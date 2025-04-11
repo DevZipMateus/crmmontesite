@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -113,7 +114,7 @@ export default function Projetos() {
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="Em andamento">Em andamento</SelectItem>
                 <SelectItem value="Finalizado">Finalizado</SelectItem>
                 <SelectItem value="Pausado">Pausado</SelectItem>
