@@ -12,6 +12,7 @@ import ProjetoDetalhe from "./pages/ProjetoDetalhe";
 import ProjetoEditar from "./pages/ProjetoEditar";
 import PersonalizeSite from "./pages/PersonalizeSite";
 import Confirmacao from "./pages/Confirmacao";
+import SiteDetalhe from "./pages/SiteDetalhe";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/projeto/:id/editar" element={<ProjetoEditar />} />
           <Route path="/personalize-site" element={<PersonalizeSite />} />
           <Route path="/confirmacao" element={<Confirmacao />} />
+          <Route path="/site/:id" element={<SiteDetalhe />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
