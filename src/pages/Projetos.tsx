@@ -32,10 +32,19 @@ interface Project {
   responsible_name?: string;
 }
 
-// Create a Supabase client
+// Create a Supabase client with proper error handling
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Check if the environment variables are defined
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Supabase environment variables are not defined. Please make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.');
+}
+
+const supabase = createClient(
+  supabaseUrl || '', 
+  supabaseKey || ''
+);
 
 export default function Projetos() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -51,6 +60,12 @@ export default function Projetos() {
   const fetchProjects = async () => {
     try {
       setLoading(true);
+      
+      // Check if Supabase is properly configured before making requests
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error('Supabase is not properly configured. Please check your environment variables.');
+      }
+      
       let query = supabase.from('projects').select('*');
       
       if (statusFilter) {
