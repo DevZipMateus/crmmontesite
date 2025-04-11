@@ -10,6 +10,8 @@ import Projetos from "./pages/Projetos";
 import NovoProjeto from "./pages/NovoProjeto";
 import ProjetoDetalhe from "./pages/ProjetoDetalhe";
 import ProjetoEditar from "./pages/ProjetoEditar";
+import PersonalizeSite from "./pages/PersonalizeSite";
+import Confirmacao from "./pages/Confirmacao";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +27,8 @@ const App = () => (
           <Route path="/novo-projeto" element={<NovoProjeto />} />
           <Route path="/projeto/:id" element={<ProjetoDetalhe />} />
           <Route path="/projeto/:id/editar" element={<ProjetoEditar />} />
+          <Route path="/personalize-site" element={<PersonalizeSite />} />
+          <Route path="/confirmacao" element={<Confirmacao />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
