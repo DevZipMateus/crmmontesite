@@ -3,22 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-import { createClient } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
-
-// Create a Supabase client with proper error handling
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// Check if the environment variables are defined
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Supabase environment variables are not defined. Please make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.');
-}
-
-const supabase = createClient(
-  supabaseUrl || '', 
-  supabaseKey || ''
-);
+import { getSupabaseClient } from "@/lib/supabase";
 
 interface Project {
   id: string;
@@ -41,29 +27,31 @@ export default function ProjetoDetalhe() {
       try {
         setLoading(true);
         
-        // Check if Supabase is properly configured before making requests
-        if (!supabaseUrl || !supabaseKey) {
-          throw new Error('Supabase is not properly configured. Please check your environment variables.');
-        }
-        
-        const { data, error } = await supabase
-          .from('projects')
-          .select('*')
-          .eq('id', id)
-          .single();
+        try {
+          const supabase = getSupabaseClient();
+          
+          const { data, error } = await supabase
+            .from('projects')
+            .select('*')
+            .eq('id', id)
+            .single();
 
-        if (error) {
-          throw error;
-        }
+          if (error) {
+            throw error;
+          }
 
-        setProject(data);
-      } catch (error) {
-        console.error('Error fetching project:', error);
-        toast({
-          title: "Erro ao buscar projeto",
-          description: "Não foi possível carregar os detalhes do projeto.",
-          variant: "destructive",
-        });
+          setProject(data);
+        } catch (error) {
+          console.error('Error fetching project:', error);
+          // Only show error toast if it's not the initialization error
+          if (error instanceof Error && !error.message.includes('not initialized')) {
+            toast({
+              title: "Erro ao buscar projeto",
+              description: "Não foi possível carregar os detalhes do projeto.",
+              variant: "destructive",
+            });
+          }
+        }
       } finally {
         setLoading(false);
       }

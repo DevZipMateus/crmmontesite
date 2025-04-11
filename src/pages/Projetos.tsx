@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -20,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from "@/lib/supabase";
 
 // Define the Project type
 interface Project {
@@ -31,20 +30,6 @@ interface Project {
   created_at: string;
   responsible_name?: string;
 }
-
-// Create a Supabase client with proper error handling
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// Check if the environment variables are defined
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Supabase environment variables are not defined. Please make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.');
-}
-
-const supabase = createClient(
-  supabaseUrl || '', 
-  supabaseKey || ''
-);
 
 export default function Projetos() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -61,31 +46,34 @@ export default function Projetos() {
     try {
       setLoading(true);
       
-      // Check if Supabase is properly configured before making requests
-      if (!supabaseUrl || !supabaseKey) {
-        throw new Error('Supabase is not properly configured. Please check your environment variables.');
+      try {
+        const supabase = getSupabaseClient();
+        
+        let query = supabase.from('projects').select('*');
+        
+        if (statusFilter) {
+          query = query.eq('status', statusFilter);
+        }
+        
+        const { data, error } = await query.order('created_at', { ascending: false });
+        
+        if (error) {
+          throw error;
+        }
+        
+        setProjects(data || []);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        setProjects([]);
+        
+        if (error instanceof Error && !error.message.includes('not initialized')) {
+          toast({
+            title: "Erro ao buscar projetos",
+            description: "Não foi possível carregar a lista de projetos.",
+            variant: "destructive",
+          });
+        }
       }
-      
-      let query = supabase.from('projects').select('*');
-      
-      if (statusFilter) {
-        query = query.eq('status', statusFilter);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      if (error) {
-        throw error;
-      }
-      
-      setProjects(data || []);
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-      toast({
-        title: "Erro ao buscar projetos",
-        description: "Não foi possível carregar a lista de projetos.",
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
