@@ -133,6 +133,25 @@ export default function PersonalizeSite() {
     }
   };
 
+  const handleRemoveMidia = (index: number) => {
+    setMidiaFiles((prev) => {
+      const newFiles = [...prev];
+      newFiles.splice(index, 1);
+      return newFiles;
+    });
+
+    setMidiaPreviews((prev) => {
+      const newPreviews = [...prev];
+      URL.revokeObjectURL(newPreviews[index]);
+      newPreviews.splice(index, 1);
+      return newPreviews;
+    });
+
+    toast({
+      description: "Mídia removida com sucesso",
+    });
+  };
+
   useEffect(() => {
     return () => {
       if (logoPreview) URL.revokeObjectURL(logoPreview);
@@ -553,24 +572,44 @@ export default function PersonalizeSite() {
                     <div className="mt-2 flex flex-wrap gap-2">
                       {midiaPreviews.map((preview, index) => {
                         const file = midiaFiles[index];
-                        if (file.type.startsWith('video/')) {
-                          return (
-                            <div key={index} className="w-32 h-32 border rounded-md overflow-hidden">
-                              <video
-                                src={preview}
-                                className="w-full h-full object-cover"
-                                controls
-                              />
-                            </div>
-                          );
-                        }
                         return (
-                          <div key={index} className="w-32 h-32 border rounded-md overflow-hidden">
-                            <img
-                              src={preview}
-                              alt={`Mídia preview ${index + 1}`}
-                              className="w-full h-full object-cover"
-                            />
+                          <div key={index} className="relative group">
+                            <div className="w-32 h-32 border rounded-md overflow-hidden">
+                              {file.type.startsWith('video/') ? (
+                                <video
+                                  src={preview}
+                                  className="w-full h-full object-cover"
+                                  controls
+                                />
+                              ) : (
+                                <img
+                                  src={preview}
+                                  alt={`Mídia preview ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveMidia(index)}
+                              className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              aria-label="Remover mídia"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M18 6 6 18" />
+                                <path d="m6 6 12 12" />
+                              </svg>
+                            </button>
                           </div>
                         );
                       })}
