@@ -9,7 +9,120 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      projects: {
+        Row: {
+          client_name: string
+          created_at: string | null
+          id: string
+          responsible_name: string | null
+          status: string | null
+          template: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_name: string
+          created_at?: string | null
+          id?: string
+          responsible_name?: string | null
+          status?: string | null
+          template?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_name?: string
+          created_at?: string | null
+          id?: string
+          responsible_name?: string | null
+          status?: string | null
+          template?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      site_personalizacoes: {
+        Row: {
+          botaowhatsapp: boolean | null
+          created_at: string | null
+          depoimento_urls: string[] | null
+          depoimentos: string | null
+          descricao: string
+          email: string
+          endereco: string
+          fonte: string | null
+          id: string
+          linkmapa: string | null
+          logo_url: string | null
+          midia_urls: string[] | null
+          modelo: string | null
+          officenome: string
+          paletacores: string | null
+          planos: string | null
+          possuimapa: boolean | null
+          possuiplanos: boolean | null
+          redessociais: string | null
+          responsavelnome: string
+          servicos: string
+          slogan: string | null
+          status: string | null
+          telefone: string
+          updated_at: string | null
+        }
+        Insert: {
+          botaowhatsapp?: boolean | null
+          created_at?: string | null
+          depoimento_urls?: string[] | null
+          depoimentos?: string | null
+          descricao: string
+          email: string
+          endereco: string
+          fonte?: string | null
+          id?: string
+          linkmapa?: string | null
+          logo_url?: string | null
+          midia_urls?: string[] | null
+          modelo?: string | null
+          officenome: string
+          paletacores?: string | null
+          planos?: string | null
+          possuimapa?: boolean | null
+          possuiplanos?: boolean | null
+          redessociais?: string | null
+          responsavelnome: string
+          servicos: string
+          slogan?: string | null
+          status?: string | null
+          telefone: string
+          updated_at?: string | null
+        }
+        Update: {
+          botaowhatsapp?: boolean | null
+          created_at?: string | null
+          depoimento_urls?: string[] | null
+          depoimentos?: string | null
+          descricao?: string
+          email?: string
+          endereco?: string
+          fonte?: string | null
+          id?: string
+          linkmapa?: string | null
+          logo_url?: string | null
+          midia_urls?: string[] | null
+          modelo?: string | null
+          officenome?: string
+          paletacores?: string | null
+          planos?: string | null
+          possuimapa?: boolean | null
+          possuiplanos?: boolean | null
+          redessociais?: string | null
+          responsavelnome?: string
+          servicos?: string
+          slogan?: string | null
+          status?: string | null
+          telefone?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
