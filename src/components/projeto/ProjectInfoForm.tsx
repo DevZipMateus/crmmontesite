@@ -59,7 +59,7 @@ export const ProjectInfoForm: React.FC<ProjectInfoFormProps> = ({ form, standalo
     );
   }
 
-  // Form-connected mode
+  // Form-connected mode - ensure we're using the form context properly
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
