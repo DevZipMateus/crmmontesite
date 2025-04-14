@@ -4,6 +4,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { UseFormReturn } from "react-hook-form";
+import { Label } from "@/components/ui/label";
 
 interface ExtractedDataFormProps {
   form: UseFormReturn<any>;

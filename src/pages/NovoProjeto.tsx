@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-// Import our new components
+// Import our components
 import { FileUploadTab } from "@/components/projeto/FileUploadTab";
 import { GoogleDocsTab } from "@/components/projeto/GoogleDocsTab";
 import { ProjectInfoForm } from "@/components/projeto/ProjectInfoForm";
