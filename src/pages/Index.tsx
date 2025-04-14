@@ -51,7 +51,7 @@ const Index = () => {
         <div className="container py-6 max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Site Flow Connect</h1>
+              <h1 className="text-3xl font-bold text-gray-900">CRM MonteSite</h1>
               <p className="text-gray-500 mt-1">Gerencie e personalize sites de forma eficiente</p>
             </div>
             <Button 
@@ -139,7 +139,7 @@ const Index = () => {
       <footer className="bg-white border-t border-gray-200 py-6 mt-auto">
         <div className="container max-w-7xl mx-auto">
           <p className="text-center text-gray-500">
-            © {new Date().getFullYear()} Site Flow Connect - Sistema de Gerenciamento de Sites
+            © {new Date().getFullYear()} CRM MonteSite - Sistema de Gerenciamento de Sites
           </p>
         </div>
       </footer>
