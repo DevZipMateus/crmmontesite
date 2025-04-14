@@ -13,11 +13,11 @@ export default function NovoProjeto() {
     <div className="container py-10 max-w-3xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Novo Projeto</CardTitle>
+          <CardTitle className="text-2xl">Adicionar Site</CardTitle> {/* Changed from "Novo Projeto" */}
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground mb-4">
-            Aqui será implementado o formulário de cadastro de novos projetos.
+            Aqui será implementado o formulário para adicionar um novo site. {/* Slightly updated description */}
           </p>
           <Button
             onClick={() => {

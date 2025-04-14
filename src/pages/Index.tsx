@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,11 +22,11 @@ const Index = () => {
       buttonText: "Ver Projetos"
     },
     {
-      title: "Novo Projeto",
-      description: "Crie um novo projeto de site para um cliente.",
+      title: "Adicionar Site",
+      description: "Crie um novo site para um cliente.",
       icon: <PlusCircle className="h-8 w-8 text-green-600" />,
       action: () => navigate("/novo-projeto"),
-      buttonText: "Criar Projeto"
+      buttonText: "Adicionar Site"
     },
     {
       title: "Personalização de Sites",
