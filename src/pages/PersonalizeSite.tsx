@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -34,7 +33,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-// Form schema para validação
 const formSchema = z.object({
   officeNome: z.string().min(2, "Nome do escritório é obrigatório"),
   responsavelNome: z.string().min(2, "Nome do responsável é obrigatório"),
@@ -42,7 +40,7 @@ const formSchema = z.object({
   email: z.string().email("Email inválido"),
   endereco: z.string().min(5, "Endereço completo é obrigatório"),
   redesSociais: z.string().optional(),
-  logo: z.any().optional(), // Será tratado separadamente
+  logo: z.any().optional(),
   fonte: z.string().optional(),
   paletaCores: z.string().optional(),
   descricao: z.string().min(10, "Descreva seu escritório com pelo menos 10 caracteres"),
@@ -52,6 +50,8 @@ const formSchema = z.object({
   servicos: z.string().min(5, "Liste pelo menos um serviço de destaque"),
   depoimentos: z.string().optional(),
   botaoWhatsapp: z.boolean().default(true),
+  possuiMapa: z.boolean().default(false),
+  linkMapa: z.string().optional(),
   modelo: z.string().optional(),
 });
 
@@ -67,11 +67,9 @@ export default function PersonalizeSite() {
   const [depoimentoFiles, setDepoimentoFiles] = useState<File[]>([]);
   const [depoimentoPreviews, setDepoimentoPreviews] = useState<string[]>([]);
 
-  // Extrair o parâmetro 'modelo' da URL
   const queryParams = new URLSearchParams(location.search);
   const modeloParam = queryParams.get("modelo") || "";
 
-  // Formulário com valores iniciais
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -90,11 +88,12 @@ export default function PersonalizeSite() {
       servicos: "",
       depoimentos: "",
       botaoWhatsapp: true,
+      possuiMapa: false,
+      linkMapa: "",
       modelo: modeloParam,
     },
   });
 
-  // Manipulador para upload da logo
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -104,7 +103,6 @@ export default function PersonalizeSite() {
     }
   };
 
-  // Manipulador para upload de imagens de depoimentos
   const handleDepoimentoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
@@ -116,7 +114,6 @@ export default function PersonalizeSite() {
     }
   };
 
-  // Limpar previews quando o componente for desmontado
   useEffect(() => {
     return () => {
       if (logoPreview) URL.revokeObjectURL(logoPreview);
@@ -124,21 +121,18 @@ export default function PersonalizeSite() {
     };
   }, [logoPreview, depoimentoPreviews]);
 
-  // Enviar o formulário
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
 
     try {
       const supabase = getSupabaseClient();
 
-      // Incluir o parâmetro 'modelo' nos dados
       const formData = {
         ...data,
         modelo: modeloParam || data.modelo,
         created_at: new Date().toISOString(),
       };
 
-      // Upload da logo se existir
       let logoUrl = null;
       if (logoFile) {
         const fileName = `logos/${Date.now()}_${logoFile.name}`;
@@ -153,7 +147,6 @@ export default function PersonalizeSite() {
         logoUrl = fileName;
       }
 
-      // Upload das imagens de depoimentos
       const depoimentoUrls: string[] = [];
       for (const file of depoimentoFiles) {
         const fileName = `depoimentos/${Date.now()}_${file.name}`;
@@ -168,7 +161,6 @@ export default function PersonalizeSite() {
         depoimentoUrls.push(fileName);
       }
 
-      // Inserir dados na tabela
       const { data: insertData, error: insertError } = await supabase
         .from("site_personalizacoes")
         .insert([
@@ -189,7 +181,6 @@ export default function PersonalizeSite() {
         description: "Suas informações foram enviadas.",
       });
 
-      // Redirecionar para a página de confirmação
       navigate("/confirmacao");
     } catch (error) {
       console.error("Erro ao salvar personalização:", error);
@@ -216,7 +207,6 @@ export default function PersonalizeSite() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Informações Básicas */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Informações Básicas</h3>
                 
@@ -313,7 +303,6 @@ export default function PersonalizeSite() {
                 />
               </div>
 
-              {/* Identidade Visual */}
               <div className="space-y-4 pt-4 border-t">
                 <h3 className="text-lg font-medium">Identidade Visual</h3>
                 
@@ -404,7 +393,6 @@ export default function PersonalizeSite() {
                 />
               </div>
 
-              {/* Serviços e Planos */}
               <div className="space-y-4 pt-4 border-t">
                 <h3 className="text-lg font-medium">Serviços e Planos</h3>
                 
@@ -463,7 +451,6 @@ export default function PersonalizeSite() {
                 />
               </div>
 
-              {/* Depoimentos */}
               <div className="space-y-4 pt-4 border-t">
                 <h3 className="text-lg font-medium">Depoimentos</h3>
                 
@@ -511,7 +498,6 @@ export default function PersonalizeSite() {
                 </div>
               </div>
 
-              {/* Configurações Adicionais */}
               <div className="space-y-4 pt-4 border-t">
                 <h3 className="text-lg font-medium">Configurações Adicionais</h3>
                 
@@ -530,6 +516,44 @@ export default function PersonalizeSite() {
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="possuiMapa"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel>Deseja incluir Mapa do Google?</FormLabel>
+                    </FormItem>
+                  )}
+                />
+
+                {form.watch("possuiMapa") && (
+                  <FormField
+                    control={form.control}
+                    name="linkMapa"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Link do Google Maps</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Cole aqui o link compartilhável do Google Maps"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Copie o link do seu endereço no Google Maps clicando em "Compartilhar" e depois em "Incorporar um mapa"
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <FormField
                   control={form.control}
