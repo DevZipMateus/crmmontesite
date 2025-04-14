@@ -20,6 +20,7 @@ export const ExtractedDataForm: React.FC<ExtractedDataFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
+  // Ensure we properly wrap the form fields in a Form component
   return (
     <Form {...form}>
       <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>

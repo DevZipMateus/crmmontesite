@@ -1,6 +1,6 @@
 
 import React from "react";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,8 +13,8 @@ interface ProjectInfoFormProps {
 }
 
 export const ProjectInfoForm: React.FC<ProjectInfoFormProps> = ({ form, standalone = false }) => {
-  if (standalone) {
-    // Render a simplified version without Form context
+  // If standalone mode is enabled or form isn't provided, render without form context
+  if (standalone || !form) {
     return (
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -59,12 +59,12 @@ export const ProjectInfoForm: React.FC<ProjectInfoFormProps> = ({ form, standalo
     );
   }
 
-  // Form context is available, use the form-connected components
+  // We made it here, so we know we have a form object and should use the form-connected components
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
-          control={form?.control}
+          control={form.control}
           name="domain"
           render={({ field }) => (
             <FormItem>
@@ -78,7 +78,7 @@ export const ProjectInfoForm: React.FC<ProjectInfoFormProps> = ({ form, standalo
         />
         
         <FormField
-          control={form?.control}
+          control={form.control}
           name="client_type"
           render={({ field }) => (
             <FormItem>
@@ -104,7 +104,7 @@ export const ProjectInfoForm: React.FC<ProjectInfoFormProps> = ({ form, standalo
       </div>
       
       <FormField
-        control={form?.control}
+        control={form.control}
         name="provider_credentials"
         render={({ field }) => (
           <FormItem>
@@ -124,7 +124,7 @@ export const ProjectInfoForm: React.FC<ProjectInfoFormProps> = ({ form, standalo
       />
       
       <FormField
-        control={form?.control}
+        control={form.control}
         name="blaster_link"
         render={({ field }) => (
           <FormItem>
