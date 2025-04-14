@@ -1,9 +1,13 @@
 
-interface ExtractedProjectData {
+/**
+ * Interface for extracted project data with index signature
+ */
+export interface ExtractedProjectData {
   client_name?: string;
   template?: string;
   responsible_name?: string;
   status?: string;
+  [key: string]: string | undefined; // Add index signature to make it assignable to Record<string, string>
 }
 
 /**

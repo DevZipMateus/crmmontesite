@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Upload, Link as LinkIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import mammoth from "mammoth";
-import { extractProjectDataFromText, isValidProjectData } from "@/utils/documentParser";
+import { extractProjectDataFromText, ExtractedProjectData, isValidProjectData } from "@/utils/documentParser";
 import { getSupabaseClient } from "@/lib/supabase";
 import {
   Form,
@@ -42,7 +42,7 @@ export default function NovoProjeto() {
   const [fileName, setFileName] = useState<string>("");
   const [googleDocsLink, setGoogleDocsLink] = useState<string>("");
   const [isLoadingGoogleDoc, setIsLoadingGoogleDoc] = useState(false);
-  const [extractedData, setExtractedData] = useState<Record<string, string>>({});
+  const [extractedData, setExtractedData] = useState<ExtractedProjectData>({});
   
   // Initialize form with react-hook-form
   const form = useForm<ProjectFormValues>({
@@ -206,9 +206,19 @@ Esta seria uma implementação futura mais completa.`;
     try {
       const supabase = getSupabaseClient();
       
+      // Ensure client_name is set before insert (it's required in the database)
+      if (!values.client_name) {
+        toast({
+          title: "Erro ao criar projeto",
+          description: "Nome do cliente é obrigatório.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       const { data, error } = await supabase
         .from('projects')
-        .insert([values])
+        .insert(values) // Insert a single object, not an array
         .select();
       
       if (error) {
