@@ -22,8 +22,8 @@ import {
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Checkbox } from "@/components/ui/checkbox";
 
-// Schema for project creation form
 const projectFormSchema = z.object({
   client_name: z.string().min(1, "Nome do cliente é obrigatório"),
   template: z.string().optional(),
@@ -44,7 +44,6 @@ export default function NovoProjeto() {
   const [extractedData, setExtractedData] = useState<ExtractedProjectData>({});
   const [showManualInput, setShowManualInput] = useState(false);
   
-  // Initialize form with react-hook-form
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
@@ -59,7 +58,6 @@ export default function NovoProjeto() {
     const file = event.target.files?.[0];
     if (!file) return;
     
-    // Verificar se o arquivo é .doc ou .docx
     if (!file.name.endsWith('.doc') && !file.name.endsWith('.docx')) {
       toast({
         title: "Formato inválido",
@@ -73,21 +71,16 @@ export default function NovoProjeto() {
     setFileName(file.name);
     
     try {
-      // Ler o arquivo como ArrayBuffer
       const arrayBuffer = await file.arrayBuffer();
       
-      // Converter o documento para HTML usando mammoth
       const result = await mammoth.extractRawText({ arrayBuffer });
       const textContent = result.value;
       setDocContent(textContent);
       
-      // Extrair informações do projeto do texto
       const projectData = extractProjectDataFromText(textContent);
       
-      // Atualizar os dados extraídos
       setExtractedData(projectData);
       
-      // Preencher o formulário com os dados extraídos
       if (projectData.client_name) {
         form.setValue("client_name", projectData.client_name);
       }
@@ -129,14 +122,9 @@ export default function NovoProjeto() {
     setFileName("Documento do Google");
 
     try {
-      // Para acessar documentos do Google Docs, precisamos usar uma API externa
-      // Neste exemplo, vamos simular isso extraindo o ID do documento
       const docId = extractGoogleDocId(googleDocsLink);
       
-      // Em um caso real, precisaríamos de uma API para acessar o Google Docs
-      // Aqui estamos apenas simulando o resultado para fins de demonstração
       setTimeout(() => {
-        // Simulando o conteúdo extraído
         const conteudoSimulado = `Conteúdo extraído do Google Docs (ID: ${docId})
         
 Este é um conteúdo simulado para demonstrar como a funcionalidade funcionaria.
@@ -155,13 +143,10 @@ Esta seria uma implementação futura mais completa.`;
 
         setDocContent(conteudoSimulado);
         
-        // Extrair informações do projeto do texto simulado
         const projectData = extractProjectDataFromText(conteudoSimulado);
         
-        // Atualizar os dados extraídos
         setExtractedData(projectData);
         
-        // Preencher o formulário com os dados extraídos
         if (projectData.client_name) {
           form.setValue("client_name", projectData.client_name);
         }
@@ -190,7 +175,6 @@ Esta seria uma implementação futura mais completa.`;
     }
   };
 
-  // Função para extrair o ID do documento do link do Google Docs
   const extractGoogleDocId = (url: string): string => {
     try {
       const regex = /\/d\/([a-zA-Z0-9-_]+)/;
@@ -201,10 +185,8 @@ Esta seria uma implementação futura mais completa.`;
     }
   };
 
-  // Função para salvar o projeto no banco de dados
   const saveProject = async (values: ProjectFormValues) => {
     try {
-      // Ensure client_name is provided (should be already validated by Zod schema)
       if (!values.client_name) {
         toast({
           title: "Erro ao criar projeto",
@@ -214,7 +196,6 @@ Esta seria uma implementação futura mais completa.`;
         return;
       }
       
-      // Prepare data for insert - make sure to include all required fields with proper values
       const projectData = {
         client_name: values.client_name,
         template: values.template || null,
@@ -236,7 +217,6 @@ Esta seria uma implementação futura mais completa.`;
         description: `O projeto para ${values.client_name} foi criado.`,
       });
       
-      // Redirecionar para a lista de projetos
       navigate("/projetos");
     } catch (error) {
       console.error("Erro ao criar projeto:", error);
@@ -400,9 +380,6 @@ Esta seria uma implementação futura mais completa.`;
                             <Input 
                               id="office_name" 
                               placeholder="Ex: Advocacia Silva" 
-                              onChange={(e) => {
-                                // Este campo não está no formulário principal, mas pode ser usado para processamento adicional
-                              }}
                             />
                           </div>
                           
@@ -466,6 +443,107 @@ Esta seria uma implementação futura mais completa.`;
                             id="slogan" 
                             placeholder="Ex: Soluções jurídicas para o seu negócio"
                           />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="font">Fonte preferida</Label>
+                          <Input 
+                            id="font" 
+                            placeholder="Ex: Roboto, Open Sans, etc."
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="colorPalette">Paleta de cores</Label>
+                          <Input 
+                            id="colorPalette" 
+                            placeholder="Ex: Azul, cinza e branco"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2 pt-2">
+                          <h5 className="font-medium text-sm text-gray-700 mb-2">Planos de negócio</h5>
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Checkbox id="hasPlans" />
+                            <label
+                              htmlFor="hasPlans"
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              Possui planos de negócios
+                            </label>
+                          </div>
+                          <Textarea 
+                            id="businessPlans" 
+                            placeholder="Descreva os planos oferecidos (nome, valor, serviços incluídos)"
+                            rows={3}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="testimonials">Depoimentos de clientes</Label>
+                          <Textarea 
+                            id="testimonials" 
+                            placeholder="Inclua depoimentos de clientes no formato: Nome, empresa: Depoimento"
+                            rows={3}
+                          />
+                        </div>
+                        
+                        <div className="mt-4 space-y-2">
+                          <h5 className="font-medium text-sm text-gray-700 mb-2">Configurações adicionais</h5>
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center space-x-2">
+                              <Checkbox id="whatsappButton" defaultChecked />
+                              <label
+                                htmlFor="whatsappButton"
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                              >
+                                Incluir botão do WhatsApp
+                              </label>
+                            </div>
+                            
+                            <div className="flex items-center space-x-2">
+                              <Checkbox id="hasMap" />
+                              <label
+                                htmlFor="hasMap"
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                              >
+                                Incluir mapa do Google
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="mapLink">Link do Google Maps</Label>
+                          <Input 
+                            id="mapLink" 
+                            placeholder="Cole aqui o link compartilhável do Google Maps"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Copie o link do seu endereço no Google Maps clicando em "Compartilhar" e depois em "Incorporar um mapa"
+                          </p>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="uploadLogo">Upload da Logo</Label>
+                          <Input 
+                            id="uploadLogo"
+                            type="file"
+                            accept="image/*"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="uploadImages">Upload de imagens adicionais</Label>
+                          <Input 
+                            id="uploadImages"
+                            type="file"
+                            accept="image/*,video/*,.gif"
+                            multiple
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Formatos aceitos: imagens (JPG, PNG), vídeos (MP4) e GIFs.
+                          </p>
                         </div>
                         
                         <p className="text-sm text-muted-foreground">
