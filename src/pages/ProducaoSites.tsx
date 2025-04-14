@@ -44,7 +44,7 @@ export default function ProducaoSites() {
   const [sites, setSites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null); // Fix: Changed from number to string
 
   // Form state for new site
   const [newSite, setNewSite] = useState({
@@ -93,7 +93,7 @@ export default function ProducaoSites() {
   };
 
   // Update site status
-  const updateSiteStatus = async (id: number, newStatus: string) => {
+  const updateSiteStatus = async (id: string, newStatus: string) => { // Fix: Changed parameter type to string
     setUpdatingId(id);
     try {
       const supabase = getSupabaseClient();
@@ -140,13 +140,20 @@ export default function ProducaoSites() {
 
     try {
       const supabase = getSupabaseClient();
+      
+      // Fix: Match database column names and provide required fields
       const { data, error } = await supabase
         .from("site_personalizacoes")
         .insert([
           {
-            officeNome: newSite.nome,
+            officenome: newSite.nome,
             modelo: newSite.modelo,
-            link_formulario: newSite.link_formulario,
+            responsavelnome: "A definir", // Required field
+            telefone: "A definir", // Required field
+            email: "exemplo@email.com", // Required field
+            endereco: "A definir", // Required field
+            descricao: "A definir", // Required field
+            servicos: "A definir", // Required field
             status: newSite.status,
             created_at: new Date().toISOString(),
           },

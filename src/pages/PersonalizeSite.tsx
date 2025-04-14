@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -214,16 +215,33 @@ export default function PersonalizeSite() {
         midiaUrls.push(fileName);
       }
 
+      // Fix: Map form field names to match database column names (lowercase)
       const { data: insertData, error: insertError } = await supabase
         .from("site_personalizacoes")
-        .insert([
-          {
-            ...formData,
-            logo_url: logoUrl,
-            depoimento_urls: depoimentoUrls.length > 0 ? depoimentoUrls : null,
-            midia_urls: midiaUrls.length > 0 ? midiaUrls : null,
-          },
-        ])
+        .insert([{
+          officenome: formData.officeNome,
+          responsavelnome: formData.responsavelNome,
+          telefone: formData.telefone,
+          email: formData.email,
+          endereco: formData.endereco,
+          redessociais: formData.redesSociais,
+          fonte: formData.fonte,
+          paletacores: formData.paletaCores,
+          descricao: formData.descricao,
+          slogan: formData.slogan,
+          possuiplanos: formData.possuiPlanos,
+          planos: formData.planos,
+          servicos: formData.servicos,
+          depoimentos: formData.depoimentos,
+          botaowhatsapp: formData.botaoWhatsapp,
+          possuimapa: formData.possuiMapa,
+          linkmapa: formData.linkMapa,
+          modelo: formData.modelo,
+          logo_url: logoUrl,
+          depoimento_urls: depoimentoUrls.length > 0 ? depoimentoUrls : null,
+          midia_urls: midiaUrls.length > 0 ? midiaUrls : null,
+          created_at: formData.created_at
+        }])
         .select();
 
       if (insertError) {
