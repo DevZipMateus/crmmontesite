@@ -7,6 +7,10 @@ export interface ExtractedProjectData {
   template?: string;
   responsible_name?: string;
   status?: string;
+  domain?: string;
+  provider_credentials?: string;
+  blaster_link?: string;
+  client_type?: string;
   [key: string]: string | undefined; // Add index signature to make it assignable to Record<string, string>
 }
 
@@ -63,6 +67,37 @@ export function extractProjectDataFromText(text: string): ExtractedProjectData {
     const match = text.match(pattern);
     if (match && match[1]?.trim()) {
       data.responsible_name = match[1].trim();
+      break;
+    }
+  }
+
+  // Extract domain information
+  const domainPatterns = [
+    /domínio:\s*([^\n]+)/i,
+    /dominio:\s*([^\n]+)/i,
+    /domain:\s*([^\n]+)/i,
+    /url:\s*([^\n]+)/i
+  ];
+  
+  for (const pattern of domainPatterns) {
+    const match = text.match(pattern);
+    if (match && match[1]?.trim()) {
+      data.domain = match[1].trim();
+      break;
+    }
+  }
+
+  // Extract provider credentials
+  const credentialsPatterns = [
+    /credenciais[\s\S]*?login[^\n]*?:\s*([^\n]+)[\s\S]*?senha[^\n]*?:\s*([^\n]+)/i,
+    /provedor[\s\S]*?login[^\n]*?:\s*([^\n]+)[\s\S]*?senha[^\n]*?:\s*([^\n]+)/i,
+    /login[^\n]*?:\s*([^\n]+)[\s\S]*?senha[^\n]*?:\s*([^\n]+)/i
+  ];
+  
+  for (const pattern of credentialsPatterns) {
+    const match = text.match(pattern);
+    if (match && match[1]?.trim() && match[2]?.trim()) {
+      data.provider_credentials = `Login: ${match[1].trim()}, Senha: ${match[2].trim()}`;
       break;
     }
   }

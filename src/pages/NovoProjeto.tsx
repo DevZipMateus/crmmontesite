@@ -23,12 +23,17 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const projectFormSchema = z.object({
   client_name: z.string().min(1, "Nome do cliente é obrigatório"),
   template: z.string().optional(),
   responsible_name: z.string().optional(),
   status: z.string().default("Em andamento"),
+  domain: z.string().optional(),
+  provider_credentials: z.string().optional(),
+  blaster_link: z.string().optional(),
+  client_type: z.string().optional(),
 });
 
 type ProjectFormValues = z.infer<typeof projectFormSchema>;
@@ -51,6 +56,10 @@ export default function NovoProjeto() {
       template: "",
       responsible_name: "",
       status: "Em andamento",
+      domain: "",
+      provider_credentials: "",
+      blaster_link: "",
+      client_type: "",
     },
   });
 
@@ -200,7 +209,11 @@ Esta seria uma implementação futura mais completa.`;
         client_name: values.client_name,
         template: values.template || null,
         responsible_name: values.responsible_name || null,
-        status: values.status || "Em andamento"
+        status: values.status || "Em andamento",
+        domain: values.domain || null,
+        provider_credentials: values.provider_credentials || null,
+        blaster_link: values.blaster_link || null,
+        client_type: values.client_type || null
       };
       
       const { data, error } = await supabase
@@ -301,6 +314,92 @@ Esta seria uma implementação futura mais completa.`;
               </div>
             </TabsContent>
           </Tabs>
+          
+          <div className="border rounded-lg p-4 bg-slate-50 space-y-4">
+            <h3 className="text-lg font-medium">Informações adicionais do projeto</h3>
+            
+            <Form {...form}>
+              <form className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="domain"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Domínio</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: cliente.com.br" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="client_type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo de cliente</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="parceiro">Parceiro</SelectItem>
+                            <SelectItem value="cliente_final">Cliente Final</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <FormField
+                  control={form.control}
+                  name="provider_credentials"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Credenciais do provedor</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Login: exemplo@mail.com, Senha: 123456" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Informe as credenciais de acesso ao provedor/hospedagem do cliente.
+                      </p>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="blaster_link"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Link no Blaster</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Ex: https://blaster.com.br/cliente123" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </form>
+            </Form>
+          </div>
           
           {docContent && (
             <>
