@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -43,6 +42,7 @@ export default function NovoProjeto() {
   const [googleDocsLink, setGoogleDocsLink] = useState<string>("");
   const [isLoadingGoogleDoc, setIsLoadingGoogleDoc] = useState(false);
   const [extractedData, setExtractedData] = useState<ExtractedProjectData>({});
+  const [showManualInput, setShowManualInput] = useState(false);
   
   // Initialize form with react-hook-form
   const form = useForm<ProjectFormValues>({
@@ -335,7 +335,16 @@ Esta seria uma implementação futura mais completa.`;
               </div>
               
               <div className="border rounded-lg p-4 bg-slate-50">
-                <h3 className="text-lg font-medium mb-4">Dados extraídos para o projeto</h3>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-medium">Dados extraídos para o projeto</h3>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowManualInput(!showManualInput)}
+                  >
+                    {showManualInput ? "Esconder campos manuais" : "Preencher manualmente"}
+                  </Button>
+                </div>
                 
                 <Form {...form}>
                   <form className="space-y-4" onSubmit={form.handleSubmit(saveProject)}>
@@ -380,6 +389,90 @@ Esta seria uma implementação futura mais completa.`;
                         </FormItem>
                       )}
                     />
+                    
+                    {showManualInput && (
+                      <div className="space-y-4 mt-6 pt-4 border-t border-gray-200">
+                        <h4 className="font-medium text-sm text-gray-700">Campos adicionais para preenchimento manual</h4>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="office_name">Nome do escritório/empresa</Label>
+                            <Input 
+                              id="office_name" 
+                              placeholder="Ex: Advocacia Silva" 
+                              onChange={(e) => {
+                                // Este campo não está no formulário principal, mas pode ser usado para processamento adicional
+                              }}
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="phone">Telefone</Label>
+                            <Input 
+                              id="phone" 
+                              placeholder="Ex: (11) 99999-9999"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="services">Serviços oferecidos</Label>
+                          <Textarea 
+                            id="services" 
+                            placeholder="Liste os principais serviços separados por vírgula"
+                            rows={3}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="address">Endereço</Label>
+                          <Input 
+                            id="address" 
+                            placeholder="Ex: Av. Paulista, 1000 - São Paulo/SP"
+                          />
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="email">E-mail</Label>
+                            <Input 
+                              id="email" 
+                              type="email" 
+                              placeholder="Ex: contato@empresa.com"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="social_media">Redes sociais</Label>
+                            <Input 
+                              id="social_media" 
+                              placeholder="Ex: @empresa"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="description">Descrição do negócio</Label>
+                          <Textarea 
+                            id="description" 
+                            placeholder="Descreva brevemente o negócio e sua proposta de valor"
+                            rows={4}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="slogan">Slogan</Label>
+                          <Input 
+                            id="slogan" 
+                            placeholder="Ex: Soluções jurídicas para o seu negócio"
+                          />
+                        </div>
+                        
+                        <p className="text-sm text-muted-foreground">
+                          Estes campos são opcionais e complementam as informações básicas do projeto.
+                        </p>
+                      </div>
+                    )}
                     
                     <div className="flex justify-between items-center pt-4">
                       <Button
