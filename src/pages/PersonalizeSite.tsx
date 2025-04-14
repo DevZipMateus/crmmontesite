@@ -53,6 +53,7 @@ const formSchema = z.object({
   possuiMapa: z.boolean().default(false),
   linkMapa: z.string().optional(),
   modelo: z.string().optional(),
+  midias: z.any().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -66,6 +67,8 @@ export default function PersonalizeSite() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [depoimentoFiles, setDepoimentoFiles] = useState<File[]>([]);
   const [depoimentoPreviews, setDepoimentoPreviews] = useState<string[]>([]);
+  const [midiaFiles, setMidiaFiles] = useState<File[]>([]);
+  const [midiaPreviews, setMidiaPreviews] = useState<string[]>([]);
 
   const queryParams = new URLSearchParams(location.search);
   const modeloParam = queryParams.get("modelo") || "";
@@ -114,12 +117,29 @@ export default function PersonalizeSite() {
     }
   };
 
+  const handleMidiaUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setMidiaFiles((prev) => [...prev, ...newFiles]);
+
+      const newPreviews = newFiles.map((file) => {
+        if (file.type.startsWith('image/') || file.type === 'image/gif') {
+          return URL.createObjectURL(file);
+        }
+        return file.type.startsWith('video/') ? URL.createObjectURL(file) : '';
+      });
+      setMidiaPreviews((prev) => [...prev, ...newPreviews]);
+    }
+  };
+
   useEffect(() => {
     return () => {
       if (logoPreview) URL.revokeObjectURL(logoPreview);
       depoimentoPreviews.forEach((preview) => URL.revokeObjectURL(preview));
+      midiaPreviews.forEach((preview) => URL.revokeObjectURL(preview));
     };
-  }, [logoPreview, depoimentoPreviews]);
+  }, [logoPreview, depoimentoPreviews, midiaPreviews]);
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
@@ -161,6 +181,20 @@ export default function PersonalizeSite() {
         depoimentoUrls.push(fileName);
       }
 
+      const midiaUrls: string[] = [];
+      for (const file of midiaFiles) {
+        const fileName = `midias/${Date.now()}_${file.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("site_personalizacoes")
+          .upload(fileName, file);
+
+        if (uploadError) {
+          throw new Error(`Erro ao fazer upload de mídia: ${uploadError.message}`);
+        }
+
+        midiaUrls.push(fileName);
+      }
+
       const { data: insertData, error: insertError } = await supabase
         .from("site_personalizacoes")
         .insert([
@@ -168,6 +202,7 @@ export default function PersonalizeSite() {
             ...formData,
             logo_url: logoUrl,
             depoimento_urls: depoimentoUrls.length > 0 ? depoimentoUrls : null,
+            midia_urls: midiaUrls.length > 0 ? midiaUrls : null,
           },
         ])
         .select();
@@ -499,77 +534,124 @@ export default function PersonalizeSite() {
               </div>
 
               <div className="space-y-4 pt-4 border-t">
-                <h3 className="text-lg font-medium">Configurações Adicionais</h3>
+                <h3 className="text-lg font-medium">Mídias do Site</h3>
                 
-                <FormField
-                  control={form.control}
-                  name="botaoWhatsapp"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormLabel>Deseja incluir botão do WhatsApp?</FormLabel>
-                    </FormItem>
+                <div>
+                  <FormLabel>Upload de Mídias (Imagens, Vídeos e GIFs)</FormLabel>
+                  <Input
+                    type="file"
+                    accept="image/*,video/*,.gif"
+                    multiple
+                    onChange={handleMidiaUpload}
+                    className="mt-1"
+                  />
+                  <FormDescription>
+                    Faça upload das mídias que deseja incluir no site. Formatos aceitos: imagens (JPG, PNG), vídeos (MP4) e GIFs.
+                  </FormDescription>
+                  
+                  {midiaPreviews.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {midiaPreviews.map((preview, index) => {
+                        const file = midiaFiles[index];
+                        if (file.type.startsWith('video/')) {
+                          return (
+                            <div key={index} className="w-32 h-32 border rounded-md overflow-hidden">
+                              <video
+                                src={preview}
+                                className="w-full h-full object-cover"
+                                controls
+                              />
+                            </div>
+                          );
+                        }
+                        return (
+                          <div key={index} className="w-32 h-32 border rounded-md overflow-hidden">
+                            <img
+                              src={preview}
+                              alt={`Mídia preview ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
                   )}
-                />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="possuiMapa"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormLabel>Deseja incluir Mapa do Google?</FormLabel>
-                    </FormItem>
-                  )}
-                />
-
-                {form.watch("possuiMapa") && (
+                <div className="space-y-4 pt-4 border-t">
+                  <h3 className="text-lg font-medium">Configurações Adicionais</h3>
+                  
                   <FormField
                     control={form.control}
-                    name="linkMapa"
+                    name="botaoWhatsapp"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Link do Google Maps</FormLabel>
+                      <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                         <FormControl>
-                          <Input 
-                            placeholder="Cole aqui o link compartilhável do Google Maps"
-                            {...field}
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
                           />
                         </FormControl>
-                        <FormDescription>
-                          Copie o link do seu endereço no Google Maps clicando em "Compartilhar" e depois em "Incorporar um mapa"
-                        </FormDescription>
-                        <FormMessage />
+                        <FormLabel>Deseja incluir botão do WhatsApp?</FormLabel>
                       </FormItem>
                     )}
                   />
-                )}
 
-                <FormField
-                  control={form.control}
-                  name="modelo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Modelo Selecionado</FormLabel>
-                      <FormControl>
-                        <Input readOnly {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Este é o modelo selecionado para o seu site (detectado automaticamente da URL).
-                      </FormDescription>
-                    </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="possuiMapa"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel>Deseja incluir Mapa do Google?</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+
+                  {form.watch("possuiMapa") && (
+                    <FormField
+                      control={form.control}
+                      name="linkMapa"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Link do Google Maps</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Cole aqui o link compartilhável do Google Maps"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Copie o link do seu endereço no Google Maps clicando em "Compartilhar" e depois em "Incorporar um mapa"
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   )}
-                />
+
+                  <FormField
+                    control={form.control}
+                    name="modelo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Modelo Selecionado</FormLabel>
+                        <FormControl>
+                          <Input readOnly {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Este é o modelo selecionado para o seu site (detectado automaticamente da URL).
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
               </div>
 
               <div className="flex justify-end">
