@@ -1,29 +1,25 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Loader2, Upload, Link as LinkIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import mammoth from "mammoth";
 import { extractProjectDataFromText, ExtractedProjectData, isValidProjectData } from "@/utils/documentParser";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+// Import our new components
+import { FileUploadTab } from "@/components/projeto/FileUploadTab";
+import { GoogleDocsTab } from "@/components/projeto/GoogleDocsTab";
+import { ProjectInfoForm } from "@/components/projeto/ProjectInfoForm";
+import { ExtractedDataForm } from "@/components/projeto/ExtractedDataForm";
+import { ManualDataFields } from "@/components/projeto/ManualDataFields";
+import { DocumentContent } from "@/components/projeto/DocumentContent";
 
 const projectFormSchema = z.object({
   client_name: z.string().min(1, "Nome do cliente é obrigatório"),
@@ -98,6 +94,12 @@ export default function NovoProjeto() {
       }
       if (projectData.responsible_name) {
         form.setValue("responsible_name", projectData.responsible_name);
+      }
+      if (projectData.domain) {
+        form.setValue("domain", projectData.domain);
+      }
+      if (projectData.provider_credentials) {
+        form.setValue("provider_credentials", projectData.provider_credentials);
       }
       
       toast({
@@ -254,418 +256,46 @@ Esta seria uma implementação futura mais completa.`;
               <TabsTrigger value="gdocs">Google Docs</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="file" className="space-y-4 pt-4">
-              <p className="text-muted-foreground mb-4">
-                Faça upload de um arquivo Word (.doc ou .docx) contendo informações do site.
-              </p>
-              
-              <div className="grid w-full max-w-md items-center gap-1.5">
-                <Label htmlFor="docFile">Arquivo Word</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="docFile"
-                    type="file"
-                    accept=".doc,.docx"
-                    onChange={handleFileUpload}
-                    disabled={isReading}
-                    className="flex-1"
-                  />
-                  {isReading && <Loader2 className="h-4 w-4 animate-spin" />}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Formatos aceitos: .doc, .docx
-                </p>
-              </div>
+            <TabsContent value="file">
+              <FileUploadTab 
+                isReading={isReading} 
+                handleFileUpload={handleFileUpload} 
+              />
             </TabsContent>
             
-            <TabsContent value="gdocs" className="space-y-4 pt-4">
-              <p className="text-muted-foreground mb-4">
-                Insira o link de um documento do Google Docs para importar o conteúdo.
-              </p>
-              
-              <div className="grid w-full items-center gap-1.5">
-                <Label htmlFor="gdocsLink">Link do Google Docs</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="gdocsLink"
-                    type="url"
-                    placeholder="https://docs.google.com/document/d/..."
-                    value={googleDocsLink}
-                    onChange={(e) => setGoogleDocsLink(e.target.value)}
-                    disabled={isLoadingGoogleDoc}
-                    className="flex-1"
-                  />
-                  <Button 
-                    onClick={handleGoogleDocsImport}
-                    disabled={isLoadingGoogleDoc || !googleDocsLink}
-                    size="sm"
-                  >
-                    {isLoadingGoogleDoc ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <LinkIcon className="h-4 w-4 mr-2" />
-                    )}
-                    Importar
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  O documento deve estar configurado com permissão de acesso para visualização.
-                </p>
-              </div>
+            <TabsContent value="gdocs">
+              <GoogleDocsTab 
+                isLoadingGoogleDoc={isLoadingGoogleDoc}
+                googleDocsLink={googleDocsLink}
+                setGoogleDocsLink={setGoogleDocsLink}
+                handleGoogleDocsImport={handleGoogleDocsImport}
+              />
             </TabsContent>
           </Tabs>
           
           <div className="border rounded-lg p-4 bg-slate-50 space-y-4">
             <h3 className="text-lg font-medium">Informações adicionais do projeto</h3>
-            
-            <Form {...form}>
-              <form className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="domain"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Domínio</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex: cliente.com.br" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="client_type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tipo de cliente</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione..." />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="parceiro">Parceiro</SelectItem>
-                            <SelectItem value="cliente_final">Cliente Final</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <FormField
-                  control={form.control}
-                  name="provider_credentials"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Credenciais do provedor</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Login: exemplo@mail.com, Senha: 123456" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Informe as credenciais de acesso ao provedor/hospedagem do cliente.
-                      </p>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="blaster_link"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Link no Blaster</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Ex: https://blaster.com.br/cliente123" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </form>
-            </Form>
+            <ProjectInfoForm form={form} />
           </div>
           
           {docContent && (
             <>
-              <div className="space-y-2">
-                <Label htmlFor="content">Conteúdo extraído: {fileName}</Label>
-                <Textarea
-                  id="content"
-                  value={docContent}
-                  readOnly
-                  className="h-64 font-mono text-sm"
-                />
-              </div>
+              <DocumentContent fileName={fileName} docContent={docContent} />
               
               <div className="border rounded-lg p-4 bg-slate-50">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-medium">Dados extraídos para o projeto</h3>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setShowManualInput(!showManualInput)}
-                  >
-                    {showManualInput ? "Esconder campos manuais" : "Preencher manualmente"}
-                  </Button>
                 </div>
                 
-                <Form {...form}>
-                  <form className="space-y-4" onSubmit={form.handleSubmit(saveProject)}>
-                    <FormField
-                      control={form.control}
-                      name="client_name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nome do cliente</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="template"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Modelo escolhido</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="responsible_name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Responsável</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    {showManualInput && (
-                      <div className="space-y-4 mt-6 pt-4 border-t border-gray-200">
-                        <h4 className="font-medium text-sm text-gray-700">Campos adicionais para preenchimento manual</h4>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="office_name">Nome do escritório/empresa</Label>
-                            <Input 
-                              id="office_name" 
-                              placeholder="Ex: Advocacia Silva" 
-                            />
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label htmlFor="phone">Telefone</Label>
-                            <Input 
-                              id="phone" 
-                              placeholder="Ex: (11) 99999-9999"
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="services">Serviços oferecidos</Label>
-                          <Textarea 
-                            id="services" 
-                            placeholder="Liste os principais serviços separados por vírgula"
-                            rows={3}
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="address">Endereço</Label>
-                          <Input 
-                            id="address" 
-                            placeholder="Ex: Av. Paulista, 1000 - São Paulo/SP"
-                          />
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="email">E-mail</Label>
-                            <Input 
-                              id="email" 
-                              type="email" 
-                              placeholder="Ex: contato@empresa.com"
-                            />
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label htmlFor="social_media">Redes sociais</Label>
-                            <Input 
-                              id="social_media" 
-                              placeholder="Ex: @empresa"
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="description">Descrição do negócio</Label>
-                          <Textarea 
-                            id="description" 
-                            placeholder="Descreva brevemente o negócio e sua proposta de valor"
-                            rows={4}
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="slogan">Slogan</Label>
-                          <Input 
-                            id="slogan" 
-                            placeholder="Ex: Soluções jurídicas para o seu negócio"
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="font">Fonte preferida</Label>
-                          <Input 
-                            id="font" 
-                            placeholder="Ex: Roboto, Open Sans, etc."
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="colorPalette">Paleta de cores</Label>
-                          <Input 
-                            id="colorPalette" 
-                            placeholder="Ex: Azul, cinza e branco"
-                          />
-                        </div>
-                        
-                        <div className="space-y-2 pt-2">
-                          <h5 className="font-medium text-sm text-gray-700 mb-2">Planos de negócio</h5>
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Checkbox id="hasPlans" />
-                            <label
-                              htmlFor="hasPlans"
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              Possui planos de negócios
-                            </label>
-                          </div>
-                          <Textarea 
-                            id="businessPlans" 
-                            placeholder="Descreva os planos oferecidos (nome, valor, serviços incluídos)"
-                            rows={3}
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="testimonials">Depoimentos de clientes</Label>
-                          <Textarea 
-                            id="testimonials" 
-                            placeholder="Inclua depoimentos de clientes no formato: Nome, empresa: Depoimento"
-                            rows={3}
-                          />
-                        </div>
-                        
-                        <div className="mt-4 space-y-2">
-                          <h5 className="font-medium text-sm text-gray-700 mb-2">Configurações adicionais</h5>
-                          <div className="flex flex-col gap-2">
-                            <div className="flex items-center space-x-2">
-                              <Checkbox id="whatsappButton" defaultChecked />
-                              <label
-                                htmlFor="whatsappButton"
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                              >
-                                Incluir botão do WhatsApp
-                              </label>
-                            </div>
-                            
-                            <div className="flex items-center space-x-2">
-                              <Checkbox id="hasMap" />
-                              <label
-                                htmlFor="hasMap"
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                              >
-                                Incluir mapa do Google
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="mapLink">Link do Google Maps</Label>
-                          <Input 
-                            id="mapLink" 
-                            placeholder="Cole aqui o link compartilhável do Google Maps"
-                          />
-                          <p className="text-xs text-muted-foreground">
-                            Copie o link do seu endereço no Google Maps clicando em "Compartilhar" e depois em "Incorporar um mapa"
-                          </p>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="uploadLogo">Upload da Logo</Label>
-                          <Input 
-                            id="uploadLogo"
-                            type="file"
-                            accept="image/*"
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="uploadImages">Upload de imagens adicionais</Label>
-                          <Input 
-                            id="uploadImages"
-                            type="file"
-                            accept="image/*,video/*,.gif"
-                            multiple
-                          />
-                          <p className="text-xs text-muted-foreground">
-                            Formatos aceitos: imagens (JPG, PNG), vídeos (MP4) e GIFs.
-                          </p>
-                        </div>
-                        
-                        <p className="text-sm text-muted-foreground">
-                          Estes campos são opcionais e complementam as informações básicas do projeto.
-                        </p>
-                      </div>
-                    )}
-                    
-                    <div className="flex justify-between items-center pt-4">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={() => navigate("/projetos")}
-                      >
-                        Voltar para Projetos
-                      </Button>
-                      
-                      <Button type="submit">
-                        Criar Projeto
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
+                <ExtractedDataForm 
+                  form={form}
+                  showManualInput={showManualInput}
+                  setShowManualInput={setShowManualInput}
+                  onSubmit={saveProject}
+                  onCancel={() => navigate("/projetos")}
+                />
+                
+                {showManualInput && <ManualDataFields />}
               </div>
             </>
           )}
