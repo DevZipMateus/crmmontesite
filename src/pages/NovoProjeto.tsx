@@ -11,7 +11,7 @@ import { Loader2, Upload, Link as LinkIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import mammoth from "mammoth";
 import { extractProjectDataFromText, ExtractedProjectData, isValidProjectData } from "@/utils/documentParser";
-import { getSupabaseClient } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Form,
   FormControl,
@@ -204,9 +204,7 @@ Esta seria uma implementação futura mais completa.`;
   // Função para salvar o projeto no banco de dados
   const saveProject = async (values: ProjectFormValues) => {
     try {
-      const supabase = getSupabaseClient();
-      
-      // Ensure client_name is set before insert (it's required in the database)
+      // Ensure client_name is provided (should be already validated by Zod schema)
       if (!values.client_name) {
         toast({
           title: "Erro ao criar projeto",
@@ -216,9 +214,17 @@ Esta seria uma implementação futura mais completa.`;
         return;
       }
       
+      // Prepare data for insert - make sure to include all required fields with proper values
+      const projectData = {
+        client_name: values.client_name,
+        template: values.template || null,
+        responsible_name: values.responsible_name || null,
+        status: values.status || "Em andamento"
+      };
+      
       const { data, error } = await supabase
         .from('projects')
-        .insert(values) // Insert a single object, not an array
+        .insert(projectData)
         .select();
       
       if (error) {
