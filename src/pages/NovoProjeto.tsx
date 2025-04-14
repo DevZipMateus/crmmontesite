@@ -1,10 +1,8 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import mammoth from "mammoth";
 import { extractProjectDataFromText, ExtractedProjectData, isValidProjectData } from "@/utils/documentParser";
@@ -275,7 +273,7 @@ Esta seria uma implementação futura mais completa.`;
           
           <div className="border rounded-lg p-4 bg-slate-50 space-y-4">
             <h3 className="text-lg font-medium">Informações adicionais do projeto</h3>
-            <ProjectInfoForm form={form} />
+            <ProjectInfoForm form={form} standalone={false} />
           </div>
           
           {docContent && (
