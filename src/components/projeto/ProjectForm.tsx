@@ -13,6 +13,7 @@ import { ExtractedProjectData } from "@/utils/documentParser";
 import { ProjectInfoForm } from "@/components/projeto/ProjectInfoForm";
 import { ExtractedDataForm } from "@/components/projeto/ExtractedDataForm";
 import { ManualDataFields } from "@/components/projeto/ManualDataFields";
+import { Form } from "@/components/ui/form";
 
 const projectFormSchema = z.object({
   client_name: z.string().min(1, "Nome do cliente é obrigatório"),
@@ -107,28 +108,30 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
 
   return (
     <>
-      <div className="border rounded-lg p-4 bg-slate-50 space-y-4">
-        <h3 className="text-lg font-medium">Informações adicionais do projeto</h3>
-        <ProjectInfoForm form={form} />
-      </div>
-      
-      {docContent && (
-        <div className="border rounded-lg p-4 bg-slate-50">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium">Dados extraídos para o projeto</h3>
-          </div>
-          
-          <ExtractedDataForm 
-            form={form}
-            showManualInput={showManualInput}
-            setShowManualInput={setShowManualInput}
-            onSubmit={saveProject}
-            onCancel={onCancel}
-          />
-          
-          {showManualInput && <ManualDataFields />}
+      <Form {...form}>
+        <div className="border rounded-lg p-4 bg-slate-50 space-y-4">
+          <h3 className="text-lg font-medium">Informações adicionais do projeto</h3>
+          <ProjectInfoForm form={form} />
         </div>
-      )}
+        
+        {docContent && (
+          <div className="border rounded-lg p-4 bg-slate-50 mt-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Dados extraídos para o projeto</h3>
+            </div>
+            
+            <ExtractedDataForm 
+              form={form}
+              showManualInput={showManualInput}
+              setShowManualInput={setShowManualInput}
+              onSubmit={saveProject}
+              onCancel={onCancel}
+            />
+            
+            {showManualInput && <ManualDataFields />}
+          </div>
+        )}
+      </Form>
     </>
   );
 };

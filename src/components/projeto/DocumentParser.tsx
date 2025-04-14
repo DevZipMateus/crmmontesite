@@ -2,11 +2,9 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { DocumentContent } from "@/components/projeto/DocumentContent";
 import { FileUploadTab } from "@/components/projeto/FileUploadTab";
 import { GoogleDocsTab } from "@/components/projeto/GoogleDocsTab";
-import { ExtractedProjectData } from "@/utils/documentParser";
+import { DocumentContent } from "@/components/projeto/DocumentContent";
 
 interface DocumentParserProps {
   isReading: boolean;
