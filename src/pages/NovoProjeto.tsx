@@ -10,6 +10,29 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Upload, Link as LinkIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import mammoth from "mammoth";
+import { extractProjectDataFromText, isValidProjectData } from "@/utils/documentParser";
+import { getSupabaseClient } from "@/lib/supabase";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import * as z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+// Schema for project creation form
+const projectFormSchema = z.object({
+  client_name: z.string().min(1, "Nome do cliente é obrigatório"),
+  template: z.string().optional(),
+  responsible_name: z.string().optional(),
+  status: z.string().default("Em andamento"),
+});
+
+type ProjectFormValues = z.infer<typeof projectFormSchema>;
 
 export default function NovoProjeto() {
   const navigate = useNavigate();
@@ -19,6 +42,18 @@ export default function NovoProjeto() {
   const [fileName, setFileName] = useState<string>("");
   const [googleDocsLink, setGoogleDocsLink] = useState<string>("");
   const [isLoadingGoogleDoc, setIsLoadingGoogleDoc] = useState(false);
+  const [extractedData, setExtractedData] = useState<Record<string, string>>({});
+  
+  // Initialize form with react-hook-form
+  const form = useForm<ProjectFormValues>({
+    resolver: zodResolver(projectFormSchema),
+    defaultValues: {
+      client_name: "",
+      template: "",
+      responsible_name: "",
+      status: "Em andamento",
+    },
+  });
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -43,11 +78,29 @@ export default function NovoProjeto() {
       
       // Converter o documento para HTML usando mammoth
       const result = await mammoth.extractRawText({ arrayBuffer });
-      setDocContent(result.value);
+      const textContent = result.value;
+      setDocContent(textContent);
+      
+      // Extrair informações do projeto do texto
+      const projectData = extractProjectDataFromText(textContent);
+      
+      // Atualizar os dados extraídos
+      setExtractedData(projectData);
+      
+      // Preencher o formulário com os dados extraídos
+      if (projectData.client_name) {
+        form.setValue("client_name", projectData.client_name);
+      }
+      if (projectData.template) {
+        form.setValue("template", projectData.template);
+      }
+      if (projectData.responsible_name) {
+        form.setValue("responsible_name", projectData.responsible_name);
+      }
       
       toast({
         title: "Arquivo lido com sucesso",
-        description: `${file.name} foi carregado e processado.`,
+        description: `${file.name} foi carregado e analisado.`,
       });
     } catch (error) {
       console.error("Erro ao ler arquivo:", error);
@@ -87,25 +140,41 @@ export default function NovoProjeto() {
         const conteudoSimulado = `Conteúdo extraído do Google Docs (ID: ${docId})
         
 Este é um conteúdo simulado para demonstrar como a funcionalidade funcionaria.
+
+Cliente: Empresa ABC
+Modelo escolhido: Business Premium
+Responsável: Maria Silva
+
 Em um ambiente de produção, precisaríamos implementar:
 
 1. Autenticação com a API do Google
 2. Uso da Google Docs API para extrair o conteúdo real
 3. Processamento do conteúdo extraído
 
-Para implementar completamente esta funcionalidade, seria necessário:
-- Registrar um projeto no Google Cloud Console
-- Configurar credenciais OAuth2
-- Implementar o fluxo de autenticação
-- Usar a Google Docs API para extrair o conteúdo do documento
-
 Esta seria uma implementação futura mais completa.`;
 
         setDocContent(conteudoSimulado);
         
+        // Extrair informações do projeto do texto simulado
+        const projectData = extractProjectDataFromText(conteudoSimulado);
+        
+        // Atualizar os dados extraídos
+        setExtractedData(projectData);
+        
+        // Preencher o formulário com os dados extraídos
+        if (projectData.client_name) {
+          form.setValue("client_name", projectData.client_name);
+        }
+        if (projectData.template) {
+          form.setValue("template", projectData.template);
+        }
+        if (projectData.responsible_name) {
+          form.setValue("responsible_name", projectData.responsible_name);
+        }
+        
         toast({
           title: "Google Docs processado",
-          description: "O documento foi importado com sucesso.",
+          description: "O documento foi importado e analisado com sucesso.",
         });
       }, 1500);
     } catch (error) {
@@ -129,6 +198,37 @@ Esta seria uma implementação futura mais completa.`;
       return match ? match[1] : "ID não encontrado";
     } catch (e) {
       return "ID não encontrado";
+    }
+  };
+
+  // Função para salvar o projeto no banco de dados
+  const saveProject = async (values: ProjectFormValues) => {
+    try {
+      const supabase = getSupabaseClient();
+      
+      const { data, error } = await supabase
+        .from('projects')
+        .insert([values])
+        .select();
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: "Projeto criado com sucesso",
+        description: `O projeto para ${values.client_name} foi criado.`,
+      });
+      
+      // Redirecionar para a lista de projetos
+      navigate("/projetos");
+    } catch (error) {
+      console.error("Erro ao criar projeto:", error);
+      toast({
+        title: "Erro ao criar projeto",
+        description: "Não foi possível criar o projeto. Tente novamente.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -207,39 +307,93 @@ Esta seria uma implementação futura mais completa.`;
           </Tabs>
           
           {docContent && (
-            <div className="space-y-2">
-              <Label htmlFor="content">Conteúdo extraído: {fileName}</Label>
-              <Textarea
-                id="content"
-                value={docContent}
-                readOnly
-                className="h-64 font-mono text-sm"
-              />
-            </div>
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="content">Conteúdo extraído: {fileName}</Label>
+                <Textarea
+                  id="content"
+                  value={docContent}
+                  readOnly
+                  className="h-64 font-mono text-sm"
+                />
+              </div>
+              
+              <div className="border rounded-lg p-4 bg-slate-50">
+                <h3 className="text-lg font-medium mb-4">Dados extraídos para o projeto</h3>
+                
+                <Form {...form}>
+                  <form className="space-y-4" onSubmit={form.handleSubmit(saveProject)}>
+                    <FormField
+                      control={form.control}
+                      name="client_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nome do cliente</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="template"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Modelo escolhido</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="responsible_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Responsável</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="flex justify-between items-center pt-4">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => navigate("/projetos")}
+                      >
+                        Voltar para Projetos
+                      </Button>
+                      
+                      <Button type="submit">
+                        Criar Projeto
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </div>
+            </>
           )}
           
-          <div className="flex justify-between items-center">
-            <Button
-              variant="secondary"
-              onClick={() => navigate("/projetos")}
-            >
-              Voltar para Projetos
-            </Button>
-            
-            {docContent && (
+          {!docContent && (
+            <div className="flex justify-between items-center">
               <Button
-                onClick={() => {
-                  toast({
-                    title: "Informações salvas",
-                    description: "O conteúdo do documento foi salvo com sucesso.",
-                  });
-                  navigate("/projetos");
-                }}
+                variant="secondary"
+                onClick={() => navigate("/projetos")}
               >
-                Salvar Informações
+                Voltar para Projetos
               </Button>
-            )}
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
