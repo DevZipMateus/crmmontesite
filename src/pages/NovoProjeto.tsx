@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -118,6 +117,16 @@ export default function NovoProjeto() {
     }
   };
 
+  const extractGoogleDocId = (url: string): string => {
+    try {
+      const regex = /\/d\/([a-zA-Z0-9-_]+)/;
+      const match = url.match(regex);
+      return match ? match[1] : "ID não encontrado";
+    } catch (e) {
+      return "ID não encontrado";
+    }
+  };
+
   const handleGoogleDocsImport = async () => {
     if (!googleDocsLink || !googleDocsLink.includes("docs.google.com")) {
       toast({
@@ -182,16 +191,6 @@ Esta seria uma implementação futura mais completa.`;
       setDocContent("");
     } finally {
       setIsLoadingGoogleDoc(false);
-    }
-  };
-
-  const extractGoogleDocId = (url: string): string => {
-    try {
-      const regex = /\/d\/([a-zA-Z0-9-_]+)/;
-      const match = url.match(regex);
-      return match ? match[1] : "ID não encontrado";
-    } catch (e) {
-      return "ID não encontrado";
     }
   };
 
@@ -274,7 +273,7 @@ Esta seria uma implementação futura mais completa.`;
           
           <div className="border rounded-lg p-4 bg-slate-50 space-y-4">
             <h3 className="text-lg font-medium">Informações adicionais do projeto</h3>
-            <ProjectInfoForm form={form} standalone={false} />
+            <ProjectInfoForm form={form} />
           </div>
           
           {docContent && (
