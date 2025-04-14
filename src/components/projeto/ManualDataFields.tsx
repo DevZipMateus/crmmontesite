@@ -160,6 +160,7 @@ export const ManualDataFields: React.FC = () => {
         </p>
       </div>
       
+      {/* Campos para upload */}
       <div className="space-y-2">
         <Label htmlFor="uploadLogo">Upload da Logo</Label>
         <Input 
@@ -167,6 +168,18 @@ export const ManualDataFields: React.FC = () => {
           type="file"
           accept="image/*"
         />
+      </div>
+      
+      {/* Novo campo para link do Drive para logo */}
+      <div className="space-y-2">
+        <Label htmlFor="logoGoogleDriveLink">Link do Google Drive para Logo</Label>
+        <Input 
+          id="logoGoogleDriveLink"
+          placeholder="Cole aqui o link compartilhável da sua logo no Google Drive"
+        />
+        <p className="text-xs text-muted-foreground">
+          O link deve ser público ou com acesso de visualização permitido
+        </p>
       </div>
       
       <div className="space-y-2">
@@ -179,6 +192,18 @@ export const ManualDataFields: React.FC = () => {
         />
         <p className="text-xs text-muted-foreground">
           Formatos aceitos: imagens (JPG, PNG), vídeos (MP4) e GIFs.
+        </p>
+      </div>
+      
+      {/* Novo campo para link do Drive para mídias */}
+      <div className="space-y-2">
+        <Label htmlFor="mediaGoogleDriveLink">Link do Google Drive para mídias adicionais</Label>
+        <Input 
+          id="mediaGoogleDriveLink"
+          placeholder="Cole aqui o link da pasta compartilhada no Google Drive"
+        />
+        <p className="text-xs text-muted-foreground">
+          Você pode compartilhar uma pasta com várias mídias (fotos, vídeos, etc.)
         </p>
       </div>
       
