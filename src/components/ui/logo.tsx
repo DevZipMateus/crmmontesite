@@ -4,14 +4,15 @@ import { cn } from "@/lib/utils";
 
 interface LogoProps {
   className?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 export const Logo: React.FC<LogoProps> = ({ className, size = "md" }) => {
   const sizeClasses = {
     sm: "h-8 w-8",
     md: "h-10 w-10",
-    lg: "h-12 w-12"
+    lg: "h-12 w-12",
+    xl: "h-[150px] w-[200px]"
   };
 
   return (

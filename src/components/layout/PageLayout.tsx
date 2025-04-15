@@ -29,7 +29,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
         <div className="container py-4 max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Logo />
+              <Logo size="lg" />
               <div className="h-6 w-px bg-border mx-2" />
               <h1 className="text-xl font-medium">{title}</h1>
             </div>

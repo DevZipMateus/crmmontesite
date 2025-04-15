@@ -15,7 +15,7 @@ const DashboardHeader: React.FC = () => {
       <div className="container max-w-7xl mx-auto py-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Logo size={isMobile ? "sm" : "md"} />
+            <Logo size={isMobile ? "md" : "xl"} />
             {!isMobile && (
               <p className="text-gray-500 mt-1 hidden md:block">Gerencie e personalize sites de forma eficiente</p>
             )}
