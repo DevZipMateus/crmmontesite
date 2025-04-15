@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { getSupabaseClient } from "@/lib/supabase";
+import { getSupabaseClient, updateProjectStatus } from "@/lib/supabase";
 
 // Define the Project type
 interface Project {
@@ -38,6 +37,8 @@ export default function Projetos() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "kanban">("kanban"); // Default to Kanban view
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -94,31 +95,50 @@ export default function Projetos() {
     navigate(`/projeto/${projectId}${action === 'edit' ? '/editar' : ''}`);
   };
 
-  const updateProjectStatus = async (projectId: string, newStatus: string) => {
+  const handleDragStart = (e: React.DragEvent, projectId: string) => {
+    setDraggingId(projectId);
+    e.dataTransfer.setData('text/plain', projectId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = async (e: React.DragEvent, newStatus: string) => {
+    e.preventDefault();
+    const projectId = e.dataTransfer.getData('text/plain');
+    
+    if (!projectId || !draggingId) return;
+    
+    // Prevent updating if the status is the same
+    const project = projects.find(p => p.id === projectId);
+    if (project?.status === newStatus) {
+      setDraggingId(null);
+      return;
+    }
+
+    setUpdatingStatus(true);
+    
     try {
-      setLoading(true);
-      const supabase = getSupabaseClient();
+      const result = await updateProjectStatus(projectId, newStatus);
       
-      const { error } = await supabase
-        .from('projects')
-        .update({ status: newStatus })
-        .eq('id', projectId);
-      
-      if (error) {
-        throw error;
+      if (result.success) {
+        toast({
+          title: "Status atualizado",
+          description: `Projeto movido para "${newStatus}"`,
+        });
+        
+        // Update local state
+        setProjects(prevProjects => 
+          prevProjects.map(project => 
+            project.id === projectId ? { ...project, status: newStatus } : project
+          )
+        );
+      } else {
+        throw new Error('Failed to update project status');
       }
-      
-      toast({
-        title: "Status atualizado",
-        description: `Projeto movido para "${newStatus}"`,
-      });
-      
-      // Update the local state
-      setProjects(prevProjects => 
-        prevProjects.map(project => 
-          project.id === projectId ? { ...project, status: newStatus } : project
-        )
-      );
     } catch (error) {
       console.error('Error updating project status:', error);
       toast({
@@ -127,11 +147,11 @@ export default function Projetos() {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setDraggingId(null);
+      setUpdatingStatus(false);
     }
   };
 
-  // Render Kanban board with columns for each status
   const renderKanbanBoard = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -140,7 +160,12 @@ export default function Projetos() {
           const filteredProjects = projects.filter(project => project.status === statusType.value);
           
           return (
-            <Card key={statusType.value} className="flex flex-col h-full">
+            <Card 
+              key={statusType.value} 
+              className="flex flex-col h-full"
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, statusType.value)}
+            >
               <CardHeader className={`${statusType.color} text-white rounded-t-lg`}>
                 <div className="flex items-center space-x-2">
                   <StatusIcon className="h-5 w-5" />
@@ -159,7 +184,12 @@ export default function Projetos() {
                 ) : (
                   <div className="space-y-2">
                     {filteredProjects.map((project) => (
-                      <Card key={project.id} className="p-3 shadow-sm hover:shadow-md transition-shadow">
+                      <Card 
+                        key={project.id} 
+                        className={`p-3 shadow-sm hover:shadow-md transition-shadow cursor-move ${draggingId === project.id ? 'opacity-50' : ''}`}
+                        draggable="true"
+                        onDragStart={(e) => handleDragStart(e, project.id)}
+                      >
                         <div className="font-medium">{project.client_name}</div>
                         <div className="text-sm text-gray-500 mt-1">
                           {project.template || "Sem modelo"}
@@ -194,7 +224,8 @@ export default function Projetos() {
                               variant="ghost" 
                               size="sm"
                               className="text-xs h-7"
-                              onClick={() => updateProjectStatus(project.id, status.value)}
+                              onClick={() => updateProjectStatus(project.id, status.value).then(() => fetchProjects())}
+                              disabled={updatingStatus}
                             >
                               <status.icon className="h-3 w-3 mr-1" />
                               {status.value.length > 10 ? `${status.value.substring(0, 10)}...` : status.value}
@@ -213,7 +244,6 @@ export default function Projetos() {
     );
   };
 
-  // Render the original list view
   const renderListView = () => {
     return (
       <Card>

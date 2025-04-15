@@ -14,3 +14,19 @@ export function getSupabaseClient() {
   }
   return supabase;
 }
+
+// Helper to update project status across the application
+export async function updateProjectStatus(projectId: string, newStatus: string) {
+  try {
+    const { error } = await supabase
+      .from('projects')
+      .update({ status: newStatus })
+      .eq('id', projectId);
+    
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating project status:', error);
+    return { success: false, error };
+  }
+}

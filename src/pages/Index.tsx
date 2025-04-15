@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,8 @@ import {
   LayoutDashboard, 
   Globe,
   Briefcase,
-  Users
+  Users,
+  CheckCircle2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -21,6 +21,7 @@ interface DashboardStats {
   finalClients: number;
   sitesInProduction: number;
   sitesPublished: number;
+  sitesReady: number;
 }
 
 const Index = () => {
@@ -30,7 +31,8 @@ const Index = () => {
     partnerClients: 0,
     finalClients: 0,
     sitesInProduction: 0,
-    sitesPublished: 0
+    sitesPublished: 0,
+    sitesReady: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -67,13 +69,20 @@ const Index = () => {
           .from('projects')
           .select('*', { count: 'exact', head: true })
           .eq('status', 'Finalizado');
+          
+        // Get sites ready count - NEW
+        const { count: readyCount } = await supabase
+          .from('projects')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'Site pronto');
         
         setStats({
           totalClients: totalCount || 0,
           partnerClients: partnerCount || 0,
           finalClients: finalCount || 0,
           sitesInProduction: productionCount || 0,
-          sitesPublished: publishedCount || 0
+          sitesPublished: publishedCount || 0,
+          sitesReady: readyCount || 0
         });
         
       } catch (error) {
@@ -199,19 +208,20 @@ const Index = () => {
               </CardContent>
             </Card>
 
+            {/* New Card for Sites Ready */}
             <Card className="border-gray-200 shadow-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Total de Clientes</CardTitle>
+                <CardTitle className="text-lg">Sites Prontos</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
-                  <div className="bg-purple-100 p-3 rounded-full">
-                    <FileText className="h-6 w-6 text-purple-600" />
+                  <div className="bg-emerald-100 p-3 rounded-full">
+                    <CheckCircle2 className="h-6 w-6 text-emerald-600" />
                   </div>
                   {loading ? (
-                    <div className="h-8 w-8 rounded-full border-2 border-purple-600 border-t-transparent animate-spin"></div>
+                    <div className="h-8 w-8 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin"></div>
                   ) : (
-                    <span className="text-3xl font-bold">{stats.totalClients}</span>
+                    <span className="text-3xl font-bold">{stats.sitesReady}</span>
                   )}
                 </div>
               </CardContent>
