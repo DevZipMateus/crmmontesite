@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Inbox, Code, Globe, Clock, CheckCircle2 } from "lucide-react";
 import ProjectCard from "./ProjectCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Project {
   id: string;
@@ -10,6 +11,7 @@ interface Project {
   status: string;
   created_at: string;
   responsible_name?: string;
+  domain?: string;
 }
 
 interface StatusType {
@@ -46,6 +48,7 @@ export default function KanbanColumn({
                     statusType.value === "Aguardando DNS" ? Clock : CheckCircle2;
   
   const filteredProjects = projects.filter(project => project.status === statusType.value);
+  const isMobile = useIsMobile();
   
   return (
     <Card 
@@ -53,17 +56,17 @@ export default function KanbanColumn({
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, statusType.value)}
     >
-      <CardHeader className={`${statusType.color} text-white rounded-t-lg`}>
+      <CardHeader className={`${statusType.color} text-white rounded-t-lg py-3 px-3 md:p-4`}>
         <div className="flex items-center space-x-2">
           <StatusIcon className="h-5 w-5" />
-          <CardTitle className="text-lg">{statusType.value}</CardTitle>
+          <CardTitle className="text-base md:text-lg font-medium">{statusType.value}</CardTitle>
           <div className="flex-1" />
           <span className="bg-white text-gray-800 rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium">
             {filteredProjects.length}
           </span>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 overflow-y-auto max-h-[70vh] p-2">
+      <CardContent className={`flex-1 overflow-y-auto p-2 ${isMobile ? 'max-h-[60vh]' : 'max-h-[70vh]'}`}>
         {filteredProjects.length === 0 ? (
           <div className="text-center py-4 text-gray-500 text-sm">
             Nenhum projeto
