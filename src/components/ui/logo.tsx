@@ -18,7 +18,7 @@ export const Logo: React.FC<LogoProps> = ({ className, size = "md" }) => {
     <div className={cn("flex items-center", className)}>
       <img 
         src="/logo.png" 
-        alt="MonteSite Logo" 
+        alt="MonteSite CRM Logo" 
         className={cn(
           "object-contain",
           sizeClasses[size]
