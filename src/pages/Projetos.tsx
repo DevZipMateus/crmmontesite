@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { getSupabaseClient, updateProjectStatus, PROJECT_STATUS_TYPES } from "@/lib/supabase";
 
-// Define the Project type
 interface Project {
   id: string;
   client_name: string;
@@ -28,7 +26,7 @@ export default function Projetos() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"list" | "kanban">("kanban"); // Default to Kanban view
+  const [viewMode, setViewMode] = useState<"list" | "kanban">("kanban");
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const navigate = useNavigate();
@@ -105,7 +103,6 @@ export default function Projetos() {
     
     if (!projectId || !draggingId) return;
     
-    // Prevent updating if the status is the same
     const project = projects.find(p => p.id === projectId);
     if (project?.status === newStatus) {
       setDraggingId(null);
@@ -123,7 +120,6 @@ export default function Projetos() {
           description: `Projeto movido para "${newStatus}"`,
         });
         
-        // Update local state
         setProjects(prevProjects => 
           prevProjects.map(project => 
             project.id === projectId ? { ...project, status: newStatus } : project
@@ -157,7 +153,6 @@ export default function Projetos() {
           description: `Status do projeto alterado para "${newStatus}"`,
         });
         
-        // Update local state
         setProjects(prevProjects => 
           prevProjects.map(project => 
             project.id === projectId ? { ...project, status: newStatus } : project
@@ -414,7 +409,7 @@ export default function Projetos() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
-                    {STATUS_TYPES.map(status => (
+                    {PROJECT_STATUS_TYPES.map(status => (
                       <SelectItem key={status.value} value={status.value}>{status.value}</SelectItem>
                     ))}
                   </SelectContent>
