@@ -3,17 +3,20 @@ import { useState, ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface SearchInputProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  className?: string;
 }
 
 export default function SearchInput({ 
   value, 
   onChange, 
-  placeholder = "Buscar projetos..." 
+  placeholder = "Buscar projetos...",
+  className 
 }: SearchInputProps) {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
@@ -24,7 +27,7 @@ export default function SearchInput({
   };
 
   return (
-    <div className="relative w-full max-w-sm">
+    <div className={cn("relative w-full max-w-sm", className)}>
       <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         type="text"
