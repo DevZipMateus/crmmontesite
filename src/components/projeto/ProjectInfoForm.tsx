@@ -1,4 +1,3 @@
-
 import React from "react";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -48,9 +47,12 @@ export const ProjectInfoForm = ({ form }) => {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="modelo1">Modelo Básico</SelectItem>
-                <SelectItem value="modelo2">Modelo Profissional</SelectItem>
-                <SelectItem value="modelo3">Modelo Premium</SelectItem>
+                <SelectItem value="Modelo 1">Modelo 1</SelectItem>
+                <SelectItem value="Modelo 2">Modelo 2</SelectItem>
+                <SelectItem value="Modelo 3">Modelo 3</SelectItem>
+                <SelectItem value="Modelo 4">Modelo 4</SelectItem>
+                <SelectItem value="Modelo 5">Modelo 5</SelectItem>
+                <SelectItem value="Modelo 6">Modelo 6</SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />
