@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,6 +12,14 @@ interface ProjectInfoFormProps {
 }
 
 export const ProjectInfoForm = ({ form }: ProjectInfoFormProps) => {
+  const [isPartner, setIsPartner] = useState(false);
+  
+  // Check if client_type is "parceiro" when form values change
+  useEffect(() => {
+    const clientType = form.watch("client_type");
+    setIsPartner(clientType === "parceiro");
+  }, [form.watch("client_type"), form]);
+  
   return (
     <div className="space-y-4">
       <FormField
@@ -114,6 +122,23 @@ export const ProjectInfoForm = ({ form }: ProjectInfoFormProps) => {
           </FormItem>
         )}
       />
+      
+      {/* Display the partner link field only when client type is "parceiro" */}
+      {isPartner && (
+        <FormField
+          control={form.control}
+          name="partner_link"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Link do Parceiro</FormLabel>
+              <FormControl>
+                <Input placeholder="https://..." {...field} value={field.value || ""} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
       
       <FormField
         control={form.control}

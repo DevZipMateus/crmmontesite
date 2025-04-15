@@ -29,6 +29,7 @@ export default function ProjetoEditar() {
       client_type: "",
       domain: "",
       blaster_link: "",
+      partner_link: "",
     },
   });
 

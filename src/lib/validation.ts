@@ -10,6 +10,7 @@ export const projectSchema = z.object({
   client_type: z.string().min(1, "Selecione o tipo de cliente"),
   domain: z.string().optional(),
   blaster_link: z.string().optional(),
+  partner_link: z.string().optional(),
 });
 
 export type ProjectFormValues = z.infer<typeof projectSchema>;
