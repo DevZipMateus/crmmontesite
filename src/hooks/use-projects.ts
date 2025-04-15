@@ -12,7 +12,7 @@ interface Project {
   responsible_name?: string;
 }
 
-export function useProjects(statusFilter: string | null) {
+export function useProjects(statusFilter: string | null, searchQuery: string = "") {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -37,7 +37,19 @@ export function useProjects(statusFilter: string | null) {
         }
         
         console.log("Fetched projects:", data);
-        setProjects(data || []);
+        let filteredProjects = data || [];
+        
+        // Apply search filter client-side if search query exists
+        if (searchQuery.trim()) {
+          const lowercaseQuery = searchQuery.toLowerCase();
+          filteredProjects = filteredProjects.filter(project => 
+            project.client_name?.toLowerCase().includes(lowercaseQuery) || 
+            project.template?.toLowerCase().includes(lowercaseQuery) ||
+            project.responsible_name?.toLowerCase().includes(lowercaseQuery)
+          );
+        }
+        
+        setProjects(filteredProjects);
       } catch (error) {
         console.error('Error fetching projects:', error);
         setProjects([]);
@@ -57,7 +69,7 @@ export function useProjects(statusFilter: string | null) {
 
   useEffect(() => {
     fetchProjects();
-  }, [statusFilter]);
+  }, [statusFilter, searchQuery]);
 
   return { projects, setProjects, loading, fetchProjects };
 }
