@@ -49,9 +49,10 @@ export async function updateProject(id: string, projectData: ProjectFormValues) 
 export async function createProject(projectData: ProjectFormValues) {
   try {
     const supabase = getSupabaseClient();
+    // Fix: Pass the projectData directly, not as an array
     const { data, error } = await supabase
       .from("projects")
-      .insert([projectData])
+      .insert(projectData)
       .select();
 
     if (error) {
