@@ -49,7 +49,12 @@ export async function updateProject(id: string, projectData: ProjectFormValues) 
 export async function createProject(projectData: ProjectFormValues) {
   try {
     const supabase = getSupabaseClient();
-    // Fix: Pass the projectData directly, not as an array
+    
+    // Ensure client_name is provided since it's required by the database
+    if (!projectData.client_name) {
+      throw new Error("Client name is required");
+    }
+    
     const { data, error } = await supabase
       .from("projects")
       .insert(projectData)
