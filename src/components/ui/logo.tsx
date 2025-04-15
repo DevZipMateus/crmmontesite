@@ -16,12 +16,12 @@ export const Logo: React.FC<LogoProps> = ({ className, size = "md" }) => {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <div className="relative">
-        <div className="absolute inset-0 bg-primary opacity-20 rounded-lg blur-sm"></div>
-        <div className="relative bg-gradient-to-r from-primary/80 to-blue-500/80 text-white font-bold rounded-lg p-1.5 shadow-lg flex items-center justify-center">
-          <span className={`${sizeClasses[size]}`}>MS</span>
+        <div className="absolute inset-0 bg-primary opacity-20 rounded-full blur-sm"></div>
+        <div className="relative bg-gradient-to-r from-primary to-blue-400 text-white font-semibold rounded-full shadow-sm flex items-center justify-center">
+          <span className={`${sizeClasses[size]} aspect-square flex items-center justify-center px-1`}>MS</span>
         </div>
       </div>
-      <span className="font-semibold tracking-tight text-lg">MonteSite</span>
+      <span className="font-medium tracking-tight text-lg">MonteSite</span>
     </div>
   );
 };

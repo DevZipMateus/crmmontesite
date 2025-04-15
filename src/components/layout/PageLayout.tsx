@@ -24,14 +24,14 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   const navigate = useNavigate();
   
   return (
-    <div className="min-h-screen bg-gray-50/50 flex flex-col">
-      <header className="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-10">
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="bg-white/80 backdrop-blur-md border-b border-border/40 shadow-sm sticky top-0 z-10">
         <div className="container py-4 max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Logo />
-              <div className="h-6 w-px bg-gray-200 mx-2" />
-              <h1 className="text-xl font-medium text-gray-800">{title}</h1>
+              <div className="h-6 w-px bg-border mx-2" />
+              <h1 className="text-xl font-medium">{title}</h1>
             </div>
             <div className="flex items-center gap-2">
               {actions}
@@ -40,7 +40,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
                   variant="outline"
                   size="icon"
                   onClick={() => navigate("/")}
-                  className="ml-2"
+                  className="ml-2 border-border/40"
                 >
                   <Home className="h-4 w-4" />
                 </Button>
@@ -56,7 +56,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
         </div>
       </main>
       
-      <footer className="bg-white border-t border-gray-100 py-4 text-center text-sm text-gray-500">
+      <footer className="bg-white border-t border-border/40 py-4 text-center text-sm text-muted-foreground">
         <div className="container mx-auto">
           MonteSite CRM © {new Date().getFullYear()} - Gerenciamento de projetos
         </div>

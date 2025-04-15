@@ -70,8 +70,10 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			boxShadow: {
-				'card-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-				'kanban': '0 2px 5px rgba(0,0,0,0.1)',
+				'card-hover': '0 4px 12px rgba(0, 0, 0, 0.05)',
+				'kanban': '0 2px 5px rgba(0,0,0,0.05)',
+				'apple': '0 4px 20px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.02)',
+				'subtle': '0 1px 3px rgba(0, 0, 0, 0.04)',
 			},
 			keyframes: {
 				'accordion-down': {
