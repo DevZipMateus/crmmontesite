@@ -22,7 +22,6 @@ const projectFormSchema = z.object({
   status: z.string().default("Em andamento"),
   domain: z.string().optional(),
   provider_credentials: z.string().optional(),
-  blaster_link: z.string().optional(),
   client_type: z.string().optional(),
 });
 
@@ -54,7 +53,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       status: "Em andamento",
       domain: extractedData.domain || "",
       provider_credentials: extractedData.provider_credentials || "",
-      blaster_link: "",
       client_type: "",
     },
   });
@@ -70,6 +68,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         return;
       }
       
+      // Removing blaster_link from the projectData object since that column doesn't exist in the database
       const projectData = {
         client_name: values.client_name,
         template: values.template || null,
@@ -77,7 +76,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         status: values.status || "Em andamento",
         domain: values.domain || null,
         provider_credentials: values.provider_credentials || null,
-        blaster_link: values.blaster_link || null,
         client_type: values.client_type || null
       };
       
@@ -87,6 +85,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         .select();
       
       if (error) {
+        console.error("Erro ao criar projeto:", error);
         throw error;
       }
       
