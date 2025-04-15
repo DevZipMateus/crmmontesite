@@ -11,7 +11,7 @@ export const Logo: React.FC<LogoProps> = ({ className, size = "md" }) => {
   const sizeClasses = {
     sm: "h-8 w-auto",
     md: "h-10 w-auto", 
-    lg: "h-64 w-auto",
+    lg: "h-24 w-auto",
     xl: "h-64 w-auto"  // Added new size class
   };
 
