@@ -48,7 +48,7 @@ export const ProjectInfoForm = ({ form }: ProjectInfoFormProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Modelo</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} value={field.value || ""}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um modelo" />
@@ -74,7 +74,7 @@ export const ProjectInfoForm = ({ form }: ProjectInfoFormProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Status</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} value={field.value || ""}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um status" />
@@ -99,7 +99,7 @@ export const ProjectInfoForm = ({ form }: ProjectInfoFormProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Tipo de Cliente</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} value={field.value || ""}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o tipo de cliente" />
@@ -110,6 +110,34 @@ export const ProjectInfoForm = ({ form }: ProjectInfoFormProps) => {
                 <SelectItem value="cliente_final">Cliente Final</SelectItem>
               </SelectContent>
             </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={form.control}
+        name="domain"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Domínio</FormLabel>
+            <FormControl>
+              <Input placeholder="exemplo.com.br" {...field} value={field.value || ""} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={form.control}
+        name="blaster_link"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Link do Blaster</FormLabel>
+            <FormControl>
+              <Input placeholder="https://..." {...field} value={field.value || ""} />
+            </FormControl>
             <FormMessage />
           </FormItem>
         )}

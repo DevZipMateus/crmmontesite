@@ -2,7 +2,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Home, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { projectSchema } from "@/lib/validation";
@@ -12,6 +12,7 @@ import { updateProject, getProjectById } from "@/server/project-actions";
 import { toast } from "@/components/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
+import { Form } from "@/components/ui/form";
 
 export default function ProjetoEditar() {
   const navigate = useNavigate();
@@ -26,6 +27,8 @@ export default function ProjetoEditar() {
       template: "",
       status: "",
       client_type: "",
+      domain: "",
+      blaster_link: "",
     },
   });
 
@@ -99,15 +102,17 @@ export default function ProjetoEditar() {
           <CardTitle>Informações do Projeto</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <ProjectInfoForm form={form} />
-            <div className="flex justify-end">
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Salvar Alterações
-              </Button>
-            </div>
-          </form>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <ProjectInfoForm form={form} />
+              <div className="flex justify-end">
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Salvar Alterações
+                </Button>
+              </div>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>
