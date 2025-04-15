@@ -25,6 +25,21 @@ const projectEditSchema = z.object({
 
 export type ProjectEditValues = z.infer<typeof projectEditSchema>;
 
+// Define a more complete ProjectType that includes all database fields
+interface ProjectType {
+  id: string;
+  client_name: string;
+  template: string | null;
+  responsible_name: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  domain: string | null;
+  provider_credentials: string | null;
+  client_type: string | null;
+  blaster_link: string | null;
+}
+
 export default function ProjetoEditar() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -70,8 +85,8 @@ export default function ProjetoEditar() {
             status: data.status || "Em andamento",
             domain: data.domain || "",
             provider_credentials: data.provider_credentials || "",
-            client_type: "", // Campo adicional que não está no banco
-            blaster_link: "", // Campo adicional que não está no banco
+            client_type: data.client_type || "",
+            blaster_link: data.blaster_link || "",
           });
         }
       } catch (error) {
@@ -94,7 +109,6 @@ export default function ProjetoEditar() {
     if (!id) return;
 
     try {
-      // Remover campos que não existem no banco de dados
       const projectData = {
         client_name: values.client_name,
         template: values.template || null,
@@ -102,7 +116,8 @@ export default function ProjetoEditar() {
         status: values.status,
         domain: values.domain || null,
         provider_credentials: values.provider_credentials || null,
-        // Não incluir client_type e blaster_link pois não existem no banco
+        client_type: values.client_type || null,
+        blaster_link: values.blaster_link || null,
       };
 
       const { error } = await supabase

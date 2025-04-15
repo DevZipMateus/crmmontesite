@@ -22,6 +22,8 @@ const projectFormSchema = z.object({
   status: z.string().default("Em andamento"),
   domain: z.string().optional(),
   provider_credentials: z.string().optional(),
+  client_type: z.string().optional(),
+  blaster_link: z.string().optional(),
 });
 
 export type ProjectFormValues = z.infer<typeof projectFormSchema>;
@@ -52,6 +54,8 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       status: "Em andamento",
       domain: extractedData.domain || "",
       provider_credentials: extractedData.provider_credentials || "",
+      client_type: "",
+      blaster_link: "",
     },
   });
 
@@ -66,14 +70,16 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         return;
       }
       
-      // Removing client_type from the projectData object since that column doesn't exist in the database
+      // Include all fields in the projectData object
       const projectData = {
         client_name: values.client_name,
         template: values.template || null,
         responsible_name: values.responsible_name || null,
         status: values.status || "Em andamento",
         domain: values.domain || null,
-        provider_credentials: values.provider_credentials || null
+        provider_credentials: values.provider_credentials || null,
+        client_type: values.client_type || null,
+        blaster_link: values.blaster_link || null
       };
       
       const { data, error } = await supabase

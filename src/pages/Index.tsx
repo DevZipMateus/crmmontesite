@@ -1,3 +1,5 @@
+
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,11 +9,82 @@ import {
   Settings, 
   LayoutDashboard, 
   Globe,
-  Briefcase
+  Briefcase,
+  Users
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+// Define type for dashboard stats
+interface DashboardStats {
+  totalClients: number;
+  partnerClients: number;
+  finalClients: number;
+  sitesInProduction: number;
+  sitesPublished: number;
+}
 
 const Index = () => {
   const navigate = useNavigate();
+  const [stats, setStats] = useState<DashboardStats>({
+    totalClients: 0,
+    partnerClients: 0,
+    finalClients: 0,
+    sitesInProduction: 0,
+    sitesPublished: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        setLoading(true);
+        
+        // Get total clients count
+        const { count: totalCount } = await supabase
+          .from('projects')
+          .select('*', { count: 'exact', head: true });
+        
+        // Get partner clients count
+        const { count: partnerCount } = await supabase
+          .from('projects')
+          .select('*', { count: 'exact', head: true })
+          .eq('client_type', 'parceiro');
+        
+        // Get final clients count
+        const { count: finalCount } = await supabase
+          .from('projects')
+          .select('*', { count: 'exact', head: true })
+          .eq('client_type', 'cliente_final');
+        
+        // Get sites in production count
+        const { count: productionCount } = await supabase
+          .from('projects')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'Em andamento');
+        
+        // Get published sites count
+        const { count: publishedCount } = await supabase
+          .from('projects')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'Finalizado');
+        
+        setStats({
+          totalClients: totalCount || 0,
+          partnerClients: partnerCount || 0,
+          finalClients: finalCount || 0,
+          sitesInProduction: productionCount || 0,
+          sitesPublished: publishedCount || 0
+        });
+        
+      } catch (error) {
+        console.error("Erro ao carregar estatísticas:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchStats();
+  }, []);
 
   const menuItems = [
     {
@@ -99,7 +172,11 @@ const Index = () => {
                   <div className="bg-blue-100 p-3 rounded-full">
                     <Briefcase className="h-6 w-6 text-blue-600" />
                   </div>
-                  <span className="text-3xl font-bold">--</span>
+                  {loading ? (
+                    <div className="h-8 w-8 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div>
+                  ) : (
+                    <span className="text-3xl font-bold">{stats.sitesInProduction}</span>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -113,7 +190,11 @@ const Index = () => {
                   <div className="bg-green-100 p-3 rounded-full">
                     <Globe className="h-6 w-6 text-green-600" />
                   </div>
-                  <span className="text-3xl font-bold">--</span>
+                  {loading ? (
+                    <div className="h-8 w-8 rounded-full border-2 border-green-600 border-t-transparent animate-spin"></div>
+                  ) : (
+                    <span className="text-3xl font-bold">{stats.sitesPublished}</span>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -127,7 +208,50 @@ const Index = () => {
                   <div className="bg-purple-100 p-3 rounded-full">
                     <FileText className="h-6 w-6 text-purple-600" />
                   </div>
-                  <span className="text-3xl font-bold">--</span>
+                  {loading ? (
+                    <div className="h-8 w-8 rounded-full border-2 border-purple-600 border-t-transparent animate-spin"></div>
+                  ) : (
+                    <span className="text-3xl font-bold">{stats.totalClients}</span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Client Type Cards */}
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <Card className="border-gray-200 shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Parceiros</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div className="bg-amber-100 p-3 rounded-full">
+                    <Users className="h-6 w-6 text-amber-600" />
+                  </div>
+                  {loading ? (
+                    <div className="h-8 w-8 rounded-full border-2 border-amber-600 border-t-transparent animate-spin"></div>
+                  ) : (
+                    <span className="text-3xl font-bold">{stats.partnerClients}</span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-gray-200 shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Clientes Finais</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div className="bg-indigo-100 p-3 rounded-full">
+                    <Users className="h-6 w-6 text-indigo-600" />
+                  </div>
+                  {loading ? (
+                    <div className="h-8 w-8 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin"></div>
+                  ) : (
+                    <span className="text-3xl font-bold">{stats.finalClients}</span>
+                  )}
                 </div>
               </CardContent>
             </Card>

@@ -11,27 +11,39 @@ export type Database = {
     Tables: {
       projects: {
         Row: {
+          blaster_link: string | null
           client_name: string
+          client_type: string | null
           created_at: string | null
+          domain: string | null
           id: string
+          provider_credentials: string | null
           responsible_name: string | null
           status: string | null
           template: string | null
           updated_at: string | null
         }
         Insert: {
+          blaster_link?: string | null
           client_name: string
+          client_type?: string | null
           created_at?: string | null
+          domain?: string | null
           id?: string
+          provider_credentials?: string | null
           responsible_name?: string | null
           status?: string | null
           template?: string | null
           updated_at?: string | null
         }
         Update: {
+          blaster_link?: string | null
           client_name?: string
+          client_type?: string | null
           created_at?: string | null
+          domain?: string | null
           id?: string
+          provider_credentials?: string | null
           responsible_name?: string | null
           status?: string | null
           template?: string | null

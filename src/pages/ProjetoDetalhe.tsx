@@ -13,6 +13,10 @@ interface Project {
   status: string;
   created_at: string;
   responsible_name?: string;
+  domain?: string;
+  provider_credentials?: string;
+  client_type?: string;
+  blaster_link?: string;
 }
 
 export default function ProjetoDetalhe() {
@@ -66,6 +70,11 @@ export default function ProjetoDetalhe() {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
+  const formatClientType = (type: string | undefined) => {
+    if (!type) return "—";
+    return type === 'parceiro' ? 'Parceiro' : 'Cliente Final';
+  };
+
   if (loading) {
     return (
       <div className="container py-10 flex justify-center">
@@ -104,7 +113,7 @@ export default function ProjetoDetalhe() {
             
             <div>
               <h3 className="font-medium text-sm text-muted-foreground">Modelo escolhido</h3>
-              <p>{project.template}</p>
+              <p>{project.template || "—"}</p>
             </div>
             
             <div>
@@ -123,6 +132,27 @@ export default function ProjetoDetalhe() {
             </div>
             
             <div>
+              <h3 className="font-medium text-sm text-muted-foreground">Tipo de Cliente</h3>
+              <p>{formatClientType(project.client_type)}</p>
+            </div>
+
+            <div>
+              <h3 className="font-medium text-sm text-muted-foreground">Domínio</h3>
+              <p>{project.domain || "—"}</p>
+            </div>
+            
+            {project.blaster_link && (
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground">Link no Blaster</h3>
+                <p className="text-blue-600 underline hover:text-blue-800">
+                  <a href={project.blaster_link} target="_blank" rel="noopener noreferrer">
+                    {project.blaster_link}
+                  </a>
+                </p>
+              </div>
+            )}
+            
+            <div>
               <h3 className="font-medium text-sm text-muted-foreground">Data de criação</h3>
               <p>{formatDate(project.created_at)}</p>
             </div>
@@ -131,6 +161,15 @@ export default function ProjetoDetalhe() {
               <div>
                 <h3 className="font-medium text-sm text-muted-foreground">Responsável</h3>
                 <p>{project.responsible_name}</p>
+              </div>
+            )}
+            
+            {project.provider_credentials && (
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground">Credenciais do provedor</h3>
+                <p className="font-mono bg-gray-100 p-2 rounded text-sm overflow-x-auto">
+                  {project.provider_credentials}
+                </p>
               </div>
             )}
           </div>
