@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { ProjectInfoForm } from "@/components/projeto/ProjectInfoForm";
+import { ManualDataFields } from "@/components/projeto/ManualDataFields"; // Import the ManualDataFields component
 
 // Schema de validação para o formulário de edição
 const projectEditSchema = z.object({
@@ -45,6 +46,7 @@ export default function ProjetoEditar() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
+  const [showManualFields, setShowManualFields] = useState(false);
 
   const form = useForm<ProjectEditValues>({
     resolver: zodResolver(projectEditSchema),
@@ -160,8 +162,28 @@ export default function ProjetoEditar() {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleUpdate)} className="space-y-6">
                 <div className="border rounded-lg p-4 bg-slate-50 space-y-4">
-                  <h3 className="text-lg font-medium">Informações do projeto</h3>
+                  <h3 className="text-lg font-medium">Informações básicas do projeto</h3>
                   <ProjectInfoForm form={form} />
+                </div>
+
+                <div className="border rounded-lg p-4 bg-slate-50 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-medium">Dados adicionais</h3>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setShowManualFields(!showManualFields)}
+                      type="button"
+                    >
+                      {showManualFields ? "Ocultar campos adicionais" : "Mostrar campos adicionais"}
+                    </Button>
+                  </div>
+                  
+                  {showManualFields && (
+                    <div className="mt-4">
+                      <ManualDataFields />
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex justify-between">
