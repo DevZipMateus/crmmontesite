@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Home } from "lucide-react";
 import KanbanBoard from "@/components/projects/KanbanBoard";
 import ProjectListView from "@/components/projects/ProjectListView";
 import ViewToggle from "@/components/projects/ViewToggle";
@@ -25,6 +25,14 @@ export default function Projetos() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Projetos</h1>
         <div className="flex items-center gap-4">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={() => navigate('/')}
+            className="mr-2"
+          >
+            <Home className="h-4 w-4" />
+          </Button>
           <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
           <Button onClick={handleNewProject} className="bg-primary">
             <Plus className="mr-2 h-4 w-4" /> Novo site

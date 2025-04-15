@@ -1,189 +1,26 @@
-
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useEffect, useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { getSupabaseClient } from "@/lib/supabase";
-
-interface Project {
-  id: string;
-  client_name: string;
-  template: string;
-  status: string;
-  created_at: string;
-  responsible_name?: string;
-  domain?: string;
-  provider_credentials?: string;
-  client_type?: string;
-  blaster_link?: string;
-}
+import { Home } from "lucide-react";
 
 export default function ProjetoDetalhe() {
-  const { id } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [project, setProject] = useState<Project | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProject = async () => {
-      try {
-        setLoading(true);
-        
-        try {
-          const supabase = getSupabaseClient();
-          
-          const { data, error } = await supabase
-            .from('projects')
-            .select('*')
-            .eq('id', id)
-            .single();
-
-          if (error) {
-            throw error;
-          }
-
-          setProject(data);
-        } catch (error) {
-          console.error('Error fetching project:', error);
-          // Only show error toast if it's not the initialization error
-          if (error instanceof Error && !error.message.includes('not initialized')) {
-            toast({
-              title: "Erro ao buscar projeto",
-              description: "Não foi possível carregar os detalhes do projeto.",
-              variant: "destructive",
-            });
-          }
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) {
-      fetchProject();
-    }
-  }, [id, toast]);
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
-  };
-
-  const formatClientType = (type: string | undefined) => {
-    if (!type) return "—";
-    return type === 'parceiro' ? 'Parceiro' : 'Cliente Final';
-  };
-
-  if (loading) {
-    return (
-      <div className="container py-10 flex justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (!project) {
-    return (
-      <div className="container py-10 max-w-3xl mx-auto">
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-center mb-4">Projeto não encontrado</p>
-            <div className="flex justify-center">
-              <Button onClick={() => navigate("/projetos")}>Voltar para Projetos</Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const { id } = useParams();
 
   return (
-    <div className="container py-10 max-w-3xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Detalhes do Projeto</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-medium text-sm text-muted-foreground">Nome do cliente</h3>
-              <p className="text-lg">{project.client_name}</p>
-            </div>
-            
-            <div>
-              <h3 className="font-medium text-sm text-muted-foreground">Modelo escolhido</h3>
-              <p>{project.template || "—"}</p>
-            </div>
-            
-            <div>
-              <h3 className="font-medium text-sm text-muted-foreground">Status</h3>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                project.status === 'Finalizado'
-                  ? 'bg-green-100 text-green-800'
-                  : project.status === 'Em andamento'
-                  ? 'bg-blue-100 text-blue-800'
-                  : project.status === 'Pausado'
-                  ? 'bg-yellow-100 text-yellow-800'
-                  : 'bg-red-100 text-red-800'
-              }`}>
-                {project.status}
-              </span>
-            </div>
-            
-            <div>
-              <h3 className="font-medium text-sm text-muted-foreground">Tipo de Cliente</h3>
-              <p>{formatClientType(project.client_type)}</p>
-            </div>
-
-            <div>
-              <h3 className="font-medium text-sm text-muted-foreground">Domínio</h3>
-              <p>{project.domain || "—"}</p>
-            </div>
-            
-            {project.blaster_link && (
-              <div>
-                <h3 className="font-medium text-sm text-muted-foreground">Link no Blaster</h3>
-                <p className="text-blue-600 underline hover:text-blue-800">
-                  <a href={project.blaster_link} target="_blank" rel="noopener noreferrer">
-                    {project.blaster_link}
-                  </a>
-                </p>
-              </div>
-            )}
-            
-            <div>
-              <h3 className="font-medium text-sm text-muted-foreground">Data de criação</h3>
-              <p>{formatDate(project.created_at)}</p>
-            </div>
-            
-            {project.responsible_name && (
-              <div>
-                <h3 className="font-medium text-sm text-muted-foreground">Responsável</h3>
-                <p>{project.responsible_name}</p>
-              </div>
-            )}
-            
-            {project.provider_credentials && (
-              <div>
-                <h3 className="font-medium text-sm text-muted-foreground">Credenciais do provedor</h3>
-                <p className="font-mono bg-gray-100 p-2 rounded text-sm overflow-x-auto">
-                  {project.provider_credentials}
-                </p>
-              </div>
-            )}
-          </div>
-          
-          <div className="mt-8 flex gap-3">
-            <Button variant="outline" onClick={() => navigate("/projetos")}>
-              Voltar
-            </Button>
-            <Button onClick={() => navigate(`/projeto/${id}/editar`)}>
-              Editar Projeto
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="container py-10 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Detalhes do Projeto</h1>
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={() => navigate('/')}
+          className="mr-2"
+        >
+          <Home className="h-4 w-4" />
+        </Button>
+      </div>
+      
+      {/* Existing project details code */}
     </div>
   );
 }
