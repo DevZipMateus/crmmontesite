@@ -1,12 +1,14 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ExtractedProjectData } from "@/utils/documentParser";
+import { projectSchema } from "@/lib/validation";
 
 // Import our components
 import { ProjectInfoForm } from "@/components/projeto/ProjectInfoForm";
@@ -14,18 +16,8 @@ import { ExtractedDataForm } from "@/components/projeto/ExtractedDataForm";
 import { ManualDataFields } from "@/components/projeto/ManualDataFields";
 import { Form } from "@/components/ui/form";
 
-const projectFormSchema = z.object({
-  client_name: z.string().min(1, "Nome do cliente é obrigatório"),
-  template: z.string().optional(),
-  responsible_name: z.string().optional(),
-  status: z.string().default("Recebido"),
-  domain: z.string().optional(),
-  provider_credentials: z.string().optional(),
-  client_type: z.string().optional(),
-  blaster_link: z.string().optional(),
-});
-
-export type ProjectFormValues = z.infer<typeof projectFormSchema>;
+// Use the same schema as in validation.ts
+export type ProjectFormValues = z.infer<typeof projectSchema>;
 
 interface ProjectFormProps {
   extractedData: ExtractedProjectData;
@@ -45,14 +37,13 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   const [showManualInput, setShowManualInput] = useState(false);
   
   const form = useForm<ProjectFormValues>({
-    resolver: zodResolver(projectFormSchema),
+    resolver: zodResolver(projectSchema),
     defaultValues: {
       client_name: extractedData.client_name || "",
       template: extractedData.template || "",
       responsible_name: extractedData.responsible_name || "",
       status: "Recebido",
       domain: extractedData.domain || "",
-      provider_credentials: extractedData.provider_credentials || "",
       client_type: "",
       blaster_link: "",
     },
@@ -72,12 +63,11 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       // Include all fields in the projectData object
       const projectData = {
         client_name: values.client_name,
-        template: values.template || null,
-        responsible_name: values.responsible_name || null,
-        status: values.status || "Recebido",
+        template: values.template,
+        responsible_name: values.responsible_name,
+        status: values.status,
         domain: values.domain || null,
-        provider_credentials: values.provider_credentials || null,
-        client_type: values.client_type || null,
+        client_type: values.client_type,
         blaster_link: values.blaster_link || null
       };
       
