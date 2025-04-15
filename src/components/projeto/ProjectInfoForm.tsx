@@ -1,9 +1,17 @@
+
 import React from "react";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { UseFormReturn } from "react-hook-form";
+import { z } from "zod";
+import { projectSchema } from "@/lib/validation";
 
-export const ProjectInfoForm = ({ form }) => {
+interface ProjectInfoFormProps {
+  form: UseFormReturn<z.infer<typeof projectSchema>>;
+}
+
+export const ProjectInfoForm = ({ form }: ProjectInfoFormProps) => {
   return (
     <div className="space-y-4">
       <FormField

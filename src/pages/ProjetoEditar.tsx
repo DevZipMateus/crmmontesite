@@ -1,6 +1,7 @@
+
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home } from "lucide-react";
+import { Home, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateProject, getProjectById } from "@/server/project-actions";
 import { toast } from "@/components/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import { z } from "zod";
 
 export default function ProjetoEditar() {
@@ -41,7 +41,7 @@ export default function ProjetoEditar() {
     }
   }, [project, form]);
 
-  const { mutate: updateProjectMutation, isLoading: isSubmitting } = useMutation({
+  const { mutate: updateProjectMutation, isPending: isSubmitting } = useMutation({
     mutationFn: async (data: z.infer<typeof projectSchema>) => {
       if (!id) {
         throw new Error("Project ID is missing");
