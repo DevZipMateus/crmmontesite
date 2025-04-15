@@ -19,7 +19,7 @@ export const Logo: React.FC<LogoProps> = ({ className, size = "md" }) => {
       <div className="relative">
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
-          viewBox="0 0 512 512" 
+          viewBox="0 0 24 24"  // Adjusted viewBox for better proportions
           className={cn(
             "text-primary",
             sizeClasses[size]
@@ -27,7 +27,7 @@ export const Logo: React.FC<LogoProps> = ({ className, size = "md" }) => {
           fill="currentColor"
         >
           <path 
-            d="M256 48c-55.2 0-100 44.8-100 100v216c0 55.2 44.8 100 100 100s100-44.8 100-100V148c0-55.2-44.8-100-100-100zm0 400c-27.6 0-50-22.4-50-50V148c0-27.6 22.4-50 50-50s50 22.4 50 50v250c0 27.6-22.4 50-50 50z" 
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" 
           />
         </svg>
       </div>
