@@ -342,14 +342,14 @@ export default function Projetos() {
                 <Filter className="h-5 w-5 text-muted-foreground" />
                 <div className="text-sm font-medium">Filtrar por:</div>
                 <Select
-                  value={statusFilter || ""}
-                  onValueChange={(value) => setStatusFilter(value || null)}
+                  value={statusFilter || "all"}
+                  onValueChange={(value) => setStatusFilter(value === "all" ? null : value)}
                 >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="all">Todos</SelectItem>
                     {STATUS_TYPES.map(status => (
                       <SelectItem key={status.value} value={status.value}>{status.value}</SelectItem>
                     ))}
