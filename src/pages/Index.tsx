@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -65,11 +66,11 @@ const Index = () => {
           .select('*', { count: 'exact', head: true })
           .eq('status', 'Criando site');
         
-        // Get published sites count
+        // Get published sites count (agora contando os status "Configurando Domínio" e "Aguardando DNS")
         const { count: publishedCount } = await supabase
           .from('projects')
           .select('*', { count: 'exact', head: true })
-          .eq('status', 'Finalizado');
+          .in('status', ['Configurando Domínio', 'Aguardando DNS']);
           
         // Get sites ready count
         const { count: readyCount } = await supabase
@@ -193,15 +194,15 @@ const Index = () => {
 
             <Card className="border-gray-200 shadow-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Sites Publicados</CardTitle>
+                <CardTitle className="text-lg">Sites em Configuração</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
-                  <div className="bg-green-100 p-3 rounded-full">
-                    <Globe className="h-6 w-6 text-green-600" />
+                  <div className="bg-orange-100 p-3 rounded-full">
+                    <Globe className="h-6 w-6 text-orange-600" />
                   </div>
                   {loading ? (
-                    <div className="h-8 w-8 rounded-full border-2 border-green-600 border-t-transparent animate-spin"></div>
+                    <div className="h-8 w-8 rounded-full border-2 border-orange-600 border-t-transparent animate-spin"></div>
                   ) : (
                     <span className="text-3xl font-bold">{stats.sitesPublished}</span>
                   )}
