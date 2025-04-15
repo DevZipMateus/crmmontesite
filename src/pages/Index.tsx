@@ -13,6 +13,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { PROJECT_STATUS_TYPES } from "@/lib/supabase";
 
 // Define type for dashboard stats
 interface DashboardStats {
@@ -62,7 +63,7 @@ const Index = () => {
         const { count: productionCount } = await supabase
           .from('projects')
           .select('*', { count: 'exact', head: true })
-          .eq('status', 'Em andamento');
+          .eq('status', 'Criando site');
         
         // Get published sites count
         const { count: publishedCount } = await supabase
@@ -70,7 +71,7 @@ const Index = () => {
           .select('*', { count: 'exact', head: true })
           .eq('status', 'Finalizado');
           
-        // Get sites ready count - NEW
+        // Get sites ready count
         const { count: readyCount } = await supabase
           .from('projects')
           .select('*', { count: 'exact', head: true })
@@ -208,7 +209,6 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            {/* New Card for Sites Ready */}
             <Card className="border-gray-200 shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">Sites Prontos</CardTitle>
@@ -228,7 +228,6 @@ const Index = () => {
             </Card>
           </div>
           
-          {/* Client Type Cards */}
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
             <Card className="border-gray-200 shadow-sm">
               <CardHeader className="pb-2">

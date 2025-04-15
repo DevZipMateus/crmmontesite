@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { getSupabaseClient, updateProjectStatus } from "@/lib/supabase";
+import { getSupabaseClient, updateProjectStatus, PROJECT_STATUS_TYPES } from "@/lib/supabase";
 
 // Define the Project type
 interface Project {
@@ -22,15 +23,6 @@ interface Project {
   created_at: string;
   responsible_name?: string;
 }
-
-// Define the status types for our Kanban columns
-const STATUS_TYPES = [
-  { value: "Recebido", icon: Inbox, color: "bg-purple-500" },
-  { value: "Criando site", icon: Code, color: "bg-blue-500" },
-  { value: "Configurando Domínio", icon: Globe, color: "bg-amber-500" },
-  { value: "Aguardando DNS", icon: Clock, color: "bg-orange-500" },
-  { value: "Site pronto", icon: CheckCircle2, color: "bg-green-500" }
-];
 
 export default function Projetos() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -65,6 +57,7 @@ export default function Projetos() {
           throw error;
         }
         
+        console.log("Fetched projects:", data);
         setProjects(data || []);
       } catch (error) {
         console.error('Error fetching projects:', error);
@@ -152,11 +145,48 @@ export default function Projetos() {
     }
   };
 
+  const handleStatusChange = async (projectId: string, newStatus: string) => {
+    setUpdatingStatus(true);
+    
+    try {
+      const result = await updateProjectStatus(projectId, newStatus);
+      
+      if (result.success) {
+        toast({
+          title: "Status atualizado",
+          description: `Status do projeto alterado para "${newStatus}"`,
+        });
+        
+        // Update local state
+        setProjects(prevProjects => 
+          prevProjects.map(project => 
+            project.id === projectId ? { ...project, status: newStatus } : project
+          )
+        );
+      } else {
+        throw new Error('Failed to update project status');
+      }
+    } catch (error) {
+      console.error('Error updating project status:', error);
+      toast({
+        title: "Erro ao atualizar status",
+        description: "Não foi possível atualizar o status do projeto.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
   const renderKanbanBoard = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {STATUS_TYPES.map((statusType) => {
-          const StatusIcon = statusType.icon;
+        {PROJECT_STATUS_TYPES.map((statusType) => {
+          const StatusIcon = statusType.value === "Recebido" ? Inbox :
+                           statusType.value === "Criando site" ? Code :
+                           statusType.value === "Configurando Domínio" ? Globe :
+                           statusType.value === "Aguardando DNS" ? Clock : CheckCircle2;
+          
           const filteredProjects = projects.filter(project => project.status === statusType.value);
           
           return (
@@ -218,16 +248,20 @@ export default function Projetos() {
                           </div>
                         </div>
                         <div className="mt-2 pt-2 border-t grid grid-cols-2 gap-1">
-                          {STATUS_TYPES.filter(s => s.value !== project.status).map(status => (
+                          {PROJECT_STATUS_TYPES.filter(s => s.value !== project.status).map(status => (
                             <Button 
                               key={status.value} 
                               variant="ghost" 
                               size="sm"
                               className="text-xs h-7"
-                              onClick={() => updateProjectStatus(project.id, status.value).then(() => fetchProjects())}
+                              onClick={() => handleStatusChange(project.id, status.value)}
                               disabled={updatingStatus}
                             >
-                              <status.icon className="h-3 w-3 mr-1" />
+                              {status.value === "Recebido" ? <Inbox className="h-3 w-3 mr-1" /> : 
+                               status.value === "Criando site" ? <Code className="h-3 w-3 mr-1" /> : 
+                               status.value === "Configurando Domínio" ? <Globe className="h-3 w-3 mr-1" /> :
+                               status.value === "Aguardando DNS" ? <Clock className="h-3 w-3 mr-1" /> :
+                               <CheckCircle2 className="h-3 w-3 mr-1" />}
                               {status.value.length > 10 ? `${status.value.substring(0, 10)}...` : status.value}
                             </Button>
                           ))}

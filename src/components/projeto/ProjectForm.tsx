@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,7 @@ const projectFormSchema = z.object({
   client_name: z.string().min(1, "Nome do cliente é obrigatório"),
   template: z.string().optional(),
   responsible_name: z.string().optional(),
-  status: z.string().default("Em andamento"),
+  status: z.string().default("Recebido"),
   domain: z.string().optional(),
   provider_credentials: z.string().optional(),
   client_type: z.string().optional(),
@@ -51,7 +50,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       client_name: extractedData.client_name || "",
       template: extractedData.template || "",
       responsible_name: extractedData.responsible_name || "",
-      status: "Em andamento",
+      status: "Recebido",
       domain: extractedData.domain || "",
       provider_credentials: extractedData.provider_credentials || "",
       client_type: "",
@@ -75,7 +74,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         client_name: values.client_name,
         template: values.template || null,
         responsible_name: values.responsible_name || null,
-        status: values.status || "Em andamento",
+        status: values.status || "Recebido",
         domain: values.domain || null,
         provider_credentials: values.provider_credentials || null,
         client_type: values.client_type || null,
