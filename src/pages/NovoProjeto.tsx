@@ -5,10 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import mammoth from "mammoth";
 import { extractProjectDataFromText, ExtractedProjectData } from "@/utils/documentParser";
-
-// Import our components
 import { DocumentParser } from "@/components/projeto/DocumentParser";
 import { ProjectForm } from "@/components/projeto/ProjectForm";
+import { PageLayout } from "@/components/layout/PageLayout";
+import { FileUp } from "lucide-react";
 
 export default function NovoProjeto() {
   const navigate = useNavigate();
@@ -130,34 +130,52 @@ Esta seria uma implementação futura mais completa.`;
   };
 
   return (
-    <div className="container py-10 max-w-3xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Adicionar Site</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <DocumentParser
-            isReading={isReading}
-            isLoadingGoogleDoc={isLoadingGoogleDoc}
-            fileName={fileName}
-            docContent={docContent}
-            googleDocsLink={googleDocsLink}
-            setGoogleDocsLink={setGoogleDocsLink}
-            handleFileUpload={handleFileUpload}
-            handleGoogleDocsImport={handleGoogleDocsImport}
-            onCancel={() => navigate("/projetos")}
-          />
-          
-          {docContent && (
-            <ProjectForm
-              extractedData={extractedData}
-              docContent={docContent}
+    <PageLayout 
+      title="Adicionar Site"
+      contentClass="bg-gray-50/50"
+    >
+      <div className="max-w-3xl mx-auto">
+        <Card className="border-gray-100 shadow-sm mb-6">
+          <CardHeader className="bg-gray-50/50 border-b border-gray-100 flex flex-row items-center gap-4">
+            <div className="p-2 bg-primary/10 rounded-full">
+              <FileUp className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-xl">Importar Documento</CardTitle>
+              <p className="text-sm text-gray-500 mt-1">Importe um documento para extrair informações do projeto</p>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <DocumentParser
+              isReading={isReading}
+              isLoadingGoogleDoc={isLoadingGoogleDoc}
               fileName={fileName}
+              docContent={docContent}
+              googleDocsLink={googleDocsLink}
+              setGoogleDocsLink={setGoogleDocsLink}
+              handleFileUpload={handleFileUpload}
+              handleGoogleDocsImport={handleGoogleDocsImport}
               onCancel={() => navigate("/projetos")}
             />
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+        
+        {docContent && (
+          <Card className="border-gray-100 shadow-sm">
+            <CardHeader className="bg-gray-50/50 border-b border-gray-100">
+              <CardTitle className="text-xl">Detalhes do Projeto</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <ProjectForm
+                extractedData={extractedData}
+                docContent={docContent}
+                fileName={fileName}
+                onCancel={() => navigate("/projetos")}
+              />
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </PageLayout>
   );
 }

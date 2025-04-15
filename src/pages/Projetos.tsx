@@ -2,12 +2,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, Home } from "lucide-react";
+import { Plus } from "lucide-react";
 import KanbanBoard from "@/components/projects/KanbanBoard";
 import ProjectListView from "@/components/projects/ProjectListView";
 import ViewToggle from "@/components/projects/ViewToggle";
 import SearchInput from "@/components/projects/SearchInput";
 import { useProjects } from "@/hooks/use-projects";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 export default function Projetos() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
@@ -21,30 +22,23 @@ export default function Projetos() {
   };
 
   return (
-    <div className="container py-10 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Projetos</h1>
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={() => navigate('/')}
-            className="mr-2"
-          >
-            <Home className="h-4 w-4" />
-          </Button>
+    <PageLayout 
+      title="Projetos"
+      actions={
+        <>
           <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-          <Button onClick={handleNewProject} className="bg-primary">
-            <Plus className="mr-2 h-4 w-4" /> Novo site
+          <Button onClick={handleNewProject} className="bg-primary shadow-sm flex items-center gap-2">
+            <Plus className="h-4 w-4" /> Novo site
           </Button>
-        </div>
-      </div>
-      
+        </>
+      }
+    >
       <div className="mb-6">
         <SearchInput 
           value={searchQuery} 
           onChange={setSearchQuery} 
           placeholder="Buscar por nome do cliente, modelo ou responsável..."
+          className="rounded-xl shadow-sm"
         />
       </div>
 
@@ -58,6 +52,6 @@ export default function Projetos() {
           setStatusFilter={setStatusFilter}
         />
       )}
-    </div>
+    </PageLayout>
   );
 }

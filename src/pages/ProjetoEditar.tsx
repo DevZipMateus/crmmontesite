@@ -1,7 +1,7 @@
 
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, Loader2 } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +13,7 @@ import { toast } from "@/components/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { Form } from "@/components/ui/form";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 export default function ProjetoEditar() {
   const navigate = useNavigate();
@@ -75,47 +76,44 @@ export default function ProjetoEditar() {
 
   if (isLoading) {
     return (
-      <div className="container py-10 max-w-7xl mx-auto">
-        <div className="flex justify-center items-center">
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Carregando projeto...
+      <PageLayout title="Carregando projeto...">
+        <div className="flex justify-center items-center py-20">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            <p className="text-gray-500">Carregando informações do projeto...</p>
+          </div>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="container py-10 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Editar Projeto</h1>
+    <PageLayout 
+      title="Editar Projeto"
+      actions={
         <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={() => navigate('/')}
-          className="mr-2"
+          type="button" 
+          onClick={form.handleSubmit(onSubmit)} 
+          disabled={isSubmitting}
+          className="flex items-center gap-2 shadow-sm"
         >
-          <Home className="h-4 w-4" />
+          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          Salvar Alterações
         </Button>
-      </div>
-      
-      <Card>
-        <CardHeader>
+      }
+    >
+      <Card className="border-gray-100 shadow-sm bg-white">
+        <CardHeader className="bg-gray-50/50 border-b border-gray-100">
           <CardTitle>Informações do Projeto</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <ProjectInfoForm form={form} />
-              <div className="flex justify-end">
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Salvar Alterações
-                </Button>
-              </div>
             </form>
           </Form>
         </CardContent>
       </Card>
-    </div>
+    </PageLayout>
   );
 }

@@ -1,27 +1,22 @@
+
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home } from "lucide-react";
+import { PageLayout } from "@/components/layout/PageLayout";
+import { Construction } from "lucide-react";
 
 export default function ProducaoSites() {
   const navigate = useNavigate();
 
   return (
-    <div className="container py-10 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Produção de Sites</h1>
-        <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={() => navigate('/')}
-          className="mr-2"
-        >
-          <Home className="h-4 w-4" />
+    <PageLayout title="Produção de Sites">
+      <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+        <Construction className="h-16 w-16 mb-6 text-primary/40" />
+        <h2 className="text-2xl font-semibold mb-2">Em construção</h2>
+        <p className="mb-6">Esta funcionalidade está sendo desenvolvida.</p>
+        <Button onClick={() => navigate("/projetos")}>
+          Voltar para Projetos
         </Button>
       </div>
-      
-      <div>
-        <p>Em construção...</p>
-      </div>
-    </div>
+    </PageLayout>
   );
 }
