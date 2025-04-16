@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { useProjects } from "@/hooks/use-projects";
-import { Construction, Copy, FileText } from "lucide-react";
+import { Construction, Copy, FileText, Award } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ProducaoSites() {
@@ -22,18 +22,72 @@ export default function ProducaoSites() {
   const handleGenerateCommand = (project: any) => {
     setSelectedProjectId(project.id);
     
-    // Generate the command text
+    // Generate the command text with only specified fields
     const commandText = `Vou lhe mantar as informações de uma empresa para implementar nesse layout. Otimize o site para SEO e cuide para não quebrar no mobile e deixar rolagem na horizontal. Mantenha responsivo.
 Logo é a imagem que lhe envio 
 Paleta de cores use as cores da logo e utilize a regra 60,30,10 para as proporções das cores onde 60% é branco
 
 Nome da empresa: ${project.client_name || 'Não informado'}
-Template escolhido: ${project.template || 'Não informado'}
 Responsável: ${project.responsible_name || 'Não informado'}
-Domínio: ${project.domain || 'Não informado'}
-Tipo de cliente: ${project.client_type || 'Não informado'}
-Link blaster: ${project.blaster_link || 'Não informado'}
-Data de criação: ${formatDate(project.created_at)}`;
+Domínio: ${project.domain || 'Não informado'}`;
+
+    setGeneratedText(commandText);
+  };
+  
+  const handleGenerateEgestorCommand = (project: any) => {
+    setSelectedProjectId(project.id);
+    
+    // Create component code with the partner's link
+    const partnerLink = project.blaster_link || "link do parceiro";
+    
+    const egestorCode = `import React from 'react';
+import { Button } from '@/components/ui/button';
+
+const EgestorERP = () => {
+  // Link for both the title and button
+  const egestorLink = "${partnerLink}";
+
+  return <section className="py-16 bg-white overflow-hidden">
+      <div className="container px-4 mx-auto max-w-6xl">
+        {/* Two-column layout for desktop, stack on mobile */}
+        <div className="flex flex-col md:flex-row md:items-center md:gap-8 lg:gap-12 mb-10">
+          {/* Left column - Header Text */}
+          <div className="md:w-1/2 text-center md:text-left mb-8 md:mb-0 animate-fade-in">
+            <a href={egestorLink} target="_blank" rel="noopener noreferrer" className="inline-block hover:opacity-90 transition-opacity">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4 leading-tight">Sistema de gestão empresarial</h2>
+            </a>
+            <p className="text-lg md:text-xl text-gray-600 font-normal">
+              Dobre seus lucros otimizando sua gestão
+            </p>
+          </div>
+          
+          {/* Right column - Video Container */}
+          <div className="md:w-1/2 rounded-xl overflow-hidden shadow-xl animate-fade-in">
+            <video className="w-full aspect-video object-cover" autoPlay muted loop playsInline poster="/lovable-uploads/00b6d73e-0139-4a17-ad97-b66dac2be5f8.png">
+              <source src="https://egestor.com.br/assets/img/egestor-gestao-simples-para-crescer.mp4" type="video/mp4" />
+              Seu navegador não suporta vídeos.
+            </video>
+          </div>
+        </div>
+        
+        {/* CTA Button - Centered below both columns */}
+        <div className="flex justify-center animate-fade-in">
+          <a href={egestorLink} target="_blank" rel="noopener noreferrer" className="inline-block w-full max-w-sm">
+            <button className="w-full py-3 bg-[#7CFFA0] hover:bg-[#6DF090] text-black font-medium rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]">
+              Teste grátis
+            </button>
+          </a>
+        </div>
+      </div>
+    </section>;
+};
+
+export default EgestorERP;`;
+
+    const commandText = `Vou lhe mantar as informações para adicionar uma seção de anúncio do eGestor no site. 
+Insira o seguinte componente no site:
+
+${egestorCode}`;
 
     setGeneratedText(commandText);
   };
@@ -92,6 +146,7 @@ Data de criação: ${formatDate(project.created_at)}`;
                     <TableHead>Nome do cliente</TableHead>
                     <TableHead>Modelo escolhido</TableHead>
                     <TableHead>Responsável</TableHead>
+                    <TableHead>Tipo de cliente</TableHead>
                     <TableHead>Data de recebimento</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
@@ -102,17 +157,30 @@ Data de criação: ${formatDate(project.created_at)}`;
                       <TableCell className="font-medium">{project.client_name}</TableCell>
                       <TableCell>{project.template || "—"}</TableCell>
                       <TableCell>{project.responsible_name || "—"}</TableCell>
+                      <TableCell>{project.client_type || "—"}</TableCell>
                       <TableCell>{formatDate(project.created_at)}</TableCell>
-                      <TableCell>
+                      <TableCell className="space-y-2">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleGenerateCommand(project)}
-                          className="flex items-center gap-2"
+                          className="flex items-center gap-2 w-full"
                         >
                           <FileText className="h-4 w-4" />
                           Gerar Comando
                         </Button>
+                        
+                        {project.client_type?.toLowerCase() === "parceiro" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleGenerateEgestorCommand(project)}
+                            className="flex items-center gap-2 w-full mt-2"
+                          >
+                            <Award className="h-4 w-4" />
+                            Gerar Anúncio eGestor
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
