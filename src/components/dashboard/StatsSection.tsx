@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Briefcase, Globe, CheckCircle2, Users } from "lucide-react";
 import StatsItem from "./StatsItem";
@@ -47,11 +46,11 @@ const StatsSection: React.FC = () => {
           .select('*', { count: 'exact', head: true })
           .eq('client_type', 'cliente_final');
         
-        // Get sites in production count
+        // Get sites in production count (Recebido e Criando site)
         const { count: productionCount } = await supabase
           .from('projects')
           .select('*', { count: 'exact', head: true })
-          .eq('status', 'Criando site');
+          .in('status', ['Recebido', 'Criando site']);
         
         // Get published sites count (contando os status "Configurando Domínio" e "Aguardando DNS")
         const { count: publishedCount } = await supabase

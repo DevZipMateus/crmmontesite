@@ -10,7 +10,7 @@ const DashboardHeader: React.FC = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   return <header className="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-10 fixed w-full">
-      <div className="container max-w-7xl mx-auto py-0">
+      <div className="container max-w-7xl mx-auto py-4">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Logo size={isMobile ? "md" : "xl"} />
