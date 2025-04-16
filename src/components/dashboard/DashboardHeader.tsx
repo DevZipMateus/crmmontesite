@@ -1,9 +1,11 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/ui/logo";
 import { useIsMobile } from "@/hooks/use-mobile";
+
 const DashboardHeader: React.FC = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -22,4 +24,5 @@ const DashboardHeader: React.FC = () => {
       </div>
     </header>;
 };
+
 export default DashboardHeader;

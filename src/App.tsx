@@ -28,13 +28,20 @@ const App = () => {
           <Toaster />
           <Sonner />
           <Routes>
+            {/* Redirect root to login */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            
             {/* Página pública de login */}
             <Route path="/login" element={<Login />} />
             
-            {/* Página inicial pública */}
-            <Route path="/" element={<Index />} />
+            {/* Página inicial - acessível apenas após login */}
+            <Route path="/home" element={
+              <AuthGuard>
+                <Index />
+              </AuthGuard>
+            } />
             
-            {/* Rotas protegidas */}
+            {/* Outras rotas protegidas */}
             <Route path="/projetos" element={
               <AuthGuard>
                 <Projetos />

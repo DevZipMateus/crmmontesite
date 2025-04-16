@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,13 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Check if user is already logged in
+  useEffect(() => {
+    if (localStorage.getItem("isLoggedIn") === "true") {
+      navigate("/home");
+    }
+  }, [navigate]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +37,7 @@ const Login: React.FC = () => {
           description: "Bem-vindo ao sistema administrativo.",
         });
         
-        navigate("/projetos");
+        navigate("/home");
       }, 1000);
     } else {
       setLoading(false);
@@ -84,21 +91,13 @@ const Login: React.FC = () => {
               />
             </div>
           </CardContent>
-          <CardFooter className="flex-col space-y-4">
+          <CardFooter className="flex-col">
             <Button 
               type="submit" 
               className="w-full bg-primary" 
               disabled={loading}
             >
               {loading ? "Aguarde..." : "Entrar"}
-            </Button>
-            <Button 
-              type="button" 
-              variant="outline" 
-              className="w-full" 
-              onClick={() => navigate("/")}
-            >
-              Voltar
             </Button>
           </CardFooter>
         </form>
