@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -10,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import ModeloSelector from "@/components/site-personalize/ModeloSelector";
 import PersonalizeForm from "@/components/site-personalize/PersonalizeForm";
 import { FormValues } from "@/components/site-personalize/PersonalizeBasicForm";
 import { modelosDisponiveis } from "@/components/site-personalize/modelosData";
@@ -27,18 +25,21 @@ export default function PersonalizeSite() {
   const [midiaFiles, setMidiaFiles] = useState<File[]>([]);
   const [midiaPreviews, setMidiaPreviews] = useState<string[]>([]);
   const [modeloSelecionado, setModeloSelecionado] = useState<string | null>(null);
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
 
   const queryParams = new URLSearchParams(location.search);
   const modeloParam = queryParams.get("modelo") || "";
 
-  // Efeito para verificar se há um modelo na URL e mostrar o formulário automaticamente
   useEffect(() => {
     if (modeloParam) {
       setModeloSelecionado(modeloParam);
-      setMostrarFormulario(true);
+    } else {
+      toast({
+        title: "Modelo não especificado",
+        description: "Por favor, acesse esta página através de um link com o modelo especificado.",
+        variant: "destructive",
+      });
     }
-  }, [modeloParam]);
+  }, [modeloParam, toast]);
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -110,21 +111,6 @@ export default function PersonalizeSite() {
     });
   };
 
-  const selecionarModelo = (modeloId: string) => {
-    setModeloSelecionado(modeloId);
-    setMostrarFormulario(true);
-    // Atualizar a URL com o modelo selecionado
-    navigate(`/personalize-site?modelo=${modeloId}`, { replace: true });
-  };
-
-  useEffect(() => {
-    return () => {
-      if (logoPreview) URL.revokeObjectURL(logoPreview);
-      depoimentoPreviews.forEach((preview) => URL.revokeObjectURL(preview));
-      midiaPreviews.forEach((preview) => URL.revokeObjectURL(preview));
-    };
-  }, [logoPreview, depoimentoPreviews, midiaPreviews]);
-
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
 
@@ -179,7 +165,6 @@ export default function PersonalizeSite() {
         midiaUrls.push(fileName);
       }
 
-      // Fix: Map form field names to match database column names (lowercase)
       const { data: insertData, error: insertError } = await supabase
         .from("site_personalizacoes")
         .insert([{
@@ -212,7 +197,6 @@ export default function PersonalizeSite() {
         throw insertError;
       }
 
-      // Criar automaticamente um projeto com status "Recebido"
       const { data: projectData, error: projectError } = await supabase
         .from("projects")
         .insert([{
@@ -226,7 +210,6 @@ export default function PersonalizeSite() {
 
       if (projectError) {
         console.error("Erro ao criar projeto automático:", projectError);
-        // Continuamos mesmo se houver erro na criação do projeto
       } else {
         console.log("Projeto criado automaticamente:", projectData);
       }
@@ -249,24 +232,27 @@ export default function PersonalizeSite() {
     }
   };
 
+  const modeloDetails = modelosDisponiveis.find(m => m.id === modeloSelecionado);
+
   return (
     <div className="container py-6 md:py-10 max-w-4xl mx-auto">
       <Card>
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl md:text-3xl font-bold">Personalize Seu Site</CardTitle>
           <CardDescription>
-            {!mostrarFormulario 
-              ? "Selecione um modelo para começar a personalizar seu site."
-              : "Preencha o formulário abaixo com as informações do seu escritório contábil para personalizar seu site."}
+            {!modeloSelecionado 
+              ? "Por favor, acesse esta página através de um link com o modelo especificado."
+              : `Preencha o formulário abaixo com as informações do seu escritório contábil para personalizar seu site no modelo ${modeloSelecionado}.`}
           </CardDescription>
+          {modeloDetails && (
+            <div className="bg-blue-50 border border-blue-100 rounded-md p-4 mt-2">
+              <h3 className="font-medium text-blue-700">Modelo selecionado: {modeloDetails.name}</h3>
+              <p className="text-sm text-blue-600 mt-1">{modeloDetails.description}</p>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
-          {!mostrarFormulario ? (
-            <ModeloSelector 
-              modelos={modelosDisponiveis} 
-              onSelectModelo={selecionarModelo} 
-            />
-          ) : (
+          {modeloSelecionado ? (
             <PersonalizeForm
               modeloSelecionado={modeloSelecionado}
               logoPreview={logoPreview}
@@ -280,6 +266,15 @@ export default function PersonalizeSite() {
               handleRemoveMidia={handleRemoveMidia}
               onSubmit={onSubmit}
             />
+          ) : (
+            <div className="text-center p-8">
+              <p className="text-muted-foreground">
+                É necessário especificar um modelo através da URL para continuar.
+              </p>
+              <p className="text-sm mt-2 text-muted-foreground">
+                Exemplo: /personalize-site?modelo=Modelo%201
+              </p>
+            </div>
           )}
         </CardContent>
       </Card>

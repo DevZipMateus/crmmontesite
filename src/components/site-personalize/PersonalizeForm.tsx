@@ -64,13 +64,6 @@ const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-4">
-          <div className="bg-blue-50 border border-blue-100 rounded-md p-4 mb-4">
-            <h3 className="font-medium text-blue-700">Modelo selecionado: {modeloSelecionado}</h3>
-            <p className="text-sm text-blue-600 mt-1">
-              Você está personalizando o modelo {modeloSelecionado}. Preencha os dados abaixo.
-            </p>
-          </div>
-          
           <PersonalizeBasicForm 
             form={form} 
             logoPreview={logoPreview}
