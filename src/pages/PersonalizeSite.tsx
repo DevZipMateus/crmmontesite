@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import {
   Card,
@@ -15,10 +15,12 @@ import { modelosDisponiveis } from "@/components/site-personalize/modelosData";
 import { useFileUploadHandlers } from "@/components/site-personalize/FileUploadHandlers";
 import { useFormSubmission } from "@/components/site-personalize/useFormSubmission";
 import ModeloDetails from "@/components/site-personalize/ModeloDetails";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function PersonalizeSite() {
   const { toast } = useToast();
   const location = useLocation();
+  const params = useParams();
   
   // File state management
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -29,10 +31,10 @@ export default function PersonalizeSite() {
   const [midiaPreviews, setMidiaPreviews] = useState<string[]>([]);
   const [midiaCaptions, setMidiaCaptions] = useState<string[]>([]);
 
-  // Get modelo from URL parameter
+  // Get modelo from URL parameter or path parameter
   const queryParams = new URLSearchParams(location.search);
-  const modeloParam = queryParams.get("modelo") || "";
-  const [modeloSelecionado, setModeloSelecionado] = useState<string | null>(modeloParam);
+  const modeloParam = queryParams.get("modelo") || params.modelo || "";
+  const [modeloSelecionado, setModeloSelecionado] = useState<string | null>(modeloParam || "basic"); // Default to "basic" if no model specified
 
   // Initialize file upload handlers
   const fileHandlers = useFileUploadHandlers({
@@ -56,16 +58,14 @@ export default function PersonalizeSite() {
   useEffect(() => {
     if (modeloParam) {
       setModeloSelecionado(modeloParam);
-    } else {
-      toast({
-        title: "Modelo não especificado",
-        description: "Por favor, acesse esta página através de um link com o modelo especificado.",
-        variant: "destructive",
-      });
     }
-  }, [modeloParam, toast]);
+  }, [modeloParam]);
 
   const modeloDetails = modelosDisponiveis.find(m => m.id === modeloSelecionado);
+
+  const handleModeloChange = (value: string) => {
+    setModeloSelecionado(value);
+  };
 
   return (
     <div className="container py-6 md:py-10 max-w-4xl mx-auto">
@@ -73,39 +73,48 @@ export default function PersonalizeSite() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl md:text-3xl font-bold">Personalize Seu Site</CardTitle>
           <CardDescription>
-            {!modeloSelecionado 
-              ? "Por favor, acesse esta página através de um link com o modelo especificado."
-              : `Preencha o formulário abaixo com as informações do seu escritório contábil para personalizar seu site no modelo ${modeloSelecionado}.`}
+            Preencha o formulário abaixo com as informações do seu escritório contábil para personalizar seu site.
           </CardDescription>
-          <ModeloDetails modelo={modeloDetails} />
+          
+          <div className="pt-4">
+            <label htmlFor="modelo-select" className="text-sm font-medium mb-2 block">
+              Selecione um modelo:
+            </label>
+            <Select 
+              value={modeloSelecionado || "basic"} 
+              onValueChange={handleModeloChange}
+            >
+              <SelectTrigger className="w-full md:w-[300px]">
+                <SelectValue placeholder="Selecione um modelo" />
+              </SelectTrigger>
+              <SelectContent>
+                {modelosDisponiveis.map((modelo) => (
+                  <SelectItem key={modelo.id} value={modelo.id}>
+                    {modelo.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {modeloDetails && <ModeloDetails modelo={modeloDetails} />}
         </CardHeader>
         <CardContent>
-          {modeloSelecionado ? (
-            <PersonalizeForm
-              modeloSelecionado={modeloSelecionado}
-              logoPreview={logoPreview}
-              depoimentoPreviews={depoimentoPreviews}
-              midiaPreviews={midiaPreviews}
-              midiaCaptions={midiaCaptions}
-              isSubmitting={isSubmitting}
-              handleLogoUpload={fileHandlers.handleLogoUpload}
-              handleDepoimentoUpload={fileHandlers.handleDepoimentoUpload}
-              handleRemoveDepoimento={fileHandlers.handleRemoveDepoimento}
-              handleMidiaUpload={fileHandlers.handleMidiaUpload}
-              handleRemoveMidia={fileHandlers.handleRemoveMidia}
-              handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
-              onSubmit={onSubmit}
-            />
-          ) : (
-            <div className="text-center p-8">
-              <p className="text-muted-foreground">
-                É necessário especificar um modelo através da URL para continuar.
-              </p>
-              <p className="text-sm mt-2 text-muted-foreground">
-                Exemplo: /personalize-site?modelo=Modelo%201
-              </p>
-            </div>
-          )}
+          <PersonalizeForm
+            modeloSelecionado={modeloSelecionado}
+            logoPreview={logoPreview}
+            depoimentoPreviews={depoimentoPreviews}
+            midiaPreviews={midiaPreviews}
+            midiaCaptions={midiaCaptions}
+            isSubmitting={isSubmitting}
+            handleLogoUpload={fileHandlers.handleLogoUpload}
+            handleDepoimentoUpload={fileHandlers.handleDepoimentoUpload}
+            handleRemoveDepoimento={fileHandlers.handleRemoveDepoimento}
+            handleMidiaUpload={fileHandlers.handleMidiaUpload}
+            handleRemoveMidia={fileHandlers.handleRemoveMidia}
+            handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
+            onSubmit={onSubmit}
+          />
         </CardContent>
       </Card>
     </div>

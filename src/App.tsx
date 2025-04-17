@@ -67,6 +67,11 @@ const App = () => {
                 <PersonalizeSite />
               </AuthGuard>
             } />
+            <Route path="/personalize-site/:modelo" element={
+              <AuthGuard>
+                <PersonalizeSite />
+              </AuthGuard>
+            } />
             <Route path="/confirmacao" element={
               <AuthGuard>
                 <Confirmacao />
