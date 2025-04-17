@@ -10,6 +10,9 @@ interface Project {
   status: string;
   created_at: string;
   responsible_name?: string;
+  domain?: string;
+  client_type?: string;
+  blaster_link?: string;
 }
 
 export function useProjects(statusFilter: string | null, searchQuery: string = "") {
