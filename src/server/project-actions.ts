@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client"; 
 import { toast } from "@/components/ui/use-toast";
 import { ProjectFormValues } from "@/components/projeto/ProjectForm";
@@ -14,6 +13,7 @@ export interface Project {
   domain?: string;
   client_type?: string;
   blaster_link?: string;
+  partner_link?: string; // Adicionado o campo partner_link
 }
 
 // Função para obter um projeto por ID
