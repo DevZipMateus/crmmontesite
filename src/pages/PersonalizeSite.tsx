@@ -117,6 +117,7 @@ export default function PersonalizeSite() {
   const queryParams = new URLSearchParams(location.search);
   const modeloParam = queryParams.get("modelo") || "";
 
+  // Efeito para verificar se há um modelo na URL e mostrar o formulário automaticamente
   useEffect(() => {
     if (modeloParam) {
       setModeloSelecionado(modeloParam);
