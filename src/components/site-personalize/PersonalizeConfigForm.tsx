@@ -18,16 +18,20 @@ interface PersonalizeConfigFormProps {
   form: UseFormReturn<FormValues>;
   modeloSelecionado: string | null;
   midiaPreviews: string[];
+  midiaCaptions: string[];
   handleMidiaUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveMidia: (index: number) => void;
+  handleUpdateMidiaCaption: (index: number, caption: string) => void;
 }
 
 const PersonalizeConfigForm: React.FC<PersonalizeConfigFormProps> = ({
   form,
   modeloSelecionado,
   midiaPreviews,
+  midiaCaptions,
   handleMidiaUpload,
   handleRemoveMidia,
+  handleUpdateMidiaCaption,
 }) => {
   return (
     <>
@@ -40,12 +44,15 @@ const PersonalizeConfigForm: React.FC<PersonalizeConfigFormProps> = ({
         
         <MediaUploader 
           label="Upload de Mídias"
-          description="Adicione imagens, vídeos e GIFs para o seu site. Máximo de 5 arquivos."
+          description="Adicione imagens, vídeos e GIFs para o seu site. Inclua legendas descritivas para cada mídia."
           accept="image/*,video/*,.gif"
           multiple={true}
           previews={midiaPreviews}
+          captions={midiaCaptions}
           onUpload={handleMidiaUpload}
           onRemove={handleRemoveMidia}
+          onUpdateCaption={handleUpdateMidiaCaption}
+          allowCaptions={true}
         />
       </div>
 

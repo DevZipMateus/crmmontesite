@@ -9,10 +9,11 @@ export interface SubmissionProps {
   logoFile: File | null;
   depoimentoFiles: File[];
   midiaFiles: File[];
+  midiaCaptions?: string[];
 }
 
 export const useFormSubmission = (props: SubmissionProps) => {
-  const { logoFile, depoimentoFiles, midiaFiles } = props;
+  const { logoFile, depoimentoFiles, midiaFiles, midiaCaptions = [] } = props;
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,8 +58,13 @@ export const useFormSubmission = (props: SubmissionProps) => {
         depoimentoUrls.push(fileName);
       }
 
-      const midiaUrls: string[] = [];
-      for (const file of midiaFiles) {
+      // Create an array to store media items with captions
+      const midiaItems: { url: string; caption: string }[] = [];
+      
+      for (let i = 0; i < midiaFiles.length; i++) {
+        const file = midiaFiles[i];
+        const caption = i < midiaCaptions.length ? midiaCaptions[i] : "";
+        
         const fileName = `midias/${Date.now()}_${file.name}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("site_personalizacoes")
@@ -68,7 +74,10 @@ export const useFormSubmission = (props: SubmissionProps) => {
           throw new Error(`Erro ao fazer upload de mídia: ${uploadError.message}`);
         }
 
-        midiaUrls.push(fileName);
+        midiaItems.push({
+          url: fileName,
+          caption: caption
+        });
       }
 
       const { data: insertData, error: insertError } = await supabase
@@ -94,7 +103,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
           modelo: formData.modelo,
           logo_url: logoUrl,
           depoimento_urls: depoimentoUrls.length > 0 ? depoimentoUrls : null,
-          midia_urls: midiaUrls.length > 0 ? midiaUrls : null,
+          midia_urls: midiaItems.length > 0 ? midiaItems : null,
           created_at: formData.created_at
         }])
         .select();

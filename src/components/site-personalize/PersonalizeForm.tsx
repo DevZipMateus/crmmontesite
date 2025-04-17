@@ -14,12 +14,14 @@ interface PersonalizeFormProps {
   logoPreview: string | null;
   depoimentoPreviews: string[];
   midiaPreviews: string[];
+  midiaCaptions: string[];
   isSubmitting: boolean;
   handleLogoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleDepoimentoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveDepoimento: (index: number) => void;
   handleMidiaUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveMidia: (index: number) => void;
+  handleUpdateMidiaCaption: (index: number, caption: string) => void;
   onSubmit: (data: FormValues) => Promise<void>;
 }
 
@@ -28,12 +30,14 @@ const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
   logoPreview,
   depoimentoPreviews,
   midiaPreviews,
+  midiaCaptions,
   isSubmitting,
   handleLogoUpload,
   handleDepoimentoUpload,
   handleRemoveDepoimento,
   handleMidiaUpload,
   handleRemoveMidia,
+  handleUpdateMidiaCaption,
   onSubmit,
 }) => {
   const form = useForm<FormValues>({
@@ -81,8 +85,10 @@ const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
             form={form}
             modeloSelecionado={modeloSelecionado}
             midiaPreviews={midiaPreviews}
+            midiaCaptions={midiaCaptions}
             handleMidiaUpload={handleMidiaUpload}
             handleRemoveMidia={handleRemoveMidia}
+            handleUpdateMidiaCaption={handleUpdateMidiaCaption}
           />
         </div>
 

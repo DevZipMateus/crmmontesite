@@ -9,6 +9,13 @@ export interface FileHandlersProps {
   setDepoimentoPreviews: React.Dispatch<React.SetStateAction<string[]>>;
   setMidiaFiles: React.Dispatch<React.SetStateAction<File[]>>;
   setMidiaPreviews: React.Dispatch<React.SetStateAction<string[]>>;
+  setMidiaCaptions: React.Dispatch<React.SetStateAction<string[]>>;
+}
+
+export interface MediaItem {
+  file: File;
+  preview: string;
+  caption: string;
 }
 
 export const useFileUploadHandlers = (props: FileHandlersProps) => {
@@ -19,7 +26,8 @@ export const useFileUploadHandlers = (props: FileHandlersProps) => {
     setDepoimentoFiles,
     setDepoimentoPreviews,
     setMidiaFiles,
-    setMidiaPreviews
+    setMidiaPreviews,
+    setMidiaCaptions
   } = props;
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,6 +78,10 @@ export const useFileUploadHandlers = (props: FileHandlersProps) => {
         return file.type.startsWith('video/') ? URL.createObjectURL(file) : '';
       });
       setMidiaPreviews((prev) => [...prev, ...newPreviews]);
+      
+      // Add empty captions for new files
+      const newCaptions = newFiles.map(() => "");
+      setMidiaCaptions((prev) => [...prev, ...newCaptions]);
     }
   };
 
@@ -87,8 +99,22 @@ export const useFileUploadHandlers = (props: FileHandlersProps) => {
       return newPreviews;
     });
 
+    setMidiaCaptions((prev) => {
+      const newCaptions = [...prev];
+      newCaptions.splice(index, 1);
+      return newCaptions;
+    });
+
     toast({
       description: "Mídia removida com sucesso",
+    });
+  };
+
+  const handleUpdateMidiaCaption = (index: number, caption: string) => {
+    setMidiaCaptions((prev) => {
+      const newCaptions = [...prev];
+      newCaptions[index] = caption;
+      return newCaptions;
     });
   };
 
@@ -97,6 +123,7 @@ export const useFileUploadHandlers = (props: FileHandlersProps) => {
     handleDepoimentoUpload,
     handleRemoveDepoimento,
     handleMidiaUpload,
-    handleRemoveMidia
+    handleRemoveMidia,
+    handleUpdateMidiaCaption
   };
 };

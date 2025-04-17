@@ -1,7 +1,8 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Input } from "@/components/ui/input";
 import { ImageIcon } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface MediaUploaderProps {
   label: string;
@@ -9,8 +10,11 @@ interface MediaUploaderProps {
   accept: string;
   multiple?: boolean;
   previews: string[];
+  captions?: string[];
   onUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onRemove: (index: number) => void;
+  onUpdateCaption?: (index: number, caption: string) => void;
+  allowCaptions?: boolean;
 }
 
 const MediaUploader: React.FC<MediaUploaderProps> = ({ 
@@ -19,8 +23,11 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
   accept, 
   multiple = false, 
   previews = [],
+  captions = [],
   onUpload,
   onRemove,
+  onUpdateCaption,
+  allowCaptions = false,
 }) => {
   return (
     <div className="space-y-4">
@@ -46,48 +53,67 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       </div>
 
       {previews.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2 justify-center">
-          {previews.map((preview, index) => {
-            const isVideo = preview.includes("video");
-            return (
-              <div key={index} className="relative group w-24 h-24 border-2 border-primary/30 rounded-md overflow-hidden">
-                {isVideo ? (
-                  <video
-                    src={preview}
-                    className="w-full h-full object-cover"
-                    controls
-                  />
-                ) : (
-                  <img
-                    src={preview}
-                    alt={`Preview ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                )}
-                <button
-                  type="button"
-                  onClick={() => onRemove(index)}
-                  className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  aria-label="Remover mídia"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M18 6 6 18" />
-                    <path d="m6 6 12 12" />
-                  </svg>
-                </button>
-              </div>
-            );
-          })}
+        <div className="mt-4 space-y-4">
+          <h4 className="text-sm font-medium">Mídias selecionadas ({previews.length})</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {previews.map((preview, index) => {
+              const isVideo = preview.includes("video");
+              return (
+                <div key={index} className="relative group border border-primary/30 rounded-md p-3 bg-white">
+                  <div className="flex flex-col">
+                    <div className="w-full h-32 mb-2 relative">
+                      {isVideo ? (
+                        <video
+                          src={preview}
+                          className="w-full h-full object-cover rounded-md"
+                          controls
+                        />
+                      ) : (
+                        <img
+                          src={preview}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-full object-cover rounded-md"
+                        />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => onRemove(index)}
+                        className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 opacity-80 hover:opacity-100 transition-opacity"
+                        aria-label="Remover mídia"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M18 6 6 18" />
+                          <path d="m6 6 12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    
+                    {allowCaptions && onUpdateCaption && (
+                      <div className="mt-2">
+                        <Textarea
+                          className="w-full text-sm resize-none"
+                          placeholder="Adicione uma legenda para esta mídia..."
+                          rows={2}
+                          value={captions[index] || ""}
+                          onChange={(e) => onUpdateCaption(index, e.target.value)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

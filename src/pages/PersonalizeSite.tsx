@@ -27,6 +27,7 @@ export default function PersonalizeSite() {
   const [depoimentoPreviews, setDepoimentoPreviews] = useState<string[]>([]);
   const [midiaFiles, setMidiaFiles] = useState<File[]>([]);
   const [midiaPreviews, setMidiaPreviews] = useState<string[]>([]);
+  const [midiaCaptions, setMidiaCaptions] = useState<string[]>([]);
 
   // Get modelo from URL parameter
   const queryParams = new URLSearchParams(location.search);
@@ -40,14 +41,16 @@ export default function PersonalizeSite() {
     setDepoimentoFiles,
     setDepoimentoPreviews,
     setMidiaFiles,
-    setMidiaPreviews
+    setMidiaPreviews,
+    setMidiaCaptions
   });
 
   // Initialize form submission handler
   const { onSubmit, isSubmitting } = useFormSubmission({
     logoFile,
     depoimentoFiles,
-    midiaFiles
+    midiaFiles,
+    midiaCaptions
   });
 
   useEffect(() => {
@@ -83,12 +86,14 @@ export default function PersonalizeSite() {
               logoPreview={logoPreview}
               depoimentoPreviews={depoimentoPreviews}
               midiaPreviews={midiaPreviews}
+              midiaCaptions={midiaCaptions}
               isSubmitting={isSubmitting}
               handleLogoUpload={fileHandlers.handleLogoUpload}
               handleDepoimentoUpload={fileHandlers.handleDepoimentoUpload}
               handleRemoveDepoimento={fileHandlers.handleRemoveDepoimento}
               handleMidiaUpload={fileHandlers.handleMidiaUpload}
               handleRemoveMidia={fileHandlers.handleRemoveMidia}
+              handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
               onSubmit={onSubmit}
             />
           ) : (
