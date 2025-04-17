@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -6,7 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { getSupabaseClient } from "@/lib/supabase";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, FileText, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -378,24 +377,31 @@ export default function PersonalizeSite() {
               <div className="space-y-4 pt-4 border-t">
                 <h3 className="text-lg font-medium">Identidade Visual</h3>
                 
-                <div>
-                  <FormLabel>Upload da Logo</FormLabel>
-                  <div className="mt-1 flex items-center gap-4">
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoUpload}
-                      className="flex-1"
-                    />
-                    {logoPreview && (
-                      <div className="w-16 h-16 border rounded-md overflow-hidden">
-                        <img
-                          src={logoPreview}
-                          alt="Preview da logo"
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    )}
+                <div className="space-y-4">
+                  <FormLabel className="flex items-center gap-2">
+                    <Upload className="h-5 w-5 text-primary" /> Upload da Logo
+                  </FormLabel>
+                  <div className="border-2 border-dashed border-primary/30 rounded-lg p-4 text-center">
+                    <div className="flex items-center gap-4">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="flex-1 file:mr-4 file:rounded-full file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-sm file:font-medium hover:file:bg-primary/20"
+                      />
+                      {logoPreview && (
+                        <div className="w-24 h-24 border-2 border-primary/30 rounded-md overflow-hidden">
+                          <img
+                            src={logoPreview}
+                            alt="Preview da logo"
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Faça upload de sua logo. Formatos aceitos: JPG, PNG, SVG
+                    </p>
                   </div>
                 </div>
 
@@ -544,55 +550,64 @@ export default function PersonalizeSite() {
                   )}
                 />
 
-                <div>
-                  <FormLabel>Imagens para Depoimentos (opcional)</FormLabel>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleDepoimentoUpload}
-                    className="mt-1"
-                  />
-                  
-                  {depoimentoPreviews.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {depoimentoPreviews.map((preview, index) => (
-                        <div key={index} className="w-16 h-16 border rounded-md overflow-hidden">
-                          <img
-                            src={preview}
-                            alt={`Depoimento preview ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                <div className="space-y-4">
+                  <FormLabel className="flex items-center gap-2">
+                    <Image className="h-5 w-5 text-primary" /> Imagens para Depoimentos
+                  </FormLabel>
+                  <div className="border-2 border-dashed border-primary/30 rounded-lg p-4 text-center">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleDepoimentoUpload}
+                      className="file:mr-4 file:rounded-full file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-sm file:font-medium hover:file:bg-primary/20"
+                    />
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Adicione imagens relacionadas aos depoimentos. Múltiplas imagens permitidas.
+                    </p>
+                    
+                    {depoimentoPreviews.length > 0 && (
+                      <div className="mt-4 flex flex-wrap gap-2 justify-center">
+                        {depoimentoPreviews.map((preview, index) => (
+                          <div key={index} className="w-24 h-24 border-2 border-primary/30 rounded-md overflow-hidden">
+                            <img
+                              src={preview}
+                              alt={`Depoimento preview ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-4 pt-4 border-t">
                 <h3 className="text-lg font-medium">Mídias do Site</h3>
                 
-                <div>
-                  <FormLabel>Upload de Mídias (Imagens, Vídeos e GIFs)</FormLabel>
-                  <Input
-                    type="file"
-                    accept="image/*,video/*,.gif"
-                    multiple
-                    onChange={handleMidiaUpload}
-                    className="mt-1"
-                  />
-                  <FormDescription>
-                    Faça upload das mídias que deseja incluir no site. Formatos aceitos: imagens (JPG, PNG), vídeos (MP4) e GIFs.
-                  </FormDescription>
-                  
-                  {midiaPreviews.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {midiaPreviews.map((preview, index) => {
-                        const file = midiaFiles[index];
-                        return (
-                          <div key={index} className="relative group">
-                            <div className="w-32 h-32 border rounded-md overflow-hidden">
+                <div className="space-y-4">
+                  <FormLabel className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-primary" /> Upload de Mídias
+                  </FormLabel>
+                  <div className="border-2 border-dashed border-primary/30 rounded-lg p-4 text-center">
+                    <Input
+                      type="file"
+                      accept="image/*,video/*,.gif"
+                      multiple
+                      onChange={handleMidiaUpload}
+                      className="file:mr-4 file:rounded-full file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-sm file:font-medium hover:file:bg-primary/20"
+                    />
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Adicione imagens, vídeos e GIFs para o seu site. Máximo de 5 arquivos.
+                    </p>
+                    
+                    {midiaPreviews.length > 0 && (
+                      <div className="mt-4 flex flex-wrap gap-2 justify-center">
+                        {midiaPreviews.map((preview, index) => {
+                          const file = midiaFiles[index];
+                          return (
+                            <div key={index} className="relative group w-24 h-24 border-2 border-primary/30 rounded-md overflow-hidden">
                               {file.type.startsWith('video/') ? (
                                 <video
                                   src={preview}
@@ -606,33 +621,33 @@ export default function PersonalizeSite() {
                                   className="w-full h-full object-cover"
                                 />
                               )}
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveMidia(index)}
-                              className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                              aria-label="Remover mídia"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveMidia(index)}
+                                className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                aria-label="Remover mídia"
                               >
-                                <path d="M18 6 6 18" />
-                                <path d="m6 6 12 12" />
-                              </svg>
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="M18 6 6 18" />
+                                  <path d="m6 6 12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-4 pt-4 border-t">
