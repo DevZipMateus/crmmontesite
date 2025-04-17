@@ -58,8 +58,8 @@ export const useFormSubmission = (props: SubmissionProps) => {
         depoimentoUrls.push(fileName);
       }
 
-      // Create an array to store media items with captions
-      const midiaItems: { url: string; caption: string }[] = [];
+      // Process media items with captions
+      const midiaItems = [];
       
       for (let i = 0; i < midiaFiles.length; i++) {
         const file = midiaFiles[i];
@@ -80,9 +80,10 @@ export const useFormSubmission = (props: SubmissionProps) => {
         });
       }
 
+      // Fix: Insert a single object, not an array, and ensure midia_urls is in the proper format
       const { data: insertData, error: insertError } = await supabase
         .from("site_personalizacoes")
-        .insert([{
+        .insert({
           officenome: formData.officeNome,
           responsavelnome: formData.responsavelNome,
           telefone: formData.telefone,
@@ -105,7 +106,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
           depoimento_urls: depoimentoUrls.length > 0 ? depoimentoUrls : null,
           midia_urls: midiaItems.length > 0 ? midiaItems : null,
           created_at: formData.created_at
-        }])
+        })
         .select();
 
       if (insertError) {
@@ -114,13 +115,13 @@ export const useFormSubmission = (props: SubmissionProps) => {
 
       const { data: projectData, error: projectError } = await supabase
         .from("projects")
-        .insert([{
+        .insert({
           client_name: formData.officeNome,
           responsible_name: formData.responsavelNome,
           template: formData.modelo,
           status: "Recebido",
           client_type: "cliente_final"
-        }])
+        })
         .select();
 
       if (projectError) {
