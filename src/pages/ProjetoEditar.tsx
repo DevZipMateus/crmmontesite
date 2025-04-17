@@ -1,12 +1,13 @@
 
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Loader2, Save } from "lucide-react";
-import { useEffect } from "react";
+import { Loader2, Save, Edit, Check } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { projectSchema } from "@/lib/validation";
 import { ProjectInfoForm } from "@/components/projeto/ProjectInfoForm";
+import { ManualDataFields } from "@/components/projeto/ManualDataFields";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateProject, getProjectById } from "@/server/project-actions";
 import { toast } from "@/components/ui/use-toast";
@@ -19,6 +20,7 @@ export default function ProjetoEditar() {
   const navigate = useNavigate();
   const { id } = useParams();
   const queryClient = useQueryClient();
+  const [showManualInput, setShowManualInput] = useState(false);
 
   const form = useForm<z.infer<typeof projectSchema>>({
     resolver: zodResolver(projectSchema),
@@ -124,6 +126,28 @@ export default function ProjetoEditar() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <ProjectInfoForm form={form} />
+              
+              <div className="flex justify-between items-center my-6">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowManualInput(!showManualInput)}
+                  type="button"
+                  className="flex items-center gap-2 shadow-sm"
+                >
+                  {showManualInput ? (
+                    <>
+                      <Check className="h-4 w-4" /> Ocultar campos adicionais
+                    </>
+                  ) : (
+                    <>
+                      <Edit className="h-4 w-4" /> Mostrar campos adicionais
+                    </>
+                  )}
+                </Button>
+              </div>
+              
+              {showManualInput && <ManualDataFields />}
               
               <div className="flex justify-end">
                 <Button 
