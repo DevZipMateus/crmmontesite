@@ -42,7 +42,21 @@ export default function ProjetoEditar() {
 
   useEffect(() => {
     if (project) {
-      form.reset(project);
+      // Garantir que todos os campos estejam presentes, mesmo que sejam undefined
+      const formData = {
+        client_name: project.client_name || "",
+        responsible_name: project.responsible_name || "",
+        template: project.template || "",
+        status: project.status || "",
+        client_type: project.client_type || "",
+        domain: project.domain || "",
+        blaster_link: project.blaster_link || "",
+        partner_link: project.partner_link || "",
+      };
+      form.reset(formData);
+      
+      // Log para debug
+      console.log("Dados do projeto carregados:", formData);
     }
   }, [project, form]);
 
@@ -110,6 +124,17 @@ export default function ProjetoEditar() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <ProjectInfoForm form={form} />
+              
+              <div className="flex justify-end">
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="flex items-center gap-2"
+                >
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  Salvar Alterações
+                </Button>
+              </div>
             </form>
           </Form>
         </CardContent>
