@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -15,7 +14,6 @@ import { useFileUploadHandlers } from "@/components/site-personalize/FileUploadH
 import { useFormSubmission } from "@/components/site-personalize/useFormSubmission";
 import ModeloDetails from "@/components/site-personalize/ModeloDetails";
 import { modelosDisponiveis } from "@/components/site-personalize/modelosData";
-import { Logo } from "@/components/ui/logo";
 
 export default function PublicPersonalizeForm() {
   const { toast } = useToast();
@@ -96,7 +94,6 @@ export default function PublicPersonalizeForm() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container py-6 md:py-10 max-w-4xl mx-auto">
         <div className="mb-8 text-center">
-          <Logo size="lg" />
           <h1 className="text-3xl font-bold mt-4">Personalização de Site</h1>
           <p className="text-gray-500 mt-2">Preencha os detalhes abaixo para personalizar seu site</p>
         </div>
