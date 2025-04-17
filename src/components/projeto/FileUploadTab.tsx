@@ -38,6 +38,9 @@ export const FileUploadTab: React.FC<FileUploadTabProps> = ({
               disabled={isReading}
               className="text-sm file:mr-4 file:rounded-full file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-sm file:font-medium hover:file:bg-primary/20"
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              Clique para selecionar um arquivo ou arraste e solte aqui
+            </p>
           </div>
           {isReading && <Loader2 className="h-6 w-6 animate-spin text-primary" />}
         </div>
@@ -51,4 +54,3 @@ export const FileUploadTab: React.FC<FileUploadTabProps> = ({
     </div>
   );
 };
-
