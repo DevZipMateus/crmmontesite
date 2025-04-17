@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import {
   Card,
@@ -10,16 +10,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import PersonalizeForm from "@/components/site-personalize/PersonalizeForm";
-import { FormValues } from "@/components/site-personalize/PersonalizeBasicForm";
-import { modelosDisponiveis } from "@/components/site-personalize/modelosData";
 import { useFileUploadHandlers } from "@/components/site-personalize/FileUploadHandlers";
 import { useFormSubmission } from "@/components/site-personalize/useFormSubmission";
 import ModeloDetails from "@/components/site-personalize/ModeloDetails";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { modelosDisponiveis } from "@/components/site-personalize/modelosData";
 
 export default function PersonalizeSite() {
   const { toast } = useToast();
-  const location = useLocation();
+  const navigate = useNavigate();
   const params = useParams();
   
   // File state management
@@ -31,10 +30,9 @@ export default function PersonalizeSite() {
   const [midiaPreviews, setMidiaPreviews] = useState<string[]>([]);
   const [midiaCaptions, setMidiaCaptions] = useState<string[]>([]);
 
-  // Get modelo from URL parameter or path parameter
-  const queryParams = new URLSearchParams(location.search);
-  const modeloParam = queryParams.get("modelo") || params.modelo || "";
-  const [modeloSelecionado, setModeloSelecionado] = useState<string | null>(modeloParam || "basic"); // Default to "basic" if no model specified
+  // Get modelo from URL parameter
+  const modeloParam = params.modelo || "";
+  const [modeloSelecionado, setModeloSelecionado] = useState<string | null>(modeloParam || "Modelo 1"); // Default to "Modelo 1" if no model specified
 
   // Initialize file upload handlers
   const fileHandlers = useFileUploadHandlers({
@@ -55,16 +53,29 @@ export default function PersonalizeSite() {
     midiaCaptions
   });
 
+  // Update modelo when URL parameter changes
   useEffect(() => {
     if (modeloParam) {
-      setModeloSelecionado(modeloParam);
+      const isValidModelo = modelosDisponiveis.some(m => m.id === modeloParam);
+      if (isValidModelo) {
+        setModeloSelecionado(modeloParam);
+      } else {
+        setModeloSelecionado("Modelo 1"); // Default if invalid model
+        toast({
+          title: "Modelo não encontrado",
+          description: "O modelo especificado não existe. Utilizando o modelo padrão.",
+          variant: "destructive",
+        });
+      }
     }
-  }, [modeloParam]);
+  }, [modeloParam, toast]);
 
   const modeloDetails = modelosDisponiveis.find(m => m.id === modeloSelecionado);
 
   const handleModeloChange = (value: string) => {
     setModeloSelecionado(value);
+    // Navigate to the new URL without reloading the page
+    navigate(`/personalize-site/${value}`, { replace: true });
   };
 
   return (
@@ -81,7 +92,7 @@ export default function PersonalizeSite() {
               Selecione um modelo:
             </label>
             <Select 
-              value={modeloSelecionado || "basic"} 
+              value={modeloSelecionado || "Modelo 1"} 
               onValueChange={handleModeloChange}
             >
               <SelectTrigger className="w-full md:w-[300px]">

@@ -62,6 +62,7 @@ const App = () => {
                 <ProjetoEditar />
               </AuthGuard>
             } />
+            {/* Personalize site routes - default and with model parameter */}
             <Route path="/personalize-site" element={
               <AuthGuard>
                 <PersonalizeSite />
