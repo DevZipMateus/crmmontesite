@@ -17,6 +17,7 @@ import SiteDetalhe from "./pages/SiteDetalhe";
 import ProducaoSites from "./pages/ProducaoSites";
 import Login from "./pages/Login";
 import AuthGuard from "./components/auth/AuthGuard";
+import PublicPersonalizeForm from "./pages/PublicPersonalizeForm";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,9 @@ const App = () => {
             
             {/* Página pública de login */}
             <Route path="/login" element={<Login />} />
+            
+            {/* Página de formulário público para clientes */}
+            <Route path="/formulario/:modelo" element={<PublicPersonalizeForm />} />
             
             {/* Página inicial - acessível apenas após login */}
             <Route path="/home" element={
