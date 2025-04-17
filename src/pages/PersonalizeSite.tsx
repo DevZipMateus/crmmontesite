@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -24,10 +25,11 @@ export default function PersonalizeSite() {
   const [depoimentoPreviews, setDepoimentoPreviews] = useState<string[]>([]);
   const [midiaFiles, setMidiaFiles] = useState<File[]>([]);
   const [midiaPreviews, setMidiaPreviews] = useState<string[]>([]);
-  const [modeloSelecionado, setModeloSelecionado] = useState<string | null>(null);
 
+  // Get modelo from URL parameter
   const queryParams = new URLSearchParams(location.search);
   const modeloParam = queryParams.get("modelo") || "";
+  const [modeloSelecionado, setModeloSelecionado] = useState<string | null>(modeloParam);
 
   useEffect(() => {
     if (modeloParam) {
