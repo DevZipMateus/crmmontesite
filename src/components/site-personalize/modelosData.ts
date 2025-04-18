@@ -10,38 +10,38 @@ export interface ModeloItem {
 export const modelosDisponiveis: ModeloItem[] = [
   {
     id: "modelo1",
-    name: "Básico",
-    description: "Design simples e elegante ideal para pequenos escritórios",
+    name: "Modelo 1",
+    description: "Um site moderno e responsivo, ideal para quem busca presença online com estilo e simplicidade",
     imageUrl: "/placeholder.svg"
   },
   {
     id: "modelo2",
-    name: "Profissional",
-    description: "Layout moderno com recursos avançados",
+    name: "Modelo 2",
+    description: "Design clean e objetivo, feito para apresentar suas informações de forma clara e profissional",
     imageUrl: "/placeholder.svg"
   },
   {
     id: "modelo3",
-    name: "Premium",
-    description: "Design exclusivo com animações e recursos premium",
+    name: "Modelo 3",
+    description: "Layout versátil que se adapta a diferentes tipos de negócio ou projeto pessoal.",
     imageUrl: "/placeholder.svg"
   },
   {
     id: "modelo4",
-    name: "Corporativo",
-    description: "Ideal para escritórios de médio e grande porte",
+    name: "Modelo 4",
+    description: "Site focado em conversão e destaque visual, perfeito para quem quer impactar logo de cara.",
     imageUrl: "/placeholder.svg"
   },
   {
     id: "modelo5",
-    name: "Consultoria",
-    description: "Focado em serviços de consultoria empresarial",
+    name: "Modelo 5",
+    description: "Um modelo funcional, rápido e leve, com tudo o que você precisa para começar bem na internet.",
     imageUrl: "/placeholder.svg"
   },
   {
     id: "modelo6",
-    name: "Especialista",
-    description: "Para escritórios com foco em nichos específicos",
+    name: "Modelo 6",
+    description: "Design equilibrado entre beleza e usabilidade, pronto para ser personalizado ao seu estilo.",
     imageUrl: "/placeholder.svg"
   },
 ];
