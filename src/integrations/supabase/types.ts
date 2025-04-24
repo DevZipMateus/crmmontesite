@@ -9,6 +9,53 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      project_customizations: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          description: string
+          id: string
+          notes: string | null
+          priority: Database["public"]["Enums"]["customization_priority"]
+          project_id: string
+          requested_at: string
+          status: Database["public"]["Enums"]["customization_status"]
+          updated_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["customization_priority"]
+          project_id: string
+          requested_at?: string
+          status?: Database["public"]["Enums"]["customization_status"]
+          updated_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["customization_priority"]
+          project_id?: string
+          requested_at?: string
+          status?: Database["public"]["Enums"]["customization_status"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_customizations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           blaster_link: string | null
@@ -143,7 +190,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      customization_priority: "Baixa" | "Média" | "Alta" | "Urgente"
+      customization_status:
+        | "Solicitado"
+        | "Em andamento"
+        | "Concluído"
+        | "Cancelado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -258,6 +310,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      customization_priority: ["Baixa", "Média", "Alta", "Urgente"],
+      customization_status: [
+        "Solicitado",
+        "Em andamento",
+        "Concluído",
+        "Cancelado",
+      ],
+    },
   },
 } as const
