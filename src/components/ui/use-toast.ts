@@ -1,5 +1,5 @@
 
-// Forward exports from the hooks directory
-import { useToast, toast } from "@/hooks/use-toast";
+// Re-export types and functions from the hooks directory
+import { useToast, toast, type Toast, type ToastProps } from "@/hooks/use-toast";
 
-export { useToast, toast };
+export { useToast, toast, type Toast, type ToastProps };
