@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { ProjectCustomization } from "@/types/customization";
 import {
   Table,

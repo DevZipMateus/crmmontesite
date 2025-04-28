@@ -1,4 +1,3 @@
-
 import { useNavigate, useParams } from "react-router-dom";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,8 @@ import { getProjectById } from "@/server/project-actions";
 import { CustomizationList } from "@/components/projeto/CustomizationList";
 import { CustomizationForm } from "@/components/projeto/CustomizationForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CustomizationTab } from "@/components/projeto/CustomizationTab";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -133,6 +134,26 @@ export default function ProjetoDetalhe() {
           </CardContent>
         </Card>
       </div>
+
+      <Tabs>
+        <TabsList className="grid grid-cols-3 md:grid-cols-5 mb-4">
+          <TabsTrigger value="info">Informações</TabsTrigger>
+          <TabsTrigger value="domain">Domínio</TabsTrigger>
+          <TabsTrigger value="customization">Personalizações</TabsTrigger>
+          <TabsTrigger value="upload">Upload</TabsTrigger>
+          <TabsTrigger value="gdocs">Google Docs</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="customization" className="space-y-4">
+          {project ? (
+            <CustomizationTab projectId={project.id} projectStatus={project.status || ''} />
+          ) : (
+            <div className="flex items-center justify-center h-64">
+              <p className="text-muted-foreground">Carregando...</p>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </PageLayout>
   );
 }
