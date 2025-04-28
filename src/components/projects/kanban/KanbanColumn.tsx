@@ -63,12 +63,14 @@ export default function KanbanColumn({
       onDragOver={(e) => onDragOver(e, statusType.value)}
       onDrop={(e) => onDrop(e, statusType.value)}
       className="flex flex-col h-full"
+      role="region"
+      aria-label={`Coluna ${statusType.value}`}
     >
       <div className="mb-3">
         <Card className={`p-2 ${statusType.color.replace('bg-', 'bg-opacity-10 border-l-4 border-')} shadow-sm`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className={`rounded-full p-1 ${statusType.color} text-white`}>
+              <div className={`rounded-full p-1 ${statusType.color} text-white`} aria-hidden="true">
                 <StatusIcon className="h-4 w-4" />
               </div>
               <span className="font-medium">{statusType.value}</span>
@@ -82,7 +84,7 @@ export default function KanbanColumn({
       
       {filteredProjects.length > 0 ? (
         <ScrollArea className="flex-grow pr-3">
-          <div className="flex flex-col space-y-3">
+          <div className="flex flex-col space-y-3" role="list" aria-label={`Projetos com status ${statusType.value}`}>
             {filteredProjects.map((project) => (
               <ProjectCard
                 key={project.id}
@@ -98,7 +100,11 @@ export default function KanbanColumn({
           </div>
         </ScrollArea>
       ) : (
-        <div className="flex-grow flex items-center justify-center border border-dashed rounded-md bg-gray-50 p-4">
+        <div 
+          className="flex-grow flex items-center justify-center border border-dashed rounded-md bg-gray-50 p-4"
+          role="region"
+          aria-label={`Nenhum projeto com status ${statusType.value}`}
+        >
           <p className="text-gray-400 text-sm">Sem projetos</p>
         </div>
       )}

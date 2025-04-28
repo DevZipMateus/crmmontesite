@@ -15,7 +15,7 @@ import { ArrowUpRight, Clock, Database, Users } from "lucide-react";
 const Index: React.FC = () => {
   const { projects, loading } = useProjects();
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { theme } = useTheme();
   
   // Dados para os gráficos
   const chartData = [

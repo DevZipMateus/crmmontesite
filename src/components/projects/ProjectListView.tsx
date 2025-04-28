@@ -1,7 +1,8 @@
 
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import StatusFilter from "./list/StatusFilter";
 import ProjectTable from "./list/ProjectTable";
+import AdvancedFilters from "./list/AdvancedFilters";
 
 interface Project {
   id: string;
@@ -10,6 +11,7 @@ interface Project {
   status: string;
   created_at: string;
   responsible_name?: string;
+  domain?: string;
 }
 
 interface ProjectListViewProps {
@@ -27,11 +29,35 @@ export default function ProjectListView({
   setStatusFilter,
   onProjectDeleted,
 }: ProjectListViewProps) {
+  // Estado para os novos filtros
+  const [responsibleFilter, setResponsibleFilter] = useState("");
+  const [domainFilter, setDomainFilter] = useState("");
+  const [dateFromFilter, setDateFromFilter] = useState<Date | null>(null);
+  const [dateToFilter, setDateToFilter] = useState<Date | null>(null);
+
+  // Função para resetar todos os filtros
+  const resetAllFilters = () => {
+    setStatusFilter(null);
+    setResponsibleFilter("");
+    setDomainFilter("");
+    setDateFromFilter(null);
+    setDateToFilter(null);
+  };
+
   return (
     <>
-      <StatusFilter 
-        statusFilter={statusFilter} 
-        setStatusFilter={setStatusFilter} 
+      <AdvancedFilters
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        responsibleFilter={responsibleFilter}
+        setResponsibleFilter={setResponsibleFilter}
+        domainFilter={domainFilter}
+        setDomainFilter={setDomainFilter}
+        dateFromFilter={dateFromFilter}
+        setDateFromFilter={setDateFromFilter}
+        dateToFilter={dateToFilter}
+        setDateToFilter={setDateToFilter}
+        onResetFilters={resetAllFilters}
       />
       
       <Card>

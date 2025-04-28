@@ -21,6 +21,8 @@ export const StatusButton = ({
                     status.value === "Aguardando DNS" ? Clock :
                     CheckCircle2;
 
+  const displayText = status.value.length > 10 ? `${status.value.substring(0, 10)}...` : status.value;
+
   return (
     <Button 
       variant="ghost" 
@@ -28,9 +30,11 @@ export const StatusButton = ({
       className="text-xs h-7"
       onClick={onStatusChange}
       disabled={updatingStatus}
+      aria-label={`Mudar status para ${status.value}`}
+      title={status.value}
     >
-      <StatusIcon className="h-3 w-3 mr-1" />
-      {status.value.length > 10 ? `${status.value.substring(0, 10)}...` : status.value}
+      <StatusIcon className="h-3 w-3 mr-1" aria-hidden="true" />
+      {displayText}
     </Button>
   );
 };
