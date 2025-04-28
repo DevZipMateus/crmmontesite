@@ -13,6 +13,7 @@ interface Project {
   domain?: string;
   client_type?: string;
   blaster_link?: string;
+  hasPendingCustomizations?: boolean;
 }
 
 export function useProjects(statusFilter: string | null, searchQuery: string = "") {
