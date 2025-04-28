@@ -16,6 +16,14 @@ export type ToastProps = {
   variant?: "default" | "destructive"
 }
 
+// This is the type that external components will use when calling toast()
+export type Toast = {
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: ToastActionElement
+  variant?: "default" | "destructive"
+}
+
 type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
@@ -143,9 +151,7 @@ function dispatch(action: Action) {
   })
 }
 
-type Toast = Omit<ToasterToast, "id">
-
-function toast({ ...props }: Toast) {
+function toast(props: Toast) {
   const id = genId()
 
   const update = (props: ToasterToast) =>
@@ -195,4 +201,3 @@ export function useToast() {
 }
 
 export { toast }
-export type { Toast }

@@ -26,7 +26,7 @@ interface ProjectFilters {
   searchQuery?: string;
 }
 
-export function useProjects(filters: ProjectFilters | string | null = {}, searchQuery: string = "") {
+export function useProjects(filters: ProjectFilters | string | null = null, searchQuery: string = "") {
   // Para compatibilidade com versões anteriores
   if (typeof filters === 'string') {
     filters = { statusFilter: filters };
@@ -105,7 +105,7 @@ export function useProjects(filters: ProjectFilters | string | null = {}, search
           toast({
             title: "Erro ao buscar projetos",
             description: "Não foi possível carregar a lista de projetos.",
-            variant: "destructive",
+            variant: "destructive"
           });
         }
       }
