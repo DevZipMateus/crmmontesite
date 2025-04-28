@@ -98,11 +98,11 @@
 
 @layer components {
   .kanban-column {
-    @apply bg-white rounded-lg shadow-subtle border border-border/40 p-4 min-h-[600px] h-full;
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-subtle border border-border/40 p-4 min-h-[600px] h-full;
   }
 
   .kanban-card {
-    @apply bg-white rounded-xl shadow-subtle border border-border/40 mb-3 p-4 cursor-move hover:shadow-apple transition-shadow;
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-subtle border border-border/40 mb-3 p-4 cursor-move hover:shadow-apple transition-shadow;
   }
 
   .kanban-column-header {
@@ -110,7 +110,7 @@
   }
 
   .form-card {
-    @apply bg-white rounded-xl shadow-subtle border border-border/40 p-6;
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-subtle border border-border/40 p-6;
   }
 
   .form-section {
@@ -118,10 +118,25 @@
   }
 
   .form-section-title {
-    @apply text-lg font-medium text-gray-800 mb-4;
+    @apply text-lg font-medium text-gray-800 dark:text-gray-200 mb-4;
   }
 
   .apple-gradient {
-    @apply bg-gradient-to-b from-white to-secondary/50;
+    @apply bg-gradient-to-b from-white dark:from-gray-800 to-secondary/50 dark:to-secondary/20;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
