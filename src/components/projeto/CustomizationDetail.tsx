@@ -10,12 +10,26 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ProjectCustomization } from "@/types/customization";
 import { CustomizationStatusUpdate } from "./CustomizationStatusUpdate";
+import { Trash } from "lucide-react";
+import { deleteCustomization } from "@/services/customizationService";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface CustomizationDetailProps {
   customization: ProjectCustomization;
   onStatusUpdate?: () => void;
+  onDelete?: () => void;
 }
 
 const statusColors = {
@@ -35,8 +49,11 @@ const priorityColors = {
 export function CustomizationDetail({
   customization,
   onStatusUpdate,
+  onDelete,
 }: CustomizationDetailProps) {
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const toggleDescription = () => {
     setShowFullDescription(!showFullDescription);
@@ -47,6 +64,20 @@ export function CustomizationDetail({
     : customization.description.length > 150
     ? `${customization.description.slice(0, 150)}...`
     : customization.description;
+
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+      const result = await deleteCustomization(customization.id);
+      
+      if (result.success && onDelete) {
+        onDelete();
+      }
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
 
   return (
     <Card className="mb-4">
@@ -102,14 +133,49 @@ export function CustomizationDetail({
         </div>
       </CardContent>
       <CardFooter className="pt-2 flex justify-between">
-        <p className="text-xs text-gray-500">
-          ID: {customization.id.substring(0, 8)}
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-xs text-gray-500">
+            ID: {customization.id.substring(0, 8)}
+          </p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-red-500 hover:bg-red-50 border-red-200"
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            <Trash className="h-4 w-4 mr-1" />
+            Excluir
+          </Button>
+        </div>
         <CustomizationStatusUpdate
           customization={customization}
           onSuccess={onStatusUpdate}
         />
       </CardFooter>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir personalização</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta personalização? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Excluindo..." : "Excluir personalização"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

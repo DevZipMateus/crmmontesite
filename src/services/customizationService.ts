@@ -122,3 +122,40 @@ export async function updateCustomizationStatus(
     return { success: false };
   }
 }
+
+// Function to delete a customization
+export async function deleteCustomization(customizationId: string): Promise<{ success: boolean }> {
+  try {
+    console.log("Deleting customization:", customizationId);
+    const { error } = await supabase
+      .from("project_customizations")
+      .delete()
+      .eq("id", customizationId);
+
+    if (error) {
+      console.error("Error deleting customization:", error);
+      toast({
+        title: "Erro ao excluir personalização",
+        description: error.message,
+        variant: "destructive",
+      });
+      return { success: false };
+    }
+
+    console.log("Deleted customization successfully");
+    toast({
+      title: "Personalização excluída",
+      description: "A personalização foi excluída com sucesso",
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting customization:", error);
+    toast({
+      title: "Erro ao excluir personalização", 
+      description: "Ocorreu um erro ao excluir a personalização",
+      variant: "destructive",
+    });
+    return { success: false };
+  }
+}

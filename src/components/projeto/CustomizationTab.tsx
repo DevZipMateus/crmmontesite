@@ -49,6 +49,10 @@ export function CustomizationTab({ projectId, projectStatus }: CustomizationTabP
     loadCustomizations();
   };
 
+  const handleDelete = () => {
+    loadCustomizations();
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -93,6 +97,7 @@ export function CustomizationTab({ projectId, projectStatus }: CustomizationTabP
                   key={customization.id}
                   customization={customization}
                   onStatusUpdate={handleStatusUpdate}
+                  onDelete={handleDelete}
                 />
               ))}
             </div>
