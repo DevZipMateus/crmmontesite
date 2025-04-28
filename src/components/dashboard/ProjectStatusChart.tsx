@@ -37,7 +37,7 @@ export function ProjectStatusChart({
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="pb-4">
-        <div className="h-[240px] w-full">
+        <div className="h-[200px] w-full">
           {type === "bar" ? (
             <ChartContainer
               config={{
@@ -45,11 +45,11 @@ export function ProjectStatusChart({
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data}>
-                  <XAxis dataKey="name" />
-                  <YAxis />
+                <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 20 }}>
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 10 }} />
                   <Tooltip content={<ChartTooltipContent />} />
-                  <Legend />
+                  <Legend wrapperStyle={{ fontSize: '10px', marginTop: '10px' }} />
                   <Bar 
                     dataKey="value" 
                     name="Quantidade" 
@@ -66,24 +66,24 @@ export function ProjectStatusChart({
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
+                <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                   <Pie
                     data={data}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    outerRadius={80}
+                    outerRadius={60}
                     fill="#8884d8"
                     dataKey="value"
                     nameKey="name"
-                    label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={({name, percent}) => percent > 0 ? `${name} ${(percent * 100).toFixed(0)}%` : ''}
                   >
                     {data.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
                   <Tooltip content={<ChartTooltipContent />} />
-                  <Legend />
+                  <Legend wrapperStyle={{ fontSize: '10px', marginTop: '10px' }} />
                 </PieChart>
               </ResponsiveContainer>
             </ChartContainer>

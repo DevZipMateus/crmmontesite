@@ -21,13 +21,13 @@ const Index: React.FC = () => {
   const { toast } = useToast();
   
   // Dados para os gráficos
-  const chartData = [
+  const [chartData, setChartData] = useState([
     { name: "Site Pronto", value: 0, color: "#22c55e" },
-    { name: "Criando Site", value: 0, color: "#3b82f6" },
+    { name: "Criando Site", value: 4, color: "#3b82f6" },
     { name: "Recebido", value: 0, color: "#8b5cf6" },
     { name: "Config. Domínio", value: 0, color: "#f59e0b" },
     { name: "Aguardando DNS", value: 0, color: "#f97316" }
-  ];
+  ]);
   
   // Notificações do sistema
   const [notifications, setNotifications] = useState([
@@ -96,13 +96,12 @@ const Index: React.FC = () => {
         }
       });
       
-      const updatedChartData = chartData.map(item => ({
-        ...item,
-        value: statusCount[item.name] || 0
-      }));
-      
-      // Aqui não atualizamos diretamente chartData porque é uma constante
-      // Mas na aplicação real, você poderia usar um estado para atualizar o gráfico
+      setChartData(prevChartData => 
+        prevChartData.map(item => ({
+          ...item,
+          value: statusCount[item.name] || 0
+        }))
+      );
     }
   }, [projects]);
   
@@ -153,7 +152,7 @@ const Index: React.FC = () => {
           />
         </div>
         
-        {/* Charts and Recent Projects */}
+        {/* Charts Section - Adjusted height and spacing */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
           <div className="lg:col-span-2">
             <ProjectStatusChart 
@@ -171,7 +170,8 @@ const Index: React.FC = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
+        {/* Cards Section - Increased vertical spacing */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-12">
           <NotificationsCard 
             notifications={notifications}
             onMarkAsRead={markNotificationAsRead}
@@ -192,6 +192,6 @@ const Index: React.FC = () => {
       <DashboardFooter />
     </div>
   );
-};
+}
 
 export default Index;

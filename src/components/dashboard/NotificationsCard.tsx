@@ -24,29 +24,31 @@ export function NotificationsCard({
   onMarkAsRead,
   onDismiss
 }: NotificationsCardProps) {
+  const unreadCount = notifications.filter(n => !n.read).length;
+  
   return (
     <Card className="shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg">Notificações</CardTitle>
         <div className="relative">
           <Bell className="h-5 w-5 text-muted-foreground" />
-          {notifications.filter(n => !n.read).length > 0 && (
+          {unreadCount > 0 && (
             <Badge 
               variant="destructive" 
               className="absolute -top-2 -right-2 h-4 w-4 p-0 flex items-center justify-center text-[10px] rounded-full"
             >
-              {notifications.filter(n => !n.read).length}
+              {unreadCount}
             </Badge>
           )}
         </div>
       </CardHeader>
-      <CardContent className="max-h-80 overflow-y-auto">
+      <CardContent className="max-h-[250px] overflow-y-auto px-4 py-2">
         {notifications.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">
             Nenhuma notificação no momento
           </p>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {notifications.map((notification) => (
               <div 
                 key={notification.id}
