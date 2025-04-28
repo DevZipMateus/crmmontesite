@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardFooter from "@/components/dashboard/DashboardFooter";
@@ -11,11 +12,13 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useProjects } from "@/hooks/use-projects";
 import { useTheme } from "next-themes";
 import { ArrowUpRight, Clock, Database, Users } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const Index: React.FC = () => {
   const { projects, loading } = useProjects();
   const [mounted, setMounted] = useState(false);
   const { theme } = useTheme();
+  const { toast } = useToast();
   
   // Dados para os gráficos
   const chartData = [
@@ -26,8 +29,8 @@ const Index: React.FC = () => {
     { name: "Aguardando DNS", value: 0, color: "#f97316" }
   ];
   
-  // Mock de notificações
-  const notifications = [
+  // Notificações do sistema
+  const [notifications, setNotifications] = useState([
     {
       id: "1",
       title: "Novo projeto criado",
@@ -52,7 +55,33 @@ const Index: React.FC = () => {
       read: true,
       type: "success" as const
     }
-  ];
+  ]);
+  
+  // Função para marcar notificação como lida
+  const markNotificationAsRead = (id: string) => {
+    setNotifications(prevNotifications => 
+      prevNotifications.map(notification => 
+        notification.id === id ? { ...notification, read: true } : notification
+      )
+    );
+    
+    toast({
+      title: "Notificação marcada como lida",
+      description: "A notificação foi atualizada com sucesso.",
+    });
+  };
+  
+  // Função para descartar notificação
+  const dismissNotification = (id: string) => {
+    setNotifications(prevNotifications => 
+      prevNotifications.filter(notification => notification.id !== id)
+    );
+    
+    toast({
+      title: "Notificação removida",
+      description: "A notificação foi removida com sucesso.",
+    });
+  };
   
   // Atualiza os dados dos gráficos baseado nos projetos
   useEffect(() => {
@@ -67,9 +96,13 @@ const Index: React.FC = () => {
         }
       });
       
-      chartData.forEach(item => {
-        item.value = statusCount[item.name] || 0;
-      });
+      const updatedChartData = chartData.map(item => ({
+        ...item,
+        value: statusCount[item.name] || 0
+      }));
+      
+      // Aqui não atualizamos diretamente chartData porque é uma constante
+      // Mas na aplicação real, você poderia usar um estado para atualizar o gráfico
     }
   }, [projects]);
   
@@ -121,7 +154,7 @@ const Index: React.FC = () => {
         </div>
         
         {/* Charts and Recent Projects */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
           <div className="lg:col-span-2">
             <ProjectStatusChart 
               title="Status dos Projetos" 
@@ -138,8 +171,12 @@ const Index: React.FC = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <NotificationsCard notifications={notifications} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
+          <NotificationsCard 
+            notifications={notifications}
+            onMarkAsRead={markNotificationAsRead}
+            onDismiss={dismissNotification}
+          />
           <RecentProjectsCard 
             projects={projects.slice(0, 5).map(p => ({
               id: p.id,

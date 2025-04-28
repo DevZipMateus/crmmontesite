@@ -32,12 +32,12 @@ export function ProjectStatusChart({
   const COLORS = data.map(item => item.color);
   
   return (
-    <Card className="w-full shadow-sm">
-      <CardHeader>
+    <Card className="w-full shadow-sm h-full">
+      <CardHeader className="pb-2">
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="pb-4">
-        <div className="h-[300px] w-full">
+        <div className="h-[240px] w-full">
           {type === "bar" ? (
             <ChartContainer
               config={{
@@ -72,7 +72,7 @@ export function ProjectStatusChart({
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    outerRadius={100}
+                    outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
                     nameKey="name"

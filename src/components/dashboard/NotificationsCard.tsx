@@ -1,7 +1,8 @@
 
-import { Bell } from "lucide-react";
+import { Bell, Check, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface Notification {
   id: string;
@@ -14,9 +15,15 @@ interface Notification {
 
 interface NotificationsCardProps {
   notifications: Notification[];
+  onMarkAsRead?: (id: string) => void;
+  onDismiss?: (id: string) => void;
 }
 
-export function NotificationsCard({ notifications }: NotificationsCardProps) {
+export function NotificationsCard({ 
+  notifications, 
+  onMarkAsRead,
+  onDismiss
+}: NotificationsCardProps) {
   return (
     <Card className="shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -66,9 +73,37 @@ export function NotificationsCard({ notifications }: NotificationsCardProps) {
                 <p className="text-xs text-muted-foreground mt-1">
                   {notification.description}
                 </p>
-                <p className="text-xs text-muted-foreground/70 mt-2">
-                  {notification.date}
-                </p>
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs text-muted-foreground/70">
+                    {notification.date}
+                  </p>
+                  <div className="flex gap-1">
+                    {!notification.read && onMarkAsRead && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 px-2 text-xs"
+                        onClick={() => onMarkAsRead(notification.id)}
+                        aria-label="Marcar como lida"
+                      >
+                        <Check className="h-3 w-3 mr-1" />
+                        Lida
+                      </Button>
+                    )}
+                    {onDismiss && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 px-2 text-xs"
+                        onClick={() => onDismiss(notification.id)}
+                        aria-label="Descartar notificação"
+                      >
+                        <X className="h-3 w-3 mr-1" />
+                        Descartar
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
