@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardFooter from "@/components/dashboard/DashboardFooter";
@@ -16,7 +15,7 @@ import { ArrowUpRight, Clock, Database, Users } from "lucide-react";
 const Index: React.FC = () => {
   const { projects, loading } = useProjects();
   const [mounted, setMounted] = useState(false);
-  const { theme } = useTheme();
+  const { theme, setTheme } = useTheme();
   
   // Dados para os gráficos
   const chartData = [
