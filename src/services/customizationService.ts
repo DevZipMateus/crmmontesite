@@ -6,6 +6,7 @@ import { toast } from "@/components/ui/use-toast";
 // Function to get customizations for a project
 export async function getProjectCustomizations(projectId: string): Promise<ProjectCustomization[]> {
   try {
+    console.log("Fetching customizations for project:", projectId);
     const { data, error } = await supabase
       .from("project_customizations")
       .select("*")
@@ -22,6 +23,7 @@ export async function getProjectCustomizations(projectId: string): Promise<Proje
       return [];
     }
 
+    console.log("Fetched customizations:", data);
     return data as ProjectCustomization[];
   } catch (error) {
     console.error("Error fetching customizations:", error);
@@ -37,6 +39,7 @@ export async function getProjectCustomizations(projectId: string): Promise<Proje
 // Function to add a new customization
 export async function addCustomization(customization: Omit<ProjectCustomization, "id" | "created_at" | "updated_at">): Promise<{ success: boolean; data?: ProjectCustomization }> {
   try {
+    console.log("Adding customization:", customization);
     const { data, error } = await supabase
       .from("project_customizations")
       .insert(customization)
@@ -53,6 +56,7 @@ export async function addCustomization(customization: Omit<ProjectCustomization,
       return { success: false };
     }
 
+    console.log("Added customization:", data);
     toast({
       title: "Personalização adicionada",
       description: "A personalização foi adicionada com sucesso",
@@ -70,7 +74,7 @@ export async function addCustomization(customization: Omit<ProjectCustomization,
   }
 }
 
-// Function to update a customization
+// Function to update a customization status
 export async function updateCustomizationStatus(
   customizationId: string, 
   status: string,
@@ -85,6 +89,7 @@ export async function updateCustomizationStatus(
       updateData.completed_at = completedAt;
     }
     
+    console.log("Updating customization status:", { id: customizationId, ...updateData });
     const { error } = await supabase
       .from("project_customizations")
       .update(updateData)
@@ -100,6 +105,7 @@ export async function updateCustomizationStatus(
       return { success: false };
     }
 
+    console.log("Updated customization status successfully");
     toast({
       title: "Personalização atualizada",
       description: "O status da personalização foi atualizado com sucesso",

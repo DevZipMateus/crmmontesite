@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { CustomizationPriority, CustomizationStatus } from "@/types/customization";
 
 const customizationSchema = z.object({
   description: z.string().min(1, "Descrição é obrigatória"),
@@ -38,17 +39,33 @@ export function CustomizationForm({ projectId, onSuccess }: CustomizationFormPro
   const onSubmit = async (values: z.infer<typeof customizationSchema>) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
+      console.log("Submitting customization:", {
+        project_id: projectId,
+        description: values.description,
+        priority: values.priority,
+        status: "Solicitado",
+        notes: values.notes || null,
+        requested_at: new Date().toISOString(),
+      });
+      
+      const { data, error } = await supabase
         .from('project_customizations')
         .insert({
           project_id: projectId,
           description: values.description,
-          priority: values.priority,
+          priority: values.priority as CustomizationPriority,
+          status: "Solicitado" as CustomizationStatus,
           notes: values.notes || null,
-        });
+          requested_at: new Date().toISOString(),
+        })
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating customization:', error);
+        throw error;
+      }
 
+      console.log("Customization created:", data);
       toast({
         title: "Customização registrada",
         description: "A solicitação de customização foi registrada com sucesso.",

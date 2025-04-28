@@ -10,6 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { CustomizationStatus, ProjectCustomization } from "@/types/customization";
 import { updateCustomizationStatus } from "@/services/customizationService";
+import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CustomizationStatusUpdateProps {
   customization: ProjectCustomization;
@@ -28,14 +30,48 @@ export function CustomizationStatusUpdate({
 
     setIsUpdating(true);
     try {
-      const { success } = await updateCustomizationStatus(
-        customization.id,
-        status
-      );
+      console.log("Updating customization status:", {
+        id: customization.id,
+        status: status
+      });
 
-      if (success && onSuccess) {
+      let updateData: Partial<ProjectCustomization> = { status };
+      
+      // Automatically set completed_at when status is changed to Concluído
+      if (status === 'Concluído' && !customization.completed_at) {
+        updateData.completed_at = new Date().toISOString();
+      }
+
+      const { error } = await supabase
+        .from("project_customizations")
+        .update(updateData)
+        .eq("id", customization.id);
+
+      if (error) {
+        console.error("Error updating customization status:", error);
+        toast({
+          title: "Erro ao atualizar status",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Status atualizado",
+        description: `Status alterado para ${status}`,
+      });
+
+      if (onSuccess) {
         onSuccess();
       }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast({
+        title: "Erro ao atualizar status",
+        description: "Ocorreu um erro ao atualizar o status",
+        variant: "destructive",
+      });
     } finally {
       setIsUpdating(false);
     }
