@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import StatusBadge from "./StatusBadge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import DeleteProjectDialog from "../DeleteProjectDialog";
 
 interface Project {
   id: string;
@@ -19,6 +20,7 @@ interface ProjectTableProps {
   loading: boolean;
   statusFilter: string | null;
   setStatusFilter: (status: string | null) => void;
+  onProjectDeleted?: () => void;
 }
 
 export default function ProjectTable({
@@ -26,6 +28,7 @@ export default function ProjectTable({
   loading,
   statusFilter,
   setStatusFilter,
+  onProjectDeleted,
 }: ProjectTableProps) {
   const navigate = useNavigate();
 
@@ -103,6 +106,13 @@ export default function ProjectTable({
                   >
                     <PenSquare className="h-4 w-4" />
                   </Button>
+                  <DeleteProjectDialog 
+                    projectId={project.id} 
+                    projectName={project.client_name}
+                    size="sm"
+                    variant="icon"
+                    onDelete={onProjectDeleted}
+                  />
                 </div>
               </TableCell>
             </TableRow>

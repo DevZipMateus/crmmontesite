@@ -15,10 +15,15 @@ export default function Projetos() {
   const [viewMode, setViewMode] = useState<"list" | "kanban">("kanban");
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-  const { projects, setProjects, loading } = useProjects(statusFilter, searchQuery);
+  const { projects, setProjects, loading, fetchProjects } = useProjects(statusFilter, searchQuery);
 
   const handleNewProject = () => {
     navigate('/novo-projeto');
+  };
+
+  const handleProjectDeleted = () => {
+    // Refresh projects after deletion
+    fetchProjects();
   };
 
   return (
@@ -43,13 +48,18 @@ export default function Projetos() {
       </div>
 
       {viewMode === "kanban" ? (
-        <KanbanBoard projects={projects} setProjects={setProjects} />
+        <KanbanBoard 
+          projects={projects} 
+          setProjects={setProjects} 
+          onProjectDeleted={handleProjectDeleted} 
+        />
       ) : (
         <ProjectListView 
           projects={projects}
           loading={loading}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
+          onProjectDeleted={handleProjectDeleted}
         />
       )}
     </PageLayout>

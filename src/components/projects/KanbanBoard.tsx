@@ -23,9 +23,10 @@ interface Project {
 interface KanbanBoardProps {
   projects: Project[];
   setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
+  onProjectDeleted?: () => void;
 }
 
-export default function KanbanBoard({ projects, setProjects }: KanbanBoardProps) {
+export default function KanbanBoard({ projects, setProjects, onProjectDeleted }: KanbanBoardProps) {
   const {
     draggingId,
     updatingStatus,
@@ -105,6 +106,12 @@ export default function KanbanBoard({ projects, setProjects }: KanbanBoardProps)
     setActiveColumnIndex((prev) => prev > 0 ? prev - 1 : prev);
   };
 
+  const handleProjectDeleted = () => {
+    if (onProjectDeleted) {
+      onProjectDeleted();
+    }
+  };
+
   if (isMobile) {
     // Mobile view - show one column at a time with navigation controls
     const currentStatusType = PROJECT_STATUS_TYPES[activeColumnIndex];
@@ -149,6 +156,7 @@ export default function KanbanBoard({ projects, setProjects }: KanbanBoardProps)
           onDragStart={handleDragStart}
           onStatusChange={handleStatusChange}
           statusOptions={PROJECT_STATUS_TYPES}
+          onProjectDeleted={handleProjectDeleted}
         />
       </div>
     );
@@ -170,6 +178,7 @@ export default function KanbanBoard({ projects, setProjects }: KanbanBoardProps)
             onDragStart={handleDragStart}
             onStatusChange={handleStatusChange}
             statusOptions={PROJECT_STATUS_TYPES}
+            onProjectDeleted={handleProjectDeleted}
           />
         ))}
       </div>

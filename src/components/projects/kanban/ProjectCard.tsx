@@ -7,6 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import DeleteProjectDialog from "../DeleteProjectDialog";
 
 interface Project {
   id: string;
@@ -26,6 +27,7 @@ interface ProjectCardProps {
   draggingId: string | null;
   updatingStatus: boolean;
   statusOptions: Array<{ value: string; color: string }>;
+  onProjectDeleted?: () => void;
 }
 
 export default function ProjectCard({
@@ -35,6 +37,7 @@ export default function ProjectCard({
   draggingId,
   updatingStatus,
   statusOptions,
+  onProjectDeleted
 }: ProjectCardProps) {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -139,6 +142,13 @@ export default function ProjectCard({
           >
             <PenSquare className="h-3.5 w-3.5" />
           </Button>
+          <DeleteProjectDialog 
+            projectId={project.id} 
+            projectName={project.client_name}
+            size="sm"
+            variant="icon"
+            onDelete={onProjectDeleted}
+          />
         </div>
       </div>
       

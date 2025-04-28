@@ -17,6 +17,7 @@ interface ProjectListViewProps {
   loading: boolean;
   statusFilter: string | null;
   setStatusFilter: (status: string | null) => void;
+  onProjectDeleted?: () => void;
 }
 
 export default function ProjectListView({
@@ -24,6 +25,7 @@ export default function ProjectListView({
   loading,
   statusFilter,
   setStatusFilter,
+  onProjectDeleted,
 }: ProjectListViewProps) {
   return (
     <>
@@ -39,6 +41,7 @@ export default function ProjectListView({
             loading={loading}
             statusFilter={statusFilter}
             setStatusFilter={setStatusFilter}
+            onProjectDeleted={onProjectDeleted}
           />
         </CardContent>
       </Card>
