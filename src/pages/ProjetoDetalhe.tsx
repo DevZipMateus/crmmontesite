@@ -1,3 +1,4 @@
+
 import { useNavigate, useParams } from "react-router-dom";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CustomizationTab } from "@/components/projeto/CustomizationTab";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import DeleteProjectDialog from "@/components/projects/DeleteProjectDialog";
 
 export default function ProjetoDetalhe() {
   const navigate = useNavigate();
@@ -38,6 +40,10 @@ export default function ProjetoDetalhe() {
     },
     enabled: !!id,
   });
+
+  const handleProjectDeleted = () => {
+    navigate('/projetos');
+  };
 
   if (projectLoading) {
     return (
@@ -92,8 +98,15 @@ export default function ProjetoDetalhe() {
       
       <div className="grid gap-6">
         <Card className="border-gray-100 shadow-sm">
-          <CardHeader className="bg-gray-50/50 border-b border-gray-100">
+          <CardHeader className="bg-gray-50/50 border-b border-gray-100 flex flex-row items-center justify-between">
             <CardTitle>Informações do Projeto</CardTitle>
+            <DeleteProjectDialog 
+              projectId={id as string}
+              projectName={project?.client_name || ""}
+              onDelete={handleProjectDeleted}
+              variant="button"
+              size="sm"
+            />
           </CardHeader>
           <CardContent className="p-6">
             {project && (
