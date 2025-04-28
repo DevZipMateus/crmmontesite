@@ -9,9 +9,13 @@ import type { ThemeProviderProps as NextThemeProviderProps } from "next-themes";
 type Attribute = "class" | "data-theme" | "data-mode";
 
 // Define the ThemeProviderProps locally
-interface ThemeProviderProps extends Omit<NextThemeProviderProps, 'attribute'> {
-  children: React.ReactNode;
+interface ThemeProviderProps extends React.PropsWithChildren {
   attribute?: Attribute | Attribute[];
+  defaultTheme?: string;
+  enableSystem?: boolean;
+  disableTransitionOnChange?: boolean;
+  storageKey?: string;
+  forcedTheme?: string;
 }
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
