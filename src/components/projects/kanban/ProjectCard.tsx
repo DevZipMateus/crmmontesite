@@ -1,13 +1,14 @@
 
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Eye, PenSquare, Inbox, Code, Globe, Clock, CheckCircle2, ExternalLink, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import DeleteProjectDialog from "../DeleteProjectDialog";
+import {
+  ProjectCardHeader,
+  ProjectCardActions,
+  ProjectCardDomain,
+  StatusButtonsGrid
+} from "./ProjectCardComponents";
 
 interface Project {
   id: string;
@@ -40,7 +41,6 @@ export default function ProjectCard({
   onProjectDeleted
 }: ProjectCardProps) {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const [hasPendingCustomizations, setHasPendingCustomizations] = useState(
     project.hasPendingCustomizations || false
   );
@@ -80,6 +80,10 @@ export default function ProjectCard({
     navigate(`/projeto/${projectId}${action === 'edit' ? '/editar' : ''}`);
   };
 
+  const handleStatusChange = (newStatus: string) => {
+    onStatusChange(project.id, newStatus);
+  };
+
   return (
     <Card 
       key={project.id} 
@@ -87,128 +91,35 @@ export default function ProjectCard({
       draggable="true"
       onDragStart={(e) => onDragStart(e, project.id)}
     >
-      <div className="flex flex-col space-y-1.5">
-        <div className="flex justify-between">
-          <div className="font-medium text-primary">{project.client_name}</div>
-          {hasPendingCustomizations && (
-            <Badge variant="outline" className="bg-orange-100 text-orange-700 border-orange-300 text-xs">
-              <AlertCircle className="h-3 w-3 mr-1" />
-              Customização pendente
-            </Badge>
-          )}
-        </div>
-        
-        <div className="text-sm text-gray-500">
-          {project.template || "Sem modelo"}
-        </div>
-
-        {project.domain && (
-          <div className="flex items-center text-xs text-gray-600 mt-1">
-            <Globe className="h-3 w-3 mr-1 text-blue-500" />
-            <span className="truncate">{project.domain}</span>
-            {project.domain && (
-              <a 
-                href={`https://${project.domain}`} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="ml-1 inline-flex"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <ExternalLink className="h-3 w-3 text-gray-400 hover:text-primary" />
-              </a>
-            )}
-          </div>
-        )}
-      </div>
+      <ProjectCardHeader 
+        clientName={project.client_name} 
+        template={project.template} 
+        hasPendingCustomizations={hasPendingCustomizations}
+      />
+      
+      <ProjectCardDomain domain={project.domain} />
 
       <div className="flex justify-between items-center mt-3">
         <span className="text-xs text-gray-500">
           {formatDate(project.created_at)}
         </span>
-        <div className="flex gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0"
-            onClick={() => handleViewEdit(project.id, 'view')}
-          >
-            <Eye className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0"
-            onClick={() => handleViewEdit(project.id, 'edit')}
-          >
-            <PenSquare className="h-3.5 w-3.5" />
-          </Button>
-          <DeleteProjectDialog 
-            projectId={project.id} 
-            projectName={project.client_name}
-            size="sm"
-            variant="icon"
-            onDelete={onProjectDeleted}
-          />
-        </div>
+        
+        <ProjectCardActions 
+          projectId={project.id}
+          projectName={project.client_name}
+          onViewEdit={handleViewEdit}
+          onProjectDeleted={onProjectDeleted}
+        />
       </div>
       
       <div className="mt-2 pt-2 border-t">
-        {isMobile ? (
-          // Mobile view - dropdown-style status selector would be ideal
-          <div className="grid grid-cols-2 gap-1">
-            {statusOptions.filter(s => s.value !== project.status).slice(0, 2).map(status => (
-              <StatusButton 
-                key={status.value}
-                status={status}
-                onStatusChange={() => onStatusChange(project.id, status.value)}
-                updatingStatus={updatingStatus}
-              />
-            ))}
-          </div>
-        ) : (
-          // Desktop view - show all status options
-          <div className="grid grid-cols-2 gap-1">
-            {statusOptions.filter(s => s.value !== project.status).map(status => (
-              <StatusButton 
-                key={status.value}
-                status={status}
-                onStatusChange={() => onStatusChange(project.id, status.value)}
-                updatingStatus={updatingStatus}
-              />
-            ))}
-          </div>
-        )}
+        <StatusButtonsGrid
+          currentStatus={project.status}
+          statusOptions={statusOptions}
+          updatingStatus={updatingStatus}
+          onStatusChange={handleStatusChange}
+        />
       </div>
     </Card>
-  );
-}
-
-// Extracted status button component for better organization
-function StatusButton({ 
-  status, 
-  onStatusChange, 
-  updatingStatus 
-}: { 
-  status: { value: string; color: string },
-  onStatusChange: () => void, 
-  updatingStatus: boolean 
-}) {
-  const StatusIcon = status.value === "Recebido" ? Inbox : 
-                     status.value === "Criando site" ? Code : 
-                     status.value === "Configurando Domínio" ? Globe :
-                     status.value === "Aguardando DNS" ? Clock :
-                     CheckCircle2;
-
-  return (
-    <Button 
-      variant="ghost" 
-      size="sm"
-      className="text-xs h-7"
-      onClick={onStatusChange}
-      disabled={updatingStatus}
-    >
-      <StatusIcon className="h-3 w-3 mr-1" />
-      {status.value.length > 10 ? `${status.value.substring(0, 10)}...` : status.value}
-    </Button>
   );
 }
