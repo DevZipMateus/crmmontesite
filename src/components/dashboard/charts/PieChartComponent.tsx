@@ -47,7 +47,7 @@ export function PieChartComponent({ data }: PieChartComponentProps) {
         <PieChart margin={{ top: 60, right: 10, left: 10, bottom: 80 }}>
           <Pie
             data={data}
-            cx="50%"
+            cx="45%"
             cy="30%"
             labelLine={false}
             outerRadius={85}
