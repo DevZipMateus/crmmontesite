@@ -5,7 +5,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { ThemeProvider } from "@/components/theme-provider";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Projetos from "./pages/Projetos";
@@ -25,82 +24,80 @@ const queryClient = new QueryClient();
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <BrowserRouter>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              {/* Redirect root to login */}
-              <Route path="/" element={<Navigate to="/login" replace />} />
-              
-              {/* Página pública de login */}
-              <Route path="/login" element={<Login />} />
-              
-              {/* Página de formulário público para clientes */}
-              <Route path="/formulario/:modelo" element={<PublicPersonalizeForm />} />
-              
-              {/* Página inicial - acessível apenas após login */}
-              <Route path="/home" element={
-                <AuthGuard>
-                  <Index />
-                </AuthGuard>
-              } />
-              
-              {/* Outras rotas protegidas */}
-              <Route path="/projetos" element={
-                <AuthGuard>
-                  <Projetos />
-                </AuthGuard>
-              } />
-              <Route path="/novo-projeto" element={
-                <AuthGuard>
-                  <NovoProjeto />
-                </AuthGuard>
-              } />
-              <Route path="/projeto/:id" element={
-                <AuthGuard>
-                  <ProjetoDetalhe />
-                </AuthGuard>
-              } />
-              <Route path="/projeto/:id/editar" element={
-                <AuthGuard>
-                  <ProjetoEditar />
-                </AuthGuard>
-              } />
-              {/* Personalize site routes - default and with model parameter */}
-              <Route path="/personalize-site" element={
-                <AuthGuard>
-                  <PersonalizeSite />
-                </AuthGuard>
-              } />
-              <Route path="/personalize-site/:modelo" element={
-                <AuthGuard>
-                  <PersonalizeSite />
-                </AuthGuard>
-              } />
-              <Route path="/confirmacao" element={
-                <AuthGuard>
-                  <Confirmacao />
-                </AuthGuard>
-              } />
-              <Route path="/site/:id" element={
-                <AuthGuard>
-                  <SiteDetalhe />
-                </AuthGuard>
-              } />
-              <Route path="/producao-sites" element={
-                <AuthGuard>
-                  <ProducaoSites />
-                </AuthGuard>
-              } />
-              
-              {/* Rota de fallback */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </TooltipProvider>
-        </BrowserRouter>
-      </ThemeProvider>
+      <BrowserRouter>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            {/* Redirect root to login */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            
+            {/* Página pública de login */}
+            <Route path="/login" element={<Login />} />
+            
+            {/* Página de formulário público para clientes */}
+            <Route path="/formulario/:modelo" element={<PublicPersonalizeForm />} />
+            
+            {/* Página inicial - acessível apenas após login */}
+            <Route path="/home" element={
+              <AuthGuard>
+                <Index />
+              </AuthGuard>
+            } />
+            
+            {/* Outras rotas protegidas */}
+            <Route path="/projetos" element={
+              <AuthGuard>
+                <Projetos />
+              </AuthGuard>
+            } />
+            <Route path="/novo-projeto" element={
+              <AuthGuard>
+                <NovoProjeto />
+              </AuthGuard>
+            } />
+            <Route path="/projeto/:id" element={
+              <AuthGuard>
+                <ProjetoDetalhe />
+              </AuthGuard>
+            } />
+            <Route path="/projeto/:id/editar" element={
+              <AuthGuard>
+                <ProjetoEditar />
+              </AuthGuard>
+            } />
+            {/* Personalize site routes - default and with model parameter */}
+            <Route path="/personalize-site" element={
+              <AuthGuard>
+                <PersonalizeSite />
+              </AuthGuard>
+            } />
+            <Route path="/personalize-site/:modelo" element={
+              <AuthGuard>
+                <PersonalizeSite />
+              </AuthGuard>
+            } />
+            <Route path="/confirmacao" element={
+              <AuthGuard>
+                <Confirmacao />
+              </AuthGuard>
+            } />
+            <Route path="/site/:id" element={
+              <AuthGuard>
+                <SiteDetalhe />
+              </AuthGuard>
+            } />
+            <Route path="/producao-sites" element={
+              <AuthGuard>
+                <ProducaoSites />
+              </AuthGuard>
+            } />
+            
+            {/* Rota de fallback */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </TooltipProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 };
