@@ -41,7 +41,7 @@ const renderCustomLegend = (props: any) => {
   const { payload } = props;
   
   return (
-    <div className="flex flex-wrap justify-center gap-4 mt-6 pt-2">
+    <div className="flex flex-wrap justify-center gap-4 mt-4">
       {payload.map((entry: any, index: number) => (
         <div key={`legend-${index}`} className="flex items-center gap-2">
           <div 
@@ -63,14 +63,14 @@ export function PieChartComponent({ data }: PieChartComponentProps) {
       }}
     >
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart margin={{ top: 30, right: 10, left: 10, bottom: 50 }}>
+        <PieChart margin={{ top: 20, right: 20, left: 20, bottom: 60 }}>
           <Pie
             data={data}
             cx="50%"
-            cy="45%"
+            cy="40%"
             labelLine={false}
-            outerRadius={80}
-            innerRadius={50}
+            outerRadius={75}
+            innerRadius={45}
             fill="#8884d8"
             dataKey="value"
             nameKey="name"

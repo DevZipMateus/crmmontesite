@@ -23,7 +23,7 @@ export function ProjectStatusChart({
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden pt-2 pb-4">
-        <div className={`${type === "pie" ? "h-[380px]" : "h-[350px]"} w-full overflow-hidden`}>
+        <div className={`${type === "pie" ? "h-[400px]" : "h-[350px]"} w-full`}>
           {type === "bar" ? (
             <BarChartComponent data={data} />
           ) : type === "area" ? (
