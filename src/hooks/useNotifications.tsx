@@ -68,16 +68,16 @@ export function useNotifications() {
         console.log('[useNotifications] Adding new notification to state');
         // Put new notification at the top of the list
         const updated = [newNotification, ...prev];
+        
+        // Show a toast
+        toast({
+          title: newNotification.title,
+          description: newNotification.description,
+        });
+        
+        console.log('[useNotifications] Notification added and toast displayed');
         return updated;
       });
-      
-      // Also show a toast
-      toast({
-        title: newNotification.title,
-        description: newNotification.description,
-      });
-      
-      console.log('[useNotifications] Notification added and toast displayed');
     };
 
     console.log('[useNotifications] Setting up notification realtime subscription');
@@ -143,6 +143,8 @@ export function useNotifications() {
     };
     
     console.log('[useNotifications] Adding test notification to state:', testNotification);
+    
+    // Add notification using the same function used for real notifications
     setNotifications(prev => [testNotification, ...prev]);
     
     toast({

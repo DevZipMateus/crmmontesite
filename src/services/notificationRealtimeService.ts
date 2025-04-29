@@ -7,6 +7,7 @@ type NotificationCallback = (notification: Notification) => void;
 
 /**
  * Service to handle realtime notifications from Supabase
+ * Consolidating status change monitoring in one place
  */
 export function setupNotificationRealtime(
   onNewNotification: NotificationCallback,
@@ -17,15 +18,15 @@ export function setupNotificationRealtime(
   // First, check if the channel already exists and remove it to prevent duplicates
   const existingChannels = supabase.getChannels();
   existingChannels.forEach(ch => {
-    if (ch.topic === 'realtime-notifications') {
-      console.log('[notificationRealtimeService] Removing existing realtime-notifications channel');
+    if (ch.topic === 'notification-status-changes') {
+      console.log('[notificationRealtimeService] Removing existing notification-status-changes channel');
       supabase.removeChannel(ch);
     }
   });
   
-  // Set up a new channel for project status updates with a unique name
+  // Set up a dedicated channel just for notification status updates with a unique name
   const channel = supabase
-    .channel('realtime-notifications')
+    .channel('notification-status-changes')
     .on(
       'postgres_changes',
       {
@@ -46,6 +47,7 @@ export function setupNotificationRealtime(
           
           // Create a unique ID based on project ID, old status, new status, and timestamp
           const notificationId = createNotificationId('status-change', projectId, oldStatus, newStatus);
+          console.log('[notificationRealtimeService] Generated notification ID:', notificationId);
           
           // Check if this notification is already dismissed
           if (dismissedIds.includes(notificationId)) {
@@ -65,7 +67,10 @@ export function setupNotificationRealtime(
           };
           
           console.log('[notificationRealtimeService] Creating new notification:', newNotification);
+          
+          // Call the callback with the new notification
           onNewNotification(newNotification);
+          console.log('[notificationRealtimeService] Notification callback executed');
         }
       }
     )

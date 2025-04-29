@@ -13,9 +13,9 @@ export function ProjectsAnalysisSection({ chartData }: ProjectsAnalysisSectionPr
   }, [chartData]);
 
   return (
-    <div className="mb-10">
+    <div className="mb-14">
       <h2 className="text-xl font-bold mb-4">Análise de Projetos</h2>
-      <div className="w-full h-[450px]">
+      <div className="w-full h-[400px]">
         <ProjectStatusChart 
           title="Status dos Projetos" 
           data={chartData}

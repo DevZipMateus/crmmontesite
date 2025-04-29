@@ -44,10 +44,10 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
         status: { label: "Status" },
       }}
     >
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width="100%" height={350}>
         <AreaChart 
           data={transformedData} 
-          margin={{ top: 20, right: 30, left: 10, bottom: 60 }}
+          margin={{ top: 10, right: 20, left: 10, bottom: 40 }}
         >
           <defs>
             {transformedData.map((entry, index) => (
@@ -60,10 +60,10 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
           <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
           <XAxis 
             dataKey="name" 
-            tick={{ fontSize: 11 }} 
-            height={60} 
+            tick={{ fontSize: 10 }} 
+            height={50} 
             interval={0}
-            angle={-45}
+            angle={-35}
             textAnchor="end"
           />
           <YAxis 
@@ -75,10 +75,10 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
           <Tooltip content={<ChartTooltipContent />} />
           <Legend 
             verticalAlign="bottom"
-            height={36}
+            height={30}
             wrapperStyle={{ 
-              fontSize: '12px', 
-              bottom: '10px',
+              fontSize: '11px', 
+              bottom: '0',
               left: '0',
               width: '100%'
             }}

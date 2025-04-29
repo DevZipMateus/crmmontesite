@@ -15,15 +15,19 @@ export function formatDate(date: Date): string {
 
 /**
  * Create a unique notification ID
- * Now incorporating status change information for more uniqueness
+ * Now ensuring even greater uniqueness with sanitized status values and timestamp
  */
 export function createNotificationId(type: string, entityId?: string, oldStatus?: string, newStatus?: string): string {
   const timestamp = Date.now();
   
   if (entityId) {
     if (oldStatus && newStatus) {
-      // Create a truly unique ID that includes status change information
-      return `${type}_${entityId}_${oldStatus.replace(/\s+/g, '')}_${newStatus.replace(/\s+/g, '')}_${timestamp}`;
+      // Sanitize status strings to avoid any special characters
+      const sanitizedOldStatus = oldStatus.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+      const sanitizedNewStatus = newStatus.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+      
+      // Create a truly unique ID with sanitized values
+      return `${type}_${entityId}_${sanitizedOldStatus}_${sanitizedNewStatus}_${timestamp}`;
     }
     return `${type}_${entityId}_${timestamp}`;
   }

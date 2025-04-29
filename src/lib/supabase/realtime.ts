@@ -9,15 +9,15 @@ export async function enableRealtimeForProjects() {
     // First, ensure the channel doesn't already exist 
     const existingChannels = supabase.getChannels();
     existingChannels.forEach(ch => {
-      if (ch.topic === 'project-changes-monitor') {
-        console.log('[realtime.ts] Removing existing project-changes-monitor channel');
+      if (ch.topic === 'project-updates-monitor') {
+        console.log('[realtime.ts] Removing existing project-updates-monitor channel');
         supabase.removeChannel(ch);
       }
     });
     
-    // Use a different channel name to avoid conflicts with notificationRealtimeService
+    // Use a completely different channel name to avoid conflicts with notificationRealtimeService
     const channel = supabase
-      .channel('project-changes-monitor')
+      .channel('project-updates-monitor')
       .on('postgres_changes', 
         { 
           event: '*', 
@@ -38,7 +38,7 @@ export async function enableRealtimeForProjects() {
         console.log(`[realtime.ts] Realtime subscription status: ${status}`);
       });
     
-    console.log('[realtime.ts] Realtime subscription for projects enabled with channel: project-changes-monitor');
+    console.log('[realtime.ts] Realtime subscription for projects enabled with channel: project-updates-monitor');
     return channel;
   } catch (error) {
     console.error('[realtime.ts] Error enabling realtime for projects:', error);
@@ -50,7 +50,7 @@ export async function enableRealtimeForProjects() {
 export function cleanupRealtimeSubscriptions() {
   const existingChannels = supabase.getChannels();
   existingChannels.forEach(ch => {
-    if (ch.topic === 'project-changes-monitor' || ch.topic === 'realtime-notifications') {
+    if (ch.topic === 'project-updates-monitor' || ch.topic === 'notification-status-changes') {
       console.log('[realtime.ts] Cleaning up channel:', ch.topic);
       supabase.removeChannel(ch);
     }

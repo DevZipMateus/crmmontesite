@@ -10,7 +10,7 @@ import { InfoCardsSection } from "@/components/dashboard/InfoCardsSection";
 import { ProjectsAnalysisSection } from "@/components/dashboard/ProjectsAnalysisSection";
 import { useStatusChartData } from "@/components/dashboard/useStatusChartData";
 import { useNotifications } from "@/hooks/useNotifications";
-import { enableRealtimeForProjects, cleanupRealtimeSubscriptions } from "@/lib/supabase/realtime";
+import { cleanupRealtimeSubscriptions } from "@/lib/supabase/realtime";
 import { Button } from "@/components/ui/button";
 
 const Index: React.FC = () => {
@@ -27,17 +27,13 @@ const Index: React.FC = () => {
   useEffect(() => {
     setMounted(true);
     
-    const initRealtime = async () => {
-      console.log('[Index] Initializing realtime on Index page...');
-      // Clean up any existing channels before creating new ones
+    const initApp = async () => {
+      console.log('[Index] Initializing app on Index page...');
+      // Clean up any existing channels to avoid duplication
       cleanupRealtimeSubscriptions();
-      
-      // Enable realtime for projects
-      const channel = await enableRealtimeForProjects();
-      console.log('[Index] Realtime initialized on Index page:', channel ? 'Success' : 'Failed');
     };
     
-    initRealtime();
+    initApp();
     
     return () => {
       console.log('[Index] Index page unmounting - cleaning up realtime subscriptions');
