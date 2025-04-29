@@ -12,11 +12,40 @@ export interface Notification {
   type: "info" | "warning" | "success" | "error";
 }
 
+// Helper function to format date for notifications
+function formatDate(date: Date): string {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const yesterday = today - 86400000; // 24 hours in milliseconds
+  
+  const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  
+  if (date.getTime() >= today) {
+    return `Hoje, ${time}`;
+  } else if (date.getTime() >= yesterday) {
+    return `Ontem, ${time}`;
+  } else {
+    return date.toLocaleDateString('pt-BR');
+  }
+}
+
 export function useNotifications() {
   const { toast } = useToast();
   
   // Store dismissed notification IDs in state to prevent them from reappearing
   const [dismissedNotificationIds, setDismissedNotificationIds] = useState<string[]>([]);
+  
+  // Load dismissed notifications from localStorage on init
+  useEffect(() => {
+    const savedDismissed = localStorage.getItem('dismissedNotifications');
+    if (savedDismissed) {
+      try {
+        setDismissedNotificationIds(JSON.parse(savedDismissed));
+      } catch (e) {
+        console.error('Error parsing dismissed notifications:', e);
+      }
+    }
+  }, []);
   
   // Base notifications that will be filtered against dismissed IDs
   const [baseNotifications, setBaseNotifications] = useState<Notification[]>([
@@ -49,8 +78,10 @@ export function useNotifications() {
   // Derived state: filter out dismissed notifications
   const [notifications, setNotifications] = useState<Notification[]>(baseNotifications);
   
-  // Use effect to filter notifications whenever dismissedNotificationIds changes
+  // Sync dismissed notifications to localStorage when they change
   useEffect(() => {
+    localStorage.setItem('dismissedNotificationIds', JSON.stringify(dismissedNotificationIds));
+    
     setNotifications(baseNotifications.filter(
       notification => !dismissedNotificationIds.includes(notification.id)
     ));
@@ -58,8 +89,11 @@ export function useNotifications() {
   
   // Listen for project status changes and create notifications
   useEffect(() => {
+    console.log('Setting up realtime subscription for project status changes in useNotifications');
+    
+    // Ensure we use the same channel name as in other components for consistency
     const channel = supabase
-      .channel('projects-status-changes')
+      .channel('project-status-notifications')
       .on(
         'postgres_changes',
         {
@@ -68,24 +102,32 @@ export function useNotifications() {
           table: 'projects',
         },
         (payload) => {
-          console.log('Status update received:', payload);
+          console.log('[useNotifications] Received update payload:', payload);
           
           if (payload.new && payload.old && payload.new.status !== payload.old.status) {
-            console.log('Status changed from', payload.old.status, 'to', payload.new.status);
+            console.log('[useNotifications] Status changed from', payload.old.status, 'to', payload.new.status);
             
             const projectName = payload.new.client_name;
+            const oldStatus = payload.old.status;
             const newStatus = payload.new.status;
             
-            const newNotificationId = `status-${Date.now()}`;
+            // Create a unique ID based on timestamp and project ID
+            const newNotificationId = `status-${Date.now()}-${payload.new.id}`;
+            
+            const formattedDate = formatDate(new Date());
+            
             const newNotification: Notification = {
               id: newNotificationId,
               title: "Status de projeto alterado",
-              description: `O projeto "${projectName}" foi movido para "${newStatus}"`,
-              date: "Agora",
+              description: `O projeto "${projectName}" foi movido de "${oldStatus}" para "${newStatus}"`,
+              date: formattedDate,
               read: false,
               type: "info"
             };
             
+            console.log('[useNotifications] Creating new notification:', newNotification);
+            
+            // Update baseNotifications with the new notification at the beginning
             setBaseNotifications(prev => [newNotification, ...prev]);
             
             // Also show a toast
@@ -96,9 +138,13 @@ export function useNotifications() {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log(`[useNotifications] Subscription status: ${status}`);
+      });
 
+    // Clean up subscription when component unmounts
     return () => {
+      console.log('Cleaning up useNotifications subscription');
       supabase.removeChannel(channel);
     };
   }, [toast]);

@@ -21,8 +21,9 @@ export function InfoCardsSection({
 }: InfoCardsSectionProps) {
   // Enable realtime for projects when component mounts
   useEffect(() => {
+    // Use a consistent channel name for project updates
     const channel = supabase
-      .channel('info-cards-updates')
+      .channel('project-status-updates')
       .on('postgres_changes', 
         { 
           event: '*', 
@@ -31,15 +32,21 @@ export function InfoCardsSection({
         }, 
         (payload) => {
           console.log('Project update received in InfoCardsSection:', payload);
-          if (payload.eventType === 'UPDATE') {
-            console.log('Status changed:', payload.old.status, '->', payload.new.status);
+          
+          if (payload.eventType === 'UPDATE' && payload.old && payload.new) {
+            if (payload.old.status !== payload.new.status) {
+              console.log(`Status changed: "${payload.old.status}" -> "${payload.new.status}" for project "${payload.new.client_name}"`);
+            }
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log(`InfoCardsSection subscription status: ${status}`);
+      });
       
     // Cleanup function to remove the channel subscription when component unmounts
     return () => {
+      console.log('Cleaning up InfoCardsSection realtime subscription');
       supabase.removeChannel(channel);
     };
   }, []);

@@ -12,6 +12,7 @@ import { InfoCardsSection } from "@/components/dashboard/InfoCardsSection";
 import { ProjectsAnalysisSection } from "@/components/dashboard/ProjectsAnalysisSection";
 import { useStatusChartData } from "@/components/dashboard/useStatusChartData";
 import { useNotifications } from "@/components/dashboard/useNotifications";
+import { enableRealtimeForProjects } from "@/lib/supabase";
 
 const Index: React.FC = () => {
   const { projects, loading } = useProjects();
@@ -23,6 +24,14 @@ const Index: React.FC = () => {
   
   useEffect(() => {
     setMounted(true);
+    
+    // Initialize realtime for project status changes
+    const initRealtime = async () => {
+      const channel = await enableRealtimeForProjects();
+      console.log('Realtime initialized on Index page:', channel ? 'Success' : 'Failed');
+    };
+    
+    initRealtime();
   }, []);
   
   if (!mounted) {

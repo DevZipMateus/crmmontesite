@@ -19,6 +19,17 @@ export function getSupabaseClient() {
 export async function updateProjectStatus(projectId: string, newStatus: string) {
   try {
     console.log(`Updating project ${projectId} status to ${newStatus}`);
+    
+    // Fetch the current status first to have it available for comparison
+    const { data: currentProject } = await supabase
+      .from('projects')
+      .select('status, client_name')
+      .eq('id', projectId)
+      .single();
+    
+    const oldStatus = currentProject?.status;
+    
+    // Update the status
     const { error } = await supabase
       .from('projects')
       .update({ status: newStatus })
@@ -29,7 +40,9 @@ export async function updateProjectStatus(projectId: string, newStatus: string) 
       throw error;
     }
     
-    return { success: true };
+    console.log(`Project status updated from ${oldStatus} to ${newStatus}`);
+    
+    return { success: true, oldStatus, newStatus, projectName: currentProject?.client_name };
   } catch (error) {
     console.error('Error updating project status:', error);
     return { success: false, error };
@@ -48,9 +61,9 @@ export const PROJECT_STATUS_TYPES = [
 // Enable realtime updates for the projects table
 export async function enableRealtimeForProjects() {
   try {
-    // Initialize a Supabase channel for real-time updates
+    // Use a consistent channel name for all project updates
     const channel = supabase
-      .channel('public:projects')
+      .channel('project-status-updates')
       .on('postgres_changes', 
         { 
           event: '*', 
@@ -58,12 +71,20 @@ export async function enableRealtimeForProjects() {
           table: 'projects' 
         }, 
         (payload) => {
-          console.log('Real-time update received in helper:', payload);
+          console.log('Real-time update received in supabase.ts:', payload);
+          
+          if (payload.eventType === 'UPDATE' && 
+              payload.old && payload.new && 
+              payload.old.status !== payload.new.status) {
+            console.log(`Status changed from "${payload.old.status}" to "${payload.new.status}" for project "${payload.new.client_name}"`);
+          }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log(`Realtime subscription status: ${status}`);
+      });
     
-    console.log('Realtime subscription for projects enabled');
+    console.log('Realtime subscription for projects enabled with channel: project-status-updates');
     return channel;
   } catch (error) {
     console.error('Error enabling realtime for projects:', error);
