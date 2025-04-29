@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { ProjectStatusChart } from "@/components/dashboard/ProjectStatusChart";
 import { ChartDataItem } from "@/components/dashboard/useStatusChartData";
 
@@ -8,6 +8,10 @@ interface ProjectsAnalysisSectionProps {
 }
 
 export function ProjectsAnalysisSection({ chartData }: ProjectsAnalysisSectionProps) {
+  useEffect(() => {
+    console.log("ProjectsAnalysisSection rendering with chart data:", chartData);
+  }, [chartData]);
+
   return (
     <>
       <h2 className="text-xl font-bold mb-4">Análise de Projetos</h2>

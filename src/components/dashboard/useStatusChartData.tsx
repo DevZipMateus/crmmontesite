@@ -29,7 +29,8 @@ export function useStatusChartData(projects: Project[]) {
         "Config. Domínio": 0,
         "Aguardando DNS": 0,
         "Configurando Domínio": 0, // Alias para "Config. Domínio"
-        "Em andamento": 0 // Alias para "Criando Site"
+        "Em andamento": 0, // Alias para "Criando Site"
+        "Criando site": 0  // Variation of "Criando Site" with lowercase 's'
       };
       
       // Faz a contagem de cada status
@@ -40,6 +41,7 @@ export function useStatusChartData(projects: Project[]) {
         let normalizedStatus = status;
         if (status === "Configurando Domínio") normalizedStatus = "Config. Domínio";
         if (status === "Em andamento") normalizedStatus = "Criando Site";
+        if (status === "Criando site") normalizedStatus = "Criando Site";
         
         if (statusCount[normalizedStatus] !== undefined) {
           statusCount[normalizedStatus]++;

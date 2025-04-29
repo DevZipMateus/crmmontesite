@@ -17,28 +17,33 @@ interface AreaChartComponentProps {
 }
 
 export function AreaChartComponent({ data }: AreaChartComponentProps) {
-  // Prepara dados para gráfico de área para que todos os status sejam representados corretamente
-  const preparedData = data.map((item) => ({
-    name: item.name,
-    value: item.value,
-    color: item.color
-  }));
+  console.log("AreaChartComponent rendering with data:", data);
+  // Filter out items with zero value to simplify the chart
+  const activeData = data.filter(item => item.value > 0);
+  
+  if (activeData.length === 0) {
+    // If no project data, provide some sample data for display
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-muted-foreground">Nenhum projeto com status definido</p>
+      </div>
+    );
+  }
 
   return (
     <ChartContainer
       config={{
         status: { label: "Status" },
       }}
-      className="w-full h-[500px]" // Estabelecendo altura e largura fixas
     >
-      <div style={{ width: '100%', height: '100%' }}>
+      <ResponsiveContainer width="100%" height="100%">
         <AreaChart 
-          data={preparedData} 
+          data={activeData} 
           margin={{ top: 20, right: 30, left: 30, bottom: 80 }}
         >
           <defs>
-            {preparedData.map((entry, index) => (
-              <linearGradient key={`gradient-${index}`} id={`colorGradient${index}`} x1="0" y1="0" x2="0" y2="1">
+            {activeData.map((entry, index) => (
+              <linearGradient key={`colorGradient${index}`} id={`colorGradient${index}`} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={entry.color} stopOpacity={0.8}/>
                 <stop offset="95%" stopColor={entry.color} stopOpacity={0.1}/>
               </linearGradient>
@@ -69,7 +74,7 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
               position: 'relative'
             }}
           />
-          {preparedData.map((entry, index) => (
+          {activeData.map((entry, index) => (
             <Area
               key={`area-${index}`}
               type="monotone"
@@ -78,11 +83,10 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
               stroke={entry.color}
               fillOpacity={1}
               fill={`url(#colorGradient${index})`}
-              stackId="1"
             />
           ))}
         </AreaChart>
-      </div>
+      </ResponsiveContainer>
     </ChartContainer>
   );
 }

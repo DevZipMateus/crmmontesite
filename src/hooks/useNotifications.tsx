@@ -48,11 +48,11 @@ export function useNotifications() {
     const addNotification = (newNotification: Notification) => {
       // Update notifications with the new notification at the beginning
       setNotifications(prev => {
-        // First check if we already have this notification (prevent duplicates)
+        // Check if we already have this notification by ID
         const existingIndex = prev.findIndex(n => n.id === newNotification.id);
         
         if (existingIndex >= 0) {
-          console.log('[useNotifications] Similar notification already exists, not adding duplicate');
+          console.log('[useNotifications] Notification with this ID already exists, not adding duplicate');
           return prev;
         }
         
@@ -115,8 +115,21 @@ export function useNotifications() {
    * Add a test notification
    */
   const addTestNotification = () => {
+    const testNotificationId = createNotificationId('test', `test-${Date.now()}`);
+    
+    // Check if a notification with this ID already exists
+    if (notifications.some(n => n.id.startsWith('test_'))) {
+      console.log('Test notification already exists, not adding another one');
+      
+      toast({
+        title: "Notificação de teste já existe",
+        description: "Uma notificação de teste já está presente no sistema.",
+      });
+      return;
+    }
+    
     const testNotification: Notification = {
-      id: createNotificationId('test'),
+      id: testNotificationId,
       title: "Notificação de teste",
       description: "Isto é uma notificação de teste para verificar se o sistema está funcionando",
       date: formatDate(new Date()),

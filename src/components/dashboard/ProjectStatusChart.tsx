@@ -4,6 +4,7 @@ import { BarChartComponent } from "@/components/dashboard/charts/BarChartCompone
 import { AreaChartComponent } from "@/components/dashboard/charts/AreaChartComponent";
 import { PieChartComponent } from "@/components/dashboard/charts/PieChartComponent";
 import { ChartDataItem } from "@/components/dashboard/useStatusChartData";
+import { useEffect } from "react";
 
 interface ProjectStatusChartProps {
   data: ChartDataItem[];
@@ -16,6 +17,10 @@ export function ProjectStatusChart({
   title, 
   type = "bar" 
 }: ProjectStatusChartProps) {
+  
+  useEffect(() => {
+    console.log("ProjectStatusChart rendering with data:", data);
+  }, [data]);
   
   return (
     <Card className="w-full shadow-sm h-full flex flex-col overflow-hidden">
