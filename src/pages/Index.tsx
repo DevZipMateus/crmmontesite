@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardFooter from "@/components/dashboard/DashboardFooter";
@@ -27,7 +28,11 @@ const Index: React.FC = () => {
     { name: "Aguardando DNS", value: 0, color: "#f97316" }
   ]);
   
-  const [notifications, setNotifications] = useState([
+  // Store dismissed notification IDs in state to prevent them from reappearing
+  const [dismissedNotificationIds, setDismissedNotificationIds] = useState<string[]>([]);
+  
+  // Base notifications that will be filtered against dismissed IDs
+  const [baseNotifications, setBaseNotifications] = useState([
     {
       id: "1",
       title: "Novo projeto criado",
@@ -54,8 +59,18 @@ const Index: React.FC = () => {
     }
   ]);
   
+  // Derived state: filter out dismissed notifications
+  const [notifications, setNotifications] = useState(baseNotifications);
+  
+  // Use effect to filter notifications whenever dismissedNotificationIds changes
+  useEffect(() => {
+    setNotifications(baseNotifications.filter(
+      notification => !dismissedNotificationIds.includes(notification.id)
+    ));
+  }, [baseNotifications, dismissedNotificationIds]);
+  
   const markNotificationAsRead = (id: string) => {
-    setNotifications(prevNotifications => 
+    setBaseNotifications(prevNotifications => 
       prevNotifications.map(notification => 
         notification.id === id ? { ...notification, read: true } : notification
       )
@@ -68,9 +83,8 @@ const Index: React.FC = () => {
   };
   
   const dismissNotification = (id: string) => {
-    setNotifications(prevNotifications => 
-      prevNotifications.filter(notification => notification.id !== id)
-    );
+    // Add the ID to dismissed notifications list
+    setDismissedNotificationIds(prev => [...prev, id]);
     
     toast({
       title: "Notificação removida",
