@@ -51,9 +51,6 @@ export function useNotifications() {
         console.error('Error parsing dismissed notifications:', e);
       }
     }
-    
-    // Set this to true to avoid loading demo notifications after first load
-    localStorage.setItem('notificationsInitialized', 'true');
   }, []);
   
   // Update notifications whenever baseNotifications or dismissedNotificationIds change
