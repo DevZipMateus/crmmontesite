@@ -44,7 +44,7 @@ export function PieChartComponent({ data }: PieChartComponentProps) {
       }}
     >
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart margin={{ top: 60, right: 10, left: 10, bottom: 80 }}>
+        <PieChart margin={{ top: 30, right: 10, left: 10, bottom: 80 }}>
           <Pie
             data={data}
             cx="45%"
