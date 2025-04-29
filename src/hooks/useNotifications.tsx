@@ -49,9 +49,7 @@ export function useNotifications() {
       // Update notifications with the new notification at the beginning
       setNotifications(prev => {
         // First check if we already have this notification (prevent duplicates)
-        const existingIndex = prev.findIndex(n => 
-          n.id === newNotification.id
-        );
+        const existingIndex = prev.findIndex(n => n.id === newNotification.id);
         
         if (existingIndex >= 0) {
           console.log('[useNotifications] Similar notification already exists, not adding duplicate');

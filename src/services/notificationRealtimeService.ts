@@ -43,11 +43,11 @@ export function setupNotificationRealtime(
           const oldStatus = payload.old.status;
           const newStatus = payload.new.status;
           
-          // Create a unique ID based on timestamp and project ID
-          const newNotificationId = createNotificationId('status', payload.new.id);
+          // Create a unique ID based on project ID and timestamp
+          const notificationId = createNotificationId('status', payload.new.id);
           
           // Check if this notification is already dismissed
-          if (dismissedIds.includes(newNotificationId)) {
+          if (dismissedIds.includes(notificationId)) {
             console.log('[notificationRealtimeService] Notification was previously dismissed, not showing it');
             return;
           }
@@ -55,7 +55,7 @@ export function setupNotificationRealtime(
           const formattedDate = formatDate(new Date());
           
           const newNotification: Notification = {
-            id: newNotificationId,
+            id: notificationId,
             title: "Status de projeto alterado",
             description: `O projeto "${projectName}" foi movido de "${oldStatus}" para "${newStatus}"`,
             date: formattedDate,

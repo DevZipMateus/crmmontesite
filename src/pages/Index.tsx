@@ -4,9 +4,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardFooter from "@/components/dashboard/DashboardFooter";
 import MainMenuSection from "@/components/dashboard/MainMenuSection";
 import StatsSection from "@/components/dashboard/StatsSection";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useProjects } from "@/hooks/use-projects";
-import { useTheme } from "next-themes";
 import { AnalyticsSection } from "@/components/dashboard/AnalyticsSection";
 import { InfoCardsSection } from "@/components/dashboard/InfoCardsSection";
 import { ProjectsAnalysisSection } from "@/components/dashboard/ProjectsAnalysisSection";
@@ -18,7 +16,6 @@ import { Button } from "@/components/ui/button";
 const Index: React.FC = () => {
   const { projects, loading } = useProjects();
   const [mounted, setMounted] = useState(false);
-  const { theme } = useTheme();
   
   const chartData = useStatusChartData(projects);
   const { notifications, markNotificationAsRead, dismissNotification, addTestNotification, clearAllNotifications } = useNotifications();
@@ -65,7 +62,7 @@ const Index: React.FC = () => {
   }
   
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900 flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <DashboardHeader />
 
       <main className="flex-1 container max-w-7xl mx-auto px-4 py-0 mt-16">
@@ -75,7 +72,6 @@ const Index: React.FC = () => {
               Adicionar notificação teste
             </Button>
           </div>
-          <ThemeToggle />
         </div>
         
         <MainMenuSection />
