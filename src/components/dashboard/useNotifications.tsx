@@ -35,10 +35,7 @@ export function useNotifications() {
   // Store dismissed notification IDs in state to prevent them from reappearing
   const [dismissedNotificationIds, setDismissedNotificationIds] = useState<string[]>([]);
   
-  // Initialize with empty array instead of demo notifications
-  const [baseNotifications, setBaseNotifications] = useState<Notification[]>([]);
-  
-  // Derived state: filter out dismissed notifications
+  // Initialize with empty array
   const [notifications, setNotifications] = useState<Notification[]>([]);
   
   // Load dismissed notifications from localStorage on init
@@ -53,18 +50,10 @@ export function useNotifications() {
     }
   }, []);
   
-  // Update notifications whenever baseNotifications or dismissedNotificationIds change
-  useEffect(() => {
-    const filtered = baseNotifications.filter(
-      notification => !dismissedNotificationIds.includes(notification.id)
-    );
-    setNotifications(filtered);
-    console.log('Notifications updated:', filtered.length, 'active notifications');
-  }, [baseNotifications, dismissedNotificationIds]);
-  
   // Sync dismissed notifications to localStorage when they change
   useEffect(() => {
     localStorage.setItem('dismissedNotifications', JSON.stringify(dismissedNotificationIds));
+    console.log('Dismissed notifications updated in localStorage:', dismissedNotificationIds);
   }, [dismissedNotificationIds]);
   
   // Listen for project status changes and create notifications
@@ -80,7 +69,7 @@ export function useNotifications() {
       }
     });
     
-    // Ensure we use the same channel name as in other components for consistency
+    // Set up a new channel for project status updates
     const channel = supabase
       .channel('project-status-updates')
       .on(
@@ -116,14 +105,19 @@ export function useNotifications() {
             
             console.log('[useNotifications] Creating new notification:', newNotification);
             
-            // Update baseNotifications with the new notification at the beginning
-            setBaseNotifications(prev => [newNotification, ...prev]);
-            
-            // Also show a toast
-            toast({
-              title: "Status de projeto alterado",
-              description: `O projeto "${projectName}" foi movido para "${newStatus}"`,
-            });
+            // Check if this notification should be dismissed based on ID patterns
+            if (!dismissedNotificationIds.includes(newNotificationId)) {
+              // Update notifications with the new notification at the beginning
+              setNotifications(prev => [newNotification, ...prev]);
+              
+              // Also show a toast
+              toast({
+                title: "Status de projeto alterado",
+                description: `O projeto "${projectName}" foi movido para "${newStatus}"`,
+              });
+            } else {
+              console.log('[useNotifications] Notification was previously dismissed, not showing it');
+            }
           }
         }
       )
@@ -136,10 +130,10 @@ export function useNotifications() {
       console.log('Cleaning up useNotifications subscription');
       supabase.removeChannel(channel);
     };
-  }, [toast]);
+  }, [toast, dismissedNotificationIds]);
   
   const markNotificationAsRead = (id: string) => {
-    setBaseNotifications(prevNotifications => 
+    setNotifications(prevNotifications => 
       prevNotifications.map(notification => 
         notification.id === id ? { ...notification, read: true } : notification
       )
@@ -154,6 +148,9 @@ export function useNotifications() {
   const dismissNotification = (id: string) => {
     // Add the ID to dismissed notifications list
     setDismissedNotificationIds(prev => [...prev, id]);
+    
+    // Also remove it from current notifications
+    setNotifications(prev => prev.filter(notification => notification.id !== id));
     
     toast({
       title: "Notificação removida",

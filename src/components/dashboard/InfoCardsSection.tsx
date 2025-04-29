@@ -4,7 +4,6 @@ import { NotificationsCard } from "@/components/dashboard/NotificationsCard";
 import { RecentProjectsCard } from "@/components/dashboard/RecentProjectsCard";
 import { Notification } from "@/components/dashboard/useNotifications";
 import { Project } from "@/types/project";
-import { supabase } from "@/lib/supabase";
 
 interface InfoCardsSectionProps {
   notifications: Notification[];
@@ -19,9 +18,9 @@ export function InfoCardsSection({
   onDismiss, 
   projects 
 }: InfoCardsSectionProps) {
-  // Enable realtime for projects when component mounts
+  // Log notifications count when they change
   useEffect(() => {
-    console.log('InfoCardsSection mounting - logging notifications:', notifications.length);
+    console.log('InfoCardsSection - Current notifications:', notifications.length);
   }, [notifications.length]);
 
   return (
