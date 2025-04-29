@@ -64,9 +64,9 @@ export async function enableRealtimeForProjects() {
       .subscribe();
     
     console.log('Realtime subscription for projects enabled');
-    return true;
+    return channel;
   } catch (error) {
     console.error('Error enabling realtime for projects:', error);
-    return false;
+    return null;
   }
 }
