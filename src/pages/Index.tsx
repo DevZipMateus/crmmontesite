@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardFooter from "@/components/dashboard/DashboardFooter";
@@ -162,7 +161,7 @@ const Index: React.FC = () => {
         </div>
         
         <h2 className="text-xl font-bold mb-4">Análise de Projetos</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-28">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-40">
           <div className="lg:col-span-2">
             <ProjectStatusChart 
               title="Status dos Projetos" 
