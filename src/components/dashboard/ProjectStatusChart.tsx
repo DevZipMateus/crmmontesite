@@ -21,7 +21,7 @@ export function ProjectStatusChart({
       <CardHeader className="pb-0">
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 pt-2 pb-0">
+      <CardContent className="flex-1 pt-2 pb-2">
         <div className="h-full w-full">
           {type === "bar" ? (
             <BarChartComponent data={data} />
