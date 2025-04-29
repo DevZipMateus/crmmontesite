@@ -1,26 +1,27 @@
 
 /**
- * Utility functions for notifications
+ * Format a date for display in notifications
  */
-
-// Helper function to format date for notifications
 export function formatDate(date: Date): string {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const yesterday = today - 86400000; // 24 hours in milliseconds
-  
-  const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  
-  if (date.getTime() >= today) {
-    return `Hoje, ${time}`;
-  } else if (date.getTime() >= yesterday) {
-    return `Ontem, ${time}`;
-  } else {
-    return date.toLocaleDateString('pt-BR');
-  }
+  return date.toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 }
 
-// Create a unique ID for notifications
-export function createNotificationId(prefix: string, entityId?: string): string {
-  return `${prefix}-${Date.now()}-${entityId || Math.random().toString(36).substring(2, 9)}`;
+/**
+ * Create a unique notification ID
+ */
+export function createNotificationId(type: string, entityId?: string): string {
+  const timestamp = Date.now();
+  const randomPart = Math.floor(Math.random() * 10000);
+  
+  if (entityId) {
+    return `${type}_${entityId}_${timestamp}_${randomPart}`;
+  }
+  
+  return `${type}_${timestamp}_${randomPart}`;
 }
