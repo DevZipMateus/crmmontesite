@@ -36,16 +36,16 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
   ) : null;
 };
 
-// Custom Legend renderer with improved visibility
+// Custom Legend renderer with better visibility and layout
 const renderCustomLegend = (props: any) => {
   const { payload } = props;
   
   return (
-    <div className="flex flex-wrap justify-center gap-4 mt-2">
+    <div className="flex flex-wrap justify-center gap-3 mt-6">
       {payload.map((entry: any, index: number) => (
-        <div key={`legend-${index}`} className="flex items-center gap-2">
+        <div key={`legend-${index}`} className="flex items-center gap-2 bg-background/80 px-2 py-1 rounded">
           <div 
-            className="w-4 h-4 rounded-full" 
+            className="w-3 h-3 rounded-full" 
             style={{ backgroundColor: entry.color }}
           />
           <span className="text-sm font-medium">{entry.value}</span>
@@ -63,14 +63,14 @@ export function PieChartComponent({ data }: PieChartComponentProps) {
       }}
     >
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart margin={{ top: 50, right: 20, left: 20, bottom: 30 }}>
+        <PieChart>
           <Pie
             data={data}
             cx="50%"
-            cy="50%"
+            cy="45%"
             labelLine={false}
-            outerRadius={70}
-            innerRadius={40}
+            outerRadius={60}
+            innerRadius={30}
             fill="#8884d8"
             dataKey="value"
             nameKey="name"
@@ -84,7 +84,6 @@ export function PieChartComponent({ data }: PieChartComponentProps) {
           <Tooltip content={<ChartTooltipContent />} />
           <Legend 
             content={renderCustomLegend}
-            layout="horizontal"
             verticalAlign="bottom"
             align="center"
           />
