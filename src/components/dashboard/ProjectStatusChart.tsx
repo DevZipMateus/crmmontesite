@@ -34,12 +34,12 @@ export function ProjectStatusChart({
   const COLORS = data.map(item => item.color);
   
   return (
-    <Card className="w-full shadow-sm h-full">
+    <Card className="w-full shadow-sm h-full flex flex-col overflow-hidden">
       <CardHeader className="pb-0">
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="h-[200px] w-full">
+      <CardContent className="flex-1 overflow-hidden">
+        <div className="h-[200px] w-full overflow-hidden">
           {type === "bar" ? (
             <ChartContainer
               config={{
@@ -47,7 +47,10 @@ export function ProjectStatusChart({
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 25 }}>
+                <BarChart 
+                  data={data} 
+                  margin={{ top: 10, right: 10, left: 0, bottom: 30 }}
+                >
                   <XAxis 
                     dataKey="name" 
                     tick={{ fontSize: 10 }} 
@@ -58,7 +61,11 @@ export function ProjectStatusChart({
                   />
                   <YAxis tick={{ fontSize: 10 }} width={30} />
                   <Tooltip content={<ChartTooltipContent />} />
-                  <Legend wrapperStyle={{ fontSize: '10px', marginTop: '10px' }} />
+                  <Legend 
+                    wrapperStyle={{ fontSize: '10px', marginTop: '5px', paddingBottom: '10px' }}
+                    verticalAlign="bottom"
+                    height={36}
+                  />
                   <Bar 
                     dataKey="value" 
                     name="Quantidade" 
@@ -79,7 +86,10 @@ export function ProjectStatusChart({
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 25 }}>
+                <AreaChart 
+                  data={data} 
+                  margin={{ top: 10, right: 10, left: 0, bottom: 30 }}
+                >
                   <defs>
                     {data.map((entry, index) => (
                       <linearGradient key={`gradient-${index}`} id={`colorGradient${index}`} x1="0" y1="0" x2="0" y2="1">
@@ -96,9 +106,17 @@ export function ProjectStatusChart({
                     angle={-45}
                     textAnchor="end"
                   />
-                  <YAxis tick={{ fontSize: 10 }} width={30} />
+                  <YAxis 
+                    tick={{ fontSize: 10 }} 
+                    width={30} 
+                    domain={[0, 'auto']} // Ensures chart adapts to data range
+                  />
                   <Tooltip content={<ChartTooltipContent />} />
-                  <Legend wrapperStyle={{ fontSize: '10px', marginTop: '10px' }} />
+                  <Legend 
+                    wrapperStyle={{ fontSize: '10px', marginTop: '5px', paddingBottom: '10px' }}
+                    verticalAlign="bottom"
+                    height={36}
+                  />
                   {data.map((entry, index) => (
                     <Area
                       key={`area-${index}`}
@@ -140,10 +158,19 @@ export function ProjectStatusChart({
                   </Pie>
                   <Tooltip content={<ChartTooltipContent />} />
                   <Legend 
-                    wrapperStyle={{ fontSize: '10px', marginTop: '10px' }}
+                    wrapperStyle={{ 
+                      fontSize: '10px', 
+                      marginTop: '5px',
+                      paddingBottom: '10px',
+                      width: '100%',
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      justifyContent: 'center'
+                    }}
                     layout="horizontal"
                     verticalAlign="bottom"
                     align="center"
+                    height={36}
                   />
                 </PieChart>
               </ResponsiveContainer>
