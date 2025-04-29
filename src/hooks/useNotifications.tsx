@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase/client";
 import { Notification } from "@/types/notification";
 import { notificationStorage } from "@/services/notificationStorage";
 import { setupNotificationRealtime } from "@/services/notificationRealtimeService";

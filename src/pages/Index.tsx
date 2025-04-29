@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardFooter from "@/components/dashboard/DashboardFooter";
@@ -23,7 +22,6 @@ const Index: React.FC = () => {
   const chartData = useStatusChartData(projects);
   const { notifications, markNotificationAsRead, dismissNotification, addTestNotification } = useNotifications();
   
-  // Debug notifications
   useEffect(() => {
     console.log("Index - Current notifications:", notifications);
   }, [notifications]);
@@ -31,11 +29,9 @@ const Index: React.FC = () => {
   useEffect(() => {
     setMounted(true);
     
-    // Initialize realtime for project status changes
     const initRealtime = async () => {
       console.log('Initializing realtime on Index page...');
       
-      // First, check if there are any existing channels and clean them up
       const existingChannels = supabase.getChannels();
       console.log('Existing channels:', existingChannels.length);
       
@@ -46,16 +42,12 @@ const Index: React.FC = () => {
         }
       });
       
-      // Then enable realtime for projects
       const channel = await enableRealtimeForProjects();
       console.log('Realtime initialized on Index page:', channel ? 'Success' : 'Failed');
     };
     
     initRealtime();
     
-    // Removed the automatic test notification timer
-    
-    // Cleanup function
     return () => {
       console.log('Index page unmounting - cleaning up realtime subscriptions');
       const existingChannels = supabase.getChannels();

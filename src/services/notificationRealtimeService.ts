@@ -1,5 +1,5 @@
 
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase/client";
 import { formatDate, createNotificationId } from "@/utils/notificationUtils";
 import { Notification } from "@/types/notification";
 

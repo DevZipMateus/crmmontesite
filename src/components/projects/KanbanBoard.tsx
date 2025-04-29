@@ -1,5 +1,4 @@
-
-import { PROJECT_STATUS_TYPES } from "@/lib/supabase";
+import { PROJECT_STATUS_TYPES } from "@/lib/supabase/projectStatus";
 import KanbanColumn from "./kanban/KanbanColumn";
 import { useDragAndDrop } from "./kanban/useDragAndDrop";
 import { useState, useEffect } from "react";
@@ -7,7 +6,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase/client";
 
 interface Project {
   id: string;
@@ -40,9 +39,7 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted }:
   const [activeColumnIndex, setActiveColumnIndex] = useState(0);
   const [projectsWithCustomizationStatus, setProjectsWithCustomizationStatus] = useState<Project[]>([]);
   
-  // Verifica quais projetos possuem customizações pendentes
   useEffect(() => {
-    // Só executa se tiver projetos
     if (projects.length === 0) {
       setProjectsWithCustomizationStatus([]);
       return;
@@ -50,7 +47,6 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted }:
 
     const checkCustomizations = async () => {
       try {
-        // Busca todas as customizações pendentes
         const { data: customizations, error } = await supabase
           .from("project_customizations")
           .select("project_id")
@@ -61,23 +57,17 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted }:
           return;
         }
 
-        // Cria um Set com os IDs dos projetos que têm customizações pendentes
         const projectsWithPendingCustomizations = new Set(
           customizations.map(c => c.project_id)
         );
 
-        // Atualiza os projetos com a informação de customizações pendentes
-        // E reordena para que os com customizações pendentes apareçam primeiro
         const updatedProjects = [...projects].map(project => ({
           ...project,
           hasPendingCustomizations: projectsWithPendingCustomizations.has(project.id)
         })).sort((a, b) => {
-          // Projetos com customizações pendentes vêm primeiro
           if (a.hasPendingCustomizations && !b.hasPendingCustomizations) return -1;
           if (!a.hasPendingCustomizations && b.hasPendingCustomizations) return 1;
           
-          // Caso ambos tenham o mesmo status de customização, mantém a ordem original
-          // (implicitamente baseada na data de criação)
           return 0;
         });
 
@@ -90,12 +80,10 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted }:
     checkCustomizations();
   }, [projects]);
   
-  // Usa os projetos com status de customização se disponíveis, senão usa os projetos originais
   const displayProjects = projectsWithCustomizationStatus.length > 0 
     ? projectsWithCustomizationStatus 
     : projects;
   
-  // For mobile view, only show one column at a time with navigation
   const handleNextColumn = () => {
     setActiveColumnIndex((prev) => 
       prev < PROJECT_STATUS_TYPES.length - 1 ? prev + 1 : prev
@@ -113,12 +101,10 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted }:
   };
 
   if (isMobile) {
-    // Mobile view - show one column at a time with navigation controls
     const currentStatusType = PROJECT_STATUS_TYPES[activeColumnIndex];
     
     return (
       <div className="relative">
-        {/* Mobile navigation controls */}
         <div className="flex justify-between items-center mb-2">
           <Button 
             variant="outline" 
@@ -162,7 +148,6 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted }:
     );
   }
 
-  // Desktop view - show all columns in a grid
   return (
     <ScrollArea className="w-full">
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 min-w-[1000px]">
