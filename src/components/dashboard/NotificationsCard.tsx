@@ -1,5 +1,5 @@
 
-import { Bell, Check, X } from "lucide-react";
+import { Bell, Check, X, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,12 +9,14 @@ interface NotificationsCardProps {
   notifications: Notification[];
   onMarkAsRead?: (id: string) => void;
   onDismiss?: (id: string) => void;
+  onClearAll?: () => void;
 }
 
 export function NotificationsCard({ 
   notifications, 
   onMarkAsRead,
-  onDismiss
+  onDismiss,
+  onClearAll
 }: NotificationsCardProps) {
   const unreadCount = notifications.filter(n => !n.read).length;
   
@@ -24,16 +26,30 @@ export function NotificationsCard({
     <Card className="shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg">Notificações</CardTitle>
-        <div className="relative">
-          <Bell className="h-5 w-5 text-muted-foreground" />
-          {unreadCount > 0 && (
-            <Badge 
-              variant="destructive" 
-              className="absolute -top-2 -right-2 h-4 w-4 p-0 flex items-center justify-center text-[10px] rounded-full"
+        <div className="flex items-center gap-2">
+          {notifications.length > 0 && onClearAll && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 px-2 text-xs text-muted-foreground hover:text-destructive"
+              onClick={onClearAll}
+              aria-label="Limpar todas as notificações"
             >
-              {unreadCount}
-            </Badge>
+              <Trash2 className="h-4 w-4 mr-1" />
+              Limpar todas
+            </Button>
           )}
+          <div className="relative">
+            <Bell className="h-5 w-5 text-muted-foreground" />
+            {unreadCount > 0 && (
+              <Badge 
+                variant="destructive" 
+                className="absolute -top-2 -right-2 h-4 w-4 p-0 flex items-center justify-center text-[10px] rounded-full"
+              >
+                {unreadCount}
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="max-h-[250px] overflow-y-auto px-4 py-2">

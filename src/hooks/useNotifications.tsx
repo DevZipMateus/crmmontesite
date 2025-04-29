@@ -135,10 +135,30 @@ export function useNotifications() {
     });
   };
 
+  /**
+   * Clear all notifications
+   */
+  const clearAllNotifications = () => {
+    console.log('Clearing all notifications');
+    
+    // Add all current notification IDs to dismissed list
+    const currentIds = notifications.map(notification => notification.id);
+    setDismissedNotificationIds(prev => [...prev, ...currentIds]);
+    
+    // Clear the notifications list
+    setNotifications([]);
+    
+    toast({
+      title: "Notificações limpas",
+      description: "Todas as notificações foram removidas com sucesso.",
+    });
+  };
+
   return {
     notifications,
     markNotificationAsRead,
     dismissNotification,
-    addTestNotification // Expose this for testing
+    addTestNotification,
+    clearAllNotifications
   };
 }

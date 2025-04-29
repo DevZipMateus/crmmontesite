@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardFooter from "@/components/dashboard/DashboardFooter";
@@ -20,7 +21,7 @@ const Index: React.FC = () => {
   const { theme } = useTheme();
   
   const chartData = useStatusChartData(projects);
-  const { notifications, markNotificationAsRead, dismissNotification, addTestNotification } = useNotifications();
+  const { notifications, markNotificationAsRead, dismissNotification, addTestNotification, clearAllNotifications } = useNotifications();
   
   useEffect(() => {
     console.log("Index - Current notifications:", notifications);
@@ -86,6 +87,7 @@ const Index: React.FC = () => {
           notifications={notifications}
           onMarkAsRead={markNotificationAsRead}
           onDismiss={dismissNotification}
+          onClearAll={clearAllNotifications}
           projects={projects}
         />
         

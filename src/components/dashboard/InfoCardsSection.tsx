@@ -9,6 +9,7 @@ interface InfoCardsSectionProps {
   notifications: Notification[];
   onMarkAsRead: (id: string) => void;
   onDismiss: (id: string) => void;
+  onClearAll: () => void;
   projects: Project[];
 }
 
@@ -16,6 +17,7 @@ export function InfoCardsSection({
   notifications, 
   onMarkAsRead, 
   onDismiss, 
+  onClearAll,
   projects 
 }: InfoCardsSectionProps) {
   return (
@@ -24,6 +26,7 @@ export function InfoCardsSection({
         notifications={notifications}
         onMarkAsRead={onMarkAsRead}
         onDismiss={onDismiss}
+        onClearAll={onClearAll}
       />
       <RecentProjectsCard 
         projects={projects.slice(0, 5).map(p => ({
