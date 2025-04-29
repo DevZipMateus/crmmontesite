@@ -4,7 +4,6 @@ import { BarChartComponent } from "@/components/dashboard/charts/BarChartCompone
 import { AreaChartComponent } from "@/components/dashboard/charts/AreaChartComponent";
 import { PieChartComponent } from "@/components/dashboard/charts/PieChartComponent";
 import { ChartDataItem } from "@/components/dashboard/useStatusChartData";
-import { useEffect } from "react";
 
 interface ProjectStatusChartProps {
   data: ChartDataItem[];
@@ -17,17 +16,12 @@ export function ProjectStatusChart({
   title, 
   type = "bar" 
 }: ProjectStatusChartProps) {
-  
-  useEffect(() => {
-    console.log("ProjectStatusChart rendering with data:", data);
-  }, [data]);
-  
   return (
     <Card className="w-full shadow-sm h-full flex flex-col">
       <CardHeader className="pb-0">
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 pt-2 pb-2">
+      <CardContent className="flex-1 pt-2 pb-4">
         <div className="h-full w-full">
           {type === "bar" ? (
             <BarChartComponent data={data} />

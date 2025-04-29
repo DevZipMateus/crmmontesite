@@ -17,8 +17,6 @@ interface AreaChartComponentProps {
 }
 
 export function AreaChartComponent({ data }: AreaChartComponentProps) {
-  console.log("AreaChartComponent rendering with data:", data);
-  
   // Filter out items with zero value to simplify the chart
   const activeData = data.filter(item => item.value > 0);
   
@@ -44,10 +42,10 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
         status: { label: "Status" },
       }}
     >
-      <ResponsiveContainer width="100%" height={350}>
+      <ResponsiveContainer width="100%" height={300}>
         <AreaChart 
           data={transformedData} 
-          margin={{ top: 10, right: 20, left: 10, bottom: 40 }}
+          margin={{ top: 10, right: 20, left: 10, bottom: 20 }}
         >
           <defs>
             {transformedData.map((entry, index) => (
@@ -61,9 +59,9 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
           <XAxis 
             dataKey="name" 
             tick={{ fontSize: 10 }} 
-            height={50} 
+            height={40} 
             interval={0}
-            angle={-35}
+            angle={-30}
             textAnchor="end"
           />
           <YAxis 
@@ -74,13 +72,11 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
           />
           <Tooltip content={<ChartTooltipContent />} />
           <Legend 
-            verticalAlign="bottom"
-            height={30}
+            verticalAlign="top"
+            height={20}
             wrapperStyle={{ 
               fontSize: '11px', 
-              bottom: '0',
-              left: '0',
-              width: '100%'
+              paddingTop: '5px'
             }}
           />
           {transformedData.map((entry, index) => (
