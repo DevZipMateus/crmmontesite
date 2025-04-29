@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardFooter from "@/components/dashboard/DashboardFooter";
@@ -143,6 +144,24 @@ const Index: React.FC = () => {
           />
         </div>
         
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          <NotificationsCard 
+            notifications={notifications}
+            onMarkAsRead={markNotificationAsRead}
+            onDismiss={dismissNotification}
+          />
+          <RecentProjectsCard 
+            projects={projects.slice(0, 5).map(p => ({
+              id: p.id,
+              client_name: p.client_name,
+              status: p.status,
+              created_at: p.created_at,
+              template: p.template
+            }))} 
+          />
+        </div>
+        
+        <h2 className="text-xl font-bold mb-4">Análise de Projetos</h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-14">
           <div className="lg:col-span-2">
             <ProjectStatusChart 
@@ -158,23 +177,6 @@ const Index: React.FC = () => {
               type="pie"
             />
           </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-12">
-          <NotificationsCard 
-            notifications={notifications}
-            onMarkAsRead={markNotificationAsRead}
-            onDismiss={dismissNotification}
-          />
-          <RecentProjectsCard 
-            projects={projects.slice(0, 5).map(p => ({
-              id: p.id,
-              client_name: p.client_name,
-              status: p.status,
-              created_at: p.created_at,
-              template: p.template
-            }))} 
-          />
         </div>
       </main>
 

@@ -38,8 +38,8 @@ export function ProjectStatusChart({
       <CardHeader className="pb-0">
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="pb-2">
-        <div className="h-[160px] w-full">
+      <CardContent>
+        <div className="h-[200px] w-full">
           {type === "bar" ? (
             <ChartContainer
               config={{
@@ -47,25 +47,28 @@ export function ProjectStatusChart({
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 20 }}>
+                <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 25 }}>
                   <XAxis 
                     dataKey="name" 
-                    tick={{ fontSize: 8 }} 
-                    height={30} 
+                    tick={{ fontSize: 10 }} 
+                    height={35} 
                     interval={0}
                     angle={-45}
                     textAnchor="end"
                   />
-                  <YAxis tick={{ fontSize: 8 }} width={20} />
+                  <YAxis tick={{ fontSize: 10 }} width={30} />
                   <Tooltip content={<ChartTooltipContent />} />
-                  <Legend wrapperStyle={{ fontSize: '8px', marginTop: '2px' }} />
+                  <Legend wrapperStyle={{ fontSize: '10px', marginTop: '10px' }} />
                   <Bar 
                     dataKey="value" 
                     name="Quantidade" 
                     radius={[4, 4, 0, 0]}
-                    maxBarSize={30}
-                    fill="var(--primary)"
-                  />
+                    maxBarSize={40}
+                  >
+                    {data.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </ChartContainer>
@@ -76,26 +79,38 @@ export function ProjectStatusChart({
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 15 }}>
+                <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 25 }}>
+                  <defs>
+                    {data.map((entry, index) => (
+                      <linearGradient key={`gradient-${index}`} id={`colorGradient${index}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={entry.color} stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor={entry.color} stopOpacity={0.1}/>
+                      </linearGradient>
+                    ))}
+                  </defs>
                   <XAxis 
                     dataKey="name" 
-                    tick={{ fontSize: 8 }} 
-                    height={28} 
+                    tick={{ fontSize: 10 }} 
+                    height={35} 
                     interval={0}
                     angle={-45}
                     textAnchor="end"
                   />
-                  <YAxis tick={{ fontSize: 8 }} width={20} />
+                  <YAxis tick={{ fontSize: 10 }} width={30} />
                   <Tooltip content={<ChartTooltipContent />} />
-                  <Legend wrapperStyle={{ fontSize: '8px', marginTop: '2px' }} />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    name="Quantidade"
-                    stroke="var(--primary)"
-                    fill="var(--primary)"
-                    fillOpacity={0.3}
-                  />
+                  <Legend wrapperStyle={{ fontSize: '10px', marginTop: '10px' }} />
+                  {data.map((entry, index) => (
+                    <Area
+                      key={`area-${index}`}
+                      type="monotone"
+                      dataKey="value"
+                      name={entry.name}
+                      stroke={entry.color}
+                      fillOpacity={1}
+                      fill={`url(#colorGradient${index})`}
+                      hide={index !== 0}
+                    />
+                  ))}
                 </AreaChart>
               </ResponsiveContainer>
             </ChartContainer>
@@ -110,9 +125,10 @@ export function ProjectStatusChart({
                   <Pie
                     data={data}
                     cx="50%"
-                    cy="50%"
+                    cy="45%"
                     labelLine={false}
-                    outerRadius={45}
+                    outerRadius={60}
+                    innerRadius={30}
                     fill="#8884d8"
                     dataKey="value"
                     nameKey="name"
@@ -123,7 +139,12 @@ export function ProjectStatusChart({
                     ))}
                   </Pie>
                   <Tooltip content={<ChartTooltipContent />} />
-                  <Legend wrapperStyle={{ fontSize: '8px', marginTop: '2px' }} />
+                  <Legend 
+                    wrapperStyle={{ fontSize: '10px', marginTop: '10px' }}
+                    layout="horizontal"
+                    verticalAlign="bottom"
+                    align="center"
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </ChartContainer>
