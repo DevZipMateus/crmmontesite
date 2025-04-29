@@ -2,7 +2,7 @@
 import React from "react";
 import { NotificationsCard } from "@/components/dashboard/NotificationsCard";
 import { RecentProjectsCard } from "@/components/dashboard/RecentProjectsCard";
-import { Notification } from "@/components/dashboard/useNotifications";
+import { Notification } from "@/types/notification";
 import { Project } from "@/types/project";
 
 interface InfoCardsSectionProps {

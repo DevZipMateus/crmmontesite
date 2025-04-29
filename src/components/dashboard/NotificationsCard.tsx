@@ -3,7 +3,7 @@ import { Bell, Check, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Notification } from "@/components/dashboard/useNotifications";
+import { Notification } from "@/types/notification";
 
 interface NotificationsCardProps {
   notifications: Notification[];

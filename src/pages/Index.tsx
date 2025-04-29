@@ -11,7 +11,7 @@ import { AnalyticsSection } from "@/components/dashboard/AnalyticsSection";
 import { InfoCardsSection } from "@/components/dashboard/InfoCardsSection";
 import { ProjectsAnalysisSection } from "@/components/dashboard/ProjectsAnalysisSection";
 import { useStatusChartData } from "@/components/dashboard/useStatusChartData";
-import { useNotifications } from "@/components/dashboard/useNotifications";
+import { useNotifications } from "@/hooks/useNotifications";
 import { enableRealtimeForProjects, supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 
