@@ -53,10 +53,7 @@ const Index: React.FC = () => {
     
     initRealtime();
     
-    // Add a test notification when the page loads (only during development)
-    setTimeout(() => {
-      addTestNotification();
-    }, 1500);
+    // Removed the automatic test notification timer
     
     // Cleanup function
     return () => {
@@ -68,7 +65,7 @@ const Index: React.FC = () => {
         }
       });
     };
-  }, [addTestNotification]);
+  }, []);
   
   if (!mounted) {
     return null;
