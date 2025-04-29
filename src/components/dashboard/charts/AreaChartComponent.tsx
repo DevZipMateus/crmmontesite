@@ -6,7 +6,8 @@ import {
   YAxis, 
   ResponsiveContainer, 
   Tooltip,
-  Legend
+  Legend,
+  CartesianGrid
 } from "recharts";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { ChartDataItem } from "@/components/dashboard/useStatusChartData";
@@ -25,7 +26,7 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart 
           data={data} 
-          margin={{ top: 20, right: 40, left: 30, bottom: 70 }}
+          margin={{ top: 30, right: 50, left: 50, bottom: 80 }}
         >
           <defs>
             {data.map((entry, index) => (
@@ -35,24 +36,32 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
               </linearGradient>
             ))}
           </defs>
+          <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
           <XAxis 
             dataKey="name" 
-            tick={{ fontSize: 10 }} 
-            height={70} 
+            tick={{ fontSize: 11 }} 
+            height={80} 
             interval={0}
             angle={-45}
             textAnchor="end"
+            padding={{ left: 10, right: 10 }}
           />
           <YAxis 
-            tick={{ fontSize: 10 }} 
-            width={60} 
+            tick={{ fontSize: 11 }} 
+            width={50} 
             domain={[0, 'auto']}
+            padding={{ top: 10, bottom: 10 }}
           />
           <Tooltip content={<ChartTooltipContent />} />
           <Legend 
-            wrapperStyle={{ fontSize: '10px', marginTop: '5px', paddingBottom: '30px' }}
             verticalAlign="bottom"
-            height={40}
+            height={50}
+            wrapperStyle={{ 
+              fontSize: '12px', 
+              marginTop: '10px', 
+              paddingBottom: '40px',
+              paddingTop: '10px'
+            }}
           />
           {data.map((entry, index) => (
             <Area
