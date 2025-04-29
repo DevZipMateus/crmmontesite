@@ -48,7 +48,7 @@ export function PieChartComponent({ data }: PieChartComponentProps) {
           <Pie
             data={data}
             cx="50%"
-            cy="45%"
+            cy="30%"
             labelLine={false}
             outerRadius={85}
             innerRadius={50}
