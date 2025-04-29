@@ -44,11 +44,11 @@ export function PieChartComponent({ data }: PieChartComponentProps) {
       }}
     >
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart margin={{ top: 80, right: 10, left: 10, bottom: 80 }}>
+        <PieChart margin={{ top: 120, right: 10, left: 10, bottom: 80 }}>
           <Pie
             data={data}
-            cx="45%"
-            cy="30%"
+            cx="50%"
+            cy="45%"
             labelLine={false}
             outerRadius={85}
             innerRadius={50}
