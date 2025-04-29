@@ -50,8 +50,7 @@ export function useNotifications() {
       setNotifications(prev => {
         // First check if we already have this notification (prevent duplicates)
         const existingIndex = prev.findIndex(n => 
-          n.description === newNotification.description && 
-          n.title === newNotification.title
+          n.id === newNotification.id
         );
         
         if (existingIndex >= 0) {
