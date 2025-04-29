@@ -2,7 +2,7 @@
 import React from "react";
 import { AnalyticsCard } from "@/components/dashboard/AnalyticsCard";
 import { Clock, Database, Users } from "lucide-react";
-import { Project } from "@/hooks/use-projects";
+import { Project } from "@/types/project";
 
 interface AnalyticsSectionProps {
   projects: Project[];

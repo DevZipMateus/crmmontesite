@@ -13,7 +13,8 @@ import {
   Pie,
   Cell,
   AreaChart,
-  Area
+  Area,
+  LabelList
 } from "recharts";
 
 interface ProjectStatusChartProps {
@@ -25,6 +26,28 @@ interface ProjectStatusChartProps {
   title: string;
   type?: "bar" | "pie" | "area";
 }
+
+// Custom component for the Pie chart label
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }: any) => {
+  const RADIAN = Math.PI / 180;
+  const radius = innerRadius + (outerRadius - innerRadius) * 1.1;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  // Only display the percentage if it's significant enough to be visible
+  return percent > 0.05 ? (
+    <text 
+      x={x} 
+      y={y} 
+      fill="#888888"
+      textAnchor={x > cx ? 'start' : 'end'} 
+      dominantBaseline="central"
+      fontSize={12}
+    >
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  ) : null;
+};
 
 export function ProjectStatusChart({ 
   data, 
@@ -39,7 +62,7 @@ export function ProjectStatusChart({
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden pt-2 pb-16">
-        <div className="h-[400px] w-full overflow-hidden">
+        <div className="h-[500px] w-full overflow-hidden">
           {type === "bar" ? (
             <ChartContainer
               config={{
@@ -143,18 +166,19 @@ export function ProjectStatusChart({
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 100 }}>
+                <PieChart margin={{ top: 10, right: 10, left: 10, bottom: 120 }}>
                   <Pie
                     data={data}
                     cx="50%"
-                    cy="40%"
+                    cy="45%"
                     labelLine={false}
-                    outerRadius={90}
-                    innerRadius={50}
+                    outerRadius={140}
+                    innerRadius={70}
                     fill="#8884d8"
                     dataKey="value"
                     nameKey="name"
-                    label={({name, percent}) => percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}
+                    label={renderCustomizedLabel}
+                    paddingAngle={2}
                   >
                     {data.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -162,21 +186,18 @@ export function ProjectStatusChart({
                   </Pie>
                   <Tooltip content={<ChartTooltipContent />} />
                   <Legend 
-                    wrapperStyle={{ 
-                      fontSize: '10px', 
-                      marginTop: '20px',
-                      paddingBottom: '10px',
-                      width: '100%',
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      justifyContent: 'center',
-                      position: 'absolute',
-                      bottom: '5px'
-                    }}
                     layout="horizontal"
                     verticalAlign="bottom"
                     align="center"
-                    height={80}
+                    wrapperStyle={{ 
+                      fontSize: '10px', 
+                      width: '100%',
+                      paddingTop: '20px',
+                      bottom: 0,
+                      position: 'absolute'
+                    }}
+                    iconSize={10}
+                    iconType="circle"
                   />
                 </PieChart>
               </ResponsiveContainer>

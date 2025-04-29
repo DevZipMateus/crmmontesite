@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Project } from "@/hooks/use-projects";
+import { Project } from "@/types/project";
 
 export interface ChartDataItem {
   name: string;
