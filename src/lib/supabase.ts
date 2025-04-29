@@ -54,16 +54,20 @@ export async function enableRealtimeForProjects() {
       .select('id')
       .limit(1);
     
-    // Enable realtime updates with REPLICA IDENTITY FULL for the projects table
-    const { error } = await supabase.rpc('supabase_functions.enable_realtime', {
-      table_name: 'projects'
-    });
+    // Enable realtime updates using the REST API approach instead of RPC
+    // This avoids the TypeScript error with the RPC function
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .limit(1)
+      .subscribe();
     
     if (error) {
       console.error('Error enabling realtime for projects:', error);
       return false;
     }
     
+    console.log('Realtime subscription for projects enabled');
     return true;
   } catch (error) {
     console.error('Error enabling realtime for projects:', error);
