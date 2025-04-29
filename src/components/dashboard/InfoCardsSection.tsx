@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { NotificationsCard } from "@/components/dashboard/NotificationsCard";
 import { RecentProjectsCard } from "@/components/dashboard/RecentProjectsCard";
 import { Notification } from "@/components/dashboard/useNotifications";
@@ -18,11 +18,6 @@ export function InfoCardsSection({
   onDismiss, 
   projects 
 }: InfoCardsSectionProps) {
-  // Log notifications count when they change
-  useEffect(() => {
-    console.log('InfoCardsSection - Current notifications:', notifications);
-  }, [notifications]);
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
       <NotificationsCard 

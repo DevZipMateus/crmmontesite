@@ -3,15 +3,7 @@ import { Bell, Check, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-interface Notification {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  read: boolean;
-  type: "info" | "warning" | "success" | "error";
-}
+import { Notification } from "@/components/dashboard/useNotifications";
 
 interface NotificationsCardProps {
   notifications: Notification[];
@@ -25,6 +17,8 @@ export function NotificationsCard({
   onDismiss
 }: NotificationsCardProps) {
   const unreadCount = notifications.filter(n => !n.read).length;
+  
+  console.log("NotificationsCard - Current notifications:", notifications);
   
   return (
     <Card className="shadow-sm">
