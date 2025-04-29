@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardFooter from "@/components/dashboard/DashboardFooter";
@@ -20,7 +19,6 @@ const Index: React.FC = () => {
   const { theme } = useTheme();
   const { toast } = useToast();
   
-  // Dados para os gráficos
   const [chartData, setChartData] = useState([
     { name: "Site Pronto", value: 0, color: "#22c55e" },
     { name: "Criando Site", value: 4, color: "#3b82f6" },
@@ -29,7 +27,6 @@ const Index: React.FC = () => {
     { name: "Aguardando DNS", value: 0, color: "#f97316" }
   ]);
   
-  // Notificações do sistema
   const [notifications, setNotifications] = useState([
     {
       id: "1",
@@ -57,7 +54,6 @@ const Index: React.FC = () => {
     }
   ]);
   
-  // Função para marcar notificação como lida
   const markNotificationAsRead = (id: string) => {
     setNotifications(prevNotifications => 
       prevNotifications.map(notification => 
@@ -71,7 +67,6 @@ const Index: React.FC = () => {
     });
   };
   
-  // Função para descartar notificação
   const dismissNotification = (id: string) => {
     setNotifications(prevNotifications => 
       prevNotifications.filter(notification => notification.id !== id)
@@ -83,7 +78,6 @@ const Index: React.FC = () => {
     });
   };
   
-  // Atualiza os dados dos gráficos baseado nos projetos
   useEffect(() => {
     if (projects.length > 0) {
       const statusCount: Record<string, number> = {};
@@ -105,7 +99,6 @@ const Index: React.FC = () => {
     }
   }, [projects]);
   
-  // Resolver problema de hidratação do tema
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -118,7 +111,6 @@ const Index: React.FC = () => {
     <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900 flex flex-col">
       <DashboardHeader />
 
-      {/* Main Content */}
       <main className="flex-1 container max-w-7xl mx-auto px-4 py-0 mt-16">
         <div className="flex justify-end mb-4">
           <ThemeToggle />
@@ -127,7 +119,6 @@ const Index: React.FC = () => {
         <MainMenuSection />
         <StatsSection />
         
-        {/* Analytics Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <AnalyticsCard
             title="Total de Projetos"
@@ -152,13 +143,12 @@ const Index: React.FC = () => {
           />
         </div>
         
-        {/* Charts Section - Adjusted height and spacing */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
           <div className="lg:col-span-2">
             <ProjectStatusChart 
               title="Status dos Projetos" 
               data={chartData}
-              type="bar"
+              type="area"
             />
           </div>
           <div className="lg:col-span-1">
@@ -170,7 +160,6 @@ const Index: React.FC = () => {
           </div>
         </div>
         
-        {/* Cards Section - Increased vertical spacing */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-12">
           <NotificationsCard 
             notifications={notifications}
