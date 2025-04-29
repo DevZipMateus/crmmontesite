@@ -21,6 +21,17 @@ export function InfoCardsSection({
 }: InfoCardsSectionProps) {
   // Enable realtime for projects when component mounts
   useEffect(() => {
+    console.log('InfoCardsSection mounting - setting up realtime subscription');
+    
+    // First, check if the channel already exists and remove it to prevent duplicates
+    const existingChannels = supabase.getChannels();
+    existingChannels.forEach(ch => {
+      if (ch.topic === 'project-status-updates') {
+        console.log('Removing existing project-status-updates channel in InfoCardsSection');
+        supabase.removeChannel(ch);
+      }
+    });
+    
     // Use a consistent channel name for project updates
     const channel = supabase
       .channel('project-status-updates')

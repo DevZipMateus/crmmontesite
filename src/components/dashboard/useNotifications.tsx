@@ -76,20 +76,34 @@ export function useNotifications() {
   ]);
   
   // Derived state: filter out dismissed notifications
-  const [notifications, setNotifications] = useState<Notification[]>(baseNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  
+  // Update notifications whenever baseNotifications or dismissedNotificationIds change
+  useEffect(() => {
+    const filtered = baseNotifications.filter(
+      notification => !dismissedNotificationIds.includes(notification.id)
+    );
+    setNotifications(filtered);
+    console.log('Notifications updated:', filtered.length, 'active notifications');
+  }, [baseNotifications, dismissedNotificationIds]);
   
   // Sync dismissed notifications to localStorage when they change
   useEffect(() => {
     localStorage.setItem('dismissedNotificationIds', JSON.stringify(dismissedNotificationIds));
-    
-    setNotifications(baseNotifications.filter(
-      notification => !dismissedNotificationIds.includes(notification.id)
-    ));
-  }, [baseNotifications, dismissedNotificationIds]);
+  }, [dismissedNotificationIds]);
   
   // Listen for project status changes and create notifications
   useEffect(() => {
     console.log('Setting up realtime subscription for project status changes in useNotifications');
+    
+    // First, check if the channel already exists and remove it to prevent duplicates
+    const existingChannels = supabase.getChannels();
+    existingChannels.forEach(ch => {
+      if (ch.topic === 'project-status-updates') {
+        console.log('Removing existing project-status-updates channel in useNotifications');
+        supabase.removeChannel(ch);
+      }
+    });
     
     // Ensure we use the same channel name as in other components for consistency
     const channel = supabase

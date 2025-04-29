@@ -12,7 +12,7 @@ import { InfoCardsSection } from "@/components/dashboard/InfoCardsSection";
 import { ProjectsAnalysisSection } from "@/components/dashboard/ProjectsAnalysisSection";
 import { useStatusChartData } from "@/components/dashboard/useStatusChartData";
 import { useNotifications } from "@/components/dashboard/useNotifications";
-import { enableRealtimeForProjects } from "@/lib/supabase";
+import { enableRealtimeForProjects, supabase } from "@/lib/supabase";
 
 const Index: React.FC = () => {
   const { projects, loading } = useProjects();
@@ -28,11 +28,35 @@ const Index: React.FC = () => {
     // Initialize realtime for project status changes
     const initRealtime = async () => {
       console.log('Initializing realtime on Index page...');
+      
+      // First, check if there are any existing channels and clean them up
+      const existingChannels = supabase.getChannels();
+      console.log('Existing channels:', existingChannels.length);
+      
+      existingChannels.forEach(ch => {
+        if (ch.topic === 'project-status-updates') {
+          console.log('Removing existing project-status-updates channel in Index');
+          supabase.removeChannel(ch);
+        }
+      });
+      
+      // Then enable realtime for projects
       const channel = await enableRealtimeForProjects();
       console.log('Realtime initialized on Index page:', channel ? 'Success' : 'Failed');
     };
     
     initRealtime();
+    
+    // Cleanup function
+    return () => {
+      console.log('Index page unmounting - cleaning up realtime subscriptions');
+      const existingChannels = supabase.getChannels();
+      existingChannels.forEach(ch => {
+        if (ch.topic === 'project-status-updates') {
+          supabase.removeChannel(ch);
+        }
+      });
+    };
   }, []);
   
   if (!mounted) {

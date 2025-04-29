@@ -61,6 +61,17 @@ export const PROJECT_STATUS_TYPES = [
 // Enable realtime updates for the projects table
 export async function enableRealtimeForProjects() {
   try {
+    // First, check if the channel already exists and remove it to prevent duplicates
+    const existingChannels = supabase.getChannels();
+    existingChannels.forEach(ch => {
+      if (ch.topic === 'project-status-updates') {
+        console.log('Removing existing project-status-updates channel');
+        supabase.removeChannel(ch);
+      }
+    });
+    
+    console.log('Setting up new realtime channel for projects table...');
+    
     // Use a consistent channel name for all project updates
     const channel = supabase
       .channel('project-status-updates')
