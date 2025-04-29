@@ -20,8 +20,8 @@ export function InfoCardsSection({
 }: InfoCardsSectionProps) {
   // Log notifications count when they change
   useEffect(() => {
-    console.log('InfoCardsSection - Current notifications:', notifications.length);
-  }, [notifications.length]);
+    console.log('InfoCardsSection - Current notifications:', notifications);
+  }, [notifications]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">

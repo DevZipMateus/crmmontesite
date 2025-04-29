@@ -22,6 +22,11 @@ const Index: React.FC = () => {
   const chartData = useStatusChartData(projects);
   const { notifications, markNotificationAsRead, dismissNotification } = useNotifications();
   
+  // Debug notifications
+  useEffect(() => {
+    console.log("Index - Current notifications:", notifications);
+  }, [notifications]);
+  
   useEffect(() => {
     setMounted(true);
     

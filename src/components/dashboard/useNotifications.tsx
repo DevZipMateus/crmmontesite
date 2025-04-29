@@ -32,17 +32,30 @@ function formatDate(date: Date): string {
 export function useNotifications() {
   const { toast } = useToast();
   
+  // Store notifications in state
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  
   // Store dismissed notification IDs in state to prevent them from reappearing
   const [dismissedNotificationIds, setDismissedNotificationIds] = useState<string[]>([]);
   
-  // Initialize with empty array
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  
-  // Load dismissed notifications from localStorage on init
+  // Load initial notifications and dismissed IDs from localStorage on init
   useEffect(() => {
+    // Load saved notifications
+    const savedNotifications = localStorage.getItem('notifications');
+    if (savedNotifications) {
+      try {
+        console.log('Loading saved notifications from localStorage');
+        setNotifications(JSON.parse(savedNotifications));
+      } catch (e) {
+        console.error('Error parsing saved notifications:', e);
+      }
+    }
+    
+    // Load dismissed notifications
     const savedDismissed = localStorage.getItem('dismissedNotifications');
     if (savedDismissed) {
       try {
+        console.log('Loading dismissed notifications from localStorage');
         setDismissedNotificationIds(JSON.parse(savedDismissed));
       } catch (e) {
         console.error('Error parsing dismissed notifications:', e);
@@ -50,7 +63,13 @@ export function useNotifications() {
     }
   }, []);
   
-  // Sync dismissed notifications to localStorage when they change
+  // Save notifications to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem('notifications', JSON.stringify(notifications));
+    console.log('Notifications saved to localStorage:', notifications.length);
+  }, [notifications]);
+  
+  // Save dismissed IDs to localStorage when they change
   useEffect(() => {
     localStorage.setItem('dismissedNotifications', JSON.stringify(dismissedNotificationIds));
     console.log('Dismissed notifications updated in localStorage:', dismissedNotificationIds);
@@ -92,6 +111,12 @@ export function useNotifications() {
             // Create a unique ID based on timestamp and project ID
             const newNotificationId = `status-${Date.now()}-${payload.new.id}`;
             
+            // Check if this notification is already dismissed
+            if (dismissedNotificationIds.includes(newNotificationId)) {
+              console.log('[useNotifications] Notification was previously dismissed, not showing it');
+              return;
+            }
+            
             const formattedDate = formatDate(new Date());
             
             const newNotification: Notification = {
@@ -105,19 +130,21 @@ export function useNotifications() {
             
             console.log('[useNotifications] Creating new notification:', newNotification);
             
-            // Check if this notification should be dismissed based on ID patterns
-            if (!dismissedNotificationIds.includes(newNotificationId)) {
-              // Update notifications with the new notification at the beginning
-              setNotifications(prev => [newNotification, ...prev]);
-              
-              // Also show a toast
-              toast({
-                title: "Status de projeto alterado",
-                description: `O projeto "${projectName}" foi movido para "${newStatus}"`,
-              });
-            } else {
-              console.log('[useNotifications] Notification was previously dismissed, not showing it');
-            }
+            // Update notifications with the new notification at the beginning
+            setNotifications(prev => {
+              // First check if we already have this notification (prevent duplicates)
+              if (prev.some(n => n.id === newNotificationId)) {
+                console.log('[useNotifications] Notification already exists, not adding duplicate');
+                return prev;
+              }
+              return [newNotification, ...prev];
+            });
+            
+            // Also show a toast
+            toast({
+              title: "Status de projeto alterado",
+              description: `O projeto "${projectName}" foi movido para "${newStatus}"`,
+            });
           }
         }
       )
@@ -133,6 +160,7 @@ export function useNotifications() {
   }, [toast, dismissedNotificationIds]);
   
   const markNotificationAsRead = (id: string) => {
+    console.log('Marking notification as read:', id);
     setNotifications(prevNotifications => 
       prevNotifications.map(notification => 
         notification.id === id ? { ...notification, read: true } : notification
@@ -146,6 +174,7 @@ export function useNotifications() {
   };
   
   const dismissNotification = (id: string) => {
+    console.log('Dismissing notification:', id);
     // Add the ID to dismissed notifications list
     setDismissedNotificationIds(prev => [...prev, id]);
     
