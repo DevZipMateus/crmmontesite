@@ -1,7 +1,7 @@
 
 import { 
-  AreaChart, 
-  Area, 
+  LineChart, 
+  Line, 
   XAxis, 
   YAxis, 
   ResponsiveContainer, 
@@ -29,7 +29,7 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
     );
   }
 
-  // Transform data for area chart (separate series for each status)
+  // Transform data for line chart
   const transformedData = activeData.map(item => ({
     name: item.name,
     value: item.value,
@@ -42,19 +42,11 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
         status: { label: "Status" },
       }}
     >
-      <ResponsiveContainer width="100%" height={300}>
-        <AreaChart 
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart 
           data={transformedData} 
-          margin={{ top: 10, right: 20, left: 10, bottom: 20 }}
+          margin={{ top: 10, right: 20, left: 10, bottom: 30 }}
         >
-          <defs>
-            {transformedData.map((entry, index) => (
-              <linearGradient key={`colorGradient${index}`} id={`colorGradient${index}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={entry.color} stopOpacity={0.8}/>
-                <stop offset="95%" stopColor={entry.color} stopOpacity={0.1}/>
-              </linearGradient>
-            ))}
-          </defs>
           <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
           <XAxis 
             dataKey="name" 
@@ -80,18 +72,18 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
             }}
           />
           {transformedData.map((entry, index) => (
-            <Area
-              key={`area-${entry.name}-${index}`}
+            <Line
+              key={`line-${entry.name}-${index}`}
               type="monotone"
               dataKey="value"
               name={entry.name}
               stroke={entry.color}
-              fill={`url(#colorGradient${index})`}
-              fillOpacity={0.6}
-              stackId={1}
+              strokeWidth={2}
+              dot={{ fill: entry.color, r: 4 }}
+              activeDot={{ r: 6 }}
             />
           ))}
-        </AreaChart>
+        </LineChart>
       </ResponsiveContainer>
     </ChartContainer>
   );
