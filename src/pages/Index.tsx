@@ -10,7 +10,7 @@ import { InfoCardsSection } from "@/components/dashboard/InfoCardsSection";
 import { ProjectsAnalysisSection } from "@/components/dashboard/ProjectsAnalysisSection";
 import { useStatusChartData } from "@/components/dashboard/useStatusChartData";
 import { useNotifications } from "@/hooks/useNotifications";
-import { enableRealtimeForProjects, supabase } from "@/lib/supabase";
+import { enableRealtimeForProjects, cleanupRealtimeSubscriptions } from "@/lib/supabase/realtime";
 import { Button } from "@/components/ui/button";
 
 const Index: React.FC = () => {
@@ -28,32 +28,20 @@ const Index: React.FC = () => {
     setMounted(true);
     
     const initRealtime = async () => {
-      console.log('Initializing realtime on Index page...');
+      console.log('[Index] Initializing realtime on Index page...');
+      // Clean up any existing channels before creating new ones
+      cleanupRealtimeSubscriptions();
       
-      const existingChannels = supabase.getChannels();
-      console.log('Existing channels:', existingChannels.length);
-      
-      existingChannels.forEach(ch => {
-        if (ch.topic === 'project-status-updates') {
-          console.log('Removing existing project-status-updates channel in Index');
-          supabase.removeChannel(ch);
-        }
-      });
-      
+      // Enable realtime for projects
       const channel = await enableRealtimeForProjects();
-      console.log('Realtime initialized on Index page:', channel ? 'Success' : 'Failed');
+      console.log('[Index] Realtime initialized on Index page:', channel ? 'Success' : 'Failed');
     };
     
     initRealtime();
     
     return () => {
-      console.log('Index page unmounting - cleaning up realtime subscriptions');
-      const existingChannels = supabase.getChannels();
-      existingChannels.forEach(ch => {
-        if (ch.topic === 'project-status-updates') {
-          supabase.removeChannel(ch);
-        }
-      });
+      console.log('[Index] Index page unmounting - cleaning up realtime subscriptions');
+      cleanupRealtimeSubscriptions();
     };
   }, []);
   

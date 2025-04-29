@@ -23,12 +23,12 @@ export function ProjectStatusChart({
   }, [data]);
   
   return (
-    <Card className="w-full shadow-sm h-full flex flex-col overflow-hidden">
+    <Card className="w-full shadow-sm h-full flex flex-col">
       <CardHeader className="pb-0">
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 overflow-hidden pt-4 pb-6">
-        <div className="h-[350px] w-full">
+      <CardContent className="flex-1 pt-4 pb-6">
+        <div className="h-full w-full">
           {type === "bar" ? (
             <BarChartComponent data={data} />
           ) : type === "area" ? (

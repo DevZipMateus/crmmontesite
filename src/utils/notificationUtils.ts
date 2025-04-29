@@ -15,12 +15,17 @@ export function formatDate(date: Date): string {
 
 /**
  * Create a unique notification ID
+ * Now incorporating status change information for more uniqueness
  */
-export function createNotificationId(type: string, entityId?: string): string {
+export function createNotificationId(type: string, entityId?: string, oldStatus?: string, newStatus?: string): string {
   const timestamp = Date.now();
   
   if (entityId) {
-    return `${type}_${entityId}`;
+    if (oldStatus && newStatus) {
+      // Create a truly unique ID that includes status change information
+      return `${type}_${entityId}_${oldStatus.replace(/\s+/g, '')}_${newStatus.replace(/\s+/g, '')}_${timestamp}`;
+    }
+    return `${type}_${entityId}_${timestamp}`;
   }
   
   const randomPart = Math.floor(Math.random() * 10000);

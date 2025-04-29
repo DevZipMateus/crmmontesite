@@ -4,20 +4,20 @@ import { supabase } from './client';
 // Enable realtime updates for the projects table
 export async function enableRealtimeForProjects() {
   try {
-    console.log('Setting up new realtime channel for projects table...');
+    console.log('[realtime.ts] Setting up new realtime channel for projects table...');
     
     // First, ensure the channel doesn't already exist 
     const existingChannels = supabase.getChannels();
     existingChannels.forEach(ch => {
-      if (ch.topic === 'project-status-updates') {
-        console.log('Removing existing project-status-updates channel');
+      if (ch.topic === 'project-changes-monitor') {
+        console.log('[realtime.ts] Removing existing project-changes-monitor channel');
         supabase.removeChannel(ch);
       }
     });
     
-    // Use a consistent channel name for all project updates
+    // Use a different channel name to avoid conflicts with notificationRealtimeService
     const channel = supabase
-      .channel('project-status-updates')
+      .channel('project-changes-monitor')
       .on('postgres_changes', 
         { 
           event: '*', 
@@ -25,23 +25,23 @@ export async function enableRealtimeForProjects() {
           table: 'projects' 
         }, 
         (payload) => {
-          console.log('Real-time update received in realtime.ts:', payload);
+          console.log('[realtime.ts] Real-time update received:', payload);
           
           if (payload.eventType === 'UPDATE' && 
               payload.old && payload.new && 
               payload.old.status !== payload.new.status) {
-            console.log(`Status changed from "${payload.old.status}" to "${payload.new.status}" for project "${payload.new.client_name}"`);
+            console.log(`[realtime.ts] Status changed from "${payload.old.status}" to "${payload.new.status}" for project "${payload.new.client_name}"`);
           }
         }
       )
       .subscribe((status) => {
-        console.log(`Realtime subscription status in realtime.ts: ${status}`);
+        console.log(`[realtime.ts] Realtime subscription status: ${status}`);
       });
     
-    console.log('Realtime subscription for projects enabled with channel: project-status-updates');
+    console.log('[realtime.ts] Realtime subscription for projects enabled with channel: project-changes-monitor');
     return channel;
   } catch (error) {
-    console.error('Error enabling realtime for projects:', error);
+    console.error('[realtime.ts] Error enabling realtime for projects:', error);
     return null;
   }
 }
@@ -50,8 +50,8 @@ export async function enableRealtimeForProjects() {
 export function cleanupRealtimeSubscriptions() {
   const existingChannels = supabase.getChannels();
   existingChannels.forEach(ch => {
-    if (ch.topic === 'project-status-updates') {
-      console.log('Cleaning up project-status-updates channel');
+    if (ch.topic === 'project-changes-monitor' || ch.topic === 'realtime-notifications') {
+      console.log('[realtime.ts] Cleaning up channel:', ch.topic);
       supabase.removeChannel(ch);
     }
   });

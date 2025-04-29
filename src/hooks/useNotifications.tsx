@@ -26,29 +26,34 @@ export function useNotifications() {
     
     const savedDismissedIds = notificationStorage.loadDismissedIds();
     setDismissedNotificationIds(savedDismissedIds);
+    
+    console.log('[useNotifications] Loaded from localStorage:', { 
+      notifications: savedNotifications.length,
+      dismissedIds: savedDismissedIds.length
+    });
   }, []);
   
   // Save notifications to localStorage when they change
   useEffect(() => {
     notificationStorage.saveNotifications(notifications);
-    console.log("Notifications saved to localStorage:", notifications.length);
+    console.log("[useNotifications] Notifications saved to localStorage:", notifications);
   }, [notifications]);
   
   // Save dismissed IDs to localStorage when they change
   useEffect(() => {
     notificationStorage.saveDismissedIds(dismissedNotificationIds);
-    console.log("Dismissed notifications updated in localStorage:", dismissedNotificationIds);
+    console.log("[useNotifications] Dismissed notifications updated in localStorage:", dismissedNotificationIds);
   }, [dismissedNotificationIds]);
   
   // Debug notifications
   useEffect(() => {
-    console.log("useNotifications hook - Current notifications:", notifications);
+    console.log("[useNotifications] Current notifications:", notifications);
   }, [notifications]);
   
   // Listen for project status changes and create notifications
   useEffect(() => {
     const addNotification = (newNotification: Notification) => {
-      console.log('[useNotifications] Attempting to add new notification:', newNotification);
+      console.log('[useNotifications] Adding new notification:', newNotification);
       
       // Check if this notification already exists
       setNotifications(prev => {
@@ -61,6 +66,7 @@ export function useNotifications() {
         }
         
         console.log('[useNotifications] Adding new notification to state');
+        // Put new notification at the top of the list
         const updated = [newNotification, ...prev];
         return updated;
       });
@@ -79,8 +85,10 @@ export function useNotifications() {
 
     // Clean up subscription when component unmounts
     return () => {
-      console.log('Cleaning up useNotifications subscription');
-      supabase.removeChannel(channel);
+      console.log('[useNotifications] Cleaning up notification subscription');
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [toast, dismissedNotificationIds]);
   
@@ -88,7 +96,7 @@ export function useNotifications() {
    * Mark a notification as read
    */
   const markNotificationAsRead = (id: string) => {
-    console.log('Marking notification as read:', id);
+    console.log('[useNotifications] Marking notification as read:', id);
     setNotifications(prevNotifications => 
       prevNotifications.map(notification => 
         notification.id === id ? { ...notification, read: true } : notification
@@ -105,7 +113,7 @@ export function useNotifications() {
    * Dismiss a notification
    */
   const dismissNotification = (id: string) => {
-    console.log('Dismissing notification:', id);
+    console.log('[useNotifications] Dismissing notification:', id);
     // Add the ID to dismissed notifications list
     setDismissedNotificationIds(prev => [...prev, id]);
     
@@ -122,19 +130,8 @@ export function useNotifications() {
    * Add a test notification
    */
   const addTestNotification = () => {
-    const testNotificationId = createNotificationId('test', `test-${Date.now()}`);
-    console.log('Creating test notification with ID:', testNotificationId);
-    
-    // Don't allow multiple test notifications
-    if (notifications.some(n => n.id.startsWith('test_'))) {
-      console.log('Test notification already exists, not adding another one');
-      
-      toast({
-        title: "Notificação de teste já existe",
-        description: "Uma notificação de teste já está presente no sistema.",
-      });
-      return;
-    }
+    const testNotificationId = createNotificationId('test');
+    console.log('[useNotifications] Creating test notification with ID:', testNotificationId);
     
     const testNotification: Notification = {
       id: testNotificationId,
@@ -145,7 +142,7 @@ export function useNotifications() {
       type: "info"
     };
     
-    console.log('Adding test notification to state:', testNotification);
+    console.log('[useNotifications] Adding test notification to state:', testNotification);
     setNotifications(prev => [testNotification, ...prev]);
     
     toast({
@@ -158,7 +155,7 @@ export function useNotifications() {
    * Clear all notifications
    */
   const clearAllNotifications = () => {
-    console.log('Clearing all notifications');
+    console.log('[useNotifications] Clearing all notifications');
     
     // Add all current notification IDs to dismissed list
     const currentIds = notifications.map(notification => notification.id);

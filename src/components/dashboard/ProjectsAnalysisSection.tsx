@@ -13,15 +13,15 @@ export function ProjectsAnalysisSection({ chartData }: ProjectsAnalysisSectionPr
   }, [chartData]);
 
   return (
-    <>
+    <div className="mb-10">
       <h2 className="text-xl font-bold mb-4">Análise de Projetos</h2>
-      <div className="mb-24">
+      <div className="w-full h-[450px]">
         <ProjectStatusChart 
           title="Status dos Projetos" 
           data={chartData}
           type="area"
         />
       </div>
-    </>
+    </div>
   );
 }

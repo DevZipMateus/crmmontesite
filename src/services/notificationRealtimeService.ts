@@ -12,20 +12,20 @@ export function setupNotificationRealtime(
   onNewNotification: NotificationCallback,
   dismissedIds: string[]
 ) {
-  console.log('Setting up realtime subscription for project status changes');
+  console.log('[notificationRealtimeService] Setting up realtime subscription for project status changes');
   
   // First, check if the channel already exists and remove it to prevent duplicates
   const existingChannels = supabase.getChannels();
   existingChannels.forEach(ch => {
-    if (ch.topic === 'project-status-updates') {
-      console.log('Removing existing project-status-updates channel');
+    if (ch.topic === 'realtime-notifications') {
+      console.log('[notificationRealtimeService] Removing existing realtime-notifications channel');
       supabase.removeChannel(ch);
     }
   });
   
-  // Set up a new channel for project status updates
+  // Set up a new channel for project status updates with a unique name
   const channel = supabase
-    .channel('project-status-updates')
+    .channel('realtime-notifications')
     .on(
       'postgres_changes',
       {
@@ -37,16 +37,15 @@ export function setupNotificationRealtime(
         console.log('[notificationRealtimeService] Received update payload:', payload);
         
         if (payload.new && payload.old && payload.new.status !== payload.old.status) {
-          console.log('[notificationRealtimeService] Status changed from', payload.old.status, 'to', payload.new.status);
-          
           const projectName = payload.new.client_name;
           const oldStatus = payload.old.status;
           const newStatus = payload.new.status;
           const projectId = payload.new.id;
-          const timestamp = Date.now();
           
-          // Create a unique ID based on project ID and status change with timestamp
-          const notificationId = createNotificationId('status-change', `${projectId}-${timestamp}`);
+          console.log('[notificationRealtimeService] Status changed from', oldStatus, 'to', newStatus, 'for project', projectName);
+          
+          // Create a unique ID based on project ID, old status, new status, and timestamp
+          const notificationId = createNotificationId('status-change', projectId, oldStatus, newStatus);
           
           // Check if this notification is already dismissed
           if (dismissedIds.includes(notificationId)) {
