@@ -1,7 +1,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Eye, PenSquare } from "lucide-react";
-import DeleteProjectDialog from "../../DeleteProjectDialog";
 
 interface ProjectCardActionsProps {
   projectId: string;
@@ -34,13 +33,6 @@ export const ProjectCardActions = ({
       >
         <PenSquare className="h-3.5 w-3.5" />
       </Button>
-      <DeleteProjectDialog 
-        projectId={projectId} 
-        projectName={projectName}
-        size="sm"
-        variant="icon"
-        onDelete={onProjectDeleted}
-      />
     </div>
   );
 };

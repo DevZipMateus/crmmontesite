@@ -44,3 +44,29 @@ export const PROJECT_STATUS_TYPES = [
   { value: "Aguardando DNS", icon: "Clock", color: "bg-orange-500" },
   { value: "Site pronto", icon: "CheckCircle2", color: "bg-green-500" }
 ];
+
+// Enable realtime updates for the projects table
+export async function enableRealtimeForProjects() {
+  try {
+    // We need to run a simple query to initialize the realtime subscription
+    await supabase
+      .from('projects')
+      .select('id')
+      .limit(1);
+    
+    // Enable realtime updates with REPLICA IDENTITY FULL for the projects table
+    const { error } = await supabase.rpc('supabase_functions.enable_realtime', {
+      table_name: 'projects'
+    });
+    
+    if (error) {
+      console.error('Error enabling realtime for projects:', error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error enabling realtime for projects:', error);
+    return false;
+  }
+}

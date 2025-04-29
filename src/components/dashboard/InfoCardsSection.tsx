@@ -1,9 +1,10 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { NotificationsCard } from "@/components/dashboard/NotificationsCard";
 import { RecentProjectsCard } from "@/components/dashboard/RecentProjectsCard";
 import { Notification } from "@/components/dashboard/useNotifications";
 import { Project } from "@/types/project";
+import { enableRealtimeForProjects } from "@/lib/supabase";
 
 interface InfoCardsSectionProps {
   notifications: Notification[];
@@ -18,6 +19,11 @@ export function InfoCardsSection({
   onDismiss, 
   projects 
 }: InfoCardsSectionProps) {
+  // Enable realtime for projects when component mounts
+  useEffect(() => {
+    enableRealtimeForProjects();
+  }, []);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
       <NotificationsCard 

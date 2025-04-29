@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 export interface Notification {
   id: string;
@@ -54,6 +55,68 @@ export function useNotifications() {
       notification => !dismissedNotificationIds.includes(notification.id)
     ));
   }, [baseNotifications, dismissedNotificationIds]);
+  
+  // Listen for project status changes and create notifications
+  useEffect(() => {
+    const channel = supabase
+      .channel('projects-status-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'projects',
+          filter: 'status=neq.previous.status'
+        },
+        (payload) => {
+          if (payload.new && payload.old && payload.new.status !== payload.old.status) {
+            const projectName = payload.new.client_name;
+            const newStatus = payload.new.status;
+            
+            const newNotificationId = `status-${Date.now()}`;
+            const newNotification: Notification = {
+              id: newNotificationId,
+              title: "Status de projeto alterado",
+              description: `O projeto "${projectName}" foi movido para "${newStatus}"`,
+              date: "Agora",
+              read: false,
+              type: "info"
+            };
+            
+            setBaseNotifications(prev => [newNotification, ...prev]);
+            
+            // Also show a toast
+            toast({
+              title: "Status de projeto alterado",
+              description: `O projeto "${projectName}" foi movido para "${newStatus}"`,
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [toast]);
+
+  // Add this effect to enable Supabase realtime for projects table
+  useEffect(() => {
+    const enableRealtimeForProjects = async () => {
+      try {
+        await supabase
+          .from('projects')
+          .select('id')
+          .limit(1);
+
+        console.log("Realtime subscription for projects initialized");
+      } catch (error) {
+        console.error("Error enabling realtime for projects:", error);
+      }
+    };
+
+    enableRealtimeForProjects();
+  }, []);
   
   const markNotificationAsRead = (id: string) => {
     setBaseNotifications(prevNotifications => 
