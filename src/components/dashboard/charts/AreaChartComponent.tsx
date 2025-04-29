@@ -26,7 +26,7 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart 
           data={data} 
-          margin={{ top: 20, right: 50, left: 50, bottom: 100 }}
+          margin={{ top: 20, right: 50, left: 50, bottom: 120 }}
         >
           <defs>
             {data.map((entry, index) => (
@@ -55,12 +55,13 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
           <Tooltip content={<ChartTooltipContent />} />
           <Legend 
             verticalAlign="bottom"
-            height={60}
+            height={80}
             wrapperStyle={{ 
               fontSize: '12px', 
               paddingTop: '15px',
-              paddingBottom: '20px',
-              bottom: 0
+              paddingBottom: '40px',
+              bottom: '20px',
+              position: 'relative'
             }}
           />
           {data.map((entry, index) => (
