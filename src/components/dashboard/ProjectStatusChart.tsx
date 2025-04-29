@@ -38,8 +38,8 @@ export function ProjectStatusChart({
       <CardHeader className="pb-0">
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 overflow-hidden pt-2 pb-12">
-        <div className="h-[350px] w-full overflow-hidden">
+      <CardContent className="flex-1 overflow-hidden pt-2 pb-16">
+        <div className="h-[400px] w-full overflow-hidden">
           {type === "bar" ? (
             <ChartContainer
               config={{
@@ -143,14 +143,14 @@ export function ProjectStatusChart({
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart margin={{ top: 10, right: 10, left: 10, bottom: 40 }}>
+                <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 100 }}>
                   <Pie
                     data={data}
                     cx="50%"
-                    cy="45%"
+                    cy="40%"
                     labelLine={false}
-                    outerRadius={100}
-                    innerRadius={60}
+                    outerRadius={90}
+                    innerRadius={50}
                     fill="#8884d8"
                     dataKey="value"
                     nameKey="name"
@@ -164,17 +164,19 @@ export function ProjectStatusChart({
                   <Legend 
                     wrapperStyle={{ 
                       fontSize: '10px', 
-                      marginTop: '10px',
+                      marginTop: '20px',
                       paddingBottom: '10px',
                       width: '100%',
                       display: 'flex',
                       flexWrap: 'wrap',
-                      justifyContent: 'center'
+                      justifyContent: 'center',
+                      position: 'absolute',
+                      bottom: '5px'
                     }}
                     layout="horizontal"
                     verticalAlign="bottom"
                     align="center"
-                    height={50}
+                    height={80}
                   />
                 </PieChart>
               </ResponsiveContainer>
