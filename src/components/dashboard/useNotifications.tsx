@@ -35,6 +35,12 @@ export function useNotifications() {
   // Store dismissed notification IDs in state to prevent them from reappearing
   const [dismissedNotificationIds, setDismissedNotificationIds] = useState<string[]>([]);
   
+  // Initialize with empty array instead of demo notifications
+  const [baseNotifications, setBaseNotifications] = useState<Notification[]>([]);
+  
+  // Derived state: filter out dismissed notifications
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  
   // Load dismissed notifications from localStorage on init
   useEffect(() => {
     const savedDismissed = localStorage.getItem('dismissedNotifications');
@@ -45,38 +51,10 @@ export function useNotifications() {
         console.error('Error parsing dismissed notifications:', e);
       }
     }
+    
+    // Set this to true to avoid loading demo notifications after first load
+    localStorage.setItem('notificationsInitialized', 'true');
   }, []);
-  
-  // Base notifications that will be filtered against dismissed IDs
-  const [baseNotifications, setBaseNotifications] = useState<Notification[]>([
-    {
-      id: "1",
-      title: "Novo projeto criado",
-      description: "O projeto 'Site da Empresa XYZ' foi criado com sucesso.",
-      date: "Hoje, 10:30",
-      read: false,
-      type: "info"
-    },
-    {
-      id: "2",
-      title: "Projeto aguardando customização",
-      description: "O cliente 'ABC Ltda' solicitou customizações.",
-      date: "Ontem, 15:45",
-      read: true,
-      type: "warning"
-    },
-    {
-      id: "3",
-      title: "Domínio configurado",
-      description: "O domínio 'empresa.com.br' foi configurado com sucesso.",
-      date: "25/04/2025",
-      read: true,
-      type: "success"
-    }
-  ]);
-  
-  // Derived state: filter out dismissed notifications
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   
   // Update notifications whenever baseNotifications or dismissedNotificationIds change
   useEffect(() => {
@@ -89,7 +67,7 @@ export function useNotifications() {
   
   // Sync dismissed notifications to localStorage when they change
   useEffect(() => {
-    localStorage.setItem('dismissedNotificationIds', JSON.stringify(dismissedNotificationIds));
+    localStorage.setItem('dismissedNotifications', JSON.stringify(dismissedNotificationIds));
   }, [dismissedNotificationIds]);
   
   // Listen for project status changes and create notifications
