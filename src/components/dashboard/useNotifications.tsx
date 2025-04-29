@@ -93,7 +93,7 @@ export function useNotifications() {
     
     // Ensure we use the same channel name as in other components for consistency
     const channel = supabase
-      .channel('project-status-notifications')
+      .channel('project-status-updates')
       .on(
         'postgres_changes',
         {

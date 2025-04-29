@@ -27,6 +27,7 @@ const Index: React.FC = () => {
     
     // Initialize realtime for project status changes
     const initRealtime = async () => {
+      console.log('Initializing realtime on Index page...');
       const channel = await enableRealtimeForProjects();
       console.log('Realtime initialized on Index page:', channel ? 'Success' : 'Failed');
     };

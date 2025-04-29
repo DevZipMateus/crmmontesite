@@ -81,7 +81,7 @@ export async function enableRealtimeForProjects() {
         }
       )
       .subscribe((status) => {
-        console.log(`Realtime subscription status: ${status}`);
+        console.log(`Realtime subscription status in supabase.ts: ${status}`);
       });
     
     console.log('Realtime subscription for projects enabled with channel: project-status-updates');
