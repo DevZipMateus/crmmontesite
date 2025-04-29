@@ -35,11 +35,11 @@ export function ProjectStatusChart({
   
   return (
     <Card className="w-full shadow-sm h-full">
-      <CardHeader className="pb-2">
-        <CardTitle>{title}</CardTitle>
+      <CardHeader className="pb-0">
+        <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="pb-4">
-        <div className="h-[180px] w-full">
+      <CardContent className="pb-2">
+        <div className="h-[160px] w-full">
           {type === "bar" ? (
             <ChartContainer
               config={{
@@ -50,20 +50,20 @@ export function ProjectStatusChart({
                 <BarChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 20 }}>
                   <XAxis 
                     dataKey="name" 
-                    tick={{ fontSize: 9 }} 
-                    height={40} 
+                    tick={{ fontSize: 8 }} 
+                    height={30} 
                     interval={0}
                     angle={-45}
                     textAnchor="end"
                   />
-                  <YAxis tick={{ fontSize: 9 }} width={25} />
+                  <YAxis tick={{ fontSize: 8 }} width={20} />
                   <Tooltip content={<ChartTooltipContent />} />
-                  <Legend wrapperStyle={{ fontSize: '9px', marginTop: '5px' }} />
+                  <Legend wrapperStyle={{ fontSize: '8px', marginTop: '2px' }} />
                   <Bar 
                     dataKey="value" 
                     name="Quantidade" 
                     radius={[4, 4, 0, 0]}
-                    maxBarSize={35}
+                    maxBarSize={30}
                     fill="var(--primary)"
                   />
                 </BarChart>
@@ -76,18 +76,18 @@ export function ProjectStatusChart({
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 20 }}>
+                <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 15 }}>
                   <XAxis 
                     dataKey="name" 
-                    tick={{ fontSize: 9 }} 
-                    height={40} 
+                    tick={{ fontSize: 8 }} 
+                    height={28} 
                     interval={0}
                     angle={-45}
                     textAnchor="end"
                   />
-                  <YAxis tick={{ fontSize: 9 }} width={25} />
+                  <YAxis tick={{ fontSize: 8 }} width={20} />
                   <Tooltip content={<ChartTooltipContent />} />
-                  <Legend wrapperStyle={{ fontSize: '9px', marginTop: '5px' }} />
+                  <Legend wrapperStyle={{ fontSize: '8px', marginTop: '2px' }} />
                   <Area
                     type="monotone"
                     dataKey="value"
@@ -112,7 +112,7 @@ export function ProjectStatusChart({
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    outerRadius={50}
+                    outerRadius={45}
                     fill="#8884d8"
                     dataKey="value"
                     nameKey="name"
@@ -123,7 +123,7 @@ export function ProjectStatusChart({
                     ))}
                   </Pie>
                   <Tooltip content={<ChartTooltipContent />} />
-                  <Legend wrapperStyle={{ fontSize: '9px', marginTop: '5px' }} />
+                  <Legend wrapperStyle={{ fontSize: '8px', marginTop: '2px' }} />
                 </PieChart>
               </ResponsiveContainer>
             </ChartContainer>
