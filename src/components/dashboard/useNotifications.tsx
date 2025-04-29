@@ -99,24 +99,6 @@ export function useNotifications() {
       supabase.removeChannel(channel);
     };
   }, [toast]);
-
-  // Add this effect to enable Supabase realtime for projects table
-  useEffect(() => {
-    const enableRealtimeForProjects = async () => {
-      try {
-        await supabase
-          .from('projects')
-          .select('id')
-          .limit(1);
-
-        console.log("Realtime subscription for projects initialized");
-      } catch (error) {
-        console.error("Error enabling realtime for projects:", error);
-      }
-    };
-
-    enableRealtimeForProjects();
-  }, []);
   
   const markNotificationAsRead = (id: string) => {
     setBaseNotifications(prevNotifications => 

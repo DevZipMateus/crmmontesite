@@ -4,7 +4,7 @@ import { NotificationsCard } from "@/components/dashboard/NotificationsCard";
 import { RecentProjectsCard } from "@/components/dashboard/RecentProjectsCard";
 import { Notification } from "@/components/dashboard/useNotifications";
 import { Project } from "@/types/project";
-import { enableRealtimeForProjects } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 
 interface InfoCardsSectionProps {
   notifications: Notification[];
@@ -21,7 +21,24 @@ export function InfoCardsSection({
 }: InfoCardsSectionProps) {
   // Enable realtime for projects when component mounts
   useEffect(() => {
-    enableRealtimeForProjects();
+    const channel = supabase
+      .channel('public:projects')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'projects' 
+        }, 
+        (payload) => {
+          console.log('Project update received in InfoCardsSection:', payload);
+        }
+      )
+      .subscribe();
+      
+    // Cleanup function to remove the channel subscription when component unmounts
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return (

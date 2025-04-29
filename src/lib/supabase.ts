@@ -48,24 +48,20 @@ export const PROJECT_STATUS_TYPES = [
 // Enable realtime updates for the projects table
 export async function enableRealtimeForProjects() {
   try {
-    // We need to run a simple query to initialize the realtime subscription
-    await supabase
-      .from('projects')
-      .select('id')
-      .limit(1);
-    
-    // Enable realtime updates using the REST API approach instead of RPC
-    // This avoids the TypeScript error with the RPC function
-    const { data, error } = await supabase
-      .from('projects')
-      .select('*')
-      .limit(1)
+    // Initialize a Supabase channel for real-time updates
+    const channel = supabase
+      .channel('public:projects')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'projects' 
+        }, 
+        (payload) => {
+          console.log('Real-time update received:', payload);
+        }
+      )
       .subscribe();
-    
-    if (error) {
-      console.error('Error enabling realtime for projects:', error);
-      return false;
-    }
     
     console.log('Realtime subscription for projects enabled');
     return true;
