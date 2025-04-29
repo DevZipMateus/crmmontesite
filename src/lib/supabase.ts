@@ -58,7 +58,7 @@ export async function enableRealtimeForProjects() {
           table: 'projects' 
         }, 
         (payload) => {
-          console.log('Real-time update received:', payload);
+          console.log('Real-time update received in helper:', payload);
         }
       )
       .subscribe();

@@ -66,10 +66,13 @@ export function useNotifications() {
           event: 'UPDATE',
           schema: 'public',
           table: 'projects',
-          filter: 'status=neq.previous.status'
         },
         (payload) => {
+          console.log('Status update received:', payload);
+          
           if (payload.new && payload.old && payload.new.status !== payload.old.status) {
+            console.log('Status changed from', payload.old.status, 'to', payload.new.status);
+            
             const projectName = payload.new.client_name;
             const newStatus = payload.new.status;
             

@@ -22,7 +22,7 @@ export function InfoCardsSection({
   // Enable realtime for projects when component mounts
   useEffect(() => {
     const channel = supabase
-      .channel('public:projects')
+      .channel('info-cards-updates')
       .on('postgres_changes', 
         { 
           event: '*', 
@@ -31,6 +31,9 @@ export function InfoCardsSection({
         }, 
         (payload) => {
           console.log('Project update received in InfoCardsSection:', payload);
+          if (payload.eventType === 'UPDATE') {
+            console.log('Status changed:', payload.old.status, '->', payload.new.status);
+          }
         }
       )
       .subscribe();
