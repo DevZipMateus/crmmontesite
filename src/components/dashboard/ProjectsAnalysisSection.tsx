@@ -11,21 +11,12 @@ export function ProjectsAnalysisSection({ chartData }: ProjectsAnalysisSectionPr
   return (
     <>
       <h2 className="text-xl font-bold mb-4">Análise de Projetos</h2>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-        <div className="lg:col-span-2">
-          <ProjectStatusChart 
-            title="Status dos Projetos" 
-            data={chartData}
-            type="area"
-          />
-        </div>
-        <div className="lg:col-span-1">
-          <ProjectStatusChart 
-            title="Distribuição de Status" 
-            data={chartData}
-            type="pie"
-          />
-        </div>
+      <div className="mb-10">
+        <ProjectStatusChart 
+          title="Status dos Projetos" 
+          data={chartData}
+          type="area"
+        />
       </div>
     </>
   );
