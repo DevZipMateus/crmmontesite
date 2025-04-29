@@ -15,7 +15,7 @@ export function ProjectsAnalysisSection({ chartData }: ProjectsAnalysisSectionPr
   return (
     <>
       <h2 className="text-xl font-bold mb-4">Análise de Projetos</h2>
-      <div className="mb-20">
+      <div className="mb-24">
         <ProjectStatusChart 
           title="Status dos Projetos" 
           data={chartData}

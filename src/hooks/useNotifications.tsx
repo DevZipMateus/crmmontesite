@@ -31,11 +31,13 @@ export function useNotifications() {
   // Save notifications to localStorage when they change
   useEffect(() => {
     notificationStorage.saveNotifications(notifications);
+    console.log("Notifications saved to localStorage:", notifications.length);
   }, [notifications]);
   
   // Save dismissed IDs to localStorage when they change
   useEffect(() => {
     notificationStorage.saveDismissedIds(dismissedNotificationIds);
+    console.log("Dismissed notifications updated in localStorage:", dismissedNotificationIds);
   }, [dismissedNotificationIds]);
   
   // Debug notifications
@@ -46,7 +48,9 @@ export function useNotifications() {
   // Listen for project status changes and create notifications
   useEffect(() => {
     const addNotification = (newNotification: Notification) => {
-      // Update notifications with the new notification at the beginning
+      console.log('[useNotifications] Attempting to add new notification:', newNotification);
+      
+      // Check if this notification already exists
       setNotifications(prev => {
         // Check if we already have this notification by ID
         const existingIndex = prev.findIndex(n => n.id === newNotification.id);
@@ -56,8 +60,8 @@ export function useNotifications() {
           return prev;
         }
         
+        console.log('[useNotifications] Adding new notification to state');
         const updated = [newNotification, ...prev];
-        console.log('[useNotifications] Updated notifications:', updated);
         return updated;
       });
       
@@ -66,8 +70,11 @@ export function useNotifications() {
         title: newNotification.title,
         description: newNotification.description,
       });
+      
+      console.log('[useNotifications] Notification added and toast displayed');
     };
 
+    console.log('[useNotifications] Setting up notification realtime subscription');
     const channel = setupNotificationRealtime(addNotification, dismissedNotificationIds);
 
     // Clean up subscription when component unmounts
@@ -116,8 +123,9 @@ export function useNotifications() {
    */
   const addTestNotification = () => {
     const testNotificationId = createNotificationId('test', `test-${Date.now()}`);
+    console.log('Creating test notification with ID:', testNotificationId);
     
-    // Check if a notification with this ID already exists
+    // Don't allow multiple test notifications
     if (notifications.some(n => n.id.startsWith('test_'))) {
       console.log('Test notification already exists, not adding another one');
       
@@ -137,6 +145,7 @@ export function useNotifications() {
       type: "info"
     };
     
+    console.log('Adding test notification to state:', testNotification);
     setNotifications(prev => [testNotification, ...prev]);
     
     toast({

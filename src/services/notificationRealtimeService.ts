@@ -43,9 +43,10 @@ export function setupNotificationRealtime(
           const oldStatus = payload.old.status;
           const newStatus = payload.new.status;
           const projectId = payload.new.id;
+          const timestamp = Date.now();
           
-          // Create a unique ID based on project ID and status change
-          const notificationId = createNotificationId('status-change', `${projectId}-${oldStatus}-${newStatus}-${Date.now()}`);
+          // Create a unique ID based on project ID and status change with timestamp
+          const notificationId = createNotificationId('status-change', `${projectId}-${timestamp}`);
           
           // Check if this notification is already dismissed
           if (dismissedIds.includes(notificationId)) {
