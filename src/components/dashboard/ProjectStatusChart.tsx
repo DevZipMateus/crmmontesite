@@ -38,8 +38,8 @@ export function ProjectStatusChart({
       <CardHeader className="pb-0">
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 overflow-hidden">
-        <div className="h-[200px] w-full overflow-hidden">
+      <CardContent className="flex-1 overflow-hidden pt-2 pb-6">
+        <div className="h-[250px] w-full overflow-hidden">
           {type === "bar" ? (
             <ChartContainer
               config={{
@@ -49,17 +49,21 @@ export function ProjectStatusChart({
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart 
                   data={data} 
-                  margin={{ top: 10, right: 10, left: 0, bottom: 30 }}
+                  margin={{ top: 20, right: 30, left: 10, bottom: 40 }}
                 >
                   <XAxis 
                     dataKey="name" 
                     tick={{ fontSize: 10 }} 
-                    height={35} 
+                    height={40} 
                     interval={0}
                     angle={-45}
                     textAnchor="end"
                   />
-                  <YAxis tick={{ fontSize: 10 }} width={30} />
+                  <YAxis 
+                    tick={{ fontSize: 10 }} 
+                    width={40}
+                    domain={[0, 'auto']}
+                  />
                   <Tooltip content={<ChartTooltipContent />} />
                   <Legend 
                     wrapperStyle={{ fontSize: '10px', marginTop: '5px', paddingBottom: '10px' }}
@@ -88,7 +92,7 @@ export function ProjectStatusChart({
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart 
                   data={data} 
-                  margin={{ top: 10, right: 10, left: 0, bottom: 30 }}
+                  margin={{ top: 20, right: 30, left: 10, bottom: 40 }}
                 >
                   <defs>
                     {data.map((entry, index) => (
@@ -101,15 +105,15 @@ export function ProjectStatusChart({
                   <XAxis 
                     dataKey="name" 
                     tick={{ fontSize: 10 }} 
-                    height={35} 
+                    height={40} 
                     interval={0}
                     angle={-45}
                     textAnchor="end"
                   />
                   <YAxis 
                     tick={{ fontSize: 10 }} 
-                    width={30} 
-                    domain={[0, 'auto']} // Ensures chart adapts to data range
+                    width={40} 
+                    domain={[0, 'auto']}
                   />
                   <Tooltip content={<ChartTooltipContent />} />
                   <Legend 
@@ -139,14 +143,14 @@ export function ProjectStatusChart({
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                <PieChart margin={{ top: 20, right: 30, left: 10, bottom: 30 }}>
                   <Pie
                     data={data}
                     cx="50%"
                     cy="45%"
                     labelLine={false}
-                    outerRadius={60}
-                    innerRadius={30}
+                    outerRadius={80}
+                    innerRadius={40}
                     fill="#8884d8"
                     dataKey="value"
                     nameKey="name"
