@@ -32,6 +32,7 @@ export function setupNotificationRealtime(
         event: 'UPDATE',
         schema: 'public',
         table: 'projects',
+        filter: 'status=neq.status'  // Only trigger when status changes
       },
       (payload) => {
         console.log('[notificationRealtimeService] Received update payload:', payload);
@@ -43,8 +44,8 @@ export function setupNotificationRealtime(
           const oldStatus = payload.old.status;
           const newStatus = payload.new.status;
           
-          // Create a unique ID based on project ID and timestamp
-          const notificationId = createNotificationId('status', payload.new.id);
+          // Create a unique ID based on project ID and status change
+          const notificationId = createNotificationId('status-change', `${payload.new.id}-${oldStatus}-${newStatus}`);
           
           // Check if this notification is already dismissed
           if (dismissedIds.includes(notificationId)) {

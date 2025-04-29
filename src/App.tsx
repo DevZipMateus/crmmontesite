@@ -22,6 +22,13 @@ import PublicPersonalizeForm from "./pages/PublicPersonalizeForm";
 const queryClient = new QueryClient();
 
 const App = () => {
+  // Força o tema claro globalmente
+  React.useEffect(() => {
+    document.documentElement.classList.add('light');
+    document.documentElement.classList.remove('dark');
+    document.documentElement.style.colorScheme = 'light';
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

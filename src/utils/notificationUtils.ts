@@ -18,11 +18,11 @@ export function formatDate(date: Date): string {
  */
 export function createNotificationId(type: string, entityId?: string): string {
   const timestamp = Date.now();
-  const randomPart = Math.floor(Math.random() * 10000);
   
   if (entityId) {
-    return `${type}_${entityId}_${timestamp}`;
+    return `${type}_${entityId}`;
   }
   
+  const randomPart = Math.floor(Math.random() * 10000);
   return `${type}_${timestamp}_${randomPart}`;
 }

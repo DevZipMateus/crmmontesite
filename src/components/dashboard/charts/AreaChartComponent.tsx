@@ -17,19 +17,27 @@ interface AreaChartComponentProps {
 }
 
 export function AreaChartComponent({ data }: AreaChartComponentProps) {
+  // Prepara dados para gráfico de área para que todos os status sejam representados corretamente
+  const preparedData = data.map((item) => ({
+    name: item.name,
+    value: item.value,
+    color: item.color
+  }));
+
   return (
     <ChartContainer
       config={{
         status: { label: "Status" },
       }}
+      className="w-full h-[500px]" // Estabelecendo altura e largura fixas
     >
-      <ResponsiveContainer width="100%" height="100%">
+      <div style={{ width: '100%', height: '100%' }}>
         <AreaChart 
-          data={data} 
-          margin={{ top: 20, right: 50, left: 50, bottom: 120 }}
+          data={preparedData} 
+          margin={{ top: 20, right: 30, left: 30, bottom: 80 }}
         >
           <defs>
-            {data.map((entry, index) => (
+            {preparedData.map((entry, index) => (
               <linearGradient key={`gradient-${index}`} id={`colorGradient${index}`} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={entry.color} stopOpacity={0.8}/>
                 <stop offset="95%" stopColor={entry.color} stopOpacity={0.1}/>
@@ -40,31 +48,28 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
           <XAxis 
             dataKey="name" 
             tick={{ fontSize: 11 }} 
-            height={90} 
+            height={60} 
             interval={0}
             angle={-45}
             textAnchor="end"
-            padding={{ left: 10, right: 10 }}
           />
           <YAxis 
             tick={{ fontSize: 11 }} 
-            width={50} 
+            width={30} 
             domain={[0, 'auto']}
-            padding={{ top: 10, bottom: 10 }}
           />
           <Tooltip content={<ChartTooltipContent />} />
           <Legend 
             verticalAlign="bottom"
-            height={80}
+            height={36}
             wrapperStyle={{ 
               fontSize: '12px', 
               paddingTop: '15px',
-              paddingBottom: '40px',
-              bottom: '20px',
+              bottom: '0px',
               position: 'relative'
             }}
           />
-          {data.map((entry, index) => (
+          {preparedData.map((entry, index) => (
             <Area
               key={`area-${index}`}
               type="monotone"
@@ -73,11 +78,11 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
               stroke={entry.color}
               fillOpacity={1}
               fill={`url(#colorGradient${index})`}
-              hide={index !== 0}
+              stackId="1"
             />
           ))}
         </AreaChart>
-      </ResponsiveContainer>
+      </div>
     </ChartContainer>
   );
 }
