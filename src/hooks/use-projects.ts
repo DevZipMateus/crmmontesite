@@ -2,20 +2,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { getSupabaseClient } from "@/lib/supabase";
-import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
-
-interface Project {
-  id: string;
-  client_name: string;
-  template: string;
-  status: string;
-  created_at: string;
-  responsible_name?: string;
-  domain?: string;
-  client_type?: string;
-  blaster_link?: string;
-  hasPendingCustomizations?: boolean;
-}
+import { Project } from "@/types/project";
 
 interface ProjectFilters {
   statusFilter: string | null;

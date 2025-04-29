@@ -4,114 +4,22 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardFooter from "@/components/dashboard/DashboardFooter";
 import MainMenuSection from "@/components/dashboard/MainMenuSection";
 import StatsSection from "@/components/dashboard/StatsSection";
-import { AnalyticsCard } from "@/components/dashboard/AnalyticsCard";
-import { ProjectStatusChart } from "@/components/dashboard/ProjectStatusChart";
-import { NotificationsCard } from "@/components/dashboard/NotificationsCard";
-import { RecentProjectsCard } from "@/components/dashboard/RecentProjectsCard";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useProjects } from "@/hooks/use-projects";
 import { useTheme } from "next-themes";
-import { ArrowUpRight, Clock, Database, Users } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { AnalyticsSection } from "@/components/dashboard/AnalyticsSection";
+import { InfoCardsSection } from "@/components/dashboard/InfoCardsSection";
+import { ProjectsAnalysisSection } from "@/components/dashboard/ProjectsAnalysisSection";
+import { useStatusChartData } from "@/components/dashboard/useStatusChartData";
+import { useNotifications } from "@/components/dashboard/useNotifications";
 
 const Index: React.FC = () => {
   const { projects, loading } = useProjects();
   const [mounted, setMounted] = useState(false);
   const { theme } = useTheme();
-  const { toast } = useToast();
   
-  const [chartData, setChartData] = useState([
-    { name: "Site Pronto", value: 0, color: "#22c55e" },
-    { name: "Criando Site", value: 4, color: "#3b82f6" },
-    { name: "Recebido", value: 0, color: "#8b5cf6" },
-    { name: "Config. Domínio", value: 0, color: "#f59e0b" },
-    { name: "Aguardando DNS", value: 0, color: "#f97316" }
-  ]);
-  
-  // Store dismissed notification IDs in state to prevent them from reappearing
-  const [dismissedNotificationIds, setDismissedNotificationIds] = useState<string[]>([]);
-  
-  // Base notifications that will be filtered against dismissed IDs
-  const [baseNotifications, setBaseNotifications] = useState([
-    {
-      id: "1",
-      title: "Novo projeto criado",
-      description: "O projeto 'Site da Empresa XYZ' foi criado com sucesso.",
-      date: "Hoje, 10:30",
-      read: false,
-      type: "info" as const
-    },
-    {
-      id: "2",
-      title: "Projeto aguardando customização",
-      description: "O cliente 'ABC Ltda' solicitou customizações.",
-      date: "Ontem, 15:45",
-      read: true,
-      type: "warning" as const
-    },
-    {
-      id: "3",
-      title: "Domínio configurado",
-      description: "O domínio 'empresa.com.br' foi configurado com sucesso.",
-      date: "25/04/2025",
-      read: true,
-      type: "success" as const
-    }
-  ]);
-  
-  // Derived state: filter out dismissed notifications
-  const [notifications, setNotifications] = useState(baseNotifications);
-  
-  // Use effect to filter notifications whenever dismissedNotificationIds changes
-  useEffect(() => {
-    setNotifications(baseNotifications.filter(
-      notification => !dismissedNotificationIds.includes(notification.id)
-    ));
-  }, [baseNotifications, dismissedNotificationIds]);
-  
-  const markNotificationAsRead = (id: string) => {
-    setBaseNotifications(prevNotifications => 
-      prevNotifications.map(notification => 
-        notification.id === id ? { ...notification, read: true } : notification
-      )
-    );
-    
-    toast({
-      title: "Notificação marcada como lida",
-      description: "A notificação foi atualizada com sucesso.",
-    });
-  };
-  
-  const dismissNotification = (id: string) => {
-    // Add the ID to dismissed notifications list
-    setDismissedNotificationIds(prev => [...prev, id]);
-    
-    toast({
-      title: "Notificação removida",
-      description: "A notificação foi removida com sucesso.",
-    });
-  };
-  
-  useEffect(() => {
-    if (projects.length > 0) {
-      const statusCount: Record<string, number> = {};
-      
-      projects.forEach(project => {
-        if (statusCount[project.status]) {
-          statusCount[project.status]++;
-        } else {
-          statusCount[project.status] = 1;
-        }
-      });
-      
-      setChartData(prevChartData => 
-        prevChartData.map(item => ({
-          ...item,
-          value: statusCount[item.name] || 0
-        }))
-      );
-    }
-  }, [projects]);
+  const chartData = useStatusChartData(projects);
+  const { notifications, markNotificationAsRead, dismissNotification } = useNotifications();
   
   useEffect(() => {
     setMounted(true);
@@ -133,64 +41,16 @@ const Index: React.FC = () => {
         <MainMenuSection />
         <StatsSection />
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <AnalyticsCard
-            title="Total de Projetos"
-            value={projects.length}
-            description="Todos os projetos cadastrados"
-            icon={<Database className="h-4 w-4" />}
-            trend={{ value: 12, isPositive: true }}
-          />
-          <AnalyticsCard
-            title="Projetos Ativos"
-            value={projects.filter(p => p.status !== "Site Pronto").length}
-            description="Projetos em andamento"
-            icon={<Clock className="h-4 w-4" />}
-            trend={{ value: 5, isPositive: true }}
-          />
-          <AnalyticsCard
-            title="Clientes"
-            value={new Set(projects.map(p => p.client_name)).size}
-            description="Clientes únicos"
-            icon={<Users className="h-4 w-4" />}
-            trend={{ value: 3, isPositive: true }}
-          />
-        </div>
+        <AnalyticsSection projects={projects} />
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-          <NotificationsCard 
-            notifications={notifications}
-            onMarkAsRead={markNotificationAsRead}
-            onDismiss={dismissNotification}
-          />
-          <RecentProjectsCard 
-            projects={projects.slice(0, 5).map(p => ({
-              id: p.id,
-              client_name: p.client_name,
-              status: p.status,
-              created_at: p.created_at,
-              template: p.template
-            }))} 
-          />
-        </div>
+        <InfoCardsSection 
+          notifications={notifications}
+          onMarkAsRead={markNotificationAsRead}
+          onDismiss={dismissNotification}
+          projects={projects}
+        />
         
-        <h2 className="text-xl font-bold mb-4">Análise de Projetos</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-64">
-          <div className="lg:col-span-2">
-            <ProjectStatusChart 
-              title="Status dos Projetos" 
-              data={chartData}
-              type="area"
-            />
-          </div>
-          <div className="lg:col-span-1">
-            <ProjectStatusChart 
-              title="Distribuição de Status" 
-              data={chartData}
-              type="pie"
-            />
-          </div>
-        </div>
+        <ProjectsAnalysisSection chartData={chartData} />
       </main>
 
       <DashboardFooter />
