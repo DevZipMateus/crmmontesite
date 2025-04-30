@@ -7,15 +7,11 @@ import StatsSection from "@/components/dashboard/StatsSection";
 import { useProjects } from "@/hooks/use-projects";
 import { AnalyticsSection } from "@/components/dashboard/AnalyticsSection";
 import { InfoCardsSection } from "@/components/dashboard/InfoCardsSection";
-import { ProjectsAnalysisSection } from "@/components/dashboard/ProjectsAnalysisSection";
-import { useStatusChartData } from "@/components/dashboard/useStatusChartData";
 import { cleanupRealtimeSubscriptions } from "@/lib/supabase/realtime";
 
 const Index: React.FC = () => {
   const { projects, loading } = useProjects();
   const [mounted, setMounted] = useState(false);
-  
-  const chartData = useStatusChartData(projects);
   
   useEffect(() => {
     setMounted(true);
@@ -51,8 +47,6 @@ const Index: React.FC = () => {
         <InfoCardsSection 
           projects={projects}
         />
-        
-        <ProjectsAnalysisSection chartData={chartData} />
       </main>
 
       <DashboardFooter />
