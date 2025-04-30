@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -42,8 +41,11 @@ const App = () => {
             {/* Página pública de login */}
             <Route path="/login" element={<Login />} />
             
-            {/* Página de formulário público para clientes */}
+            {/* Página de formulário público para clientes - Keep this accessible without authentication */}
             <Route path="/formulario/:modelo" element={<PublicPersonalizeForm />} />
+            
+            {/* Página de confirmação pública - Keep this accessible without authentication */}
+            <Route path="/confirmacao" element={<Confirmacao />} />
             
             {/* Página inicial - acessível apenas após login */}
             <Route path="/home" element={
@@ -82,11 +84,6 @@ const App = () => {
             <Route path="/personalize-site/:modelo" element={
               <AuthGuard>
                 <PersonalizeSite />
-              </AuthGuard>
-            } />
-            <Route path="/confirmacao" element={
-              <AuthGuard>
-                <Confirmacao />
               </AuthGuard>
             } />
             <Route path="/site/:id" element={

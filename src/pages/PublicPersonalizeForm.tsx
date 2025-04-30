@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -80,6 +81,7 @@ export default function PublicPersonalizeForm() {
         title: "Formulário enviado com sucesso!",
         description: "Obrigado por personalizar seu site. Entraremos em contato em breve.",
       });
+      navigate("/confirmacao");
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
@@ -92,7 +94,7 @@ export default function PublicPersonalizeForm() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container py-6 md:py-10 max-w-4xl mx-auto">
+      <div className="container py-6 md:py-10 max-w-4xl mx-auto px-4 sm:px-6">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mt-4">Personalização de Site</h1>
           <p className="text-gray-500 mt-2">Preencha os detalhes abaixo para personalizar seu site</p>
