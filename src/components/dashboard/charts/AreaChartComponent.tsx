@@ -45,29 +45,30 @@ export function AreaChartComponent({ data }: AreaChartComponentProps) {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart 
           data={transformedData} 
-          margin={{ top: 5, right: 20, left: 5, bottom: 25 }}
+          margin={{ top: 10, right: 30, left: 10, bottom: 40 }}
         >
           <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
           <XAxis 
             dataKey="name" 
-            tick={{ fontSize: 10 }} 
-            height={30} 
+            tick={{ fontSize: 11 }} 
+            height={40} 
             angle={-30}
             textAnchor="end"
           />
           <YAxis 
             tick={{ fontSize: 11 }} 
-            width={30} 
+            width={35} 
             domain={[0, 'auto']}
             allowDecimals={false}
           />
           <Tooltip content={<ChartTooltipContent />} />
           <Legend 
             verticalAlign="top"
-            height={20}
+            height={36}
             wrapperStyle={{ 
-              fontSize: '11px', 
-              paddingTop: '2px'
+              fontSize: '12px', 
+              paddingTop: '8px',
+              paddingBottom: '4px'
             }}
           />
           {transformedData.map((entry, index) => (
