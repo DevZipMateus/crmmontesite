@@ -84,7 +84,7 @@ export default function PersonalizeSite() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl md:text-3xl font-bold">Personalize Seu Site</CardTitle>
           <CardDescription>
-            Preencha o formulário abaixo com as informações do seu escritório contábil para personalizar seu site.
+            Preencha o formulário abaixo com as informações da sua empresa/escritório para personalizar seu site.
           </CardDescription>
           
           <div className="pt-4">
