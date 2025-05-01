@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       project_customizations: {
         Row: {
           completed_at: string | null
@@ -98,6 +125,50 @@ export type Database = {
         }
         Relationships: []
       }
+      showcases: {
+        Row: {
+          category_id: string | null
+          client_name: string
+          created_at: string
+          description: string | null
+          featured: boolean | null
+          id: string
+          image_url: string
+          site_url: string
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          client_name: string
+          created_at?: string
+          description?: string | null
+          featured?: boolean | null
+          id?: string
+          image_url: string
+          site_url: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          client_name?: string
+          created_at?: string
+          description?: string | null
+          featured?: boolean | null
+          id?: string
+          image_url?: string
+          site_url?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "showcases_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_personalizacoes: {
         Row: {
           botaowhatsapp: boolean | null
@@ -182,6 +253,56 @@ export type Database = {
         }
         Relationships: []
       }
+      templates: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          description: string
+          form_url: string
+          id: string
+          image_url: string
+          order_index: number | null
+          preview_url: string
+          status: Database["public"]["Enums"]["template_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          description: string
+          form_url: string
+          id?: string
+          image_url: string
+          order_index?: number | null
+          preview_url: string
+          status?: Database["public"]["Enums"]["template_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          description?: string
+          form_url?: string
+          id?: string
+          image_url?: string
+          order_index?: number | null
+          preview_url?: string
+          status?: Database["public"]["Enums"]["template_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "templates_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -196,6 +317,7 @@ export type Database = {
         | "Em andamento"
         | "Concluído"
         | "Cancelado"
+      template_status: "active" | "inactive" | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -318,6 +440,7 @@ export const Constants = {
         "Concluído",
         "Cancelado",
       ],
+      template_status: ["active", "inactive", "archived"],
     },
   },
 } as const

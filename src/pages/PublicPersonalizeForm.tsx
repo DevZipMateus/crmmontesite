@@ -14,7 +14,7 @@ import PersonalizeForm from "@/components/site-personalize/PersonalizeForm";
 import { useFileUploadHandlers } from "@/components/site-personalize/FileUploadHandlers";
 import { useFormSubmission } from "@/components/site-personalize/useFormSubmission";
 import ModeloDetails from "@/components/site-personalize/ModeloDetails";
-import { modelosDisponiveis } from "@/components/site-personalize/modelosData";
+import { modelosDisponiveis, findModeloByCustomUrl } from "@/components/site-personalize/modelosData";
 
 export default function PublicPersonalizeForm() {
   const { toast } = useToast();
@@ -32,7 +32,13 @@ export default function PublicPersonalizeForm() {
 
   // Get modelo from URL parameter
   const modeloParam = params.modelo || "";
-  const [modeloSelecionado, setModeloSelecionado] = useState<string | null>(modeloParam || "modelo1");
+  
+  // Tenta encontrar o ID do modelo a partir da URL personalizada, 
+  // ou usa o próprio parâmetro como ID se for um ID válido
+  const [modeloSelecionado, setModeloSelecionado] = useState<string | null>(
+    findModeloByCustomUrl(modeloParam) || 
+    (modelosDisponiveis.some(m => m.id === modeloParam) ? modeloParam : "modelo1")
+  );
 
   // Initialize file upload handlers
   const fileHandlers = useFileUploadHandlers({
@@ -56,16 +62,24 @@ export default function PublicPersonalizeForm() {
   // Update modelo when URL parameter changes
   useEffect(() => {
     if (modeloParam) {
-      const isValidModelo = modelosDisponiveis.some(m => m.id === modeloParam);
-      if (isValidModelo) {
-        setModeloSelecionado(modeloParam);
+      // Primeiro tenta encontrar pelo customUrl
+      const idByCustomUrl = findModeloByCustomUrl(modeloParam);
+      
+      if (idByCustomUrl) {
+        setModeloSelecionado(idByCustomUrl);
       } else {
-        setModeloSelecionado("modelo1"); // Default if invalid model
-        toast({
-          title: "Modelo não encontrado",
-          description: "O modelo especificado não existe. Utilizando o modelo padrão.",
-          variant: "destructive",
-        });
+        // Se não encontrar pelo customUrl, verifica se é um ID válido
+        const isValidModelo = modelosDisponiveis.some(m => m.id === modeloParam);
+        if (isValidModelo) {
+          setModeloSelecionado(modeloParam);
+        } else {
+          setModeloSelecionado("modelo1"); // Default if invalid model
+          toast({
+            title: "Modelo não encontrado",
+            description: "O modelo especificado não existe. Utilizando o modelo padrão.",
+            variant: "destructive",
+          });
+        }
       }
     }
   }, [modeloParam, toast]);
