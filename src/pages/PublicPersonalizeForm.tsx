@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { getModelTemplateByCustomUrl } from "@/services/modelTemplateService";
 import { findModeloByCustomUrl, modelosDisponiveis } from "@/components/site-personalize/modelosData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { ReloadIcon } from "@radix-ui/react-icons";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   nome: z.string().min(2, {
@@ -229,7 +229,7 @@ export default function PublicPersonalizeForm() {
               />
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && (
-                  <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
                 Enviar
               </Button>
