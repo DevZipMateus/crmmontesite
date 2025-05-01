@@ -36,6 +36,36 @@ export type Database = {
         }
         Relationships: []
       }
+      model_templates: {
+        Row: {
+          created_at: string | null
+          custom_url: string | null
+          description: string
+          id: string
+          image_url: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          custom_url?: string | null
+          description: string
+          id?: string
+          image_url?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          custom_url?: string | null
+          description?: string
+          id?: string
+          image_url?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       project_customizations: {
         Row: {
           completed_at: string | null

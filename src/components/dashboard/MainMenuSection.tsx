@@ -71,9 +71,9 @@ const MainMenuSection: React.FC = () => {
         
         <MenuItem 
           icon={<LinkIcon size={24} />}
-          label="URLs Personalizadas"
+          label="Modelos & URLs"
           href="/custom-urls"
-          description="Gerenciar URLs para formulários"
+          description="Gerenciar modelos e URLs para formulários"
         />
       </div>
     </section>

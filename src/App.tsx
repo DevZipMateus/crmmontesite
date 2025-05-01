@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -18,7 +17,7 @@ import ProducaoSites from "./pages/ProducaoSites";
 import Login from "./pages/Login";
 import AuthGuard from "./components/auth/AuthGuard";
 import PublicPersonalizeForm from "./pages/PublicPersonalizeForm";
-import CustomUrlAdmin from "./pages/CustomUrlAdmin"; // Importando a nova página
+import CustomUrlAdmin from "./pages/CustomUrlAdmin";
 
 const queryClient = new QueryClient();
 
@@ -99,7 +98,7 @@ const App = () => {
               </AuthGuard>
             } />
             
-            {/* Nova rota para gerenciamento de URLs personalizadas */}
+            {/* Rota para gerenciamento de modelos e URLs personalizadas */}
             <Route path="/custom-urls" element={
               <AuthGuard>
                 <CustomUrlAdmin />
