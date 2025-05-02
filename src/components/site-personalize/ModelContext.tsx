@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useContext, ReactNode } from "react";
-import { ModelTemplate } from "@/services/modelTemplateService";
+import { ModelTemplate, getAllModelTemplates } from "@/services/modelTemplateService";
 
 interface ModelContextType {
   models: ModelTemplate[];
@@ -25,9 +25,7 @@ export const ModelProvider: React.FC<{ children: ReactNode, baseUrl: string }> =
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [copied, setCopied] = useState<string | null>(null);
   
-  // Import at function level to avoid circular dependencies
-  const { getAllModelTemplates } = require("@/services/modelTemplateService");
-  
+  // Import directly at the top level instead of using require
   const fetchModels = async () => {
     try {
       setLoading(true);
