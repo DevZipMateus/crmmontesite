@@ -25,6 +25,13 @@ export default function SiteDetalhe() {
           >
             <Edit className="h-4 w-4" /> Editar
           </Button>
+          <DeleteProjectDialog 
+            projectId={id as string}
+            projectName="este site"
+            onDelete={handleProjectDeleted}
+            variant="button"
+            size="default"
+          />
         </>
       }
     >
@@ -41,13 +48,6 @@ export default function SiteDetalhe() {
       <div className="bg-white border border-gray-100 rounded-lg shadow-sm p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-medium">Informações do Site</h2>
-          <DeleteProjectDialog 
-            projectId={id as string}
-            projectName="este site"
-            onDelete={handleProjectDeleted}
-            variant="button"
-            size="sm"
-          />
         </div>
         <p className="text-gray-500">Carregando informações do site...</p>
       </div>
