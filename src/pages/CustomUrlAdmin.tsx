@@ -9,21 +9,54 @@ import DashboardFooter from "@/components/dashboard/DashboardFooter";
 import { supabase } from "@/lib/supabase/client";
 import { AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CustomUrlAdmin() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const baseUrl = window.location.origin;
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Set up auth state listener FIRST (as recommended in Supabase best practices)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event, !!session);
+      setIsAuthenticated(!!session);
+      
+      // If we receive a SIGNED_IN event, make sure we update our state
+      if (event === 'SIGNED_IN') {
+        setIsAuthenticated(true);
+        setAuthError(null);
+      }
+    });
+
+    // THEN check for existing session
     const checkAuthStatus = async () => {
       try {
         setLoading(true);
-        const { data } = await supabase.auth.getSession();
-        setIsAuthenticated(!!data.session);
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error checking session:", error);
+          setAuthError(error.message);
+          setIsAuthenticated(false);
+        } else {
+          console.log("Current session data:", data);
+          setIsAuthenticated(!!data.session);
+          if (!data.session) {
+            // No active session found
+            console.log("No active session found");
+            setAuthError("No active session found");
+          } else {
+            // Session found, user is authenticated
+            console.log("User is authenticated:", data.session.user.email);
+          }
+        }
       } catch (error) {
-        console.error("Error checking auth status:", error);
+        console.error("Exception checking auth status:", error);
+        setAuthError(error instanceof Error ? error.message : "Unknown error");
       } finally {
         setLoading(false);
       }
@@ -31,12 +64,34 @@ export default function CustomUrlAdmin() {
 
     checkAuthStatus();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session);
-    });
-
     return () => subscription.unsubscribe();
   }, []);
+
+  // Try to force a refresh of auth status when this page loads
+  useEffect(() => {
+    const refreshAuthStatus = async () => {
+      try {
+        const { data, error } = await supabase.auth.refreshSession();
+        if (error) {
+          console.error("Error refreshing session:", error);
+        } else if (data.session) {
+          console.log("Session refreshed successfully");
+          setIsAuthenticated(true);
+          setAuthError(null);
+        }
+      } catch (err) {
+        console.error("Error during refresh:", err);
+      }
+    };
+    
+    refreshAuthStatus();
+  }, []);
+
+  const handleLoginClick = () => {
+    // Store the current URL so we can redirect back after login
+    localStorage.setItem('redirectAfterLogin', '/custom-urls');
+    navigate('/login');
+  };
 
   if (loading) {
     return (
@@ -69,10 +124,15 @@ export default function CustomUrlAdmin() {
                 <AlertTriangle className="h-6 w-6 text-amber-500" />
                 <p className="text-amber-700">
                   Por favor, faça login como administrador para acessar esta funcionalidade.
+                  {authError && (
+                    <span className="block mt-2 text-sm text-red-600">
+                      Erro: {authError}
+                    </span>
+                  )}
                 </p>
               </div>
               <div className="mt-4">
-                <Button onClick={() => navigate('/login')}>
+                <Button onClick={handleLoginClick}>
                   Ir para página de login
                 </Button>
               </div>
@@ -84,6 +144,7 @@ export default function CustomUrlAdmin() {
     );
   }
 
+  // User is authenticated
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <DashboardHeader />
