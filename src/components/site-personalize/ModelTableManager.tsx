@@ -13,7 +13,7 @@ interface ModelTableManagerProps {
 
 const ModelTableManager: React.FC<ModelTableManagerProps> = ({ baseUrl }) => {
   const { toast } = useToast();
-  const { isAuthenticated, fetchModels, refreshAuth } = useModelContext();
+  const { isAuthenticated, fetchModels, refreshAuth, models } = useModelContext();
 
   // Edit model dialog state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -38,8 +38,27 @@ const ModelTableManager: React.FC<ModelTableManagerProps> = ({ baseUrl }) => {
       return;
     }
     
-    setCurrentEditModel(model);
-    setEditDialogOpen(true);
+    // Look up the fresh model data before editing
+    try {
+      // Find the most up-to-date model from the context
+      const freshModel = models.find(m => m.id === model.id);
+      
+      if (freshModel) {
+        console.log("Starting edit with fresh model data:", freshModel);
+        setCurrentEditModel(freshModel);
+      } else {
+        console.log("Model not found in current models list:", model.id);
+        setCurrentEditModel(model);
+      }
+      setEditDialogOpen(true);
+    } catch (err) {
+      console.error("Error preparing model for editing:", err);
+      toast({
+        title: "Erro ao preparar modelo",
+        description: "Houve um erro ao preparar o modelo para edição. Por favor, tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
   
   // Handle edit model form changes
@@ -71,6 +90,7 @@ const ModelTableManager: React.FC<ModelTableManagerProps> = ({ baseUrl }) => {
     try {
       setSaving(true);
       console.log("Sending update for model:", currentEditModel);
+      console.log("Model ID being sent:", currentEditModel.id);
       
       await updateModelTemplate(currentEditModel.id, {
         name: currentEditModel.name,

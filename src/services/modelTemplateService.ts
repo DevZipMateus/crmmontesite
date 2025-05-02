@@ -59,6 +59,8 @@ export async function getModelTemplateByCustomUrl(customUrl: string): Promise<Mo
 
 export async function getModelTemplateById(id: string): Promise<ModelTemplate | null> {
   try {
+    console.log(`Fetching model with ID: ${id}`);
+    
     const { data, error } = await supabase
       .from('model_templates')
       .select('*')
@@ -70,9 +72,15 @@ export async function getModelTemplateById(id: string): Promise<ModelTemplate | 
       throw error;
     }
     
+    if (!data) {
+      console.log(`No model found with ID: ${id}`);
+    } else {
+      console.log(`Found model with ID: ${id}`, data);
+    }
+    
     return data;
   } catch (err) {
-    console.error("Error in getModelTemplateById:", err);
+    console.error(`Error in getModelTemplateById for ID ${id}:`, err);
     throw err;
   }
 }
@@ -106,11 +114,26 @@ export async function updateModelTemplate(id: string, updates: Partial<ModelTemp
     // Log the update attempt to help with debugging
     console.log(`Attempting to update model with ID: ${id}`, updates);
     
+    // First verify the ID format is correct (UUID format check)
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      throw new Error(`ID inválido: ${id} não está no formato UUID correto.`);
+    }
+    
     // First check if the model exists
-    const checkModel = await getModelTemplateById(id);
-    if (!checkModel) {
+    const checkResult = await supabase
+      .from('model_templates')
+      .select('id')
+      .eq('id', id)
+      .maybeSingle();
+    
+    if (checkResult.error) {
+      console.error(`Error checking model existence: ${checkResult.error.message}`);
+      throw new Error(`Erro ao verificar existência do modelo: ${checkResult.error.message}`);
+    }
+    
+    if (!checkResult.data) {
       console.error(`Model with ID ${id} not found during pre-check`);
-      throw new Error(`Modelo com ID ${id} não encontrado.`);
+      throw new Error(`Modelo com ID ${id} não encontrado. Verifique o ID ou atualize a página.`);
     }
     
     const { data, error } = await supabase
