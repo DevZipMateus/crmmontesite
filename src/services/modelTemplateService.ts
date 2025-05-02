@@ -19,10 +19,6 @@ export async function getAllModelTemplates(): Promise<ModelTemplate[]> {
       .order('name');
       
     if (error) {
-      if (error.message.includes('JWT') || error.message.includes('token')) {
-        console.error("Authentication error:", error);
-        throw new Error("Você precisa estar autenticado para realizar esta operação.");
-      }
       console.error("Error fetching model templates:", error);
       throw error;
     }
@@ -87,6 +83,8 @@ export async function getModelTemplateById(id: string): Promise<ModelTemplate | 
 
 export async function createModelTemplate(model: Omit<ModelTemplate, 'id' | 'created_at' | 'updated_at'>): Promise<ModelTemplate> {
   try {
+    console.log("Creating new model with data:", model);
+    
     const { data, error } = await supabase
       .from('model_templates')
       .insert(model)
@@ -94,14 +92,17 @@ export async function createModelTemplate(model: Omit<ModelTemplate, 'id' | 'cre
       .single();
       
     if (error) {
-      if (error.message.includes('JWT') || error.message.includes('token')) {
-        console.error("Authentication error:", error);
-        throw new Error("Você precisa estar autenticado para criar modelos.");
-      }
       console.error("Error creating model template:", error);
+      
+      // Check if this is a permission issue
+      if (error.code === '42501' || error.message.includes('permission denied')) {
+        throw new Error("Erro de permissão: Não foi possível criar o modelo. Verifique as permissões do banco de dados.");
+      }
+      
       throw error;
     }
     
+    console.log("Model created successfully:", data);
     return data;
   } catch (err) {
     console.error("Error in createModelTemplate:", err);
@@ -144,11 +145,13 @@ export async function updateModelTemplate(id: string, updates: Partial<ModelTemp
       .maybeSingle(); // Using maybeSingle instead of single
       
     if (error) {
-      if (error.message.includes('JWT') || error.message.includes('token')) {
-        console.error("Authentication error:", error);
-        throw new Error("Você precisa estar autenticado para atualizar modelos.");
-      }
       console.error("Error updating model template:", error);
+      
+      // Check if this is a permission issue
+      if (error.code === '42501' || error.message.includes('permission denied')) {
+        throw new Error("Erro de permissão: Não foi possível atualizar o modelo. Verifique as permissões do banco de dados.");
+      }
+      
       throw error;
     }
     
@@ -156,6 +159,7 @@ export async function updateModelTemplate(id: string, updates: Partial<ModelTemp
       throw new Error(`Não foi possível atualizar o modelo com ID ${id}. O modelo não foi encontrado.`);
     }
     
+    console.log(`Model with ID ${id} updated successfully:`, data);
     return data;
   } catch (err) {
     console.error("Error in updateModelTemplate:", err);
@@ -165,19 +169,25 @@ export async function updateModelTemplate(id: string, updates: Partial<ModelTemp
 
 export async function deleteModelTemplate(id: string): Promise<void> {
   try {
+    console.log(`Attempting to delete model with ID: ${id}`);
+    
     const { error } = await supabase
       .from('model_templates')
       .delete()
       .eq('id', id);
       
     if (error) {
-      if (error.message.includes('JWT') || error.message.includes('token')) {
-        console.error("Authentication error:", error);
-        throw new Error("Você precisa estar autenticado para excluir modelos.");
-      }
       console.error("Error deleting model template:", error);
+      
+      // Check if this is a permission issue
+      if (error.code === '42501' || error.message.includes('permission denied')) {
+        throw new Error("Erro de permissão: Não foi possível excluir o modelo. Verifique as permissões do banco de dados.");
+      }
+      
       throw error;
     }
+    
+    console.log(`Model with ID ${id} deleted successfully`);
   } catch (err) {
     console.error("Error in deleteModelTemplate:", err);
     throw err;
