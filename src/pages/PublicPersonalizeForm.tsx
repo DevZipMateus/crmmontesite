@@ -1,8 +1,6 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getModelTemplateByCustomUrl } from "@/services/modelTemplateService";
-import { findModeloByCustomUrl, modelosDisponiveis } from "@/components/site-personalize/modelosData";
 import { useToast } from "@/hooks/use-toast";
 import {
   Card,
@@ -16,16 +14,18 @@ import PersonalizeForm from "@/components/site-personalize/PersonalizeForm";
 import { useFileUploadHandlers } from "@/components/site-personalize/FileUploadHandlers";
 import { useFormSubmission } from "@/components/site-personalize/useFormSubmission";
 import ModeloDetails from "@/components/site-personalize/ModeloDetails";
-import { Loader2 } from "lucide-react";
+import { modelosDisponiveis } from "@/components/site-personalize/modelosData";
+import { LoadingState } from "@/components/site-personalize/LoadingState";
+import { ErrorState } from "@/components/site-personalize/ErrorState";
+import { useModelFromUrl } from "@/components/site-personalize/useModelFromUrl";
 
 export default function PublicPersonalizeForm() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { modelo: modeloParam } = useParams<{ modelo: string }>();
   
-  // State for loading and error handling
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Use the hook to load model data
+  const { modeloSelecionado, loading, error } = useModelFromUrl(modeloParam);
 
   // File state management - same as PersonalizeSite component
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -35,9 +35,6 @@ export default function PublicPersonalizeForm() {
   const [midiaFiles, setMidiaFiles] = useState<File[]>([]);
   const [midiaPreviews, setMidiaPreviews] = useState<string[]>([]);
   const [midiaCaptions, setMidiaCaptions] = useState<string[]>([]);
-
-  // Model state
-  const [modeloSelecionado, setModeloSelecionado] = useState<string | null>(null);
 
   // Initialize file upload handlers
   const fileHandlers = useFileUploadHandlers({
@@ -58,66 +55,15 @@ export default function PublicPersonalizeForm() {
     midiaCaptions
   });
 
-  // Handle model loading from URL parameter
-  useEffect(() => {
-    async function loadModel() {
-      if (!modeloParam) {
-        setModeloSelecionado("Modelo 1"); // Default model
-        setLoading(false);
-        return;
-      }
-      
-      try {
-        // First try to find the model in the database by custom URL
-        const dbModel = await getModelTemplateByCustomUrl(modeloParam);
-        
-        if (dbModel) {
-          setModeloSelecionado(dbModel.id);
-          setLoading(false);
-          return;
-        }
-        
-        // If not found in DB, fallback to the static data (for backward compatibility)
-        const staticModelId = findModeloByCustomUrl(modeloParam);
-        
-        if (staticModelId) {
-          setModeloSelecionado(staticModelId);
-        } else {
-          // If still not found, check if the parameter itself is a valid model ID
-          const modelExists = modelosDisponiveis.some(m => m.id === modeloParam);
-          if (modelExists) {
-            setModeloSelecionado(modeloParam);
-          } else {
-            setError(`Modelo não encontrado: ${modeloParam}`);
-          }
-        }
-      } catch (err) {
-        console.error("Error loading model:", err);
-        setError("Erro ao carregar modelo. Por favor, tente novamente.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadModel();
-  }, [modeloParam, toast]);
-
   // Get modelo details for display
   const modeloDetails = modelosDisponiveis.find(m => m.id === modeloSelecionado);
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-center">
-          <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />
-          <p>Carregando formulário...</p>
-        </div>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (error) {
-    return <div className="text-center mt-8 text-red-500">Erro: {error}</div>;
+    return <ErrorState error={error} />;
   }
 
   if (!modeloSelecionado) {
