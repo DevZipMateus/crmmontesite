@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,7 +55,6 @@ import {
   updateModelTemplate,
   deleteModelTemplate
 } from "@/services/modelTemplateService";
-import { supabase } from "@/lib/supabase/client";
 
 interface CustomUrlManagerProps {
   baseUrl: string;
@@ -97,14 +95,19 @@ const CustomUrlManager: React.FC<CustomUrlManagerProps> = ({ baseUrl }) => {
     checkAuthStatus();
   }, []);
   
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = () => {
     try {
       setAuthChecking(true);
-      const { data } = await supabase.auth.getSession();
+      // Check if user is authenticated using localStorage instead of Supabase
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
       
-      if (data.session) {
+      if (isLoggedIn) {
         setIsAuthenticated(true);
         fetchModels();
+        toast({
+          title: "Sessão autenticada",
+          description: "Você está autenticado como administrador",
+        });
       } else {
         setIsAuthenticated(false);
         setError("Você precisa estar autenticado para gerenciar modelos.");
