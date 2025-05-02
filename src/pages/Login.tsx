@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Logo } from "@/components/ui/logo";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase/client";
 
 const Login: React.FC = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -16,36 +17,61 @@ const Login: React.FC = () => {
 
   // Check if user is already logged in
   useEffect(() => {
-    if (localStorage.getItem("isLoggedIn") === "true") {
-      navigate("/home");
-    }
+    const checkAuthStatus = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        // Check if there's a redirect URL stored
+        const redirectUrl = localStorage.getItem("redirectAfterLogin");
+        if (redirectUrl) {
+          localStorage.removeItem("redirectAfterLogin");
+          navigate(redirectUrl);
+        } else {
+          navigate("/home");
+        }
+      }
+    };
+    
+    checkAuthStatus();
   }, [navigate]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Verificação simples de admin (obviamente não segura para produção)
-    if (username === "adm" && password === "zipline") {
-      // Simulando um pequeno delay para feedback visual do carregamento
-      setTimeout(() => {
-        // Armazenar informação de login no localStorage
-        localStorage.setItem("isLoggedIn", "true");
-        
-        toast({
-          title: "Login bem-sucedido",
-          description: "Bem-vindo ao sistema administrativo.",
-        });
-        
+    try {
+      // Using Supabase auth instead of the previous localStorage approach
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Login successful
+      toast({
+        title: "Login bem-sucedido",
+        description: "Bem-vindo ao sistema administrativo.",
+      });
+      
+      // Check if there's a redirect URL stored
+      const redirectUrl = localStorage.getItem("redirectAfterLogin");
+      if (redirectUrl) {
+        localStorage.removeItem("redirectAfterLogin");
+        navigate(redirectUrl);
+      } else {
         navigate("/home");
-      }, 1000);
-    } else {
-      setLoading(false);
+      }
+    } catch (error: any) {
+      console.error("Login error:", error);
       toast({
         title: "Erro de login",
-        description: "Credenciais inválidas. Tente novamente.",
+        description: error.message || "Credenciais inválidas. Tente novamente.",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -64,16 +90,17 @@ const Login: React.FC = () => {
         <form onSubmit={handleLogin}>
           <CardContent className="pb-4 space-y-4">
             <div className="space-y-2">
-              <label htmlFor="username" className="text-sm font-medium">
-                Usuário
+              <label htmlFor="email" className="text-sm font-medium">
+                Email
               </label>
               <Input
-                id="username"
-                placeholder="Informe seu usuário"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                placeholder="seu-email@exemplo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                autoComplete="username"
+                autoComplete="email"
               />
             </div>
             <div className="space-y-2">

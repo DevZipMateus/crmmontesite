@@ -19,21 +19,10 @@ export default function CustomUrlAdmin() {
   const [loading, setLoading] = useState<boolean>(true);
   const [authError, setAuthError] = useState<string | null>(null);
 
+  // First check for existing session and also set up auth state listener
   useEffect(() => {
-    // Set up auth state listener FIRST (as recommended in Supabase best practices)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event, !!session);
-      setIsAuthenticated(!!session);
-      
-      // If we receive a SIGNED_IN event, make sure we update our state
-      if (event === 'SIGNED_IN') {
-        setIsAuthenticated(true);
-        setAuthError(null);
-      }
-    });
-
-    // THEN check for existing session
-    const checkAuthStatus = async () => {
+    // Check for existing session first
+    const fetchSession = async () => {
       try {
         setLoading(true);
         const { data, error } = await supabase.auth.getSession();
@@ -44,26 +33,44 @@ export default function CustomUrlAdmin() {
           setIsAuthenticated(false);
         } else {
           console.log("Current session data:", data);
-          setIsAuthenticated(!!data.session);
-          if (!data.session) {
-            // No active session found
-            console.log("No active session found");
-            setAuthError("No active session found");
-          } else {
+          if (data.session) {
             // Session found, user is authenticated
             console.log("User is authenticated:", data.session.user.email);
+            setIsAuthenticated(true);
+            setAuthError(null);
+          } else {
+            console.log("No active session found");
+            setAuthError("No active session found");
+            setIsAuthenticated(false);
           }
         }
       } catch (error) {
         console.error("Exception checking auth status:", error);
         setAuthError(error instanceof Error ? error.message : "Unknown error");
+        setIsAuthenticated(false);
       } finally {
         setLoading(false);
       }
     };
 
-    checkAuthStatus();
+    // Set up auth state listener to catch changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event, Boolean(session));
+      
+      if (session) {
+        console.log("Session exists - user is authenticated:", session.user.email);
+        setIsAuthenticated(true);
+        setAuthError(null);
+      } else {
+        console.log("No session in auth state change");
+        setIsAuthenticated(false);
+      }
+    });
 
+    // Execute fetch session
+    fetchSession();
+
+    // Clean up listener on component unmount
     return () => subscription.unsubscribe();
   }, []);
 
@@ -71,21 +78,36 @@ export default function CustomUrlAdmin() {
   useEffect(() => {
     const refreshAuthStatus = async () => {
       try {
+        console.log("Attempting to refresh session...");
         const { data, error } = await supabase.auth.refreshSession();
+        
         if (error) {
           console.error("Error refreshing session:", error);
-        } else if (data.session) {
-          console.log("Session refreshed successfully");
-          setIsAuthenticated(true);
-          setAuthError(null);
+        } else {
+          console.log("Session refresh response:", data);
+          if (data.session) {
+            console.log("Session refreshed successfully");
+            setIsAuthenticated(true);
+            setAuthError(null);
+            
+            toast({
+              title: "Sessão autenticada",
+              description: "Você está autenticado como " + data.session.user.email,
+            });
+          } else {
+            console.log("No session after refresh");
+          }
         }
       } catch (err) {
-        console.error("Error during refresh:", err);
+        console.error("Exception during refresh:", err);
       }
     };
     
-    refreshAuthStatus();
-  }, []);
+    // Only try to refresh if we're not authenticated yet
+    if (!isAuthenticated && !loading) {
+      refreshAuthStatus();
+    }
+  }, [isAuthenticated, loading, toast]);
 
   const handleLoginClick = () => {
     // Store the current URL so we can redirect back after login
