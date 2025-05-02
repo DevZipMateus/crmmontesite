@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Loader2 } from "lucide-react";
 import { ModelTemplate } from "@/services/modelTemplateService";
 
 interface ModelFormProps {
@@ -17,9 +18,17 @@ interface ModelFormProps {
   onChange: (field: string, value: string) => void;
   onSubmit: () => void;
   onCancel?: () => void;
+  isSubmitting?: boolean;
 }
 
-const ModelForm: React.FC<ModelFormProps> = ({ model, isEdit = false, onChange, onSubmit, onCancel }) => {
+const ModelForm: React.FC<ModelFormProps> = ({ 
+  model, 
+  isEdit = false, 
+  onChange, 
+  onSubmit, 
+  onCancel,
+  isSubmitting = false
+}) => {
   return (
     <div className="grid gap-4">
       <div className="grid grid-cols-2 gap-4">
@@ -72,12 +81,19 @@ const ModelForm: React.FC<ModelFormProps> = ({ model, isEdit = false, onChange, 
       
       <div className="flex justify-end mt-2 gap-2">
         {onCancel && (
-          <Button variant="outline" onClick={onCancel}>
+          <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
             Cancelar
           </Button>
         )}
-        <Button onClick={onSubmit}>
-          {isEdit ? "Salvar Alterações" : "Criar Modelo"}
+        <Button onClick={onSubmit} disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Salvando...
+            </>
+          ) : (
+            isEdit ? "Salvar Alterações" : "Criar Modelo"
+          )}
         </Button>
       </div>
     </div>

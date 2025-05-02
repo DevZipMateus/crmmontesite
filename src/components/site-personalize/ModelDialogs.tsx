@@ -15,6 +15,8 @@ interface ModelDialogsProps {
   modelToDelete: ModelTemplate | null;
   setModelToDelete: (model: ModelTemplate | null) => void;
   handleDeleteModel: () => void;
+  saving?: boolean;
+  deleting?: boolean;
 }
 
 export const ModelDialogs: React.FC<ModelDialogsProps> = ({
@@ -25,7 +27,9 @@ export const ModelDialogs: React.FC<ModelDialogsProps> = ({
   handleSaveEdit,
   modelToDelete,
   setModelToDelete,
-  handleDeleteModel
+  handleDeleteModel,
+  saving = false,
+  deleting = false
 }) => {
   return (
     <>
@@ -51,6 +55,7 @@ export const ModelDialogs: React.FC<ModelDialogsProps> = ({
               onChange={handleEditModelChange}
               onSubmit={handleSaveEdit}
               onCancel={() => setEditDialogOpen(false)}
+              isSubmitting={saving}
             />
           )}
         </DialogContent>
@@ -74,8 +79,9 @@ export const ModelDialogs: React.FC<ModelDialogsProps> = ({
               <AlertDialogAction 
                 onClick={handleDeleteModel}
                 className="bg-red-600 hover:bg-red-700"
+                disabled={deleting}
               >
-                Excluir
+                {deleting ? "Excluindo..." : "Excluir"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

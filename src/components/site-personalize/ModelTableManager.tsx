@@ -13,18 +13,23 @@ interface ModelTableManagerProps {
 
 const ModelTableManager: React.FC<ModelTableManagerProps> = ({ baseUrl }) => {
   const { toast } = useToast();
-  const { isAuthenticated, fetchModels } = useModelContext();
+  const { isAuthenticated, fetchModels, refreshAuth } = useModelContext();
 
   // Edit model dialog state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [currentEditModel, setCurrentEditModel] = useState<ModelTemplate | null>(null);
+  const [saving, setSaving] = useState(false);
   
   // Delete confirmation dialog state
   const [modelToDelete, setModelToDelete] = useState<ModelTemplate | null>(null);
+  const [deleting, setDeleting] = useState(false);
   
   // Start editing a model
-  const handleEditClick = (model: ModelTemplate) => {
-    if (!isAuthenticated) {
+  const handleEditClick = async (model: ModelTemplate) => {
+    // Verify authentication first
+    const authStatus = await refreshAuth();
+    
+    if (!authStatus) {
       toast({
         title: "Erro de autenticação",
         description: "Você precisa estar autenticado para editar modelos.",
@@ -49,7 +54,10 @@ const ModelTableManager: React.FC<ModelTableManagerProps> = ({ baseUrl }) => {
   
   // Save edited model
   const handleSaveEdit = async () => {
-    if (!isAuthenticated) {
+    // First verify authentication
+    const authStatus = await refreshAuth();
+    
+    if (!authStatus) {
       toast({
         title: "Erro de autenticação",
         description: "Você precisa estar autenticado para editar modelos.",
@@ -61,6 +69,9 @@ const ModelTableManager: React.FC<ModelTableManagerProps> = ({ baseUrl }) => {
     if (!currentEditModel) return;
     
     try {
+      setSaving(true);
+      console.log("Sending update for model:", currentEditModel);
+      
       await updateModelTemplate(currentEditModel.id, {
         name: currentEditModel.name,
         description: currentEditModel.description,
@@ -74,19 +85,25 @@ const ModelTableManager: React.FC<ModelTableManagerProps> = ({ baseUrl }) => {
       });
       
       setEditDialogOpen(false);
-      fetchModels();
+      await fetchModels();
     } catch (err: any) {
       toast({
         title: "Erro ao atualizar modelo",
         description: err.message || "Ocorreu um erro ao atualizar o modelo.",
         variant: "destructive",
       });
+      console.error("Update error:", err);
+    } finally {
+      setSaving(false);
     }
   };
   
   // Confirm delete model
-  const confirmDelete = (model: ModelTemplate) => {
-    if (!isAuthenticated) {
+  const confirmDelete = async (model: ModelTemplate) => {
+    // Verify authentication first
+    const authStatus = await refreshAuth();
+    
+    if (!authStatus) {
       toast({
         title: "Erro de autenticação",
         description: "Você precisa estar autenticado para excluir modelos.",
@@ -100,7 +117,10 @@ const ModelTableManager: React.FC<ModelTableManagerProps> = ({ baseUrl }) => {
   
   // Delete model
   const handleDeleteModel = async () => {
-    if (!isAuthenticated) {
+    // First verify authentication
+    const authStatus = await refreshAuth();
+    
+    if (!authStatus) {
       toast({
         title: "Erro de autenticação", 
         description: "Você precisa estar autenticado para excluir modelos.",
@@ -112,6 +132,7 @@ const ModelTableManager: React.FC<ModelTableManagerProps> = ({ baseUrl }) => {
     if (!modelToDelete) return;
     
     try {
+      setDeleting(true);
       await deleteModelTemplate(modelToDelete.id);
       
       toast({
@@ -120,13 +141,15 @@ const ModelTableManager: React.FC<ModelTableManagerProps> = ({ baseUrl }) => {
       });
       
       setModelToDelete(null);
-      fetchModels();
+      await fetchModels();
     } catch (err: any) {
       toast({
         title: "Erro ao excluir modelo",
         description: err.message || "Ocorreu um erro ao excluir o modelo.",
         variant: "destructive",
       });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -149,6 +172,8 @@ const ModelTableManager: React.FC<ModelTableManagerProps> = ({ baseUrl }) => {
         modelToDelete={modelToDelete}
         setModelToDelete={setModelToDelete}
         handleDeleteModel={handleDeleteModel}
+        saving={saving}
+        deleting={deleting}
       />
     </>
   );

@@ -63,12 +63,9 @@ export async function getModelTemplateById(id: string): Promise<ModelTemplate | 
       .from('model_templates')
       .select('*')
       .eq('id', id)
-      .single();
+      .maybeSingle(); // Using maybeSingle instead of single to handle not finding a record
       
     if (error) {
-      if (error.code === 'PGRST116') { // No rows found
-        return null;
-      }
       console.error("Error fetching model template by ID:", error);
       throw error;
     }
@@ -106,23 +103,34 @@ export async function createModelTemplate(model: Omit<ModelTemplate, 'id' | 'cre
 
 export async function updateModelTemplate(id: string, updates: Partial<ModelTemplate>): Promise<ModelTemplate> {
   try {
+    // Log the update attempt to help with debugging
+    console.log(`Attempting to update model with ID: ${id}`, updates);
+    
+    // First check if the model exists
+    const checkModel = await getModelTemplateById(id);
+    if (!checkModel) {
+      console.error(`Model with ID ${id} not found during pre-check`);
+      throw new Error(`Modelo com ID ${id} não encontrado.`);
+    }
+    
     const { data, error } = await supabase
       .from('model_templates')
       .update(updates)
       .eq('id', id)
       .select()
-      .single();
+      .maybeSingle(); // Using maybeSingle instead of single
       
     if (error) {
-      if (error.code === 'PGRST116') { // No rows found
-        throw new Error(`Modelo com ID ${id} não encontrado.`);
-      }
       if (error.message.includes('JWT') || error.message.includes('token')) {
         console.error("Authentication error:", error);
         throw new Error("Você precisa estar autenticado para atualizar modelos.");
       }
       console.error("Error updating model template:", error);
       throw error;
+    }
+    
+    if (!data) {
+      throw new Error(`Não foi possível atualizar o modelo com ID ${id}. O modelo não foi encontrado.`);
     }
     
     return data;

@@ -2,24 +2,26 @@
 import { useEffect } from "react";
 import { useModelContext } from "./ModelContext";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase/client";
 
 export const useAuthenticationCheck = () => {
   const { 
     setIsAuthenticated, 
     fetchModels, 
     setLoading, 
-    setError 
+    setError,
+    refreshAuth 
   } = useModelContext();
   const { toast } = useToast();
   
-  const verifyAuthentication = () => {
+  const verifyAuthentication = async () => {
     try {
       setLoading(true);
-      // Check if user is authenticated using localStorage
-      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      
+      // Manually check auth status
+      const isLoggedIn = await refreshAuth();
       
       if (isLoggedIn) {
-        setIsAuthenticated(true);
         fetchModels();
         toast({
           title: "Sessão autenticada",
