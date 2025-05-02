@@ -1,4 +1,3 @@
-
 import React from "react";
 import { z } from "zod";
 import { useForm, UseFormReturn } from "react-hook-form";
@@ -18,7 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import LogoUploader from "./LogoUploader";
 
 export const personalizeFormSchema = z.object({
-  officeNome: z.string().min(2, "Nome do escritório é obrigatório"),
+  officeNome: z.string().min(2, "Nome da empresa/escritório é obrigatório"),
   responsavelNome: z.string().min(2, "Nome do responsável é obrigatório"),
   telefone: z.string().min(10, "Telefone deve conter pelo menos 10 dígitos"),
   email: z.string().email("Email inválido"),
@@ -63,9 +62,9 @@ const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
           name="officeNome"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nome do Escritório Contábil*</FormLabel>
+              <FormLabel>Nome da Empresa/Escritório*</FormLabel>
               <FormControl>
-                <Input placeholder="Nome do seu escritório" {...field} />
+                <Input placeholder="Nome da sua empresa ou escritório" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
