@@ -11,7 +11,7 @@ export const useModelFromUrl = (modeloParam: string | undefined) => {
   useEffect(() => {
     async function loadModel() {
       if (!modeloParam) {
-        setModeloSelecionado("Modelo 1"); // Default model
+        setModeloSelecionado("modelo1"); // Default model
         setLoading(false);
         return;
       }

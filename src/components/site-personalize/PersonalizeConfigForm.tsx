@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { UseFormReturn } from "react-hook-form";
 import { FormValues } from "./PersonalizeBasicForm";
 import MediaUploader from "./MediaUploader";
+import { modelosDisponiveis } from "./modelosData";
 
 interface PersonalizeConfigFormProps {
   form: UseFormReturn<FormValues>;
@@ -33,6 +34,13 @@ const PersonalizeConfigForm: React.FC<PersonalizeConfigFormProps> = ({
   handleRemoveMidia,
   handleUpdateMidiaCaption,
 }) => {
+  // Buscar o nome do modelo a partir do ID
+  const getModeloNome = (modeloId: string | null): string => {
+    if (!modeloId) return "";
+    const modelo = modelosDisponiveis.find(m => m.id === modeloId);
+    return modelo ? modelo.name : modeloId;
+  };
+
   return (
     <>
       <div className="space-y-4 pt-4 border-t">
@@ -120,7 +128,7 @@ const PersonalizeConfigForm: React.FC<PersonalizeConfigFormProps> = ({
             <FormItem>
               <FormLabel>Modelo Selecionado</FormLabel>
               <FormControl>
-                <Input readOnly value={modeloSelecionado || field.value || ""} />
+                <Input readOnly value={getModeloNome(modeloSelecionado) || field.value || ""} />
               </FormControl>
               <FormDescription>
                 Este é o modelo selecionado para o seu site.
