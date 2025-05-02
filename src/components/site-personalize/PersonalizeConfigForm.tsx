@@ -35,21 +35,6 @@ const PersonalizeConfigForm: React.FC<PersonalizeConfigFormProps> = ({
   handleRemoveMidia,
   handleUpdateMidiaCaption,
 }) => {
-  // Buscar o nome do modelo a partir do ID
-  const getModeloNome = (modeloId: string | null): string => {
-    if (!modeloId) return "";
-    
-    // Try to find in static data first (for backward compatibility)
-    const staticModel = modelosDisponiveis.find(m => m.id === modeloId);
-    if (staticModel) {
-      return staticModel.name;
-    }
-    
-    // If not found in static data, return the ID as a fallback
-    // The more complete solution with DB lookup is in useModelFromUrl
-    return modeloId;
-  };
-
   return (
     <>
       <div className="space-y-4 pt-4 border-t">
@@ -130,24 +115,11 @@ const PersonalizeConfigForm: React.FC<PersonalizeConfigFormProps> = ({
           />
         )}
 
-        <FormField
-          control={form.control}
-          name="modelo"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Modelo Selecionado</FormLabel>
-              <FormControl>
-                <Input readOnly value={getModeloNome(modeloSelecionado) || field.value || ""} />
-              </FormControl>
-              <FormDescription>
-                Este é o modelo selecionado para o seu site.
-              </FormDescription>
-            </FormItem>
-          )}
-        />
+        {/* Campo "Modelo Selecionado" removido */}
       </div>
     </>
   );
 };
 
 export default PersonalizeConfigForm;
+
