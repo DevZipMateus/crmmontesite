@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ModelTemplate, updateModelTemplate } from "@/services/modelTemplateService";
-import { useModelContext } from "../ModelContext";
+import { useModelContext } from "./useModelContext";
 
 export const useModelEdit = () => {
   const { toast } = useToast();
@@ -111,7 +111,6 @@ export const useModelEdit = () => {
     editDialogOpen,
     setEditDialogOpen,
     currentEditModel,
-    setCurrentEditModel,
     saving,
     handleEditClick,
     handleEditModelChange,

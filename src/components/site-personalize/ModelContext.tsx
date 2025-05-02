@@ -1,24 +1,11 @@
 
-import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
+import React, { createContext, useState, ReactNode, useEffect } from "react";
 import { ModelTemplate, getAllModelTemplates } from "@/services/modelTemplateService";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase/client";
+import { ModelContextType } from "./hooks/useModelContext";
 
-interface ModelContextType {
-  models: ModelTemplate[];
-  setModels: React.Dispatch<React.SetStateAction<ModelTemplate[]>>;
-  loading: boolean;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  error: string | null;
-  setError: React.Dispatch<React.SetStateAction<string | null>>;
-  isAuthenticated: boolean;
-  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
-  copied: string | null;
-  setCopied: React.Dispatch<React.SetStateAction<string | null>>;
-  fetchModels: () => Promise<void>;
-  refreshAuth: () => Promise<boolean>; // Changed from Promise<void> to Promise<boolean>
-}
-
+// Create the context with an undefined default value
 const ModelContext = createContext<ModelContextType | undefined>(undefined);
 
 export const ModelProvider: React.FC<{ children: ReactNode, baseUrl: string }> = ({ children, baseUrl }) => {
@@ -29,7 +16,6 @@ export const ModelProvider: React.FC<{ children: ReactNode, baseUrl: string }> =
   const [copied, setCopied] = useState<string | null>(null);
   const { toast } = useToast();
   
-  // Import directly at the top level instead of using require
   const fetchModels = async () => {
     try {
       setLoading(true);
@@ -39,7 +25,7 @@ export const ModelProvider: React.FC<{ children: ReactNode, baseUrl: string }> =
     } catch (err: any) {
       const errorMsg = err.message || "Falha ao carregar os modelos. Por favor, tente novamente.";
       setError(errorMsg);
-      console.error(err);
+      console.error("Error fetching models:", err);
       
       // Check if this is an auth error and try to handle it
       if (errorMsg.includes('autenticado')) {
@@ -112,10 +98,5 @@ export const ModelProvider: React.FC<{ children: ReactNode, baseUrl: string }> =
   );
 };
 
-export const useModelContext = () => {
-  const context = useContext(ModelContext);
-  if (context === undefined) {
-    throw new Error("useModelContext must be used within a ModelProvider");
-  }
-  return context;
-};
+// Export context directly
+export { ModelContext };

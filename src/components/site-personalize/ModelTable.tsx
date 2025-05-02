@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { ModelTemplate } from "@/services/modelTemplateService";
 import ModelCard from "./ModelCard";
-import { useModelContext } from "./ModelContext";
+import { useModelContext } from "./hooks/useModelContext";
 
 interface ModelTableProps {
   baseUrl: string;

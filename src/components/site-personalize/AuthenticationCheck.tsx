@@ -1,8 +1,7 @@
 
 import { useEffect } from "react";
-import { useModelContext } from "./ModelContext";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase/client";
+import { useModelContext } from "./hooks/useModelContext";
 
 export const useAuthenticationCheck = () => {
   const { 

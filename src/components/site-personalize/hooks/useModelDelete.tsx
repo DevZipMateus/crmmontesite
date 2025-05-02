@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ModelTemplate, deleteModelTemplate } from "@/services/modelTemplateService";
-import { useModelContext } from "../ModelContext";
+import { useModelContext } from "./useModelContext";
 
 export const useModelDelete = () => {
   const { toast } = useToast();
