@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useModelContext } from "./ModelContext";
+import { useModelContext } from "./hooks/useModelContext";
 import ModelFormManager from "./ModelFormManager";
 import ModelTableManager from "./ModelTableManager";
 import ModelManagerAuth from "./ModelManagerAuth";

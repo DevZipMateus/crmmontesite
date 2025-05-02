@@ -1,9 +1,8 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
-import { useModelContext } from "./ModelContext";
+import { useModelContext } from "./hooks/useModelContext";
 
 const ModelManagerAuth: React.FC = () => {
   const { loading, error } = useModelContext();

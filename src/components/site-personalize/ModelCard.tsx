@@ -5,7 +5,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Copy, Check, Edit, Trash } from "lucide-react";
 import { ModelTemplate } from "@/services/modelTemplateService";
 import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { useModelContext } from "./ModelContext";
+import { useModelContext } from "./hooks/useModelContext";
 import { useToast } from "@/hooks/use-toast";
 
 interface ModelCardProps {

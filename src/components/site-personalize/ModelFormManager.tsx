@@ -5,7 +5,7 @@ import { CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { createModelTemplate } from "@/services/modelTemplateService";
-import { useModelContext } from "./ModelContext";
+import { useModelContext } from "./hooks/useModelContext";
 import ModelForm from "./ModelForm";
 import ModelDialogs from "./ModelDialogs";
 
