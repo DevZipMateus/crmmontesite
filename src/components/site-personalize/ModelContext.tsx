@@ -16,7 +16,7 @@ interface ModelContextType {
   copied: string | null;
   setCopied: React.Dispatch<React.SetStateAction<string | null>>;
   fetchModels: () => Promise<void>;
-  refreshAuth: () => Promise<void>;
+  refreshAuth: () => Promise<boolean>; // Changed from Promise<void> to Promise<boolean>
 }
 
 const ModelContext = createContext<ModelContextType | undefined>(undefined);
