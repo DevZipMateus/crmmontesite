@@ -25,7 +25,7 @@ export default function PublicPersonalizeForm() {
   const { modelo: modeloParam } = useParams<{ modelo: string }>();
   
   // Use the hook to load model data
-  const { modeloSelecionado, loading, error } = useModelFromUrl(modeloParam);
+  const { modeloSelecionado, modeloDetails, loading, error } = useModelFromUrl(modeloParam);
 
   // File state management - same as PersonalizeSite component
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -55,9 +55,6 @@ export default function PublicPersonalizeForm() {
     midiaCaptions
   });
 
-  // Get modelo details for display
-  const modeloDetails = modelosDisponiveis.find(m => m.id === modeloSelecionado);
-
   if (loading) {
     return <LoadingState />;
   }
@@ -85,7 +82,12 @@ export default function PublicPersonalizeForm() {
           
           {modeloDetails && (
             <div className="pt-4">
-              <ModeloDetails modelo={modeloDetails} />
+              <ModeloDetails modelo={{
+                id: modeloDetails.id,
+                name: modeloDetails.name,
+                description: modeloDetails.description,
+                imageUrl: ""
+              }} />
             </div>
           )}
         </CardHeader>

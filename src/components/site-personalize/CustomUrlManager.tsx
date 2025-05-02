@@ -48,7 +48,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Check, Edit, Trash, Plus } from "lucide-react";
+import { Copy, Check, Edit, Trash, Plus, AlertTriangle } from "lucide-react";
 import { 
   ModelTemplate,
   getAllModelTemplates,
@@ -56,6 +56,7 @@ import {
   updateModelTemplate,
   deleteModelTemplate
 } from "@/services/modelTemplateService";
+import { supabase } from "@/lib/supabase/client";
 
 interface CustomUrlManagerProps {
   baseUrl: string;
@@ -68,6 +69,8 @@ const CustomUrlManager: React.FC<CustomUrlManagerProps> = ({ baseUrl }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [authChecking, setAuthChecking] = useState<boolean>(true);
   
   // New model form state
   const [showNewModelForm, setShowNewModelForm] = useState(false);
@@ -91,8 +94,28 @@ const CustomUrlManager: React.FC<CustomUrlManagerProps> = ({ baseUrl }) => {
   const [modelToDelete, setModelToDelete] = useState<ModelTemplate | null>(null);
   
   useEffect(() => {
-    fetchModels();
+    checkAuthStatus();
   }, []);
+  
+  const checkAuthStatus = async () => {
+    try {
+      setAuthChecking(true);
+      const { data } = await supabase.auth.getSession();
+      
+      if (data.session) {
+        setIsAuthenticated(true);
+        fetchModels();
+      } else {
+        setIsAuthenticated(false);
+        setError("Você precisa estar autenticado para gerenciar modelos.");
+      }
+    } catch (err) {
+      console.error("Erro ao verificar autenticação:", err);
+      setError("Erro ao verificar estado de autenticação.");
+    } finally {
+      setAuthChecking(false);
+    }
+  };
   
   const fetchModels = async () => {
     try {
@@ -100,8 +123,9 @@ const CustomUrlManager: React.FC<CustomUrlManagerProps> = ({ baseUrl }) => {
       const data = await getAllModelTemplates();
       setModels(data);
       setError(null);
-    } catch (err) {
-      setError("Falha ao carregar os modelos. Por favor, tente novamente.");
+    } catch (err: any) {
+      const errorMsg = err.message || "Falha ao carregar os modelos. Por favor, tente novamente.";
+      setError(errorMsg);
       console.error(err);
     } finally {
       setLoading(false);
@@ -147,6 +171,15 @@ const CustomUrlManager: React.FC<CustomUrlManagerProps> = ({ baseUrl }) => {
   
   // Submit new model
   const handleCreateModel = async () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Erro de autenticação",
+        description: "Você precisa estar autenticado para criar modelos.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       if (!newModel.name || !newModel.description) {
         toast({
@@ -183,12 +216,30 @@ const CustomUrlManager: React.FC<CustomUrlManagerProps> = ({ baseUrl }) => {
   
   // Start editing a model
   const handleEditClick = (model: ModelTemplate) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Erro de autenticação",
+        description: "Você precisa estar autenticado para editar modelos.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setCurrentEditModel(model);
     setEditDialogOpen(true);
   };
   
   // Save edited model
   const handleSaveEdit = async () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Erro de autenticação",
+        description: "Você precisa estar autenticado para editar modelos.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!currentEditModel) return;
     
     try {
@@ -217,11 +268,29 @@ const CustomUrlManager: React.FC<CustomUrlManagerProps> = ({ baseUrl }) => {
   
   // Confirm delete model
   const confirmDelete = (model: ModelTemplate) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Erro de autenticação",
+        description: "Você precisa estar autenticado para excluir modelos.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setModelToDelete(model);
   };
   
   // Delete model
   const handleDeleteModel = async () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Erro de autenticação", 
+        description: "Você precisa estar autenticado para excluir modelos.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!modelToDelete) return;
     
     try {
@@ -242,6 +311,36 @@ const CustomUrlManager: React.FC<CustomUrlManagerProps> = ({ baseUrl }) => {
       });
     }
   };
+  
+  if (authChecking) {
+    return <div className="flex justify-center py-8">Verificando autenticação...</div>;
+  }
+  
+  if (!isAuthenticated) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Acesso Restrito</CardTitle>
+          <CardDescription>
+            Você precisa estar autenticado para gerenciar modelos e URLs personalizadas.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2 p-4 bg-amber-50 border border-amber-200 rounded-md">
+            <AlertTriangle className="h-6 w-6 text-amber-500" />
+            <p className="text-amber-700">
+              Por favor, faça login como administrador para acessar esta funcionalidade.
+            </p>
+          </div>
+          <div className="mt-4">
+            <Button onClick={() => window.location.href = "/login"}>
+              Ir para página de login
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   
   if (loading) {
     return <div className="flex justify-center py-8">Carregando modelos...</div>;

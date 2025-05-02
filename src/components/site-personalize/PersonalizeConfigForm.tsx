@@ -14,6 +14,7 @@ import { UseFormReturn } from "react-hook-form";
 import { FormValues } from "./PersonalizeBasicForm";
 import MediaUploader from "./MediaUploader";
 import { modelosDisponiveis } from "./modelosData";
+import { getModelTemplateById } from "@/services/modelTemplateService";
 
 interface PersonalizeConfigFormProps {
   form: UseFormReturn<FormValues>;
@@ -37,8 +38,16 @@ const PersonalizeConfigForm: React.FC<PersonalizeConfigFormProps> = ({
   // Buscar o nome do modelo a partir do ID
   const getModeloNome = (modeloId: string | null): string => {
     if (!modeloId) return "";
-    const modelo = modelosDisponiveis.find(m => m.id === modeloId);
-    return modelo ? modelo.name : modeloId;
+    
+    // Try to find in static data first (for backward compatibility)
+    const staticModel = modelosDisponiveis.find(m => m.id === modeloId);
+    if (staticModel) {
+      return staticModel.name;
+    }
+    
+    // If not found in static data, return the ID as a fallback
+    // The more complete solution with DB lookup is in useModelFromUrl
+    return modeloId;
   };
 
   return (
