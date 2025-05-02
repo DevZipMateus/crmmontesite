@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
 interface AuthGuardProps {
@@ -12,7 +12,9 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   
   // Se não estiver logado e não estiver na página de login, redirecionar para o login
   if (!isLoggedIn && location.pathname !== '/login') {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    // Store the current path for redirect after login
+    localStorage.setItem('redirectAfterLogin', location.pathname);
+    return <Navigate to="/login" replace />;
   }
   
   return <>{children}</>;
