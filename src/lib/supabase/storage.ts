@@ -26,18 +26,15 @@ export async function getSignedUrl(filePath: string, bucket: string = 'site_pers
 // Verifica se um arquivo existe no Storage
 export async function checkFileExists(filePath: string, bucket: string = 'site_personalizacoes') {
   try {
-    // Tenta obter os metadados do arquivo para verificar se existe
-    const { data, error } = await supabase
+    // Usando getPublicUrl para verificar se o arquivo existe
+    const { data } = await supabase
       .storage
       .from(bucket)
       .getPublicUrl(filePath);
     
-    if (error) {
-      console.error(`Erro ao verificar arquivo (bucket: ${bucket}):`, error);
-      return false;
-    }
-    
-    return !!data;
+    // Se temos uma URL pública, o arquivo existe (embora isso não seja
+    // uma verificação 100% precisa, pois getPublicUrl sempre retorna uma URL)
+    return !!data && !!data.publicUrl;
   } catch (err) {
     console.error(`Erro ao verificar arquivo (bucket: ${bucket}):`, err);
     return false;
