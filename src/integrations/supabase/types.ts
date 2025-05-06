@@ -338,7 +338,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_bucket_policy: {
+        Args: { bucket_name: string }
+        Returns: boolean
+      }
     }
     Enums: {
       customization_priority: "Baixa" | "Média" | "Alta" | "Urgente"

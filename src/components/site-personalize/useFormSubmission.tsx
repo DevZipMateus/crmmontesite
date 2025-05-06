@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { getSupabaseClient } from "@/lib/supabase";
 import { FormValues } from "./PersonalizeBasicForm";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface SubmissionProps {
   logoFile: File | null;
@@ -22,14 +23,13 @@ export const useFormSubmission = (props: SubmissionProps) => {
     setIsSubmitting(true);
 
     try {
-      const supabase = getSupabaseClient();
-
       const formData = {
         ...data,
         modelo: data.modelo,
         created_at: new Date().toISOString(),
       };
 
+      // Process file uploads
       let logoUrl = null;
       if (logoFile) {
         const fileName = `logos/${Date.now()}_${logoFile.name}`;
@@ -80,8 +80,8 @@ export const useFormSubmission = (props: SubmissionProps) => {
         });
       }
 
-      // Fix: Insert a single object, not an array, and ensure midia_urls is in the proper format
-      const { data: insertData, error: insertError } = await supabase
+      // Step 1: Insert into site_personalizacoes first to get the personalization ID
+      const { data: personalizationData, error: personalizationError } = await supabase
         .from("site_personalizacoes")
         .insert({
           officenome: formData.officeNome,
@@ -109,10 +109,13 @@ export const useFormSubmission = (props: SubmissionProps) => {
         })
         .select();
 
-      if (insertError) {
-        throw insertError;
+      if (personalizationError) {
+        throw personalizationError;
       }
 
+      const personalizationId = personalizationData[0].id;
+
+      // Step 2: Create project with reference to the personalization
       const { data: projectData, error: projectError } = await supabase
         .from("projects")
         .insert({
@@ -120,14 +123,16 @@ export const useFormSubmission = (props: SubmissionProps) => {
           responsible_name: formData.responsavelNome,
           template: formData.modelo,
           status: "Recebido",
-          client_type: "cliente_final"
+          client_type: "cliente_final",
+          // Store the personalization ID in the blaster_link field temporarily (we'll add a proper field later)
+          blaster_link: `personalization:${personalizationId}`
         })
         .select();
 
       if (projectError) {
         console.error("Erro ao criar projeto automático:", projectError);
       } else {
-        console.log("Projeto criado automaticamente:", projectData);
+        console.log("Projeto criado automaticamente com referência à personalização:", projectData);
       }
 
       toast({
