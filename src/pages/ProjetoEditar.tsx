@@ -1,40 +1,25 @@
 
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Loader2, Save, Edit, Check } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { projectSchema } from "@/lib/validation";
-import { ProjectInfoForm } from "@/components/projeto/ProjectInfoForm";
-import { ManualDataFields } from "@/components/projeto/ManualDataFields";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { updateProject, getProjectById } from "@/server/project-actions";
-import { toast } from "@/components/ui/use-toast";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { z } from "zod";
-import { Form } from "@/components/ui/form";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { ProjectForm } from "@/components/projeto/ProjectForm";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getProjectById } from "@/server/project-actions";
+import { getPersonalizationId } from "@/lib/supabase/projectStatus";
+import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/use-toast";
 
 export default function ProjetoEditar() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const queryClient = useQueryClient();
-  const [showManualInput, setShowManualInput] = useState(false);
-
-  const form = useForm<z.infer<typeof projectSchema>>({
-    resolver: zodResolver(projectSchema),
-    defaultValues: {
-      client_name: "",
-      responsible_name: "",
-      template: "",
-      status: "",
-      client_type: "",
-      domain: "",
-      blaster_link: "",
-      partner_link: "",
-    },
-  });
+  const [personalizationId, setPersonalizationId] = useState<string | null>(null);
+  const [blasterLink, setBlasterLink] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", id],
@@ -43,126 +28,165 @@ export default function ProjetoEditar() {
   });
 
   useEffect(() => {
-    if (project) {
-      // Garantir que todos os campos estejam presentes, mesmo que sejam undefined
-      const formData = {
-        client_name: project.client_name || "",
-        responsible_name: project.responsible_name || "",
-        template: project.template || "",
-        status: project.status || "",
-        client_type: project.client_type || "",
-        domain: project.domain || "",
-        blaster_link: project.blaster_link || "",
-        partner_link: project.partner_link || "",
-      };
-      form.reset(formData);
-      
-      // Log para debug
-      console.log("Dados do projeto carregados:", formData);
+    if (project?.blaster_link) {
+      setBlasterLink(project.blaster_link);
     }
-  }, [project, form]);
+  }, [project]);
 
-  const { mutate: updateProjectMutation, isPending: isSubmitting } = useMutation({
-    mutationFn: async (data: z.infer<typeof projectSchema>) => {
-      if (!id) {
-        throw new Error("Project ID is missing");
-      }
-      return updateProject(id, data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects"] });
+  // Check if there's a personalization associated with this project
+  useEffect(() => {
+    if (id) {
+      getPersonalizationId(id)
+        .then(personId => {
+          setPersonalizationId(personId);
+        })
+        .catch(err => {
+          console.error("Error getting personalization ID:", err);
+        });
+    }
+  }, [id]);
+
+  const handleSaveBlasterLink = async () => {
+    if (!id) return;
+    
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ blaster_link: blasterLink })
+        .eq('id', id);
+      
+      if (error) throw error;
       toast({
-        title: "Sucesso!",
-        description: "Projeto atualizado com sucesso.",
+        title: "Link atualizado",
+        description: "O link do blaster foi atualizado com sucesso",
       });
-      navigate("/projetos");
-    },
-    onError: (error) => {
+    } catch (err) {
+      console.error(err);
       toast({
-        title: "Erro!",
-        description: "Houve um erro ao atualizar o projeto.",
+        title: "Erro ao atualizar link",
+        description: "Ocorreu um erro ao atualizar o link do blaster",
         variant: "destructive",
       });
-    },
-  });
-
-  const onSubmit = (values: z.infer<typeof projectSchema>) => {
-    updateProjectMutation(values);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  if (isLoading) {
-    return (
-      <PageLayout title="Carregando projeto...">
-        <div className="flex justify-center items-center py-20">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-gray-500">Carregando informações do projeto...</p>
-          </div>
-        </div>
-      </PageLayout>
-    );
-  }
+  // Function to associate a personalization with this project
+  const handleAssociatePersonalization = async () => {
+    if (!id || !personalizationId) return;
+    
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ blaster_link: `personalization:${personalizationId}` })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Personalização associada",
+        description: "A personalização foi associada ao projeto com sucesso",
+      });
+      
+      // Update the blaster link state to match
+      setBlasterLink(`personalization:${personalizationId}`);
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Erro ao associar personalização",
+        description: "Ocorreu um erro ao associar a personalização ao projeto",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
-    <PageLayout 
-      title="Editar Projeto"
-      actions={
+    <PageLayout title="Editar Projeto">
+      <div className="mb-6">
         <Button 
-          type="button" 
-          onClick={form.handleSubmit(onSubmit)} 
-          disabled={isSubmitting}
-          className="flex items-center gap-2 shadow-sm"
+          variant="ghost" 
+          className="flex items-center gap-2 text-gray-500"
+          onClick={() => navigate(`/projeto/${id}`)}
         >
-          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          Salvar Alterações
+          <ArrowLeft className="h-4 w-4" /> Voltar para Detalhes do Projeto
         </Button>
-      }
-    >
-      <Card className="border-gray-100 shadow-sm bg-white">
-        <CardHeader className="bg-gray-50/50 border-b border-gray-100">
-          <CardTitle>Informações do Projeto</CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <ProjectInfoForm form={form} />
-              
-              <div className="flex justify-between items-center my-6">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setShowManualInput(!showManualInput)}
-                  type="button"
-                  className="flex items-center gap-2 shadow-sm"
-                >
-                  {showManualInput ? (
-                    <>
-                      <Check className="h-4 w-4" /> Ocultar campos adicionais
-                    </>
-                  ) : (
-                    <>
-                      <Edit className="h-4 w-4" /> Mostrar campos adicionais
-                    </>
-                  )}
-                </Button>
+      </div>
+      
+      {isLoading ? (
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Informações do Projeto</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {project && (
+                <ProjectForm 
+                  initialValues={project}
+                  submitButtonText="Atualizar Projeto"
+                  mode="edit"
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Link do Blaster</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-end">
+                  <div className="space-y-2 flex-1">
+                    <Label htmlFor="blaster_link">Link do Blaster</Label>
+                    <Input
+                      id="blaster_link"
+                      value={blasterLink}
+                      onChange={(e) => setBlasterLink(e.target.value)}
+                      placeholder="Ex: https://blaster.zipline.com.br/..."
+                    />
+                  </div>
+                  <Button onClick={handleSaveBlasterLink} disabled={isSaving}>
+                    Salvar Link
+                  </Button>
+                </div>
+                
+                {personalizationId && (
+                  <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                    <p className="text-sm text-green-800">
+                      Personalização encontrada para este projeto (ID: {personalizationId})
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      className="mt-2"
+                      onClick={handleAssociatePersonalization}
+                      disabled={isSaving}
+                    >
+                      Associar Personalização ao Projeto
+                    </Button>
+                  </div>
+                )}
+                
+                {!personalizationId && blasterLink && !blasterLink.startsWith('personalization:') && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
+                    <p className="text-sm text-amber-800">
+                      Este projeto não está associado a uma personalização.
+                    </p>
+                  </div>
+                )}
               </div>
-              
-              {showManualInput && <ManualDataFields />}
-              
-              <div className="flex justify-end">
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="flex items-center gap-2"
-                >
-                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                  Salvar Alterações
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </PageLayout>
   );
 }
