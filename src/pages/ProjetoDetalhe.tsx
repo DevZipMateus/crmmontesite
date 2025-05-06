@@ -18,12 +18,14 @@ export default function ProjetoDetalhe() {
   const { id } = useParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  // Query to fetch the project data
   const { data: project, isLoading: projectLoading } = useQuery({
     queryKey: ["project", id],
     queryFn: () => getProjectById(id as string),
     enabled: !!id,
   });
 
+  // Query to fetch personalization data
   const { data: personalization, isLoading: personalizationLoading } = useQuery({
     queryKey: ["personalization", project?.personalization_id],
     queryFn: async () => {
@@ -68,6 +70,7 @@ export default function ProjetoDetalhe() {
     enabled: !!project,
   });
 
+  // Query to fetch customizations
   const { data: customizations, isLoading: customizationsLoading } = useQuery({
     queryKey: ["customizations", id],
     queryFn: async () => {
@@ -132,26 +135,29 @@ export default function ProjetoDetalhe() {
         personalizationId={project?.personalization_id}
       />
       
-      <div className="grid gap-6">
-        {project && <ProjectInformation project={project as Project} />}
+      {/* Display project information in the main section */}
+      {project && <ProjectInformation project={project as Project} />}
 
-        {/* Personalização Components */}
-        {personalization && (
-          <>
-            <PersonalizationData personalization={personalization} />
-            <PersonalizationFiles 
-              personalization={personalization} 
-              getFileUrl={getFileUrl} 
-            />
-          </>
-        )}
+      {/* Personalization Components */}
+      {personalization && (
+        <div className="mt-6 space-y-6">
+          <PersonalizationData personalization={personalization} />
+          <PersonalizationFiles 
+            personalization={personalization} 
+            getFileUrl={getFileUrl} 
+          />
+        </div>
+      )}
 
+      {/* Customizations Card */}
+      <div className="mt-6">
         <CustomizationsCard 
           customizations={customizations || []} 
           isLoading={customizationsLoading} 
         />
       </div>
 
+      {/* Project Tabs for detailed information */}
       <ProjectTabs project={project as Project} />
     </PageLayout>
   );
