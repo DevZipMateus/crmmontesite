@@ -18,6 +18,7 @@ import Login from "./pages/Login";
 import AuthGuard from "./components/auth/AuthGuard";
 import PublicPersonalizeForm from "./pages/PublicPersonalizeForm";
 import CustomUrlAdmin from "./pages/CustomUrlAdmin";
+import PersonalizacaoDetalhe from "@/pages/PersonalizacaoDetalhe";
 
 const queryClient = new QueryClient();
 
@@ -104,6 +105,9 @@ const App = () => {
                 <CustomUrlAdmin />
               </AuthGuard>
             } />
+            
+            {/* Add the new route for personalization details */}
+            <Route path="/personalizacao/:id" element={<PersonalizacaoDetalhe />} />
             
             {/* Rota de fallback */}
             <Route path="*" element={<NotFound />} />

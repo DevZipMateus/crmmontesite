@@ -38,6 +38,7 @@ export default function ProjetoDetalhe() {
           .single();
         
         if (!error && data) {
+          console.log("Personalization found using personalization_id:", data);
           return data;
         }
       }
@@ -57,9 +58,11 @@ export default function ProjetoDetalhe() {
           return null;
         }
         
+        console.log("Personalization found using blaster_link:", data);
         return data;
       }
       
+      console.log("No personalization found for project");
       return null;
     },
     enabled: !!project,
@@ -126,6 +129,7 @@ export default function ProjetoDetalhe() {
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
         handleProjectDeleted={handleProjectDeleted}
+        personalizationId={project?.personalization_id}
       />
       
       <div className="grid gap-6">
