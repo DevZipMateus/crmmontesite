@@ -42,6 +42,7 @@ export const ProjectFormEdit: React.FC<ProjectFormEditProps> = ({
       domain: initialValues?.domain || "",
       client_type: initialValues?.client_type || "",
       blaster_link: initialValues?.blaster_link || "",
+      partner_link: initialValues?.partner_link || "",
     },
   });
 
@@ -68,7 +69,8 @@ export const ProjectFormEdit: React.FC<ProjectFormEditProps> = ({
         status: values.status,
         domain: values.domain || null,
         client_type: values.client_type,
-        blaster_link: values.blaster_link || null
+        blaster_link: values.blaster_link || null,
+        partner_link: values.partner_link || null,
       };
       
       let error;
