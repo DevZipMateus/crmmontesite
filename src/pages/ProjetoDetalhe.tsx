@@ -2,10 +2,10 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useQuery } from "@tanstack/react-query";
-import { getProjectById } from "@/server/project-actions";
+import { getProjectById } from "@/server/project";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Project } from "@/types/project"; // Ensure we're using the correct Project type
+import { Project } from "@/types/project";
 import { ProjectHeader } from "@/components/projeto/detail/ProjectHeader";
 import { ProjectInformation } from "@/components/projeto/detail/ProjectInformation";
 import { PersonalizationData } from "@/components/projeto/detail/PersonalizationData";

@@ -7,8 +7,8 @@ import { ArrowLeft } from "lucide-react";
 import { ProjectFormEdit } from "@/components/projeto/ProjectFormEdit";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getProjectById } from "@/server/project-actions";
-import { Project } from "@/types/project"; // Ensure we're using the correct Project type
+import { getProjectById } from "@/server/project";
+import { Project } from "@/types/project";
 import { getPersonalizationId } from "@/lib/supabase/projectStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
