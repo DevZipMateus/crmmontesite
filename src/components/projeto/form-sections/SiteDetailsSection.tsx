@@ -6,6 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { projectSchema } from "@/lib/validation";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 
 interface SiteDetailsSectionProps {
   form: UseFormReturn<z.infer<typeof projectSchema>>;
@@ -60,6 +62,7 @@ export const SiteDetailsSection = ({ form }: SiteDetailsSectionProps) => {
                 <SelectItem value="Configurando Domínio">Configurando Domínio</SelectItem>
                 <SelectItem value="Aguardando DNS">Aguardando DNS</SelectItem>
                 <SelectItem value="Site pronto">Site pronto</SelectItem>
+                <SelectItem value="Em Customização">Em Customização</SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />
@@ -92,6 +95,25 @@ export const SiteDetailsSection = ({ form }: SiteDetailsSectionProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel className="text-gray-700">Link do Blaster</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="https://..." 
+                {...field} 
+                value={field.value || ""} 
+                className="rounded-md shadow-sm border-gray-200 focus:border-primary focus:ring-primary"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={form.control}
+        name="partner_link"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-gray-700">Link do Parceiro</FormLabel>
             <FormControl>
               <Input 
                 placeholder="https://..." 
