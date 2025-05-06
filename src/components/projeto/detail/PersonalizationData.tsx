@@ -26,6 +26,9 @@ export const PersonalizationData: React.FC<PersonalizationDataProps> = ({ person
                 <p><span className="font-medium">Telefone:</span> {personalization.telefone}</p>
                 <p><span className="font-medium">Email:</span> {personalization.email}</p>
                 <p><span className="font-medium">Endereço:</span> {personalization.endereco}</p>
+                {personalization.status && (
+                  <p><span className="font-medium">Status:</span> {personalization.status}</p>
+                )}
               </div>
             </div>
             
@@ -33,6 +36,13 @@ export const PersonalizationData: React.FC<PersonalizationDataProps> = ({ person
               <div>
                 <h3 className="text-sm font-medium text-gray-500">Redes Sociais</h3>
                 <p className="mt-2 whitespace-pre-line">{personalization.redessociais}</p>
+              </div>
+            )}
+            
+            {personalization.modelo && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Modelo</h3>
+                <p className="mt-2">{personalization.modelo}</p>
               </div>
             )}
           </div>
@@ -61,6 +71,24 @@ export const PersonalizationData: React.FC<PersonalizationDataProps> = ({ person
                 <p className="mt-2">{personalization.slogan}</p>
               </div>
             )}
+
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Datas</h3>
+              <div className="mt-2 space-y-2">
+                {personalization.created_at && (
+                  <p>
+                    <span className="font-medium">Criado em:</span>{' '}
+                    {new Date(personalization.created_at).toLocaleDateString('pt-BR')}
+                  </p>
+                )}
+                {personalization.updated_at && personalization.updated_at !== personalization.created_at && (
+                  <p>
+                    <span className="font-medium">Atualizado em:</span>{' '}
+                    {new Date(personalization.updated_at).toLocaleDateString('pt-BR')}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
         

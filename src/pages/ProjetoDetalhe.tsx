@@ -67,17 +67,22 @@ export default function ProjetoDetalhe() {
   const getFileUrl = async (filePath: string) => {
     if (!filePath) return null;
     
-    const { data, error } = await supabase
-      .storage
-      .from('site_personalizacoes')
-      .createSignedUrl(filePath, 60 * 60); // 1 hour expiration
-    
-    if (error) {
-      console.error("Erro ao gerar URL para arquivo:", error);
+    try {
+      const { data, error } = await supabase
+        .storage
+        .from('site_personalizacoes')
+        .createSignedUrl(filePath, 60 * 60); // 1 hour expiration
+      
+      if (error) {
+        console.error("Erro ao gerar URL para arquivo:", error);
+        return null;
+      }
+      
+      return data.signedUrl;
+    } catch (err) {
+      console.error("Erro ao processar arquivo:", err);
       return null;
     }
-    
-    return data.signedUrl;
   };
 
   const handleProjectDeleted = () => {

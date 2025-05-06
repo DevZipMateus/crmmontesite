@@ -2,6 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MediaFileDisplay } from "./MediaFileDisplay";
+import { Badge } from "@/components/ui/badge";
 
 interface PersonalizationFilesProps {
   personalization: any;
@@ -23,7 +24,14 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
   return (
     <Card className="border-gray-100 shadow-sm">
       <CardHeader className="bg-gray-50/50 border-b border-gray-100">
-        <CardTitle>Arquivos Enviados</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Arquivos Enviados</CardTitle>
+          <div className="flex items-center gap-2">
+            {hasLogo && <Badge variant="outline" className="bg-blue-50">Logo</Badge>}
+            {hasDepoimentos && <Badge variant="outline" className="bg-green-50">Depoimentos ({personalization.depoimento_urls.length})</Badge>}
+            {hasMidia && <Badge variant="outline" className="bg-purple-50">Mídias ({personalization.midia_urls.length})</Badge>}
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -31,11 +39,13 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
           {hasLogo && (
             <div className="space-y-2">
               <h3 className="text-sm font-medium text-gray-500">Logo</h3>
-              <MediaFileDisplay 
-                filePath={personalization.logo_url} 
-                type="logo" 
-                getFileUrl={getFileUrl}
-              />
+              <div className="max-w-[200px]">
+                <MediaFileDisplay 
+                  filePath={personalization.logo_url} 
+                  type="logo" 
+                  getFileUrl={getFileUrl}
+                />
+              </div>
             </div>
           )}
 
