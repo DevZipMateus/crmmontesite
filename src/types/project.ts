@@ -4,7 +4,7 @@ export interface Project {
   client_name: string;
   template?: string;
   status?: string;
-  created_at: string;
+  created_at?: string;
   responsible_name?: string;
   domain?: string;
   client_type?: string;
