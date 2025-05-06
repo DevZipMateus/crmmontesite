@@ -13,6 +13,7 @@ import { updateProject } from "@/server/project";
 // Import our components
 import { ProjectInfoForm } from "@/components/projeto/ProjectInfoForm";
 import { Form } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
 
 // Use the same schema as in validation.ts
 export type ProjectFormValues = z.infer<typeof projectSchema>;
