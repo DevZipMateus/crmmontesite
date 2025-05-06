@@ -18,7 +18,7 @@ export const ClientInfoSection = ({ form }: ClientInfoSectionProps) => {
   useEffect(() => {
     const clientType = form.watch("client_type");
     setIsPartner(clientType === "parceiro");
-  }, [form.watch("client_type"), form]);
+  }, [form.watch("client_type")]);
   
   return (
     <div className="space-y-6">
@@ -52,6 +52,7 @@ export const ClientInfoSection = ({ form }: ClientInfoSectionProps) => {
               <Input 
                 placeholder="Nome do responsável" 
                 {...field} 
+                value={field.value || ""} 
                 className="rounded-md shadow-sm border-gray-200 focus:border-primary focus:ring-primary"
               />
             </FormControl>

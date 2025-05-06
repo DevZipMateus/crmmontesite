@@ -19,11 +19,23 @@ export default function ProjetoEditar() {
   const [personalizationId, setPersonalizationId] = useState<string | null>(null);
   const [personalizationData, setPersonalizationData] = useState<any>(null);
 
-  const { data: project, isLoading } = useQuery({
+  const { data: project, isLoading, error } = useQuery({
     queryKey: ["project", id],
     queryFn: () => getProjectById(id as string),
     enabled: !!id,
   });
+
+  // Check if there's an error loading the project
+  useEffect(() => {
+    if (error) {
+      console.error("Error loading project:", error);
+      toast({
+        title: "Erro ao carregar projeto",
+        description: "Não foi possível carregar os dados do projeto.",
+        variant: "destructive",
+      });
+    }
+  }, [error]);
 
   // Check if there's a personalization associated with this project
   useEffect(() => {
@@ -75,6 +87,34 @@ export default function ProjetoEditar() {
     navigate(`/personalizacao/${personalizationId}`);
   };
 
+  if (isLoading) {
+    return (
+      <PageLayout title="Editar Projeto">
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (!project && !isLoading) {
+    return (
+      <PageLayout title="Editar Projeto">
+        <div className="bg-red-50 border border-red-200 text-red-800 p-6 rounded-md">
+          <h3 className="text-lg font-medium">Projeto não encontrado</h3>
+          <p className="mt-2">Não foi possível encontrar o projeto solicitado.</p>
+          <Button 
+            variant="outline" 
+            className="mt-4"
+            onClick={() => navigate('/projetos')}
+          >
+            Voltar para Projetos
+          </Button>
+        </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout title="Editar Projeto">
       <div className="mb-6">
@@ -87,68 +127,62 @@ export default function ProjetoEditar() {
         </Button>
       </div>
       
-      {isLoading ? (
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-        </div>
-      ) : (
-        <div className="space-y-6">
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Informações do Projeto</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {project && (
+              <ProjectFormEdit 
+                initialValues={project as Project}
+                submitButtonText="Atualizar Projeto"
+                mode="edit"
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        {personalizationId && (
           <Card>
             <CardHeader>
-              <CardTitle>Informações do Projeto</CardTitle>
+              <CardTitle>Personalização</CardTitle>
             </CardHeader>
             <CardContent>
-              {project && (
-                <ProjectFormEdit 
-                  initialValues={project as Project}
-                  submitButtonText="Atualizar Projeto"
-                  mode="edit"
-                />
-              )}
+              <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                {personalizationData ? (
+                  <div className="space-y-2">
+                    <p className="text-sm text-green-800">
+                      Personalização encontrada para este projeto
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      <strong>Empresa:</strong> {personalizationData.officenome}
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      <strong>Responsável:</strong> {personalizationData.responsavelnome}
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      <strong>Email:</strong> {personalizationData.email}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-green-800">
+                    Personalização encontrada para este projeto (ID: {personalizationId})
+                  </p>
+                )}
+                
+                <Button 
+                  variant="outline" 
+                  className="mt-3"
+                  onClick={handleViewPersonalization}
+                >
+                  Ver Personalização Completa
+                </Button>
+              </div>
             </CardContent>
           </Card>
-
-          {personalizationId && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Personalização</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-green-50 border border-green-200 rounded-md p-4">
-                  {personalizationData ? (
-                    <div className="space-y-2">
-                      <p className="text-sm text-green-800">
-                        Personalização encontrada para este projeto
-                      </p>
-                      <p className="text-sm text-gray-700">
-                        <strong>Empresa:</strong> {personalizationData.officenome}
-                      </p>
-                      <p className="text-sm text-gray-700">
-                        <strong>Responsável:</strong> {personalizationData.responsavelnome}
-                      </p>
-                      <p className="text-sm text-gray-700">
-                        <strong>Email:</strong> {personalizationData.email}
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-green-800">
-                      Personalização encontrada para este projeto (ID: {personalizationId})
-                    </p>
-                  )}
-                  
-                  <Button 
-                    variant="outline" 
-                    className="mt-3"
-                    onClick={handleViewPersonalization}
-                  >
-                    Ver Personalização Completa
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
+        )}
+      </div>
     </PageLayout>
   );
 }

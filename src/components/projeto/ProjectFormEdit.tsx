@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -63,7 +63,8 @@ export const ProjectFormEdit: React.FC<ProjectFormEditProps> = ({
       
       let result;
       
-      if (mode === "edit") {
+      if (mode === "edit" && initialValues) {
+        // Make sure we pass the project ID correctly
         result = await updateProject(initialValues.id, values);
       } else {
         // Leave the create functionality as is for now

@@ -11,45 +11,32 @@ export async function updateProject(id: string, values: Partial<Project>) {
       throw new Error("Nome do cliente é obrigatório");
     }
     
+    console.log("Updating project ID:", id);
+    console.log("Update values:", values);
+    
     const { data, error } = await supabase
       .from('projects')
       .update(values)
       .eq('id', id)
-      .select();
+      .select('*')
+      .single();
     
     if (error) {
       console.error("Erro ao atualizar projeto:", error);
-      toast({
-        title: "Erro ao atualizar projeto",
-        description: error.message,
-        variant: "destructive",
-      });
-      return { success: false, error };
+      throw error;
     }
     
-    toast({
-      title: "Projeto atualizado com sucesso",
-      description: "As alterações foram salvas.",
-    });
+    console.log("Project updated successfully:", data);
     
     return { success: true, data };
   } catch (error) {
     console.error("Erro ao atualizar projeto:", error);
     
+    let errorMessage = "Ocorreu um erro desconhecido.";
     if (error instanceof Error) {
-      toast({
-        title: "Erro ao atualizar projeto",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Erro ao atualizar projeto",
-        description: "Ocorreu um erro desconhecido.",
-        variant: "destructive",
-      });
+      errorMessage = error.message;
     }
     
-    return { success: false, error };
+    return { success: false, error, message: errorMessage };
   }
 }
