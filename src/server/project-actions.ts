@@ -1,20 +1,10 @@
+
 import { supabase } from "@/integrations/supabase/client"; 
 import { toast } from "@/components/ui/use-toast";
 import { ProjectFormValues } from "@/components/projeto/ProjectForm";
+import { Project } from "@/types/project"; // Import Project from the central type file
 
-// Tipo que define a estrutura de um projeto
-export interface Project {
-  id: string;
-  client_name: string; // Garantindo que client_name é obrigatório
-  template?: string;
-  status?: string;
-  created_at?: string;
-  responsible_name?: string;
-  domain?: string;
-  client_type?: string;
-  blaster_link?: string;
-  partner_link?: string; // Adicionado o campo partner_link
-}
+// Remove duplicate Project interface definition - we'll use the imported one
 
 // Função para obter um projeto por ID
 export async function getProjectById(id: string) {
@@ -68,9 +58,9 @@ export async function createProject(values: ProjectFormValues) {
     // Cria o objeto de dados do projeto com client_name como campo obrigatório
     const projectData = {
       client_name: values.client_name,  // Campo obrigatório
-      template: values.template,
+      template: values.template || 'Não especificado', // Garantir que template não é undefined
       responsible_name: values.responsible_name,
-      status: values.status,
+      status: values.status || 'Recebido', // Garantir que status não é undefined
       domain: values.domain || null,
       client_type: values.client_type,
       blaster_link: values.blaster_link || null

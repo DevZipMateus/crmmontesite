@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getProjectById } from "@/server/project-actions";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Project } from "@/types/project"; // Ensure we're using the correct Project type
 import { ProjectHeader } from "@/components/projeto/detail/ProjectHeader";
 import { ProjectInformation } from "@/components/projeto/detail/ProjectInformation";
 import { PersonalizationData } from "@/components/projeto/detail/PersonalizationData";
@@ -112,7 +113,7 @@ export default function ProjetoDetalhe() {
       />
       
       <div className="grid gap-6">
-        {project && <ProjectInformation project={project} />}
+        {project && <ProjectInformation project={project as Project} />}
 
         {/* Personalização Components */}
         {personalization && (
@@ -131,7 +132,7 @@ export default function ProjetoDetalhe() {
         />
       </div>
 
-      <ProjectTabs project={project} />
+      <ProjectTabs project={project as Project} />
     </PageLayout>
   );
 }

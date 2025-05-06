@@ -8,6 +8,7 @@ import { ProjectFormEdit } from "@/components/projeto/ProjectFormEdit";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getProjectById } from "@/server/project-actions";
+import { Project } from "@/types/project"; // Ensure we're using the correct Project type
 import { getPersonalizationId } from "@/lib/supabase/projectStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -130,7 +131,7 @@ export default function ProjetoEditar() {
             <CardContent>
               {project && (
                 <ProjectFormEdit 
-                  initialValues={project}
+                  initialValues={project as Project}
                   submitButtonText="Atualizar Projeto"
                   mode="edit"
                 />
