@@ -115,7 +115,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
 
       const personalizationId = personalizationData[0].id;
 
-      // Step 2: Create project with reference to the personalization
+      // Step 2: Create project with reference to the personalization using personalization_id field
       const { data: projectData, error: projectError } = await supabase
         .from("projects")
         .insert({
@@ -124,8 +124,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
           template: formData.modelo,
           status: "Recebido",
           client_type: "cliente_final",
-          // Store the personalization ID in the blaster_link field temporarily (we'll add a proper field later)
-          blaster_link: `personalization:${personalizationId}`
+          personalization_id: personalizationId  // Use the new personalization_id field
         })
         .select();
 

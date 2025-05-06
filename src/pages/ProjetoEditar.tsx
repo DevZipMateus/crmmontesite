@@ -24,7 +24,10 @@ export default function ProjetoEditar() {
 
   // Check if there's a personalization associated with this project
   useEffect(() => {
-    if (id) {
+    if (project?.personalization_id) {
+      setPersonalizationId(project.personalization_id);
+    } else if (id) {
+      // Backward compatibility check
       getPersonalizationId(id)
         .then(personId => {
           setPersonalizationId(personId);
@@ -33,7 +36,7 @@ export default function ProjetoEditar() {
           console.error("Error getting personalization ID:", err);
         });
     }
-  }, [id]);
+  }, [id, project]);
 
   return (
     <PageLayout title="Editar Projeto">

@@ -1,3 +1,4 @@
+
 import { supabase } from './client';
 
 // Function to ensure consistent status values
@@ -64,10 +65,10 @@ export async function updateProjectBlasterLink(projectId: string, blasterLink: s
 
 export async function getPersonalizationId(projectId: string): Promise<string | null> {
   try {
-    // First check if the project already has a personalization link
+    // First check if the project has a personalization_id
     const { data: project, error: projectError } = await supabase
       .from('projects')
-      .select('blaster_link')
+      .select('personalization_id, blaster_link')
       .eq('id', projectId)
       .single();
     
@@ -76,28 +77,27 @@ export async function getPersonalizationId(projectId: string): Promise<string | 
       return null;
     }
     
-    // If we already have a personalization link, extract the ID
+    // If we have a personalization_id, return it
+    if (project?.personalization_id) {
+      return project.personalization_id;
+    }
+    
+    // For backward compatibility: check if there's a personalization link in blaster_link
     if (project?.blaster_link?.startsWith('personalization:')) {
-      return project.blaster_link.replace('personalization:', '');
-    }
-    
-    // If not, let's check if there's a personalization with this project ID
-    const { data: personalization, error: personalizationError } = await supabase
-      .from('site_personalizacoes')
-      .select('id')
-      .eq('id', projectId)
-      .single();
-    
-    if (personalizationError) {
-      // This is expected if there's no personalization with this ID
-      console.log('No personalization found with project ID:', projectId);
-      return null;
-    }
-    
-    if (personalization) {
-      // We found a personalization, update the project link
-      await updateProjectBlasterLink(projectId, `personalization:${personalization.id}`);
-      return personalization.id;
+      const personalizationId = project.blaster_link.replace('personalization:', '');
+      
+      // Update the project to use the new field for future queries
+      try {
+        await supabase
+          .from('projects')
+          .update({ personalization_id: personalizationId })
+          .eq('id', projectId);
+      } catch (err) {
+        console.error('Error updating personalization_id from blaster_link:', err);
+        // Continue even if update fails
+      }
+      
+      return personalizationId;
     }
     
     return null;

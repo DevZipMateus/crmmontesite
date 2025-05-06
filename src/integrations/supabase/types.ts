@@ -121,6 +121,7 @@ export type Database = {
           created_at: string | null
           domain: string | null
           id: string
+          personalization_id: string | null
           provider_credentials: string | null
           responsible_name: string | null
           status: string | null
@@ -134,6 +135,7 @@ export type Database = {
           created_at?: string | null
           domain?: string | null
           id?: string
+          personalization_id?: string | null
           provider_credentials?: string | null
           responsible_name?: string | null
           status?: string | null
@@ -147,13 +149,22 @@ export type Database = {
           created_at?: string | null
           domain?: string | null
           id?: string
+          personalization_id?: string | null
           provider_credentials?: string | null
           responsible_name?: string | null
           status?: string | null
           template?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "projects_personalization_id_fkey"
+            columns: ["personalization_id"]
+            isOneToOne: false
+            referencedRelation: "site_personalizacoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       showcases: {
         Row: {

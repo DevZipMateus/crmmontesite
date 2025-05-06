@@ -31,7 +31,7 @@ export default function SiteDetalhe() {
       // If not found directly, try to find via project
       const { data: project, error: projectError } = await supabase
         .from('projects')
-        .select('*')
+        .select('personalization_id, blaster_link')
         .eq('id', id)
         .single();
       
@@ -40,24 +40,38 @@ export default function SiteDetalhe() {
         return null;
       }
       
-      if (!project?.blaster_link?.startsWith('personalization:')) {
-        return null;
+      // First check for personalization_id
+      if (project?.personalization_id) {
+        const { data, error } = await supabase
+          .from('site_personalizacoes')
+          .select('*')
+          .eq('id', project.personalization_id)
+          .single();
+        
+        if (!error) {
+          return data;
+        }
       }
       
-      const personalizationId = project.blaster_link.replace('personalization:', '');
-      
-      const { data, error } = await supabase
-        .from('site_personalizacoes')
-        .select('*')
-        .eq('id', personalizationId)
-        .single();
-      
-      if (error) {
-        console.error("Erro ao buscar personalização:", error);
-        return null;
+      // Backward compatibility: check blaster_link if personalization_id is not available
+      if (project?.blaster_link?.startsWith('personalization:')) {
+        const personalizationId = project.blaster_link.replace('personalization:', '');
+        
+        const { data, error } = await supabase
+          .from('site_personalizacoes')
+          .select('*')
+          .eq('id', personalizationId)
+          .single();
+        
+        if (error) {
+          console.error("Erro ao buscar personalização:", error);
+          return null;
+        }
+        
+        return data;
       }
       
-      return data;
+      return null;
     },
     enabled: !!id,
   });

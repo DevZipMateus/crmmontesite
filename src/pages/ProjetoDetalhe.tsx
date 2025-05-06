@@ -25,28 +25,44 @@ export default function ProjetoDetalhe() {
   });
 
   const { data: personalization, isLoading: personalizationLoading } = useQuery({
-    queryKey: ["personalization", project?.blaster_link],
+    queryKey: ["personalization", project?.personalization_id],
     queryFn: async () => {
-      if (!project?.blaster_link || !project.blaster_link.startsWith('personalization:')) {
-        return null;
+      if (!project) return null;
+      
+      // First, try to get personalization using personalization_id
+      if (project.personalization_id) {
+        const { data, error } = await supabase
+          .from('site_personalizacoes')
+          .select('*')
+          .eq('id', project.personalization_id)
+          .single();
+        
+        if (!error && data) {
+          return data;
+        }
       }
       
-      const personalizationId = project.blaster_link.replace('personalization:', '');
-      
-      const { data, error } = await supabase
-        .from('site_personalizacoes')
-        .select('*')
-        .eq('id', personalizationId)
-        .single();
-      
-      if (error) {
-        console.error("Erro ao buscar personalização:", error);
-        return null;
+      // Backward compatibility: try using blaster_link if personalization_id is not available
+      if (project.blaster_link && project.blaster_link.startsWith('personalization:')) {
+        const personalizationId = project.blaster_link.replace('personalization:', '');
+        
+        const { data, error } = await supabase
+          .from('site_personalizacoes')
+          .select('*')
+          .eq('id', personalizationId)
+          .single();
+        
+        if (error) {
+          console.error("Erro ao buscar personalização via blaster_link:", error);
+          return null;
+        }
+        
+        return data;
       }
       
-      return data;
+      return null;
     },
-    enabled: !!project?.blaster_link && project.blaster_link.startsWith('personalization:'),
+    enabled: !!project,
   });
 
   const { data: customizations, isLoading: customizationsLoading } = useQuery({
