@@ -2,9 +2,9 @@
 export interface Project {
   id: string;
   client_name: string;
-  template?: string;
-  status?: string;
-  created_at?: string;
+  template: string;  // Removing optional marker
+  status: string;    // Removing optional marker
+  created_at: string;
   responsible_name?: string;
   domain?: string;
   client_type?: string;

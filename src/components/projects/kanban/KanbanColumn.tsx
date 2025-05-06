@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Code, Globe, Clock, CheckCircle2, Inbox } from "lucide-react";
 import ProjectCard from "./ProjectCard";
+import { Project } from "@/types/project";
 
 interface KanbanColumnProps {
   statusType: {
@@ -11,16 +12,7 @@ interface KanbanColumnProps {
     icon: string;
     color: string;
   };
-  projects: Array<{
-    id: string;
-    client_name: string;
-    template: string;
-    status: string;
-    created_at: string;
-    responsible_name?: string;
-    domain?: string;
-    hasPendingCustomizations?: boolean;
-  }>;
+  projects: Project[];
   draggingId: string | null;
   updatingStatus: boolean;
   onDragOver: (e: React.DragEvent, status: string) => void;

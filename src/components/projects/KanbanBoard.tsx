@@ -1,3 +1,4 @@
+
 import { PROJECT_STATUS_TYPES } from "@/lib/supabase/projectStatus";
 import KanbanColumn from "./kanban/KanbanColumn";
 import { useDragAndDrop } from "./kanban/useDragAndDrop";
@@ -94,7 +95,6 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted }:
     const currentStatusType = PROJECT_STATUS_TYPES[activeColumnIndex];
     
     return (
-      
       <div className="relative">
         <div className="flex justify-between items-center mb-2">
           <Button 
@@ -140,7 +140,6 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted }:
   }
 
   return (
-    
     <ScrollArea className="w-full">
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 min-w-[1000px]">
         {PROJECT_STATUS_TYPES.map((statusType) => (

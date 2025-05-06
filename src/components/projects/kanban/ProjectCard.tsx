@@ -3,23 +3,13 @@ import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
+import { Project } from "@/types/project";
 import {
   ProjectCardHeader,
   ProjectCardActions,
   ProjectCardDomain,
   StatusButtonsGrid
 } from "./ProjectCardComponents";
-
-interface Project {
-  id: string;
-  client_name: string;
-  template: string;
-  status: string;
-  created_at: string;
-  responsible_name?: string;
-  domain?: string;
-  hasPendingCustomizations?: boolean;
-}
 
 interface ProjectCardProps {
   project: Project;
