@@ -1,3 +1,4 @@
+
 import { PROJECT_STATUS_TYPES } from "@/lib/supabase/projectStatus";
 import KanbanColumn from "./kanban/KanbanColumn";
 import { useDragAndDrop } from "./kanban/useDragAndDrop";
@@ -7,17 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase/client";
-
-interface Project {
-  id: string;
-  client_name: string;
-  template: string;
-  status: string;
-  created_at: string;
-  responsible_name?: string;
-  domain?: string;
-  hasPendingCustomizations?: boolean;
-}
+import { Project } from "@/types/project";
 
 interface KanbanBoardProps {
   projects: Project[];

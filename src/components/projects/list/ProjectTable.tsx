@@ -5,15 +5,7 @@ import { useNavigate } from "react-router-dom";
 import StatusBadge from "./StatusBadge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import DeleteProjectDialog from "../DeleteProjectDialog";
-
-interface Project {
-  id: string;
-  client_name: string;
-  template: string;
-  status: string;
-  created_at: string;
-  responsible_name?: string;
-}
+import { Project } from "@/types/project";
 
 interface ProjectTableProps {
   projects: Project[];
@@ -82,9 +74,9 @@ export default function ProjectTable({
           {projects.map((project) => (
             <TableRow key={project.id} className="hover:bg-muted/50">
               <TableCell className="font-medium">{project.client_name}</TableCell>
-              <TableCell>{project.template}</TableCell>
+              <TableCell>{project.template || '—'}</TableCell>
               <TableCell>
-                <StatusBadge status={project.status} />
+                <StatusBadge status={project.status || 'Recebido'} />
               </TableCell>
               <TableCell>{formatDate(project.created_at)}</TableCell>
               <TableCell>{project.responsible_name || '—'}</TableCell>

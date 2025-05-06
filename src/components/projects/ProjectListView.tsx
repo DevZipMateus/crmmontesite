@@ -3,16 +3,7 @@ import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import ProjectTable from "./list/ProjectTable";
 import AdvancedFilters from "./list/AdvancedFilters";
-
-interface Project {
-  id: string;
-  client_name: string;
-  template: string;
-  status: string;
-  created_at: string;
-  responsible_name?: string;
-  domain?: string;
-}
+import { Project } from "@/types/project";
 
 interface ProjectListViewProps {
   projects: Project[];

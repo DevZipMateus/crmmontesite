@@ -3,7 +3,7 @@ export interface Project {
   id: string;
   client_name: string;
   template?: string;
-  status: string;
+  status?: string;
   created_at: string;
   responsible_name?: string;
   domain?: string;
