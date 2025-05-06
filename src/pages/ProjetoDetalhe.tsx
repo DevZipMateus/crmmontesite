@@ -7,7 +7,6 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Project } from "@/types/project";
 import { ProjectHeader } from "@/components/projeto/detail/ProjectHeader";
-import { ProjectInformation } from "@/components/projeto/detail/ProjectInformation";
 import { PersonalizationData } from "@/components/projeto/detail/PersonalizationData";
 import { PersonalizationFiles } from "@/components/projeto/detail/PersonalizationFiles";
 import { CustomizationsCard } from "@/components/projeto/detail/CustomizationsCard";
@@ -135,8 +134,8 @@ export default function ProjetoDetalhe() {
         personalizationId={project?.personalization_id}
       />
       
-      {/* Display project information in the main section */}
-      {project && <ProjectInformation project={project as Project} />}
+      {/* Project Tabs for detailed information */}
+      <ProjectTabs project={project as Project} />
 
       {/* Personalization Components */}
       {personalization && (
@@ -156,9 +155,6 @@ export default function ProjetoDetalhe() {
           isLoading={customizationsLoading} 
         />
       </div>
-
-      {/* Project Tabs for detailed information */}
-      <ProjectTabs project={project as Project} />
     </PageLayout>
   );
 }
