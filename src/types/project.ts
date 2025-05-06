@@ -5,11 +5,13 @@ export interface Project {
   template: string;  
   status: string;    
   created_at: string;
+  updated_at: string; // Added this property
   responsible_name?: string;
   domain?: string;
   client_type?: string;
-  blaster_link?: string; // Now only used for its original purpose, not for relationships
+  blaster_link?: string;
   partner_link?: string;
-  personalization_id?: string; // New field for relationship with site_personalizacoes
+  personalization_id?: string;
+  provider_credentials?: string; // Added this property
   hasPendingCustomizations?: boolean;
 }
