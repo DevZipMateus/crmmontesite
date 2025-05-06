@@ -1,13 +1,10 @@
-
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Home, ArrowLeft, FileText } from "lucide-react";
-
 export default function Confirmacao() {
   const navigate = useNavigate();
-  return (
-    <div className="min-h-screen bg-gray-50/50 flex items-center justify-center py-12 px-4 sm:px-6">
+  return <div className="min-h-screen bg-gray-50/50 flex items-center justify-center py-12 px-4 sm:px-6">
       <Card className="text-center border-gray-100 shadow-sm max-w-md w-full">
         <CardHeader className="pb-2">
           <div className="mx-auto w-16 h-16 mb-4 flex items-center justify-center">
@@ -25,25 +22,8 @@ export default function Confirmacao() {
           <p className="mb-8 text-gray-600">
             Você receberá uma notificação assim que seu site estiver pronto para revisão.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-3">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate(-1)}
-              className="flex items-center justify-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar
-            </Button>
-            <Button 
-              onClick={() => window.location.href = "/"}
-              className="flex items-center justify-center gap-2"
-            >
-              <Home className="h-4 w-4" />
-              Página Inicial
-            </Button>
-          </div>
+          
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 }
