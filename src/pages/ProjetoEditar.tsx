@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { ProjectForm } from "@/components/projeto/ProjectForm";
+import { ProjectFormEdit } from "@/components/projeto/ProjectFormEdit";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getProjectById } from "@/server/project-actions";
@@ -129,7 +129,7 @@ export default function ProjetoEditar() {
             </CardHeader>
             <CardContent>
               {project && (
-                <ProjectForm 
+                <ProjectFormEdit 
                   initialValues={project}
                   submitButtonText="Atualizar Projeto"
                   mode="edit"
