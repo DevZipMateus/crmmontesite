@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { Project } from "@/types/project";
+import { useModelDetails } from "@/utils/modelUtils";
 import {
   ProjectCardHeader,
   ProjectCardActions,
@@ -34,6 +35,9 @@ export default function ProjectCard({
   const [hasPendingCustomizations, setHasPendingCustomizations] = useState(
     project.hasPendingCustomizations || false
   );
+  
+  // Use the new hook to get the model name
+  const { modelName, isLoading } = useModelDetails(project.template);
 
   useEffect(() => {
     // Verifica customizações pendentes se ainda não foram verificadas
@@ -83,7 +87,8 @@ export default function ProjectCard({
     >
       <ProjectCardHeader 
         clientName={project.client_name} 
-        template={project.template} 
+        template={modelName}
+        isLoading={isLoading}
         hasPendingCustomizations={hasPendingCustomizations}
       />
       

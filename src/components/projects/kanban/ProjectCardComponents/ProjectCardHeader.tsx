@@ -6,12 +6,14 @@ interface ProjectCardHeaderProps {
   clientName: string;
   template: string;
   hasPendingCustomizations: boolean;
+  isLoading?: boolean;
 }
 
 export const ProjectCardHeader = ({ 
   clientName, 
   template, 
-  hasPendingCustomizations 
+  hasPendingCustomizations,
+  isLoading = false
 }: ProjectCardHeaderProps) => {
   return (
     <div className="flex flex-col space-y-1.5">
@@ -26,7 +28,11 @@ export const ProjectCardHeader = ({
       </div>
       
       <div className="text-sm text-gray-500">
-        {template || "Sem modelo"}
+        {isLoading ? (
+          <span className="text-gray-400">Carregando modelo...</span>
+        ) : (
+          template || "Sem modelo"
+        )}
       </div>
     </div>
   );
