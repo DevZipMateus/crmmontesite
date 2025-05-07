@@ -7,7 +7,6 @@ import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { projectSchema } from "@/lib/validation";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 
 interface SiteDetailsSectionProps {
   form: UseFormReturn<z.infer<typeof projectSchema>>;
@@ -110,16 +109,16 @@ export const SiteDetailsSection = ({ form }: SiteDetailsSectionProps) => {
       
       <FormField
         control={form.control}
-        name="partner_link"
+        name="provider_credentials"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-gray-700">Link do Parceiro</FormLabel>
+            <FormLabel className="text-gray-700">Credenciais do Provedor</FormLabel>
             <FormControl>
-              <Input 
-                placeholder="https://..." 
-                {...field} 
-                value={field.value || ""} 
-                className="rounded-md shadow-sm border-gray-200 focus:border-primary focus:ring-primary"
+              <Textarea
+                placeholder="Credenciais de acesso ao provedor de hospedagem"
+                {...field}
+                value={field.value || ""}
+                className="rounded-md shadow-sm border-gray-200 focus:border-primary focus:ring-primary min-h-24"
               />
             </FormControl>
             <FormMessage />

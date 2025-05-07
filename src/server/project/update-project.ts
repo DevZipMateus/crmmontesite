@@ -14,9 +14,33 @@ export async function updateProject(id: string, values: Partial<Project>) {
     console.log("Updating project ID:", id);
     console.log("Update values:", values);
     
+    // Create update object with all fields that could be updated
+    const updateData: Partial<Project> = {
+      client_name: values.client_name,
+      template: values.template,
+      status: values.status,
+      responsible_name: values.responsible_name,
+      domain: values.domain,
+      client_type: values.client_type,
+      blaster_link: values.blaster_link,
+      provider_credentials: values.provider_credentials,
+    };
+    
+    // Only include partner_link if client_type is 'parceiro'
+    if (values.client_type === 'parceiro') {
+      updateData.partner_link = values.partner_link;
+    }
+    
+    // Remove undefined values
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key as keyof Project] === undefined) {
+        delete updateData[key as keyof Project];
+      }
+    });
+    
     const { data, error } = await supabase
       .from('projects')
-      .update(values)
+      .update(updateData)
       .eq('id', id)
       .select('*')
       .single();

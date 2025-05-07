@@ -67,7 +67,13 @@ export const ClientInfoSection = ({ form }: ClientInfoSectionProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel className="text-gray-700">Tipo de Cliente</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value || ""}>
+            <Select 
+              onValueChange={(value) => {
+                field.onChange(value);
+                setIsPartner(value === "parceiro");
+              }} 
+              value={field.value || ""}
+            >
               <FormControl>
                 <SelectTrigger className="rounded-md shadow-sm border-gray-200">
                   <SelectValue placeholder="Selecione o tipo de cliente" />

@@ -33,6 +33,7 @@ export const ProjectFormEdit: React.FC<ProjectFormEditProps> = ({
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // Initialize form with all values from initialValues
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
@@ -44,6 +45,7 @@ export const ProjectFormEdit: React.FC<ProjectFormEditProps> = ({
       client_type: initialValues?.client_type || "",
       blaster_link: initialValues?.blaster_link || "",
       partner_link: initialValues?.partner_link || "",
+      provider_credentials: initialValues?.provider_credentials || "",
     },
   });
 
@@ -52,6 +54,7 @@ export const ProjectFormEdit: React.FC<ProjectFormEditProps> = ({
     
     try {
       setIsSubmitting(true);
+      console.log("Saving project with values:", values);
       
       if (!values.client_name) {
         toast({
@@ -67,6 +70,7 @@ export const ProjectFormEdit: React.FC<ProjectFormEditProps> = ({
       if (mode === "edit" && initialValues) {
         // Make sure we pass the project ID correctly
         result = await updateProject(initialValues.id, values);
+        console.log("Update result:", result);
       } else {
         // Leave the create functionality as is for now
         result = { success: false, error: new Error("Create not implemented in this component") };
