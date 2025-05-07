@@ -1,11 +1,12 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { FileText, Award } from "lucide-react";
 import { Project } from "@/types/project";
 import { formatDate } from "@/utils/formatters";
-import { generateCommand, generateEgestorCommand } from "./CommandGenerator";
+import { generateSiteCommand } from "./SiteCommandGenerator";
+import { generateEgestorCommand } from "./EGestorCommandGenerator";
 
 interface ProjectTableProps {
   projects: Project[];
@@ -51,7 +52,7 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
                   size="sm"
                   onClick={() => {
                     onSelectProject(project.id);
-                    generateCommand({ 
+                    generateSiteCommand({ 
                       project, 
                       setIsGenerating, 
                       setGeneratedText: onGenerateCommand 
@@ -74,7 +75,10 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
                     size="sm"
                     onClick={() => {
                       onSelectProject(project.id);
-                      generateEgestorCommand(project, onGenerateCommand);
+                      generateEgestorCommand({ 
+                        project, 
+                        setGeneratedText: onGenerateCommand 
+                      });
                     }}
                     className="flex items-center gap-2 w-full mt-2"
                   >
