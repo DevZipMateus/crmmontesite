@@ -37,9 +37,10 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
         
         console.log(`Fetching URL for media:`, filePath);
         
-        // Handle case where filePath might be a JSON string
+        // Process the filePath (could be a string, JSON string, or object)
         let processedFilePath = filePath;
         
+        // If filePath is a string that looks like JSON, try to parse it
         if (typeof filePath === 'string' && (filePath.startsWith('{') || filePath.startsWith('['))) {
           try {
             const parsed = JSON.parse(filePath);
@@ -50,11 +51,13 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
           }
         }
         
+        // Get the URL using the helper function
         const url = await getFileUrl(processedFilePath);
+        console.log("Generated URL:", url);
         setFileUrl(url);
         
         if (!url) {
-          console.error("Failed to get signed URL");
+          console.error("Failed to get signed URL for", processedFilePath);
           setIsError(true);
         }
       } catch (err) {
@@ -68,10 +71,10 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
     fetchUrl();
   }, [filePath, getFileUrl, type]);
 
-  // Get display name and file name
+  // Get display name, file name and caption
   let displayName = '';
   let fileName = '';
-  let captionText = '';
+  let captionText = caption || '';
   
   if (typeof filePath === 'string') {
     // Check if filePath is a JSON string
@@ -79,10 +82,10 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
       try {
         const parsed = JSON.parse(filePath);
         if (parsed && typeof parsed === 'object') {
-          captionText = parsed.caption || '';
+          captionText = parsed.caption || caption || '';
           const path = parsed.url || '';
           fileName = path.split('/').pop() || '';
-          displayName = captionText || caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
+          displayName = captionText || `${type} ${(index !== undefined) ? index + 1 : ''}`;
         } else {
           displayName = caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
           fileName = filePath.split('/').pop() || displayName;
@@ -96,8 +99,8 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
       fileName = filePath.split('/').pop() || displayName;
     }
   } else if (filePath && typeof filePath === 'object') {
-    captionText = filePath.caption || '';
-    displayName = captionText || caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
+    captionText = filePath.caption || caption || '';
+    displayName = captionText || `${type} ${(index !== undefined) ? index + 1 : ''}`;
     const path = filePath.url || '';
     fileName = path.split('/').pop() || displayName;
   }
