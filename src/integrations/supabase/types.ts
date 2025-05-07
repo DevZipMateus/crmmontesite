@@ -121,6 +121,7 @@ export type Database = {
           created_at: string | null
           domain: string | null
           id: string
+          partner_link: string | null
           personalization_id: string | null
           provider_credentials: string | null
           responsible_name: string | null
@@ -135,6 +136,7 @@ export type Database = {
           created_at?: string | null
           domain?: string | null
           id?: string
+          partner_link?: string | null
           personalization_id?: string | null
           provider_credentials?: string | null
           responsible_name?: string | null
@@ -149,6 +151,7 @@ export type Database = {
           created_at?: string | null
           domain?: string | null
           id?: string
+          partner_link?: string | null
           personalization_id?: string | null
           provider_credentials?: string | null
           responsible_name?: string | null
