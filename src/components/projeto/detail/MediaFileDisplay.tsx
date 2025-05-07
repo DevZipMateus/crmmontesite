@@ -35,15 +35,7 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
           return;
         }
         
-        // Extract caption from object if available and not provided separately
-        let captionValue: string | undefined = caption;
-        
-        if (typeof filePath === 'object' && filePath !== null && filePath.caption) {
-          captionValue = filePath.caption;
-        }
-        
-        // Log the file path for debugging
-        console.log(`Fetching URL for: ${typeof filePath === 'string' ? filePath : JSON.stringify(filePath)} (type: ${type})`);
+        console.log(`Fetching URL for media:`, filePath);
         
         const url = await getFileUrl(filePath);
         setFileUrl(url);
@@ -61,9 +53,9 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
     };
     
     fetchUrl();
-  }, [filePath, getFileUrl, caption, type]);
+  }, [filePath, getFileUrl, type]);
 
-  // Determine the name of display and the name of the file
+  // Get display name and file name
   let displayName = '';
   let fileName = '';
   let captionText = '';
@@ -72,7 +64,6 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
     displayName = caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
     fileName = filePath.split('/').pop() || displayName;
   } else if (filePath && typeof filePath === 'object') {
-    // Use caption from the object or fallback
     captionText = filePath.caption || '';
     displayName = captionText || caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
     const path = filePath.url || '';

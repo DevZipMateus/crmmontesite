@@ -27,18 +27,20 @@ export async function getSignedUrl(filePath: string | { url: string; caption?: s
       return null;
     }
     
-    // Normalize the path by removing duplicate slashes
-    const normalizedPath = actualPath.replace(/\/\/+/g, '/');
+    // Remove any leading slashes to avoid double slashes
+    if (actualPath.startsWith('/')) {
+      actualPath = actualPath.substring(1);
+    }
     
-    console.log(`Generating signed URL for: ${normalizedPath} (bucket: ${bucket})`);
+    console.log(`Generating signed URL for: ${actualPath} (bucket: ${bucket})`);
     
     const { data, error } = await supabase
       .storage
       .from(bucket)
-      .createSignedUrl(normalizedPath, expiresIn);
+      .createSignedUrl(actualPath, expiresIn);
     
     if (error) {
-      console.error(`Error generating signed URL for file (bucket: ${bucket}, path: ${normalizedPath}):`, error);
+      console.error(`Error generating signed URL for file (bucket: ${bucket}, path: ${actualPath}):`, error);
       return null;
     }
     
@@ -74,61 +76,33 @@ export async function checkFileExists(filePath: string | { url: string; caption?
       return false;
     }
     
-    // Normalize the path by removing duplicate slashes
-    const normalizedPath = actualPath.replace(/\/\/+/g, '/');
-    
-    console.log(`Checking if file exists: ${normalizedPath} (bucket: ${bucket})`);
-    
-    // Split the path into directory and filename
-    const pathParts = normalizedPath.split('/');
-    const fileName = pathParts.pop() || '';
-    const directory = pathParts.join('/');
-    
-    // First try to list the directory containing the file
-    if (directory) {
-      const { data: fileData, error: fileError } = await supabase
-        .storage
-        .from(bucket)
-        .list(directory, {
-          limit: 100,
-          offset: 0,
-          sortBy: { column: 'name', order: 'asc' }
-        });
-        
-      if (fileError) {
-        console.error(`Error listing directory (bucket: ${bucket}, directory: ${directory}):`, fileError);
-      } else if (fileData && fileData.length > 0) {
-        // Check if the file exists in the directory
-        const fileExists = fileData.some(file => file.name === fileName);
-        if (fileExists) {
-          console.log(`File found in directory listing: ${normalizedPath}`);
-          return true;
-        }
-      }
+    // Remove any leading slashes to avoid double slashes
+    if (actualPath.startsWith('/')) {
+      actualPath = actualPath.substring(1);
     }
     
-    // Fallback method: Try to get public URL and check if it's accessible
-    const { data } = await supabase
+    console.log(`Checking if file exists: ${actualPath} (bucket: ${bucket})`);
+    
+    // First check if the file exists directly
+    const { data, error } = await supabase
       .storage
       .from(bucket)
-      .getPublicUrl(normalizedPath);
+      .getPublicUrl(actualPath);
     
-    if (data && data.publicUrl) {
-      try {
-        console.log(`Checking public URL accessibility for: ${normalizedPath}`);
-        const response = await fetch(data.publicUrl, { method: 'HEAD' });
-        const exists = response.ok;
-        console.log(`File exists check result: ${exists} for ${normalizedPath}`);
-        return exists;
-      } catch (fetchErr) {
-        console.error(`Error checking file URL accessibility: ${normalizedPath}`, fetchErr);
-        return false;
-      }
+    if (error) {
+      console.error(`Error checking if file exists (bucket: ${bucket}, path: ${actualPath}):`, error);
+      return false;
     }
     
-    return false;
+    try {
+      const response = await fetch(data.publicUrl, { method: 'HEAD' });
+      return response.ok;
+    } catch (fetchError) {
+      console.error(`Error fetching file URL for existence check:`, fetchError);
+      return false;
+    }
   } catch (err) {
-    console.error(`Error checking if file exists:`, err);
+    console.error(`Error in checkFileExists:`, err);
     return false;
   }
 }

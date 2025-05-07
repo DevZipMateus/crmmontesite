@@ -67,7 +67,6 @@ export const useFormSubmission = (props: SubmissionProps) => {
       }
 
       // Process media items with captions
-      // Store actual objects directly, not JSON strings
       const midiaItems = [];
       
       for (let i = 0; i < midiaFiles.length; i++) {
@@ -120,8 +119,8 @@ export const useFormSubmission = (props: SubmissionProps) => {
           linkmapa: formData.linkMapa,
           modelo: formData.modelo,
           logo_url: logoUrl,
-          // Store the arrays directly, not strings
           depoimento_urls: depoimentoUrls.length > 0 ? depoimentoUrls : null,
+          // Make sure this is properly formatted for PostgreSQL JSONB
           midia_urls: midiaItems.length > 0 ? midiaItems : null,
           created_at: formData.created_at
         })
