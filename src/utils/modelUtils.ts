@@ -1,4 +1,5 @@
 
+import React from "react";
 import { ModelTemplate, getModelTemplateById, getModelTemplateByCustomUrl } from "@/services/modelTemplateService";
 import { modelosDisponiveis } from "@/components/site-personalize/modelosData";
 
