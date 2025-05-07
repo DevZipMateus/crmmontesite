@@ -83,19 +83,19 @@ export async function checkFileExists(filePath: string | { url: string; caption?
     
     console.log(`Checking if file exists: ${actualPath} (bucket: ${bucket})`);
     
-    // First check if the file exists directly
-    const { data, error } = await supabase
+    // First get the public URL for the file
+    const publicUrlResponse = supabase
       .storage
       .from(bucket)
       .getPublicUrl(actualPath);
     
-    if (error) {
-      console.error(`Error checking if file exists (bucket: ${bucket}, path: ${actualPath}):`, error);
-      return false;
-    }
+    // The getPublicUrl method doesn't return an error property,
+    // it always returns a data object with publicUrl
+    const publicUrl = publicUrlResponse.data.publicUrl;
     
     try {
-      const response = await fetch(data.publicUrl, { method: 'HEAD' });
+      // Try to fetch the URL to see if it exists
+      const response = await fetch(publicUrl, { method: 'HEAD' });
       return response.ok;
     } catch (fetchError) {
       console.error(`Error fetching file URL for existence check:`, fetchError);
