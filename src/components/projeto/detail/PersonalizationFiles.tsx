@@ -27,25 +27,14 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
   let midiaUrls: any[] = [];
   
   if (Array.isArray(personalization.midia_urls)) {
-    midiaUrls = personalization.midia_urls.map(item => {
-      // If the item is already a string that looks like JSON, try to parse it
-      if (typeof item === 'string' && (item.startsWith('{') || item.startsWith('['))) {
-        try {
-          return JSON.parse(item);
-        } catch (e) {
-          console.log("Failed to parse JSON string:", item, e);
-          return item;
-        }
-      }
-      return item;
-    });
+    midiaUrls = personalization.midia_urls;
   }
   
   const hasMidia = midiaUrls.length > 0;
   
   console.log("Personalização - Logo:", personalization.logo_url);
   console.log("Personalização - Depoimentos:", depoimentoUrls);
-  console.log("Personalização - Mídias (processadas):", midiaUrls);
+  console.log("Personalização - Mídias:", midiaUrls);
   
   if (!hasLogo && !hasDepoimentos && !hasMidia) return null;
   
@@ -101,19 +90,16 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
           <div className="mt-6 pt-6 border-t border-gray-200">
             <h3 className="text-sm font-medium text-gray-500 mb-3">Mídias</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {midiaUrls.map((media: any, index: number) => {
-                const caption = media?.caption || '';
-                return (
-                  <MediaFileDisplay 
-                    key={index} 
-                    filePath={media} 
-                    type="midia" 
-                    index={index}
-                    caption={caption}
-                    getFileUrl={getFileUrl}
-                  />
-                );
-              })}
+              {midiaUrls.map((media: any, index: number) => (
+                <MediaFileDisplay 
+                  key={index} 
+                  filePath={media} 
+                  type="midia" 
+                  index={index} 
+                  caption={typeof media === 'object' && media?.caption ? media.caption : ''} 
+                  getFileUrl={getFileUrl}
+                />
+              ))}
             </div>
           </div>
         )}

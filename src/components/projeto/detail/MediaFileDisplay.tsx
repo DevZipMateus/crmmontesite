@@ -7,6 +7,7 @@ import { FileDisplay } from "./media-display/FileDisplay";
 import { MediaActions } from "./media-display/MediaActions";
 import { MediaInfo } from "./media-display/MediaInfo";
 import { processFilePath, isImageFile } from "./media-display/processFilePath";
+import { getSignedUrl } from "@/lib/supabase/storage";
 
 interface MediaFileDisplayProps {
   filePath: string | { url: string; caption?: string };
@@ -43,27 +44,28 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
         console.log(`Fetching URL for media:`, filePath);
         
         // Process the filePath (could be a string, JSON string, or object)
-        let processedFilePath = filePath;
+        let path: string | { url: string; caption?: string } = filePath;
         
         // If filePath is a string that looks like JSON, try to parse it
         if (typeof filePath === 'string' && (filePath.startsWith('{') || filePath.startsWith('['))) {
           try {
             const parsed = JSON.parse(filePath);
-            processedFilePath = parsed;
-            console.log("Parsed JSON string to object:", processedFilePath);
+            path = parsed;
+            console.log("Parsed JSON string to object:", path);
           } catch (parseError) {
             console.log("Not a valid JSON string, using as-is");
           }
         }
         
-        // Get the URL using the helper function
-        const url = await getFileUrl(processedFilePath);
+        // Get the URL using the imported utility function from storage.ts
+        const url = await getSignedUrl(path);
         console.log("Generated URL:", url);
-        setFileUrl(url);
         
         if (!url) {
-          console.error("Failed to get signed URL for", processedFilePath);
+          console.error("Failed to get signed URL for", path);
           setIsError(true);
+        } else {
+          setFileUrl(url);
         }
       } catch (err) {
         console.error("Error fetching file URL:", err);
@@ -74,7 +76,7 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
     };
     
     fetchUrl();
-  }, [filePath, getFileUrl, type]);
+  }, [filePath]);
 
   // Display loading state
   if (isLoading) {
@@ -102,7 +104,11 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
             fileName={fileName}
           />
         ) : (
-          <FileDisplay />
+          <FileDisplay 
+            fileUrl={fileUrl}
+            fileName={fileName}
+            displayName={displayName}
+          />
         )}
       </div>
       <div className="flex flex-col mt-1">

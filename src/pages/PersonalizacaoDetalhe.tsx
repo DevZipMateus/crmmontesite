@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PersonalizationData } from "@/components/projeto/detail/PersonalizationData";
 import { PersonalizationFiles } from "@/components/projeto/detail/PersonalizationFiles";
+import { getSignedUrl } from "@/lib/supabase/storage";
 
 export default function PersonalizacaoDetalhe() {
   const navigate = useNavigate();
@@ -36,25 +37,8 @@ export default function PersonalizacaoDetalhe() {
   });
 
   // Function to get a public URL for a file in storage
-  const getFileUrl = async (filePath: string) => {
-    if (!filePath) return null;
-    
-    try {
-      const { data, error } = await supabase
-        .storage
-        .from('site_personalizacoes')
-        .createSignedUrl(filePath, 60 * 60); // 1 hour expiration
-      
-      if (error) {
-        console.error("Erro ao gerar URL para arquivo:", error);
-        return null;
-      }
-      
-      return data.signedUrl;
-    } catch (err) {
-      console.error("Erro ao processar arquivo:", err);
-      return null;
-    }
+  const getFileUrl = async (filePath: string | { url: string; caption?: string }) => {
+    return getSignedUrl(filePath);
   };
 
   // Find the associated project
