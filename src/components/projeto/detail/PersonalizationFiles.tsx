@@ -76,8 +76,8 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
               {personalization.midia_urls.map((media: any, index: number) => (
                 <MediaFileDisplay 
                   key={index} 
-                  filePath={media.url} 
-                  caption={media.caption} 
+                  filePath={media} 
+                  caption={typeof media === 'object' ? media.caption : undefined}
                   type="midia" 
                   index={index}
                   getFileUrl={getFileUrl}

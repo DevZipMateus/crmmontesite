@@ -26,8 +26,32 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
     const fetchUrl = async () => {
       try {
         setIsLoading(true);
-        const url = await getFileUrl(filePath);
+        setIsError(false);
+        
+        if (!filePath) {
+          setIsError(true);
+          setIsLoading(false);
+          return;
+        }
+        
+        // Para arquivos de mídia com formato de objeto, extraímos a URL
+        let path = filePath;
+        if (typeof filePath === 'object' && filePath !== null) {
+          path = (filePath as any).url || '';
+        }
+        
+        if (!path) {
+          setIsError(true);
+          setIsLoading(false);
+          return;
+        }
+        
+        const url = await getFileUrl(path);
         setFileUrl(url);
+        
+        if (!url) {
+          setIsError(true);
+        }
       } catch (err) {
         console.error("Error fetching file URL:", err);
         setIsError(true);
@@ -36,16 +60,26 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
       }
     };
     
-    if (filePath) {
-      fetchUrl();
-    } else {
-      setIsLoading(false);
-      setIsError(true);
-    }
+    fetchUrl();
   }, [filePath, getFileUrl]);
 
+  // Determinar o nome de exibição e o nome do arquivo
+  let displayName = caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
+  let fileName = '';
+  
+  if (typeof filePath === 'string') {
+    fileName = filePath.split('/').pop() || displayName;
+  } else if (filePath && typeof filePath === 'object') {
+    const path = (filePath as any).url || '';
+    fileName = path.split('/').pop() || displayName;
+    // Use caption from the object if available
+    if ((filePath as any).caption) {
+      displayName = (filePath as any).caption;
+    }
+  }
+
   // Check if file is an image
-  const isImage = filePath ? /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(filePath) : false;
+  const isImage = fileName ? /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(fileName) : false;
   
   if (isLoading) {
     return (
@@ -60,13 +94,12 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
       <div className="flex flex-col justify-center items-center bg-gray-100 rounded-md p-4 h-32">
         <FileIcon className="h-8 w-8 text-gray-400" />
         <p className="text-sm text-gray-500 mt-2">Erro ao carregar arquivo</p>
-        <p className="text-xs text-gray-400">Caminho: {filePath}</p>
+        <p className="text-xs text-gray-400 truncate max-w-full">
+          {typeof filePath === 'string' ? filePath : JSON.stringify(filePath)}
+        </p>
       </div>
     );
   }
-
-  const displayName = caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
-  const fileName = filePath.split('/').pop() || displayName;
 
   return (
     <div className="flex flex-col">
@@ -113,7 +146,7 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
         )}
       </div>
       <div className="flex justify-between items-center mt-1">
-        <p className="text-sm text-gray-500 truncate max-w-[150px]">{displayName}</p>
+        <p className="text-sm text-gray-500 truncate max-w-[150px]" title={displayName}>{displayName}</p>
         <div className="flex gap-1">
           <Button 
             size="icon" 
