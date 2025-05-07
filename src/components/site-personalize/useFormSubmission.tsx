@@ -66,8 +66,8 @@ export const useFormSubmission = (props: SubmissionProps) => {
         console.log("Depoimento uploaded successfully:", fileName);
       }
 
-      // Process media items with captions
-      const midiaItems = [];
+      // Process media items with captions - Ensure they are stored as serialized JSON strings
+      const midiaItems: string[] = [];
       
       for (let i = 0; i < midiaFiles.length; i++) {
         const file = midiaFiles[i];
@@ -84,17 +84,23 @@ export const useFormSubmission = (props: SubmissionProps) => {
           throw new Error(`Erro ao fazer upload de mídia: ${uploadError.message}`);
         }
 
-        // Create media object with URL and caption
-        midiaItems.push({
+        // Create media object and serialize to JSON string
+        const mediaItemObj = {
           url: fileName,
           caption: caption
-        });
+        };
+        
+        // Serialize the object to a JSON string
+        const serializedMediaItem = JSON.stringify(mediaItemObj);
+        midiaItems.push(serializedMediaItem);
+        
         console.log("Midia uploaded successfully with caption:", fileName, caption);
+        console.log("Serialized media item:", serializedMediaItem);
       }
 
       console.log("All files uploaded successfully, saving to database...");
       console.log("Depoimento URLs:", depoimentoUrls);
-      console.log("Midia Items:", midiaItems);
+      console.log("Midia Items (serialized):", midiaItems);
 
       // Step 1: Insert into site_personalizacoes first to get the personalization ID
       const { data: personalizationData, error: personalizationError } = await supabase
@@ -120,7 +126,6 @@ export const useFormSubmission = (props: SubmissionProps) => {
           modelo: formData.modelo,
           logo_url: logoUrl,
           depoimento_urls: depoimentoUrls.length > 0 ? depoimentoUrls : null,
-          // Make sure this is properly formatted for PostgreSQL JSONB
           midia_urls: midiaItems.length > 0 ? midiaItems : null,
           created_at: formData.created_at
         })

@@ -23,7 +23,7 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
     : [];
   const hasDepoimentos = depoimentoUrls.length > 0;
   
-  // Handle midia_urls (can be array of objects or strings)
+  // Handle midia_urls (can be array of objects or serialized JSON strings)
   const midiaUrls = Array.isArray(personalization.midia_urls) 
     ? personalization.midia_urls 
     : [];

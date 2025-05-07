@@ -15,10 +15,24 @@ export async function getSignedUrl(filePath: string | { url: string; caption?: s
   }
   
   try {
-    // Extract the actual path string if filePath is an object
+    // Extract the actual path string if filePath is an object or JSON string
     let actualPath: string;
     
-    if (typeof filePath === 'string') {
+    // Handle JSON string case
+    if (typeof filePath === 'string' && (filePath.startsWith('{') || filePath.startsWith('['))) {
+      try {
+        const parsed = JSON.parse(filePath);
+        if (parsed && typeof parsed === 'object' && parsed.url) {
+          console.log("Parsed JSON string to object:", parsed);
+          actualPath = parsed.url;
+        } else {
+          actualPath = filePath;
+        }
+      } catch (parseError) {
+        console.log("Not a valid JSON string, using as-is", filePath);
+        actualPath = filePath;
+      }
+    } else if (typeof filePath === 'string') {
       actualPath = filePath;
     } else if (typeof filePath === 'object' && filePath.url) {
       actualPath = filePath.url;
@@ -64,10 +78,24 @@ export async function checkFileExists(filePath: string | { url: string; caption?
   }
   
   try {
-    // Extract the actual path string if filePath is an object
+    // Extract the actual path string if filePath is an object or JSON string
     let actualPath: string;
     
-    if (typeof filePath === 'string') {
+    // Handle JSON string case
+    if (typeof filePath === 'string' && (filePath.startsWith('{') || filePath.startsWith('['))) {
+      try {
+        const parsed = JSON.parse(filePath);
+        if (parsed && typeof parsed === 'object' && parsed.url) {
+          console.log("Parsed JSON string to object:", parsed);
+          actualPath = parsed.url;
+        } else {
+          actualPath = filePath;
+        }
+      } catch (parseError) {
+        console.log("Not a valid JSON string, using as-is", filePath);
+        actualPath = filePath;
+      }
+    } else if (typeof filePath === 'string') {
       actualPath = filePath;
     } else if (typeof filePath === 'object' && filePath.url) {
       actualPath = filePath.url;

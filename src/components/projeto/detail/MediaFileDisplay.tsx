@@ -37,7 +37,20 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
         
         console.log(`Fetching URL for media:`, filePath);
         
-        const url = await getFileUrl(filePath);
+        // Handle case where filePath might be a JSON string
+        let processedFilePath = filePath;
+        
+        if (typeof filePath === 'string' && (filePath.startsWith('{') || filePath.startsWith('['))) {
+          try {
+            const parsed = JSON.parse(filePath);
+            processedFilePath = parsed;
+            console.log("Parsed JSON string to object:", processedFilePath);
+          } catch (parseError) {
+            console.log("Not a valid JSON string, using as-is");
+          }
+        }
+        
+        const url = await getFileUrl(processedFilePath);
         setFileUrl(url);
         
         if (!url) {
@@ -61,8 +74,27 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
   let captionText = '';
   
   if (typeof filePath === 'string') {
-    displayName = caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
-    fileName = filePath.split('/').pop() || displayName;
+    // Check if filePath is a JSON string
+    if (filePath.startsWith('{') || filePath.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(filePath);
+        if (parsed && typeof parsed === 'object') {
+          captionText = parsed.caption || '';
+          const path = parsed.url || '';
+          fileName = path.split('/').pop() || '';
+          displayName = captionText || caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
+        } else {
+          displayName = caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
+          fileName = filePath.split('/').pop() || displayName;
+        }
+      } catch (e) {
+        displayName = caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
+        fileName = filePath.split('/').pop() || displayName;
+      }
+    } else {
+      displayName = caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
+      fileName = filePath.split('/').pop() || displayName;
+    }
   } else if (filePath && typeof filePath === 'object') {
     captionText = filePath.caption || '';
     displayName = captionText || caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
