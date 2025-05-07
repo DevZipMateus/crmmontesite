@@ -16,9 +16,17 @@ export const ClientInfoSection = ({ form }: ClientInfoSectionProps) => {
   
   // Check if client_type is "parceiro" when form values change
   useEffect(() => {
-    const clientType = form.watch("client_type");
-    setIsPartner(clientType === "parceiro");
-  }, [form.watch("client_type")]);
+    const subscription = form.watch((values, { name }) => {
+      if (name === "client_type" || name === undefined) {
+        setIsPartner(values.client_type === "parceiro");
+      }
+    });
+    
+    // Set initial state
+    setIsPartner(form.getValues("client_type") === "parceiro");
+    
+    return () => subscription.unsubscribe();
+  }, [form]);
   
   return (
     <div className="space-y-6">

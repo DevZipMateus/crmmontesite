@@ -68,8 +68,14 @@ export const ProjectFormEdit: React.FC<ProjectFormEditProps> = ({
       let result;
       
       if (mode === "edit" && initialValues) {
+        const updateValues = {
+          ...values,
+          // Only include partner_link if client_type is 'parceiro'
+          partner_link: values.client_type === 'parceiro' ? values.partner_link : null
+        };
+        
         // Make sure we pass the project ID correctly
-        result = await updateProject(initialValues.id, values);
+        result = await updateProject(initialValues.id, updateValues);
         console.log("Update result:", result);
       } else {
         // Leave the create functionality as is for now

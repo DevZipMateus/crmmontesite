@@ -15,28 +15,27 @@ export async function updateProject(id: string, values: Partial<Project>) {
     console.log("Update values:", values);
     
     // Create update object with all fields that could be updated
-    const updateData: Partial<Project> = {
-      client_name: values.client_name,
-      template: values.template,
-      status: values.status,
-      responsible_name: values.responsible_name,
-      domain: values.domain,
-      client_type: values.client_type,
-      blaster_link: values.blaster_link,
-      provider_credentials: values.provider_credentials,
-    };
+    const updateData: Partial<Project> = {};
+    
+    // Include all possible fields in the update
+    if (values.client_name !== undefined) updateData.client_name = values.client_name;
+    if (values.template !== undefined) updateData.template = values.template;
+    if (values.status !== undefined) updateData.status = values.status;
+    if (values.responsible_name !== undefined) updateData.responsible_name = values.responsible_name;
+    if (values.domain !== undefined) updateData.domain = values.domain;
+    if (values.client_type !== undefined) updateData.client_type = values.client_type;
+    if (values.blaster_link !== undefined) updateData.blaster_link = values.blaster_link;
+    if (values.provider_credentials !== undefined) updateData.provider_credentials = values.provider_credentials;
     
     // Only include partner_link if client_type is 'parceiro'
     if (values.client_type === 'parceiro') {
       updateData.partner_link = values.partner_link;
+    } else {
+      // If client type is not 'parceiro', set partner_link to null
+      updateData.partner_link = null;
     }
     
-    // Remove undefined values
-    Object.keys(updateData).forEach(key => {
-      if (updateData[key as keyof Project] === undefined) {
-        delete updateData[key as keyof Project];
-      }
-    });
+    console.log("Final update data:", updateData);
     
     const { data, error } = await supabase
       .from('projects')
