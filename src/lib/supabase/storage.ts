@@ -3,20 +3,32 @@ import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Get signed URL for personalization files
- * @param filePath Path to the file in storage
+ * @param filePath Path to the file in storage or object containing url property
  * @param bucket Storage bucket name (defaults to 'site_personalizacoes')
  * @param expiresIn Expiration time in seconds (defaults to 3600 = 1 hour)
  * @returns Signed URL or null if error
  */
-export async function getSignedUrl(filePath: string, bucket: string = 'site_personalizacoes', expiresIn: number = 3600) {
+export async function getSignedUrl(filePath: string | { url: string; caption?: string }, bucket: string = 'site_personalizacoes', expiresIn: number = 3600) {
   if (!filePath) {
     console.error('getSignedUrl: No file path provided');
     return null;
   }
   
   try {
+    // Extract the actual path string if filePath is an object
+    let actualPath: string;
+    
+    if (typeof filePath === 'string') {
+      actualPath = filePath;
+    } else if (typeof filePath === 'object' && filePath.url) {
+      actualPath = filePath.url;
+    } else {
+      console.error('getSignedUrl: Invalid file path format:', filePath);
+      return null;
+    }
+    
     // Normalize the path by removing duplicate slashes
-    const normalizedPath = filePath.replace(/\/\/+/g, '/');
+    const normalizedPath = actualPath.replace(/\/\/+/g, '/');
     
     console.log(`Generating signed URL for: ${normalizedPath} (bucket: ${bucket})`);
     
@@ -32,26 +44,38 @@ export async function getSignedUrl(filePath: string, bucket: string = 'site_pers
     
     return data.signedUrl;
   } catch (err) {
-    console.error(`Error processing signed URL request (bucket: ${bucket}, path: ${filePath}):`, err);
+    console.error(`Error processing signed URL request:`, err);
     return null;
   }
 }
 
 /**
  * Check if a file exists in the storage
- * @param filePath Path to the file in storage
+ * @param filePath Path to the file in storage or object containing url property
  * @param bucket Storage bucket name (defaults to 'site_personalizacoes')
  * @returns Boolean indicating if file exists
  */
-export async function checkFileExists(filePath: string, bucket: string = 'site_personalizacoes') {
+export async function checkFileExists(filePath: string | { url: string; caption?: string }, bucket: string = 'site_personalizacoes') {
   if (!filePath) {
     console.error('checkFileExists: No file path provided');
     return false;
   }
   
   try {
+    // Extract the actual path string if filePath is an object
+    let actualPath: string;
+    
+    if (typeof filePath === 'string') {
+      actualPath = filePath;
+    } else if (typeof filePath === 'object' && filePath.url) {
+      actualPath = filePath.url;
+    } else {
+      console.error('checkFileExists: Invalid file path format:', filePath);
+      return false;
+    }
+    
     // Normalize the path by removing duplicate slashes
-    const normalizedPath = filePath.replace(/\/\/+/g, '/');
+    const normalizedPath = actualPath.replace(/\/\/+/g, '/');
     
     console.log(`Checking if file exists: ${normalizedPath} (bucket: ${bucket})`);
     
@@ -104,7 +128,7 @@ export async function checkFileExists(filePath: string, bucket: string = 'site_p
     
     return false;
   } catch (err) {
-    console.error(`Error checking if file exists (bucket: ${bucket}, path: ${filePath}):`, err);
+    console.error(`Error checking if file exists:`, err);
     return false;
   }
 }

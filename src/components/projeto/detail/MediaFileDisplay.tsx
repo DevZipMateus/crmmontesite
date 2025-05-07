@@ -8,7 +8,7 @@ interface MediaFileDisplayProps {
   type: 'logo' | 'midia' | 'depoimento';
   caption?: string;
   index?: number;
-  getFileUrl: (path: string) => Promise<string | null>;
+  getFileUrl: (path: string | { url: string; caption?: string }) => Promise<string | null>;
 }
 
 export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({ 
@@ -35,35 +35,17 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
           return;
         }
         
-        // Extract path from either string or object format
-        let path: string;
+        // Extract caption from object if available and not provided separately
         let captionValue: string | undefined = caption;
         
-        if (typeof filePath === 'string') {
-          path = filePath;
-        } else if (typeof filePath === 'object' && filePath !== null) {
-          // Handle object format with url property
-          path = filePath.url || '';
-          // Use caption from the object if available and not provided separately
-          if (!captionValue && filePath.caption) {
-            captionValue = filePath.caption;
-          }
-        } else {
-          console.error("Invalid file path format:", filePath);
-          setIsError(true);
-          setIsLoading(false);
-          return;
+        if (typeof filePath === 'object' && filePath !== null && filePath.caption) {
+          captionValue = filePath.caption;
         }
         
-        if (!path) {
-          console.error("Empty path after extraction");
-          setIsError(true);
-          setIsLoading(false);
-          return;
-        }
+        // Log the file path for debugging
+        console.log(`Fetching URL for: ${typeof filePath === 'string' ? filePath : JSON.stringify(filePath)} (type: ${type})`);
         
-        console.log(`Fetching signed URL for: ${path} (type: ${type})`);
-        const url = await getFileUrl(path);
+        const url = await getFileUrl(filePath);
         setFileUrl(url);
         
         if (!url) {
@@ -84,13 +66,15 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
   // Determine the name of display and the name of the file
   let displayName = '';
   let fileName = '';
+  let captionText = '';
   
   if (typeof filePath === 'string') {
     displayName = caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
     fileName = filePath.split('/').pop() || displayName;
   } else if (filePath && typeof filePath === 'object') {
     // Use caption from the object or fallback
-    displayName = filePath.caption || caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
+    captionText = filePath.caption || '';
+    displayName = captionText || caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
     const path = filePath.url || '';
     fileName = path.split('/').pop() || displayName;
   }
@@ -114,7 +98,7 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
         <p className="text-xs text-gray-400 truncate max-w-full">
           {typeof filePath === 'string' 
             ? filePath 
-            : (typeof filePath === 'object' ? filePath.url : JSON.stringify(filePath))}
+            : (typeof filePath === 'object' && filePath.url ? filePath.url : JSON.stringify(filePath))}
         </p>
       </div>
     );
@@ -164,9 +148,12 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
           </div>
         )}
       </div>
-      <div className="flex justify-between items-center mt-1">
+      <div className="flex flex-col mt-1">
         <p className="text-sm text-gray-500 truncate max-w-[150px]" title={displayName}>{displayName}</p>
-        <div className="flex gap-1">
+        {captionText && (
+          <p className="text-xs text-gray-400 truncate max-w-[150px]" title={captionText}>{captionText}</p>
+        )}
+        <div className="flex gap-1 mt-1">
           <Button 
             size="icon" 
             variant="ghost" 

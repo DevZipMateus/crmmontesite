@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 
 interface PersonalizationFilesProps {
   personalization: any;
-  getFileUrl: (path: string) => Promise<string | null>;
+  getFileUrl: (path: string | { url: string; caption?: string }) => Promise<string | null>;
 }
 
 export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({ 
