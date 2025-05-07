@@ -19,11 +19,15 @@ export const ClientInfoSection = ({ form }: ClientInfoSectionProps) => {
     const subscription = form.watch((values, { name }) => {
       if (name === "client_type" || name === undefined) {
         setIsPartner(values.client_type === "parceiro");
+        console.log("Client type changed to:", values.client_type);
+        console.log("Is partner?", values.client_type === "parceiro");
       }
     });
     
     // Set initial state
-    setIsPartner(form.getValues("client_type") === "parceiro");
+    const initialClientType = form.getValues("client_type");
+    console.log("Initial client type:", initialClientType);
+    setIsPartner(initialClientType === "parceiro");
     
     return () => subscription.unsubscribe();
   }, [form]);
@@ -79,6 +83,7 @@ export const ClientInfoSection = ({ form }: ClientInfoSectionProps) => {
               onValueChange={(value) => {
                 field.onChange(value);
                 setIsPartner(value === "parceiro");
+                console.log("Client type select changed to:", value);
               }} 
               value={field.value || ""}
             >

@@ -68,15 +68,29 @@ export const ProjectFormEdit: React.FC<ProjectFormEditProps> = ({
       let result;
       
       if (mode === "edit" && initialValues) {
+        // Create update values object with all fields explicitly defined
         const updateValues = {
-          ...values,
+          client_name: values.client_name,
+          template: values.template,
+          responsible_name: values.responsible_name,
+          status: values.status,
+          domain: values.domain,
+          client_type: values.client_type,
+          blaster_link: values.blaster_link,
+          provider_credentials: values.provider_credentials,
           // Only include partner_link if client_type is 'parceiro'
           partner_link: values.client_type === 'parceiro' ? values.partner_link : null
         };
         
+        console.log("Sending update values:", updateValues);
+        
         // Make sure we pass the project ID correctly
         result = await updateProject(initialValues.id, updateValues);
         console.log("Update result:", result);
+        
+        if (!result.success) {
+          throw new Error(result.message || "Erro ao atualizar projeto");
+        }
       } else {
         // Leave the create functionality as is for now
         result = { success: false, error: new Error("Create not implemented in this component") };
@@ -98,9 +112,15 @@ export const ProjectFormEdit: React.FC<ProjectFormEditProps> = ({
       }
     } catch (error) {
       console.error("Erro ao salvar projeto:", error);
+      
+      let errorMessage = "Não foi possível atualizar o projeto. Tente novamente.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: `Erro ao ${mode === "edit" ? "atualizar" : "criar"} projeto`,
-        description: `Não foi possível ${mode === "edit" ? "atualizar" : "criar"} o projeto. Tente novamente.`,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
