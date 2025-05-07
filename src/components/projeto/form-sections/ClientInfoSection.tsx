@@ -12,25 +12,7 @@ interface ClientInfoSectionProps {
 }
 
 export const ClientInfoSection = ({ form }: ClientInfoSectionProps) => {
-  const [isPartner, setIsPartner] = useState(false);
-  
-  // Check if client_type is "parceiro" when form values change
-  useEffect(() => {
-    const subscription = form.watch((values, { name }) => {
-      if (name === "client_type" || name === undefined) {
-        setIsPartner(values.client_type === "parceiro");
-        console.log("Client type changed to:", values.client_type);
-        console.log("Is partner?", values.client_type === "parceiro");
-      }
-    });
-    
-    // Set initial state
-    const initialClientType = form.getValues("client_type");
-    console.log("Initial client type:", initialClientType);
-    setIsPartner(initialClientType === "parceiro");
-    
-    return () => subscription.unsubscribe();
-  }, [form]);
+  // We don't need to track isPartner since we don't have partner_link in our database
   
   return (
     <div className="space-y-6">
@@ -82,7 +64,6 @@ export const ClientInfoSection = ({ form }: ClientInfoSectionProps) => {
             <Select 
               onValueChange={(value) => {
                 field.onChange(value);
-                setIsPartner(value === "parceiro");
                 console.log("Client type select changed to:", value);
               }} 
               value={field.value || ""}
@@ -102,27 +83,7 @@ export const ClientInfoSection = ({ form }: ClientInfoSectionProps) => {
         )}
       />
       
-      {/* Display the partner link field only when client type is "parceiro" */}
-      {isPartner && (
-        <FormField
-          control={form.control}
-          name="partner_link"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-700">Link do Parceiro</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="https://..." 
-                  {...field} 
-                  value={field.value || ""} 
-                  className="rounded-md shadow-sm border-gray-200 focus:border-primary focus:ring-primary"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
+      {/* Removed partner_link field since it doesn't exist in the database */}
     </div>
   );
 };
