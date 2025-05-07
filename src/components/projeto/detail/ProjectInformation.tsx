@@ -2,12 +2,16 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Project } from "@/types/project";
+import { useModelDetails } from "@/utils/modelUtils";
 
 interface ProjectInformationProps {
   project: Project;
 }
 
 export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project }) => {
+  // Use the new hook to get the model name
+  const { modelName, isLoading } = useModelDetails(project.template);
+
   return (
     <Card className="border-gray-100 shadow-sm">
       <CardHeader className="bg-gray-50/50 border-b border-gray-100">
@@ -25,7 +29,13 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">Template</p>
-            <p className="mt-1">{project.template || '—'}</p>
+            <p className="mt-1">
+              {isLoading ? (
+                <span className="text-gray-400">Carregando...</span>
+              ) : (
+                modelName
+              )}
+            </p>
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">Responsável</p>
