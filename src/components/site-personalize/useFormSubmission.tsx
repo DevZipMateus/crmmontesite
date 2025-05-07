@@ -66,7 +66,8 @@ export const useFormSubmission = (props: SubmissionProps) => {
         console.log("Depoimento uploaded successfully:", fileName);
       }
 
-      // Process media items with captions - Store as an array of objects
+      // Process media items with captions
+      // Store actual objects directly, not JSON strings
       const midiaItems = [];
       
       for (let i = 0; i < midiaFiles.length; i++) {
@@ -84,6 +85,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
           throw new Error(`Erro ao fazer upload de mídia: ${uploadError.message}`);
         }
 
+        // Create media object with URL and caption
         midiaItems.push({
           url: fileName,
           caption: caption
@@ -118,7 +120,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
           linkmapa: formData.linkMapa,
           modelo: formData.modelo,
           logo_url: logoUrl,
-          // Ensure these columns receive correctly formatted arrays for PostgreSQL
+          // Store the arrays directly, not strings
           depoimento_urls: depoimentoUrls.length > 0 ? depoimentoUrls : null,
           midia_urls: midiaItems.length > 0 ? midiaItems : null,
           created_at: formData.created_at
