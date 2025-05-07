@@ -4,7 +4,7 @@ import { FileIcon, ExternalLink, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface MediaFileDisplayProps {
-  filePath: string;
+  filePath: string | { url: string; caption?: string };
   type: 'logo' | 'midia' | 'depoimento';
   caption?: string;
   index?: number;
@@ -29,27 +29,45 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
         setIsError(false);
         
         if (!filePath) {
+          console.error("No file path provided");
           setIsError(true);
           setIsLoading(false);
           return;
         }
         
-        // Para arquivos de mídia com formato de objeto, extraímos a URL
-        let path = filePath;
-        if (typeof filePath === 'object' && filePath !== null) {
-          path = (filePath as any).url || '';
+        // Extract path from either string or object format
+        let path: string;
+        let captionValue: string | undefined = caption;
+        
+        if (typeof filePath === 'string') {
+          path = filePath;
+        } else if (typeof filePath === 'object' && filePath !== null) {
+          // Handle object format with url property
+          path = filePath.url || '';
+          // Use caption from the object if available and not provided separately
+          if (!captionValue && filePath.caption) {
+            captionValue = filePath.caption;
+          }
+        } else {
+          console.error("Invalid file path format:", filePath);
+          setIsError(true);
+          setIsLoading(false);
+          return;
         }
         
         if (!path) {
+          console.error("Empty path after extraction");
           setIsError(true);
           setIsLoading(false);
           return;
         }
         
+        console.log(`Fetching signed URL for: ${path} (type: ${type})`);
         const url = await getFileUrl(path);
         setFileUrl(url);
         
         if (!url) {
+          console.error("Failed to get signed URL");
           setIsError(true);
         }
       } catch (err) {
@@ -61,21 +79,20 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
     };
     
     fetchUrl();
-  }, [filePath, getFileUrl]);
+  }, [filePath, getFileUrl, caption, type]);
 
-  // Determinar o nome de exibição e o nome do arquivo
-  let displayName = caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
+  // Determine the name of display and the name of the file
+  let displayName = '';
   let fileName = '';
   
   if (typeof filePath === 'string') {
+    displayName = caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
     fileName = filePath.split('/').pop() || displayName;
   } else if (filePath && typeof filePath === 'object') {
-    const path = (filePath as any).url || '';
+    // Use caption from the object or fallback
+    displayName = filePath.caption || caption || `${type} ${(index !== undefined) ? index + 1 : ''}`;
+    const path = filePath.url || '';
     fileName = path.split('/').pop() || displayName;
-    // Use caption from the object if available
-    if ((filePath as any).caption) {
-      displayName = (filePath as any).caption;
-    }
   }
 
   // Check if file is an image
@@ -95,7 +112,9 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
         <FileIcon className="h-8 w-8 text-gray-400" />
         <p className="text-sm text-gray-500 mt-2">Erro ao carregar arquivo</p>
         <p className="text-xs text-gray-400 truncate max-w-full">
-          {typeof filePath === 'string' ? filePath : JSON.stringify(filePath)}
+          {typeof filePath === 'string' 
+            ? filePath 
+            : (typeof filePath === 'object' ? filePath.url : JSON.stringify(filePath))}
         </p>
       </div>
     );

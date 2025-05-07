@@ -1,13 +1,24 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-// Função para obter URL assinada para arquivos de personalização
+/**
+ * Get signed URL for personalization files
+ * @param filePath Path to the file in storage
+ * @param bucket Storage bucket name (defaults to 'site_personalizacoes')
+ * @param expiresIn Expiration time in seconds (defaults to 3600 = 1 hour)
+ * @returns Signed URL or null if error
+ */
 export async function getSignedUrl(filePath: string, bucket: string = 'site_personalizacoes', expiresIn: number = 3600) {
-  if (!filePath) return null;
+  if (!filePath) {
+    console.error('getSignedUrl: No file path provided');
+    return null;
+  }
   
   try {
-    // Normaliza o caminho do arquivo removendo eventuais barras duplicadas
+    // Normalize the path by removing duplicate slashes
     const normalizedPath = filePath.replace(/\/\/+/g, '/');
+    
+    console.log(`Generating signed URL for: ${normalizedPath} (bucket: ${bucket})`);
     
     const { data, error } = await supabase
       .storage
@@ -15,59 +26,85 @@ export async function getSignedUrl(filePath: string, bucket: string = 'site_pers
       .createSignedUrl(normalizedPath, expiresIn);
     
     if (error) {
-      console.error(`Erro ao gerar URL para arquivo (bucket: ${bucket}, path: ${normalizedPath}):`, error);
+      console.error(`Error generating signed URL for file (bucket: ${bucket}, path: ${normalizedPath}):`, error);
       return null;
     }
     
     return data.signedUrl;
   } catch (err) {
-    console.error(`Erro ao processar arquivo (bucket: ${bucket}, path: ${filePath}):`, err);
+    console.error(`Error processing signed URL request (bucket: ${bucket}, path: ${filePath}):`, err);
     return null;
   }
 }
 
-// Verifica se um arquivo existe no Storage
+/**
+ * Check if a file exists in the storage
+ * @param filePath Path to the file in storage
+ * @param bucket Storage bucket name (defaults to 'site_personalizacoes')
+ * @returns Boolean indicating if file exists
+ */
 export async function checkFileExists(filePath: string, bucket: string = 'site_personalizacoes') {
-  if (!filePath) return false;
+  if (!filePath) {
+    console.error('checkFileExists: No file path provided');
+    return false;
+  }
   
   try {
-    // Normaliza o caminho do arquivo removendo eventuais barras duplicadas
+    // Normalize the path by removing duplicate slashes
     const normalizedPath = filePath.replace(/\/\/+/g, '/');
     
-    // Primeiro tente uma operação mais precisa para verificar se o arquivo existe
-    const { data: fileData, error: fileError } = await supabase
-      .storage
-      .from(bucket)
-      .list(normalizedPath.split('/').slice(0, -1).join('/'), {
-        limit: 1,
-        search: normalizedPath.split('/').pop() || ''
-      });
-      
-    if (fileError) {
-      console.error(`Erro ao verificar arquivo (bucket: ${bucket}, path: ${normalizedPath}):`, fileError);
-      return false;
+    console.log(`Checking if file exists: ${normalizedPath} (bucket: ${bucket})`);
+    
+    // Split the path into directory and filename
+    const pathParts = normalizedPath.split('/');
+    const fileName = pathParts.pop() || '';
+    const directory = pathParts.join('/');
+    
+    // First try to list the directory containing the file
+    if (directory) {
+      const { data: fileData, error: fileError } = await supabase
+        .storage
+        .from(bucket)
+        .list(directory, {
+          limit: 100,
+          offset: 0,
+          sortBy: { column: 'name', order: 'asc' }
+        });
+        
+      if (fileError) {
+        console.error(`Error listing directory (bucket: ${bucket}, directory: ${directory}):`, fileError);
+      } else if (fileData && fileData.length > 0) {
+        // Check if the file exists in the directory
+        const fileExists = fileData.some(file => file.name === fileName);
+        if (fileExists) {
+          console.log(`File found in directory listing: ${normalizedPath}`);
+          return true;
+        }
+      }
     }
     
-    // Se encontramos o arquivo na lista, ele existe
-    if (fileData && fileData.length > 0) {
-      return true;
-    }
-    
-    // Fallback para o método getPublicUrl
+    // Fallback method: Try to get public URL and check if it's accessible
     const { data } = await supabase
       .storage
       .from(bucket)
       .getPublicUrl(normalizedPath);
     
-    // Tenta fazer uma solicitação HEAD para verificar se o arquivo existe
-    try {
-      const response = await fetch(data.publicUrl, { method: 'HEAD' });
-      return response.ok;
-    } catch {
-      return false;
+    if (data && data.publicUrl) {
+      try {
+        console.log(`Checking public URL accessibility for: ${normalizedPath}`);
+        const response = await fetch(data.publicUrl, { method: 'HEAD' });
+        const exists = response.ok;
+        console.log(`File exists check result: ${exists} for ${normalizedPath}`);
+        return exists;
+      } catch (fetchErr) {
+        console.error(`Error checking file URL accessibility: ${normalizedPath}`, fetchErr);
+        return false;
+      }
     }
+    
+    return false;
   } catch (err) {
-    console.error(`Erro ao verificar arquivo (bucket: ${bucket}, path: ${filePath}):`, err);
+    console.error(`Error checking if file exists (bucket: ${bucket}, path: ${filePath}):`, err);
     return false;
   }
 }

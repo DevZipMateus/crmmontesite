@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { getSupabaseClient } from "@/lib/supabase";
 import { FormValues } from "./PersonalizeBasicForm";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -29,48 +28,59 @@ export const useFormSubmission = (props: SubmissionProps) => {
         created_at: new Date().toISOString(),
       };
 
-      // Process file uploads
+      console.log("Starting form submission process...");
+      
+      // Process logo upload
       let logoUrl = null;
       if (logoFile) {
+        console.log("Uploading logo file...");
         const fileName = `logos/${Date.now()}_${logoFile.name}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("site_personalizacoes")
           .upload(fileName, logoFile);
 
         if (uploadError) {
+          console.error("Logo upload error:", uploadError);
           throw new Error(`Erro ao fazer upload da logo: ${uploadError.message}`);
         }
 
         logoUrl = fileName;
+        console.log("Logo uploaded successfully:", logoUrl);
       }
 
+      // Process depoimento uploads - Store as a string array
       const depoimentoUrls: string[] = [];
       for (const file of depoimentoFiles) {
+        console.log("Uploading depoimento file:", file.name);
         const fileName = `depoimentos/${Date.now()}_${file.name}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("site_personalizacoes")
           .upload(fileName, file);
 
         if (uploadError) {
+          console.error("Depoimento upload error:", uploadError);
           throw new Error(`Erro ao fazer upload de depoimento: ${uploadError.message}`);
         }
 
         depoimentoUrls.push(fileName);
+        console.log("Depoimento uploaded successfully:", fileName);
       }
 
-      // Process media items with captions
+      // Process media items with captions - Store as an array of objects
       const midiaItems = [];
       
       for (let i = 0; i < midiaFiles.length; i++) {
         const file = midiaFiles[i];
         const caption = i < midiaCaptions.length ? midiaCaptions[i] : "";
         
+        console.log(`Uploading midia file ${i+1}/${midiaFiles.length}:`, file.name, "Caption:", caption);
         const fileName = `midias/${Date.now()}_${file.name}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("site_personalizacoes")
           .upload(fileName, file);
 
         if (uploadError) {
+          console.error("Midia upload error:", uploadError);
           throw new Error(`Erro ao fazer upload de mídia: ${uploadError.message}`);
         }
 
@@ -78,7 +88,12 @@ export const useFormSubmission = (props: SubmissionProps) => {
           url: fileName,
           caption: caption
         });
+        console.log("Midia uploaded successfully with caption:", fileName, caption);
       }
+
+      console.log("All files uploaded successfully, saving to database...");
+      console.log("Depoimento URLs:", depoimentoUrls);
+      console.log("Midia Items:", midiaItems);
 
       // Step 1: Insert into site_personalizacoes first to get the personalization ID
       const { data: personalizationData, error: personalizationError } = await supabase
@@ -103,6 +118,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
           linkmapa: formData.linkMapa,
           modelo: formData.modelo,
           logo_url: logoUrl,
+          // Ensure these columns receive correctly formatted arrays for PostgreSQL
           depoimento_urls: depoimentoUrls.length > 0 ? depoimentoUrls : null,
           midia_urls: midiaItems.length > 0 ? midiaItems : null,
           created_at: formData.created_at
@@ -110,9 +126,11 @@ export const useFormSubmission = (props: SubmissionProps) => {
         .select();
 
       if (personalizationError) {
+        console.error("Personalization error:", personalizationError);
         throw personalizationError;
       }
 
+      console.log("Personalization saved successfully:", personalizationData);
       const personalizationId = personalizationData[0].id;
 
       // Step 2: Create project with reference to the personalization using personalization_id field
@@ -124,14 +142,14 @@ export const useFormSubmission = (props: SubmissionProps) => {
           template: formData.modelo,
           status: "Recebido",
           client_type: "cliente_final",
-          personalization_id: personalizationId  // Use the new personalization_id field
+          personalization_id: personalizationId
         })
         .select();
 
       if (projectError) {
-        console.error("Erro ao criar projeto automático:", projectError);
+        console.error("Project creation error:", projectError);
       } else {
-        console.log("Projeto criado automaticamente com referência à personalização:", projectData);
+        console.log("Project created successfully:", projectData);
       }
 
       toast({
@@ -141,7 +159,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
 
       navigate("/confirmacao");
     } catch (error) {
-      console.error("Erro ao salvar personalização:", error);
+      console.error("Form submission error:", error);
       toast({
         title: "Erro ao salvar",
         description: "Ocorreu um erro ao enviar o formulário. Tente novamente.",

@@ -16,8 +16,22 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
   if (!personalization) return null;
   
   const hasLogo = !!personalization.logo_url;
-  const hasDepoimentos = personalization.depoimento_urls && personalization.depoimento_urls.length > 0;
-  const hasMidia = personalization.midia_urls && personalization.midia_urls.length > 0;
+  
+  // Handle depoimento_urls (can be array of strings)
+  const depoimentoUrls = Array.isArray(personalization.depoimento_urls) 
+    ? personalization.depoimento_urls 
+    : [];
+  const hasDepoimentos = depoimentoUrls.length > 0;
+  
+  // Handle midia_urls (can be array of objects or strings)
+  const midiaUrls = Array.isArray(personalization.midia_urls) 
+    ? personalization.midia_urls 
+    : [];
+  const hasMidia = midiaUrls.length > 0;
+  
+  console.log("Personalização - Logo:", personalization.logo_url);
+  console.log("Personalização - Depoimentos:", depoimentoUrls);
+  console.log("Personalização - Mídias:", midiaUrls);
   
   if (!hasLogo && !hasDepoimentos && !hasMidia) return null;
   
@@ -28,8 +42,8 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
           <CardTitle>Arquivos Enviados</CardTitle>
           <div className="flex items-center gap-2">
             {hasLogo && <Badge variant="outline" className="bg-blue-50">Logo</Badge>}
-            {hasDepoimentos && <Badge variant="outline" className="bg-green-50">Depoimentos ({personalization.depoimento_urls.length})</Badge>}
-            {hasMidia && <Badge variant="outline" className="bg-purple-50">Mídias ({personalization.midia_urls.length})</Badge>}
+            {hasDepoimentos && <Badge variant="outline" className="bg-green-50">Depoimentos ({depoimentoUrls.length})</Badge>}
+            {hasMidia && <Badge variant="outline" className="bg-purple-50">Mídias ({midiaUrls.length})</Badge>}
           </div>
         </div>
       </CardHeader>
@@ -54,7 +68,7 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
             <div className="space-y-2">
               <h3 className="text-sm font-medium text-gray-500">Arquivos de Depoimentos</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {personalization.depoimento_urls.map((filePath: string, index: number) => (
+                {depoimentoUrls.map((filePath: string, index: number) => (
                   <MediaFileDisplay 
                     key={index} 
                     filePath={filePath} 
@@ -73,11 +87,10 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
           <div className="mt-6 pt-6 border-t border-gray-200">
             <h3 className="text-sm font-medium text-gray-500 mb-3">Mídias</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {personalization.midia_urls.map((media: any, index: number) => (
+              {midiaUrls.map((media: any, index: number) => (
                 <MediaFileDisplay 
                   key={index} 
                   filePath={media} 
-                  caption={typeof media === 'object' ? media.caption : undefined}
                   type="midia" 
                   index={index}
                   getFileUrl={getFileUrl}
