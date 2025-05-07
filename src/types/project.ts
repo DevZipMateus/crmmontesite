@@ -10,7 +10,7 @@ export interface Project {
   domain?: string;
   client_type?: string;
   blaster_link?: string;
-  // Removed partner_link as it doesn't exist in the database
+  partner_link?: string; // Added partner_link field
   personalization_id?: string;
   provider_credentials?: string;
   hasPendingCustomizations?: boolean;

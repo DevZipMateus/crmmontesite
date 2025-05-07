@@ -10,8 +10,8 @@ export const projectSchema = z.object({
   client_type: z.string().optional().nullable(),
   domain: z.string().optional().nullable(),
   blaster_link: z.string().optional().nullable(),
+  partner_link: z.string().optional().nullable(), // Added partner_link field
   provider_credentials: z.string().optional().nullable(),
-  // Removed partner_link field since it doesn't exist in the database
 });
 
 export type ProjectFormValues = z.infer<typeof projectSchema>;

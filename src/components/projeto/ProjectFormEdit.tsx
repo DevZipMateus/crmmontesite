@@ -44,6 +44,7 @@ export const ProjectFormEdit: React.FC<ProjectFormEditProps> = ({
       domain: initialValues?.domain || "",
       client_type: initialValues?.client_type || "",
       blaster_link: initialValues?.blaster_link || "",
+      partner_link: initialValues?.partner_link || "", // Added partner_link
       provider_credentials: initialValues?.provider_credentials || "",
     },
   });
@@ -76,8 +77,8 @@ export const ProjectFormEdit: React.FC<ProjectFormEditProps> = ({
           domain: values.domain,
           client_type: values.client_type,
           blaster_link: values.blaster_link,
+          partner_link: values.partner_link,
           provider_credentials: values.provider_credentials,
-          // Removed partner_link since it doesn't exist in the database
         };
         
         console.log("Sending update values:", updateValues);

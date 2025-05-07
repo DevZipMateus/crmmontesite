@@ -12,7 +12,18 @@ interface ClientInfoSectionProps {
 }
 
 export const ClientInfoSection = ({ form }: ClientInfoSectionProps) => {
-  // We don't need to track isPartner since we don't have partner_link in our database
+  const [isPartner, setIsPartner] = useState<boolean>(form.getValues().client_type === 'parceiro');
+  
+  // Update isPartner state when client_type changes
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'client_type') {
+        setIsPartner(value.client_type === 'parceiro');
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form]);
   
   return (
     <div className="space-y-6">
@@ -64,6 +75,7 @@ export const ClientInfoSection = ({ form }: ClientInfoSectionProps) => {
             <Select 
               onValueChange={(value) => {
                 field.onChange(value);
+                setIsPartner(value === 'parceiro');
                 console.log("Client type select changed to:", value);
               }} 
               value={field.value || ""}
@@ -83,7 +95,26 @@ export const ClientInfoSection = ({ form }: ClientInfoSectionProps) => {
         )}
       />
       
-      {/* Removed partner_link field since it doesn't exist in the database */}
+      {isPartner && (
+        <FormField
+          control={form.control}
+          name="partner_link"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-gray-700">Link do Parceiro</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="https://site-do-parceiro.com.br" 
+                  {...field} 
+                  value={field.value || ""} 
+                  className="rounded-md shadow-sm border-gray-200 focus:border-primary focus:ring-primary"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
     </div>
   );
 };

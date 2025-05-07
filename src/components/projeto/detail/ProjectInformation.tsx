@@ -66,7 +66,21 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
               ) : '—'}
             </p>
           </div>
-          {/* Removed partner_link section since it doesn't exist in the Project type */}
+          {project.client_type === 'parceiro' && project.partner_link && (
+            <div className="col-span-2">
+              <p className="text-sm font-medium text-gray-500">Link do Parceiro</p>
+              <p className="mt-1">
+                <a 
+                  href={project.partner_link} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-blue-600 hover:underline break-all"
+                >
+                  {project.partner_link}
+                </a>
+              </p>
+            </div>
+          )}
           {project.personalization_id && (
             <div className="col-span-2">
               <p className="text-sm font-medium text-gray-500">ID de Personalização</p>

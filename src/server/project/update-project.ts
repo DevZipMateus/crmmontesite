@@ -27,13 +27,13 @@ export async function updateProject(id: string, values: Partial<Project>) {
     if (values.blaster_link !== undefined) updateData.blaster_link = values.blaster_link;
     if (values.provider_credentials !== undefined) updateData.provider_credentials = values.provider_credentials;
     
-    // Remove partner_link reference as it doesn't exist in the database
-    // if (values.client_type === 'parceiro') {
-    //   updateData.partner_link = values.partner_link;
-    // } else {
-    //   // If client type is not 'parceiro', set partner_link to null
-    //   updateData.partner_link = null;
-    // }
+    // Handle partner_link based on client_type
+    if (values.client_type === 'parceiro') {
+      updateData.partner_link = values.partner_link;
+    } else {
+      // If client type is not 'parceiro', set partner_link to null
+      updateData.partner_link = null;
+    }
     
     console.log("Final update data:", updateData);
     
