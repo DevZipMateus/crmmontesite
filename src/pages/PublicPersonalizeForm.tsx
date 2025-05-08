@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import PersonalizeForm from "@/components/site-personalize/PersonalizeForm";
 import { useFileUploadHandlers } from "@/components/site-personalize/FileUploadHandlers";
 import { useFormSubmission } from "@/components/site-personalize/useFormSubmission";
@@ -18,11 +19,18 @@ import { modelosDisponiveis } from "@/components/site-personalize/modelosData";
 import { LoadingState } from "@/components/site-personalize/LoadingState";
 import { ErrorState } from "@/components/site-personalize/ErrorState";
 import { useModelFromUrl } from "@/components/site-personalize/useModelFromUrl";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { FormValues } from "@/components/site-personalize/PersonalizeBasicForm";
 
 export default function PublicPersonalizeForm() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { modelo: modeloParam } = useParams<{ modelo: string }>();
+  
+  // State for form data to enable retry functionality
+  const [formData, setFormData] = useState<FormValues | null>(null);
+  const [showRetryButton, setShowRetryButton] = useState(false);
   
   // Use the hook to load model data
   const { modeloSelecionado, modeloDetails, loading, error } = useModelFromUrl(modeloParam);
@@ -47,13 +55,44 @@ export default function PublicPersonalizeForm() {
     setMidiaCaptions
   });
 
-  // Initialize form submission handler
-  const { onSubmit, isSubmitting } = useFormSubmission({
+  // Initialize form submission handler with retry capability
+  const { onSubmit, retrySubmit, isSubmitting } = useFormSubmission({
     logoFile,
     depoimentoFiles,
     midiaFiles,
     midiaCaptions
   });
+
+  // Wrapped onSubmit to save form data for retry
+  const handleSubmit = async (data: FormValues) => {
+    setFormData(data);
+    
+    try {
+      await onSubmit(data);
+      setShowRetryButton(false);
+    } catch (error) {
+      console.error("Form submission error in PublicPersonalizeForm:", error);
+      setShowRetryButton(true);
+    }
+  };
+
+  const handleRetry = async () => {
+    if (formData) {
+      try {
+        await retrySubmit(formData);
+        setShowRetryButton(false);
+      } catch (error) {
+        console.error("Form retry error:", error);
+        // Show retry button kept on
+      }
+    } else {
+      toast({
+        title: "Erro",
+        description: "Não há dados do formulário para reenviar. Por favor, preencha novamente.",
+        variant: "destructive"
+      });
+    }
+  };
 
   if (loading) {
     return <LoadingState />;
@@ -91,6 +130,28 @@ export default function PublicPersonalizeForm() {
             </div>
           )}
         </CardHeader>
+        
+        {showRetryButton && (
+          <div className="px-6">
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Houve um erro ao enviar o formulário. Verifique sua conexão e tente novamente.
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="ml-2 bg-white" 
+                  onClick={handleRetry}
+                  disabled={isSubmitting}
+                >
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                  {isSubmitting ? "Reenviando..." : "Tentar Novamente"}
+                </Button>
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
+        
         <CardContent>
           <PersonalizeForm
             modeloSelecionado={modeloSelecionado}
@@ -105,7 +166,7 @@ export default function PublicPersonalizeForm() {
             handleMidiaUpload={fileHandlers.handleMidiaUpload}
             handleRemoveMidia={fileHandlers.handleRemoveMidia}
             handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
-            onSubmit={onSubmit}
+            onSubmit={handleSubmit}
           />
         </CardContent>
         <CardFooter className="text-center">
