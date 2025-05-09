@@ -53,7 +53,7 @@ const LogoUploader = ({ preview, onUpload }: LogoUploaderProps) => {
       if (hasProblematicChars) {
         toast({
           description: "O nome do arquivo contém caracteres especiais que podem causar problemas. O sistema tentará corrigir automaticamente.",
-          variant: "warning"
+          variant: "default"
         });
       }
       
