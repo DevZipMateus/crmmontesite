@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { FormValues } from "./PersonalizeBasicForm";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadFileWithRetry } from "@/lib/file-upload-service";
+import { sanitizeFileName } from "@/lib/sanitize-file";
 
 export interface SubmissionProps {
   logoFile: File | null;
@@ -14,21 +16,20 @@ export interface SubmissionProps {
 
 // Maximum file size in MB
 const MAX_FILE_SIZE_MB = 10;
-const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024; // Convert to bytes
 
 export const useFormSubmission = (props: SubmissionProps) => {
   const { logoFile, depoimentoFiles, midiaFiles, midiaCaptions = [] } = props;
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
   
-  // Validate file sizes before upload
-  const validateFileSize = (file: File): boolean => {
-    if (file.size > MAX_FILE_SIZE) {
-      console.error(`File size exceeds limit: ${file.name} (${Math.round(file.size / 1024 / 1024)}MB)`);
-      return false;
-    }
-    return true;
+  // Helper to handle upload progress
+  const updateProgress = (fileType: string, index: number, progress: number) => {
+    setUploadProgress(prev => ({
+      ...prev,
+      [`${fileType}_${index}`]: progress
+    }));
   };
 
   const onSubmit = async (data: FormValues) => {
@@ -41,23 +42,6 @@ export const useFormSubmission = (props: SubmissionProps) => {
           !data.email || !data.endereco || !data.descricao || !data.servicos) {
         throw new Error("Por favor, preencha todos os campos obrigatórios");
       }
-      
-      // Validate file sizes
-      if (logoFile && !validateFileSize(logoFile)) {
-        throw new Error(`O arquivo de logo excede o tamanho máximo permitido (${MAX_FILE_SIZE_MB}MB)`);
-      }
-      
-      for (const file of depoimentoFiles) {
-        if (!validateFileSize(file)) {
-          throw new Error(`O arquivo de depoimento ${file.name} excede o tamanho máximo permitido (${MAX_FILE_SIZE_MB}MB)`);
-        }
-      }
-      
-      for (const file of midiaFiles) {
-        if (!validateFileSize(file)) {
-          throw new Error(`O arquivo de mídia ${file.name} excede o tamanho máximo permitido (${MAX_FILE_SIZE_MB}MB)`);
-        }
-      }
 
       const formData = {
         ...data,
@@ -68,48 +52,44 @@ export const useFormSubmission = (props: SubmissionProps) => {
       console.log("Form data prepared:", formData);
       console.log("Selected model:", data.modelo);
       
-      // Process logo upload
+      // Process logo upload with retry
       let logoUrl = null;
       if (logoFile) {
-        console.log("Uploading logo file...");
-        const fileName = `logos/${Date.now()}_${logoFile.name}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("site_personalizacoes")
-          .upload(fileName, logoFile, {
-            cacheControl: '3600',
-            upsert: false
-          });
-
-        if (uploadError) {
-          console.error("Logo upload error:", uploadError);
-          throw new Error(`Erro ao fazer upload da logo: ${uploadError.message}`);
+        console.log("Uploading logo file:", logoFile.name);
+        
+        const { success, filePath, error } = await uploadFileWithRetry(logoFile, {
+          folderPath: "logos",
+          onProgress: (progress) => updateProgress("logo", 0, progress)
+        });
+        
+        if (!success || !filePath) {
+          console.error("Logo upload error:", error);
+          throw new Error(`Erro ao fazer upload da logo: ${error?.message || 'Falha desconhecida'}`);
         }
 
-        logoUrl = fileName;
+        logoUrl = filePath;
         console.log("Logo uploaded successfully:", logoUrl);
       }
 
-      // Process depoimento uploads - Store as a string array
+      // Process depoimento uploads with retry - Store as a string array
       const depoimentoUrls: string[] = [];
-      for (const file of depoimentoFiles) {
+      for (let i = 0; i < depoimentoFiles.length; i++) {
+        const file = depoimentoFiles[i];
         console.log("Uploading depoimento file:", file.name);
-        const fileName = `depoimentos/${Date.now()}_${file.name}`;
         
         try {
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from("site_personalizacoes")
-            .upload(fileName, file, {
-              cacheControl: '3600',
-              upsert: false
-            });
-
-          if (uploadError) {
-            console.error("Depoimento upload error:", uploadError);
-            throw uploadError;
+          const { success, filePath, error } = await uploadFileWithRetry(file, {
+            folderPath: "depoimentos",
+            onProgress: (progress) => updateProgress("depoimento", i, progress)
+          });
+          
+          if (!success || !filePath) {
+            console.error("Depoimento upload error:", error);
+            throw error;
           }
 
-          depoimentoUrls.push(fileName);
-          console.log("Depoimento uploaded successfully:", fileName);
+          depoimentoUrls.push(filePath);
+          console.log("Depoimento uploaded successfully:", filePath);
         } catch (fileError) {
           console.error("Error in depoimento upload:", fileError);
           // Continue with other files instead of failing completely
@@ -120,7 +100,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
         }
       }
 
-      // Process media items with captions - Ensure they are stored as serialized JSON strings
+      // Process media items with captions and retry - Ensure they are stored as serialized JSON strings
       const midiaItems: string[] = [];
       
       for (let i = 0; i < midiaFiles.length; i++) {
@@ -128,24 +108,21 @@ export const useFormSubmission = (props: SubmissionProps) => {
         const caption = i < midiaCaptions.length ? midiaCaptions[i] : "";
         
         console.log(`Uploading midia file ${i+1}/${midiaFiles.length}:`, file.name, "Caption:", caption);
-        const fileName = `midias/${Date.now()}_${file.name}`;
         
         try {
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from("site_personalizacoes")
-            .upload(fileName, file, {
-              cacheControl: '3600',
-              upsert: false
-            });
-
-          if (uploadError) {
-            console.error("Midia upload error:", uploadError);
-            throw uploadError;
+          const { success, filePath, error } = await uploadFileWithRetry(file, {
+            folderPath: "midias",
+            onProgress: (progress) => updateProgress("midia", i, progress)
+          });
+          
+          if (!success || !filePath) {
+            console.error("Midia upload error:", error);
+            throw error;
           }
 
           // Create media object and serialize to JSON string
           const mediaItemObj = {
-            url: fileName,
+            url: filePath,
             caption: caption
           };
           
@@ -153,7 +130,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
           const serializedMediaItem = JSON.stringify(mediaItemObj);
           midiaItems.push(serializedMediaItem);
           
-          console.log("Midia uploaded successfully with caption:", fileName, caption);
+          console.log("Midia uploaded successfully with caption:", filePath, caption);
           console.log("Serialized media item:", serializedMediaItem);
         } catch (fileError) {
           console.error("Error in midia upload:", fileError);
@@ -249,6 +226,13 @@ export const useFormSubmission = (props: SubmissionProps) => {
         errorMessage = error.message;
       }
       
+      // Check if it's a connectivity error
+      if (errorMessage.toLowerCase().includes('failed to fetch') || 
+          errorMessage.toLowerCase().includes('network error') ||
+          errorMessage.toLowerCase().includes('connection')) {
+        errorMessage = "Erro de conexão. Verifique sua internet e tente novamente.";
+      }
+      
       toast({
         title: "Erro ao salvar",
         description: errorMessage,
@@ -264,5 +248,10 @@ export const useFormSubmission = (props: SubmissionProps) => {
     await onSubmit(data);
   };
 
-  return { onSubmit, retrySubmit, isSubmitting };
+  return { 
+    onSubmit, 
+    retrySubmit, 
+    isSubmitting, 
+    uploadProgress 
+  };
 };

@@ -1,9 +1,10 @@
 
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Trash2, Upload, Image, Info } from "lucide-react";
+import { Trash2, Upload, Image, Info, AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { formatFileSize } from "@/lib/sanitize-file";
 
 // Maximum file size in MB
 const MAX_FILE_SIZE_MB = 10;
@@ -33,7 +34,7 @@ const LogoUploader = ({ preview, onUpload }: LogoUploaderProps) => {
       
       // Check file size before upload
       if (file.size > MAX_FILE_SIZE) {
-        const errorMsg = `O arquivo excede o tamanho máximo de ${MAX_FILE_SIZE_MB}MB`;
+        const errorMsg = `O arquivo excede o tamanho máximo de ${MAX_FILE_SIZE_MB}MB (tamanho atual: ${formatFileSize(file.size)})`;
         setFileError(errorMsg);
         toast({
           title: "Erro no tamanho do arquivo",
@@ -41,6 +42,30 @@ const LogoUploader = ({ preview, onUpload }: LogoUploaderProps) => {
           variant: "destructive"
         });
         // Clear the input to allow reselecting files
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        return;
+      }
+      
+      // Check if filename contains problematic characters
+      const hasProblematicChars = /[^\w\s.-]/g.test(file.name);
+      if (hasProblematicChars) {
+        toast({
+          description: "O nome do arquivo contém caracteres especiais que podem causar problemas. O sistema tentará corrigir automaticamente.",
+          variant: "warning"
+        });
+      }
+      
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        const errorMsg = "Por favor, selecione apenas arquivos de imagem (JPG, PNG, etc)";
+        setFileError(errorMsg);
+        toast({
+          title: "Tipo de arquivo inválido",
+          description: errorMsg,
+          variant: "destructive"
+        });
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
@@ -83,6 +108,7 @@ const LogoUploader = ({ preview, onUpload }: LogoUploaderProps) => {
       
       {fileError && (
         <Alert variant="destructive" className="py-2">
+          <AlertTriangle className="h-4 w-4" />
           <AlertDescription className="text-xs">
             {fileError}
           </AlertDescription>
@@ -92,7 +118,8 @@ const LogoUploader = ({ preview, onUpload }: LogoUploaderProps) => {
       <Alert className="bg-blue-50 border-blue-200">
         <Info className="h-4 w-4 text-blue-500" />
         <AlertDescription className="text-xs text-blue-700">
-          Tamanho máximo do arquivo: {MAX_FILE_SIZE_MB}MB
+          Tamanho máximo do arquivo: {MAX_FILE_SIZE_MB}MB. Use formatos comuns como JPG ou PNG.
+          Para melhores resultados, evite espaços e caracteres especiais no nome do arquivo.
         </AlertDescription>
       </Alert>
       

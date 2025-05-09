@@ -1,6 +1,8 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { uploadFileWithRetry, MAX_FILE_SIZE_MB } from "@/lib/file-upload-service";
+import { formatFileSize } from "@/lib/sanitize-file";
 
 export interface FileHandlersProps {
   setLogoFile: React.Dispatch<React.SetStateAction<File | null>>;
@@ -20,6 +22,9 @@ export interface MediaItem {
 
 export const useFileUploadHandlers = (props: FileHandlersProps) => {
   const { toast } = useToast();
+  const [uploadErrors, setUploadErrors] = useState<{[filename: string]: string}>({});
+  const [uploading, setUploading] = useState<{[filename: string]: boolean}>({});
+  
   const {
     setLogoFile,
     setLogoPreview,
@@ -30,23 +35,59 @@ export const useFileUploadHandlers = (props: FileHandlersProps) => {
     setMidiaCaptions
   } = props;
 
+  // Validate file before processing
+  const validateFile = (file: File): boolean => {
+    // Check file size
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      toast({
+        title: "Arquivo muito grande",
+        description: `O arquivo ${file.name} excede o limite de ${MAX_FILE_SIZE_MB}MB (tamanho: ${formatFileSize(file.size)})`,
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    // Additional validation can be added here
+    return true;
+  };
+
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setLogoFile(file);
+      if (!validateFile(file)) return;
+      
+      // Generate preview
       const preview = URL.createObjectURL(file);
       setLogoPreview(preview);
+      setLogoFile(file);
+      
+      toast({
+        description: "Logo carregada com sucesso",
+      });
     }
   };
 
   const handleDepoimentoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
-      const newFiles = Array.from(files);
-      setDepoimentoFiles((prev) => [...prev, ...newFiles]);
-
-      const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
-      setDepoimentoPreviews((prev) => [...prev, ...newPreviews]);
+      const validFiles: File[] = [];
+      const validPreviews: string[] = [];
+      
+      Array.from(files).forEach(file => {
+        if (validateFile(file)) {
+          validFiles.push(file);
+          validPreviews.push(URL.createObjectURL(file));
+        }
+      });
+      
+      if (validFiles.length > 0) {
+        setDepoimentoFiles((prev) => [...prev, ...validFiles]);
+        setDepoimentoPreviews((prev) => [...prev, ...validPreviews]);
+        
+        toast({
+          description: `${validFiles.length} ${validFiles.length === 1 ? 'depoimento adicionado' : 'depoimentos adicionados'} com sucesso`,
+        });
+      }
     }
   };
 
@@ -63,25 +104,42 @@ export const useFileUploadHandlers = (props: FileHandlersProps) => {
       newPreviews.splice(index, 1);
       return newPreviews;
     });
+    
+    toast({
+      description: "Depoimento removido",
+    });
   };
 
   const handleMidiaUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
-      const newFiles = Array.from(files);
-      setMidiaFiles((prev) => [...prev, ...newFiles]);
-
-      const newPreviews = newFiles.map((file) => {
-        if (file.type.startsWith('image/') || file.type === 'image/gif') {
-          return URL.createObjectURL(file);
-        }
-        return file.type.startsWith('video/') ? URL.createObjectURL(file) : '';
-      });
-      setMidiaPreviews((prev) => [...prev, ...newPreviews]);
+      const validFiles: File[] = [];
+      const validPreviews: string[] = [];
+      const validCaptions: string[] = [];
       
-      // Add empty captions for new files
-      const newCaptions = newFiles.map(() => "");
-      setMidiaCaptions((prev) => [...prev, ...newCaptions]);
+      Array.from(files).forEach(file => {
+        if (validateFile(file)) {
+          validFiles.push(file);
+          
+          if (file.type.startsWith('image/') || file.type === 'image/gif') {
+            validPreviews.push(URL.createObjectURL(file));
+          } else {
+            validPreviews.push(file.type.startsWith('video/') ? URL.createObjectURL(file) : '');
+          }
+          
+          validCaptions.push("");
+        }
+      });
+      
+      if (validFiles.length > 0) {
+        setMidiaFiles((prev) => [...prev, ...validFiles]);
+        setMidiaPreviews((prev) => [...prev, ...validPreviews]);
+        setMidiaCaptions((prev) => [...prev, ...validCaptions]);
+        
+        toast({
+          description: `${validFiles.length} ${validFiles.length === 1 ? 'mídia adicionada' : 'mídias adicionadas'} com sucesso`,
+        });
+      }
     }
   };
 
@@ -124,6 +182,8 @@ export const useFileUploadHandlers = (props: FileHandlersProps) => {
     handleRemoveDepoimento,
     handleMidiaUpload,
     handleRemoveMidia,
-    handleUpdateMidiaCaption
+    handleUpdateMidiaCaption,
+    uploadErrors,
+    uploading
   };
 };

@@ -2,10 +2,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Trash2, Upload, FileText, Image, X, Info } from "lucide-react";
+import { Trash2, Upload, FileText, Image, X, Info, AlertTriangle } from "lucide-react";
 import { useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { formatFileSize } from "@/lib/sanitize-file";
 
 // Maximum file size in MB
 const MAX_FILE_SIZE_MB = 10;
@@ -39,6 +40,14 @@ const MediaUploader = ({
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  
+  // Helper function to get a human-readable format description
+  const getFormatDescription = (accept: string): string => {
+    if (accept === 'image/*') return 'Imagens (JPG, PNG, WebP, etc)';
+    if (accept === 'video/*') return 'Vídeos (MP4, WebM, etc)';
+    if (accept === 'image/*,video/*,.gif') return 'Imagens, Vídeos, GIFs';
+    return accept;
+  };
 
   const handleButtonClick = () => {
     if (fileInputRef.current) {
@@ -52,10 +61,38 @@ const MediaUploader = ({
     if (event.target.files) {
       // Check file size before upload
       const files = Array.from(event.target.files);
+      
+      // Check for invalid file types
+      const invalidTypeFiles = files.filter(file => {
+        if (accept === 'image/*' && !file.type.startsWith('image/')) return true;
+        if (accept === 'video/*' && !file.type.startsWith('video/')) return true;
+        if (accept === 'image/*,video/*,.gif' && 
+           (!file.type.startsWith('image/') && 
+            !file.type.startsWith('video/') && 
+            !file.name.toLowerCase().endsWith('.gif'))) return true;
+        return false;
+      });
+      
+      if (invalidTypeFiles.length > 0) {
+        const fileNames = invalidTypeFiles.map(file => file.name).join(", ");
+        const errorMsg = `Os seguintes arquivos não são do tipo correto: ${fileNames}. Formatos aceitos: ${getFormatDescription(accept)}`;
+        setFileError(errorMsg);
+        toast({
+          title: "Tipo de arquivo inválido",
+          description: errorMsg,
+          variant: "destructive"
+        });
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        return;
+      }
+      
+      // Check for oversized files
       const oversizedFiles = files.filter(file => file.size > MAX_FILE_SIZE);
       
       if (oversizedFiles.length > 0) {
-        const fileNames = oversizedFiles.map(file => file.name).join(", ");
+        const fileNames = oversizedFiles.map(file => `${file.name} (${formatFileSize(file.size)})`).join(", ");
         const errorMsg = `Os seguintes arquivos excedem ${MAX_FILE_SIZE_MB}MB: ${fileNames}`;
         setFileError(errorMsg);
         toast({
@@ -68,6 +105,15 @@ const MediaUploader = ({
           fileInputRef.current.value = "";
         }
         return;
+      }
+      
+      // Check if filename contains problematic characters
+      const filesWithProblematicChars = files.filter(file => /[^\w\s.-]/g.test(file.name));
+      if (filesWithProblematicChars.length > 0) {
+        toast({
+          description: "Alguns nomes de arquivos contêm caracteres especiais que podem causar problemas. O sistema tentará corrigir automaticamente.",
+          variant: "warning"
+        });
       }
       
       // If all files are valid, proceed with upload
@@ -93,6 +139,13 @@ const MediaUploader = ({
               src={url} 
               alt={`Preview ${index + 1}`} 
               className="h-full w-full object-cover" 
+              onError={(e) => {
+                // Provide a fallback for images that fail to load
+                const target = e.target as HTMLImageElement;
+                target.onerror = null; 
+                target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+RXJybyBhbyBjYXJyZWdhcjwvdGV4dD48L3N2Zz4=';
+                target.classList.add('error-image');
+              }}
             />
           )}
           <Button 
@@ -129,6 +182,7 @@ const MediaUploader = ({
         
         {fileError && (
           <Alert variant="destructive" className="mt-2 py-2">
+            <AlertTriangle className="h-4 w-4" />
             <AlertDescription className="text-xs">
               {fileError}
             </AlertDescription>
@@ -138,7 +192,12 @@ const MediaUploader = ({
         <Alert className="bg-blue-50 border-blue-200">
           <Info className="h-4 w-4 text-blue-500" />
           <AlertDescription className="text-xs text-blue-700">
-            Tamanho máximo por arquivo: {MAX_FILE_SIZE_MB}MB
+            <strong>Dicas para upload de arquivos:</strong>
+            <ul className="list-disc pl-5 mt-1">
+              <li>Tamanho máximo por arquivo: {MAX_FILE_SIZE_MB}MB</li>
+              <li>Use nomes de arquivo simples sem caracteres especiais</li>
+              <li>Formatos suportados: {getFormatDescription(accept)}</li>
+            </ul>
           </AlertDescription>
         </Alert>
         
@@ -166,7 +225,7 @@ const MediaUploader = ({
             ) : (
               <FileText className="h-4 w-4 mr-1" />
             )}
-            <span>{accept === 'image/*' ? 'Imagens (JPG, PNG, etc)' : accept === 'image/*,video/*,.gif' ? 'Imagens, Vídeos, GIFs' : accept}</span>
+            <span>{getFormatDescription(accept)}</span>
           </div>
         </div>
       </div>

@@ -20,7 +20,7 @@ import { LoadingState } from "@/components/site-personalize/LoadingState";
 import { ErrorState } from "@/components/site-personalize/ErrorState";
 import { useModelFromUrl } from "@/components/site-personalize/useModelFromUrl";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw, WifiOff, HelpCircle } from "lucide-react";
 import { FormValues } from "@/components/site-personalize/PersonalizeBasicForm";
 
 export default function PublicPersonalizeForm() {
@@ -31,6 +31,7 @@ export default function PublicPersonalizeForm() {
   // State for form data to enable retry functionality
   const [formData, setFormData] = useState<FormValues | null>(null);
   const [showRetryButton, setShowRetryButton] = useState(false);
+  const [networkError, setNetworkError] = useState<string | null>(null);
   
   // Use the hook to load model data
   const { modeloSelecionado, modeloDetails, loading, error } = useModelFromUrl(modeloParam);
@@ -56,7 +57,7 @@ export default function PublicPersonalizeForm() {
   });
 
   // Initialize form submission handler with retry capability
-  const { onSubmit, retrySubmit, isSubmitting } = useFormSubmission({
+  const { onSubmit, retrySubmit, isSubmitting, uploadProgress } = useFormSubmission({
     logoFile,
     depoimentoFiles,
     midiaFiles,
@@ -66,6 +67,7 @@ export default function PublicPersonalizeForm() {
   // Wrapped onSubmit to save form data for retry
   const handleSubmit = async (data: FormValues) => {
     setFormData(data);
+    setNetworkError(null);
     
     try {
       await onSubmit(data);
@@ -73,17 +75,32 @@ export default function PublicPersonalizeForm() {
     } catch (error) {
       console.error("Form submission error in PublicPersonalizeForm:", error);
       setShowRetryButton(true);
+      
+      // Check if it's a network error
+      if (error instanceof Error && 
+         (error.message.includes("Failed to fetch") || 
+          error.message.includes("NetworkError") ||
+          error.message.includes("connection"))) {
+        setNetworkError("Erro de conexão detectado. Verifique sua conexão de internet.");
+      }
     }
   };
 
   const handleRetry = async () => {
     if (formData) {
+      setNetworkError(null);
       try {
         await retrySubmit(formData);
         setShowRetryButton(false);
       } catch (error) {
         console.error("Form retry error:", error);
-        // Show retry button kept on
+        // Check if it's a network error
+        if (error instanceof Error && 
+           (error.message.includes("Failed to fetch") || 
+            error.message.includes("NetworkError") ||
+            error.message.includes("connection"))) {
+          setNetworkError("Erro de conexão persistente. Verifique sua conexão de internet.");
+        }
       }
     } else {
       toast({
@@ -134,20 +151,41 @@ export default function PublicPersonalizeForm() {
         {showRetryButton && (
           <div className="px-6">
             <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Houve um erro ao enviar o formulário. Verifique sua conexão e tente novamente.
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="ml-2 bg-white" 
-                  onClick={handleRetry}
-                  disabled={isSubmitting}
-                >
-                  <RefreshCw className="h-4 w-4 mr-1" />
-                  {isSubmitting ? "Reenviando..." : "Tentar Novamente"}
-                </Button>
-              </AlertDescription>
+              {networkError ? (
+                <>
+                  <WifiOff className="h-4 w-4" />
+                  <AlertDescription>
+                    {networkError} 
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="ml-2 bg-white" 
+                      onClick={handleRetry}
+                      disabled={isSubmitting}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-1" />
+                      {isSubmitting ? "Tentando..." : "Tentar Novamente"}
+                    </Button>
+                  </AlertDescription>
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Houve um erro ao enviar o formulário. Verifique sua conexão e tente novamente.
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="ml-2 bg-white" 
+                      onClick={handleRetry}
+                      disabled={isSubmitting}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-1" />
+                      {isSubmitting ? "Reenviando..." : "Tentar Novamente"}
+                    </Button>
+                  </AlertDescription>
+                </>
+              )}
             </Alert>
           </div>
         )}
@@ -160,6 +198,7 @@ export default function PublicPersonalizeForm() {
             midiaPreviews={midiaPreviews}
             midiaCaptions={midiaCaptions}
             isSubmitting={isSubmitting}
+            uploadProgress={uploadProgress}
             handleLogoUpload={fileHandlers.handleLogoUpload}
             handleDepoimentoUpload={fileHandlers.handleDepoimentoUpload}
             handleRemoveDepoimento={fileHandlers.handleRemoveDepoimento}
@@ -169,8 +208,27 @@ export default function PublicPersonalizeForm() {
             onSubmit={handleSubmit}
           />
         </CardContent>
-        <CardFooter className="text-center">
-          <p className="text-sm text-muted-foreground">
+        <CardFooter className="flex flex-col gap-4">
+          <div className="bg-gray-50 w-full p-4 rounded-md">
+            <div className="flex items-start gap-2">
+              <HelpCircle className="h-5 w-5 text-blue-500 mt-0.5" />
+              <div className="text-sm">
+                <h4 className="font-medium">Precisa de ajuda com o formulário?</h4>
+                <p className="text-muted-foreground mt-1">
+                  Se estiver com problemas para enviar o formulário, veja estas dicas:
+                </p>
+                <ul className="list-disc pl-5 mt-2 text-muted-foreground space-y-1">
+                  <li>Verifique sua conexão com a internet</li>
+                  <li>Use nomes de arquivo simples sem caracteres especiais</li>
+                  <li>Reduza o tamanho dos arquivos grandes</li>
+                  <li>Tente usando um navegador diferente</li>
+                  <li>Limpe o cache do seu navegador</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <p className="text-sm text-muted-foreground text-center w-full">
             Powered by MonteSite CRM
           </p>
         </CardFooter>
