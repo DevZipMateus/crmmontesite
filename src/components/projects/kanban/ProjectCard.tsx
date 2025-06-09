@@ -29,8 +29,11 @@ export default function ProjectCard({
   const navigate = useNavigate();
 
   const handleViewEdit = (projectId: string, action: 'view' | 'edit') => {
-    const baseUrl = action === 'view' ? '/projeto' : '/projeto/editar';
-    navigate(`${baseUrl}/${projectId}`);
+    if (action === 'view') {
+      navigate(`/projeto/${projectId}`);
+    } else {
+      navigate(`/projeto/${projectId}/editar`);
+    }
   };
 
   return (
