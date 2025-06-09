@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { ApiGuide } from "./api-documentation/ApiGuide";
 import { ErrorHandling } from "./api-documentation/ErrorHandling";
+import { DocumentationDownloader } from "./DocumentationDownloader";
 
 export const WebhookDocumentation = () => {
   const { toast } = useToast();
@@ -48,6 +50,19 @@ export const WebhookDocumentation = () => {
 
   return (
     <div className="space-y-6">
+      {/* Download Button */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-blue-800">📚 Documentação Completa</h3>
+            <p className="text-sm text-blue-700 mt-1">
+              Baixe toda a documentação em um arquivo HTML completo para consulta offline.
+            </p>
+          </div>
+          <DocumentationDownloader />
+        </div>
+      </div>
+
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">
