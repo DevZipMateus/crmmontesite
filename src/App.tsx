@@ -74,7 +74,7 @@ const App = () => {
                 <ProjetoDetalhe />
               </AuthGuard>
             } />
-            <Route path="/projeto/:id/editar" element={
+            <Route path="/projeto/editar/:id" element={
               <AuthGuard>
                 <ProjetoEditar />
               </AuthGuard>
