@@ -57,7 +57,7 @@ export function PartnerDialog({ open, onClose, partner }: PartnerDialogProps) {
 
   const generateToken = async () => {
     try {
-      const authToken = AuthTokenService.generateToken();
+      const authToken = await AuthTokenService.generateToken();
       setFormData(prev => ({ ...prev, auth_token: authToken.token }));
       toast({
         title: "Token gerado",
@@ -107,7 +107,7 @@ export function PartnerDialog({ open, onClose, partner }: PartnerDialogProps) {
 
         // Se um novo token foi gerado, salvar o hash
         if (formData.auth_token && formData.auth_token !== partner.auth_token) {
-          const authToken = AuthTokenService.generateToken();
+          const authToken = await AuthTokenService.generateToken();
           updateData.token_hash = authToken.hash;
           updateData.token_expires_at = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
           updateData.auth_token = authToken.token;
@@ -126,7 +126,7 @@ export function PartnerDialog({ open, onClose, partner }: PartnerDialogProps) {
         });
       } else {
         // Criar novo
-        const authToken = AuthTokenService.generateToken();
+        const authToken = await AuthTokenService.generateToken();
         
         const { data: newPartner, error } = await supabase
           .from('partners')
