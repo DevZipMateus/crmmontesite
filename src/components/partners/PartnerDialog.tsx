@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,8 @@ import { Partner } from "@/types/webhook";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
-import { Copy, Key } from "lucide-react";
+import { Copy, Key, Eye, EyeOff } from "lucide-react";
+import { AuthTokenService } from "@/services/authTokenService";
 
 interface PartnerDialogProps {
   open: boolean;
@@ -27,6 +27,7 @@ export function PartnerDialog({ open, onClose, partner }: PartnerDialogProps) {
     active: true
   });
   const [loading, setLoading] = useState(false);
+  const [showToken, setShowToken] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -54,9 +55,22 @@ export function PartnerDialog({ open, onClose, partner }: PartnerDialogProps) {
     setFormData(prev => ({ ...prev, hash }));
   };
 
-  const generateToken = () => {
-    const token = 'tok_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    setFormData(prev => ({ ...prev, auth_token: token }));
+  const generateToken = async () => {
+    try {
+      const authToken = AuthTokenService.generateToken();
+      setFormData(prev => ({ ...prev, auth_token: authToken.token }));
+      toast({
+        title: "Token gerado",
+        description: "Novo token de autenticação foi gerado.",
+      });
+    } catch (error) {
+      console.error('Error generating token:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível gerar o token.",
+        variant: "destructive"
+      });
+    }
   };
 
   const copyToClipboard = (text: string, label: string) => {
@@ -83,16 +97,25 @@ export function PartnerDialog({ open, onClose, partner }: PartnerDialogProps) {
 
     try {
       if (partner) {
-        // Atualizar
+        // Atualizar existente
+        const updateData: any = {
+          name: formData.name,
+          hash: formData.hash,
+          webhook_url: formData.webhook_url || null,
+          active: formData.active
+        };
+
+        // Se um novo token foi gerado, salvar o hash
+        if (formData.auth_token && formData.auth_token !== partner.auth_token) {
+          const authToken = AuthTokenService.generateToken();
+          updateData.token_hash = authToken.hash;
+          updateData.token_expires_at = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+          updateData.auth_token = authToken.token;
+        }
+
         const { error } = await supabase
           .from('partners')
-          .update({
-            name: formData.name,
-            hash: formData.hash,
-            webhook_url: formData.webhook_url || null,
-            auth_token: formData.auth_token || null,
-            active: formData.active
-          })
+          .update(updateData)
           .eq('id', partner.id);
 
         if (error) throw error;
@@ -103,15 +126,21 @@ export function PartnerDialog({ open, onClose, partner }: PartnerDialogProps) {
         });
       } else {
         // Criar novo
-        const { error } = await supabase
+        const authToken = AuthTokenService.generateToken();
+        
+        const { data: newPartner, error } = await supabase
           .from('partners')
           .insert({
             name: formData.name,
             hash: formData.hash,
             webhook_url: formData.webhook_url || null,
-            auth_token: formData.auth_token || null,
+            auth_token: authToken.token,
+            token_hash: authToken.hash,
+            token_expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
             active: formData.active
-          });
+          })
+          .select()
+          .single();
 
         if (error) throw error;
 
@@ -134,7 +163,7 @@ export function PartnerDialog({ open, onClose, partner }: PartnerDialogProps) {
     }
   };
 
-  const webhookUrl = `${window.location.origin}/functions/v1/receive-partner-data`;
+  const webhookUrl = `https://vaabpicspdbolvutnscp.supabase.co/functions/v1/receive-partner-data`;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -206,16 +235,26 @@ export function PartnerDialog({ open, onClose, partner }: PartnerDialogProps) {
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="auth_token">Token de Autenticação (Opcional)</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={generateToken}
-              >
-                <Key className="h-4 w-4 mr-1" />
-                Gerar
-              </Button>
+              <Label htmlFor="auth_token">Token de Autenticação</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowToken(!showToken)}
+                >
+                  {showToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={generateToken}
+                >
+                  <Key className="h-4 w-4 mr-1" />
+                  Gerar
+                </Button>
+              </div>
             </div>
             <div className="flex gap-2">
               <Input
@@ -223,7 +262,9 @@ export function PartnerDialog({ open, onClose, partner }: PartnerDialogProps) {
                 value={formData.auth_token}
                 onChange={(e) => setFormData(prev => ({ ...prev, auth_token: e.target.value }))}
                 placeholder="tok_..."
-                type="password"
+                type={showToken ? "text" : "password"}
+                readOnly
+                className="bg-muted"
               />
               {formData.auth_token && (
                 <Button
@@ -236,6 +277,9 @@ export function PartnerDialog({ open, onClose, partner }: PartnerDialogProps) {
                 </Button>
               )}
             </div>
+            <p className="text-xs text-muted-foreground">
+              Token gerado automaticamente para autenticação nas APIs
+            </p>
           </div>
 
           <div className="flex items-center space-x-2">

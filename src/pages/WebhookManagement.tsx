@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
@@ -14,12 +13,14 @@ import {
   ExternalLink,
   Code,
   Book,
-  AlertCircle
+  AlertCircle,
+  Shield
 } from "lucide-react";
 import { WebhookConfiguration } from "@/components/webhook/WebhookConfiguration";
 import { WebhookDocumentation } from "@/components/webhook/WebhookDocumentation";
 import { WebhookLogs } from "@/components/webhook/WebhookLogs";
 import { ApiManagement } from "@/components/webhook/ApiManagement";
+import { AuthenticationLogs } from "@/components/webhook/AuthenticationLogs";
 
 export default function WebhookManagement() {
   const [activeTab, setActiveTab] = useState("config");
@@ -81,7 +82,7 @@ export default function WebhookManagement() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="config">
               <Settings className="h-4 w-4 mr-2" />
               Configuração
@@ -93,6 +94,10 @@ export default function WebhookManagement() {
             <TabsTrigger value="logs">
               <Code className="h-4 w-4 mr-2" />
               Logs
+            </TabsTrigger>
+            <TabsTrigger value="auth">
+              <Shield className="h-4 w-4 mr-2" />
+              Autenticação
             </TabsTrigger>
             <TabsTrigger value="apis">
               <ExternalLink className="h-4 w-4 mr-2" />
@@ -110,6 +115,10 @@ export default function WebhookManagement() {
 
           <TabsContent value="logs" className="space-y-4">
             <WebhookLogs />
+          </TabsContent>
+
+          <TabsContent value="auth" className="space-y-4">
+            <AuthenticationLogs />
           </TabsContent>
 
           <TabsContent value="apis" className="space-y-4">

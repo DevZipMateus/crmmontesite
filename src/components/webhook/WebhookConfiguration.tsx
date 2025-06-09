@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,29 +14,209 @@ import {
   AlertCircle, 
   CheckCircle,
   Globe,
-  Lock
+  Lock,
+  RefreshCw,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { AuthTokenService } from "@/services/authTokenService";
+
+interface WebhookConfig {
+  id?: string;
+  name: string;
+  webhook_url: string;
+  auth_token: string;
+  active: boolean;
+  description?: string;
+}
 
 export const WebhookConfiguration = () => {
   const { toast } = useToast();
-  const [webhookUrl, setWebhookUrl] = useState("");
-  const [authToken, setAuthToken] = useState("");
-  const [isActive, setIsActive] = useState(true);
-  const [description, setDescription] = useState("");
+  const queryClient = useQueryClient();
+  
+  const [config, setConfig] = useState<WebhookConfig>({
+    name: "Sistema Principal",
+    webhook_url: "",
+    auth_token: "",
+    active: true,
+    description: ""
+  });
+  
+  const [showToken, setShowToken] = useState(false);
+
+  // Buscar configuração existente
+  const { data: partners } = useQuery({
+    queryKey: ['webhook-config'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('partners')
+        .select('*')
+        .eq('name', 'Sistema Principal')
+        .maybeSingle();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
+    }
+  });
+
+  // Atualizar estado quando dados carregarem
+  useEffect(() => {
+    if (partners) {
+      setConfig({
+        id: partners.id,
+        name: partners.name,
+        webhook_url: partners.webhook_url || "",
+        auth_token: partners.auth_token || "",
+        active: partners.active,
+        description: ""
+      });
+    }
+  }, [partners]);
+
+  // Mutação para salvar configuração
+  const saveConfigMutation = useMutation({
+    mutationFn: async (data: WebhookConfig) => {
+      if (data.id) {
+        // Atualizar existente
+        const { error } = await supabase
+          .from('partners')
+          .update({
+            webhook_url: data.webhook_url || null,
+            active: data.active
+          })
+          .eq('id', data.id);
+        
+        if (error) throw error;
+      } else {
+        // Criar novo
+        const authToken = AuthTokenService.generateToken();
+        
+        const { data: newPartner, error } = await supabase
+          .from('partners')
+          .insert({
+            name: data.name,
+            hash: 'system_' + Date.now(),
+            webhook_url: data.webhook_url || null,
+            active: data.active
+          })
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        // Salvar token
+        await AuthTokenService.saveTokenForPartner(newPartner.id, authToken);
+        
+        setConfig(prev => ({ 
+          ...prev, 
+          id: newPartner.id,
+          auth_token: authToken.token 
+        }));
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Configuração salva",
+        description: "As configurações do webhook foram atualizadas com sucesso.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['webhook-config'] });
+    },
+    onError: (error) => {
+      console.error('Error saving config:', error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar as configurações.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Mutação para gerar novo token
+  const generateTokenMutation = useMutation({
+    mutationFn: async () => {
+      if (!config.id) throw new Error("Configuração deve ser salva primeiro");
+      
+      const authToken = AuthTokenService.generateToken();
+      await AuthTokenService.saveTokenForPartner(config.id, authToken);
+      
+      return authToken.token;
+    },
+    onSuccess: (newToken) => {
+      setConfig(prev => ({ ...prev, auth_token: newToken }));
+      toast({
+        title: "Token regenerado",
+        description: "Um novo token de autenticação foi gerado com sucesso.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['webhook-config'] });
+    },
+    onError: (error) => {
+      console.error('Error generating token:', error);
+      toast({
+        title: "Erro ao gerar token",
+        description: "Não foi possível gerar um novo token.",
+        variant: "destructive"
+      });
+    }
+  });
 
   const handleSave = () => {
-    toast({
-      title: "Configuração salva",
-      description: "As configurações do webhook foram atualizadas com sucesso.",
-    });
+    saveConfigMutation.mutate(config);
   };
 
-  const handleTest = () => {
+  const handleGenerateToken = () => {
+    generateTokenMutation.mutate();
+  };
+
+  const handleTest = async () => {
+    if (!config.webhook_url) {
+      toast({
+        title: "URL necessária",
+        description: "Configure uma URL antes de testar.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     toast({
       title: "Teste iniciado",
       description: "Enviando webhook de teste para a URL configurada...",
     });
+
+    try {
+      const testPayload = {
+        type: "test",
+        message: "Webhook de teste do sistema",
+        timestamp: new Date().toISOString()
+      };
+
+      const response = await fetch(config.webhook_url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${config.auth_token}`
+        },
+        body: JSON.stringify(testPayload)
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Teste bem-sucedido",
+          description: "O webhook respondeu corretamente.",
+        });
+      } else {
+        throw new Error(`HTTP ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Test error:', error);
+      toast({
+        title: "Teste falhou",
+        description: "Erro ao conectar com o webhook.",
+        variant: "destructive"
+      });
+    }
   };
 
   const copyToClipboard = (text: string, label: string) => {
@@ -49,12 +229,12 @@ export const WebhookConfiguration = () => {
 
   return (
     <div className="space-y-6">
-      {/* Webhook Receiver Configuration */}
+      {/* Configuração Principal */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Globe className="h-5 w-5" />
-            Configuração do Receptor de Webhooks
+            Configuração de Webhook
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -64,13 +244,14 @@ export const WebhookConfiguration = () => {
               <Input
                 id="webhook-url"
                 placeholder="https://seu-site.com/webhook"
-                value={webhookUrl}
-                onChange={(e) => setWebhookUrl(e.target.value)}
+                value={config.webhook_url}
+                onChange={(e) => setConfig(prev => ({ ...prev, webhook_url: e.target.value }))}
               />
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => copyToClipboard(webhookUrl, "URL do webhook")}
+                onClick={() => copyToClipboard(config.webhook_url, "URL do webhook")}
+                disabled={!config.webhook_url}
               >
                 <Copy className="h-4 w-4" />
               </Button>
@@ -78,55 +259,79 @@ export const WebhookConfiguration = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="auth-token">Token de Autenticação</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="auth-token">Token de Autenticação</Label>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowToken(!showToken)}
+                >
+                  {showToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerateToken}
+                  disabled={generateTokenMutation.isPending}
+                >
+                  <RefreshCw className={`h-4 w-4 ${generateTokenMutation.isPending ? 'animate-spin' : ''}`} />
+                  Gerar Novo
+                </Button>
+              </div>
+            </div>
             <div className="flex gap-2">
               <Input
                 id="auth-token"
-                type="password"
-                placeholder="Token secreto para validação"
-                value={authToken}
-                onChange={(e) => setAuthToken(e.target.value)}
+                type={showToken ? "text" : "password"}
+                value={config.auth_token}
+                readOnly
+                className="bg-muted"
+                placeholder={config.auth_token ? "Token configurado" : "Nenhum token gerado"}
               />
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => copyToClipboard(authToken, "Token de autenticação")}
+                onClick={() => copyToClipboard(config.auth_token, "Token de autenticação")}
+                disabled={!config.auth_token}
               >
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Descrição</Label>
-            <Textarea
-              id="description"
-              placeholder="Descreva o propósito deste webhook..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
+            <p className="text-xs text-muted-foreground">
+              Este token deve ser usado no header Authorization: Bearer [token]
+            </p>
           </div>
 
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Switch
                 id="webhook-active"
-                checked={isActive}
-                onCheckedChange={setIsActive}
+                checked={config.active}
+                onCheckedChange={(checked) => setConfig(prev => ({ ...prev, active: checked }))}
               />
               <Label htmlFor="webhook-active">Webhook Ativo</Label>
             </div>
-            <Badge variant={isActive ? "default" : "secondary"}>
-              {isActive ? "Ativo" : "Inativo"}
+            <Badge variant={config.active ? "default" : "secondary"}>
+              {config.active ? "Ativo" : "Inativo"}
             </Badge>
           </div>
 
           <div className="flex gap-2 pt-4">
-            <Button onClick={handleSave} className="flex items-center gap-2">
+            <Button 
+              onClick={handleSave} 
+              className="flex items-center gap-2"
+              disabled={saveConfigMutation.isPending}
+            >
               <Save className="h-4 w-4" />
-              Salvar Configuração
+              {saveConfigMutation.isPending ? 'Salvando...' : 'Salvar Configuração'}
             </Button>
-            <Button variant="outline" onClick={handleTest} className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              onClick={handleTest} 
+              className="flex items-center gap-2"
+              disabled={!config.webhook_url || !config.auth_token}
+            >
               <TestTube className="h-4 w-4" />
               Testar Webhook
             </Button>
@@ -134,7 +339,7 @@ export const WebhookConfiguration = () => {
         </CardContent>
       </Card>
 
-      {/* Our Webhook Endpoints */}
+      {/* Nossos Endpoints */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -162,18 +367,17 @@ export const WebhookConfiguration = () => {
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <CheckCircle className="h-4 w-4 text-green-500" />
-              Endpoint ativo e funcionando
+              Endpoint ativo com autenticação por token
             </div>
           </div>
 
-          <div className="bg-orange-50 border border-orange-200 p-4 rounded-lg">
+          <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
             <div className="flex items-start gap-2">
-              <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5" />
               <div>
-                <h4 className="font-semibold text-orange-800">Importante</h4>
-                <p className="text-sm text-orange-700">
-                  Certifique-se de que sua aplicação está configurada para enviar dados para nossos endpoints
-                  usando o método POST com Content-Type: application/json.
+                <h4 className="font-semibold text-blue-800">Autenticação</h4>
+                <p className="text-sm text-blue-700">
+                  Todos os requests devem incluir o header: <code>Authorization: Bearer [seu-token]</code>
                 </p>
               </div>
             </div>

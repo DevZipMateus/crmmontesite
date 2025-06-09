@@ -9,6 +9,47 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      auth_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          partner_id: string | null
+          request_headers: Json | null
+          request_ip: string | null
+          success: boolean
+          token_used: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          partner_id?: string | null
+          request_headers?: Json | null
+          request_ip?: string | null
+          success: boolean
+          token_used?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          partner_id?: string | null
+          request_headers?: Json | null
+          request_ip?: string | null
+          success?: boolean
+          token_used?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auth_logs_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -73,7 +114,10 @@ export type Database = {
           created_at: string | null
           hash: string
           id: string
+          last_used_at: string | null
           name: string
+          token_expires_at: string | null
+          token_hash: string | null
           updated_at: string | null
           webhook_url: string | null
         }
@@ -83,7 +127,10 @@ export type Database = {
           created_at?: string | null
           hash: string
           id?: string
+          last_used_at?: string | null
           name: string
+          token_expires_at?: string | null
+          token_hash?: string | null
           updated_at?: string | null
           webhook_url?: string | null
         }
@@ -93,7 +140,10 @@ export type Database = {
           created_at?: string | null
           hash?: string
           id?: string
+          last_used_at?: string | null
           name?: string
+          token_expires_at?: string | null
+          token_hash?: string | null
           updated_at?: string | null
           webhook_url?: string | null
         }
@@ -444,6 +494,14 @@ export type Database = {
       create_bucket_policy: {
         Args: { bucket_name: string }
         Returns: boolean
+      }
+      validate_auth_token: {
+        Args: { token_input: string }
+        Returns: {
+          partner_id: string
+          partner_name: string
+          is_valid: boolean
+        }[]
       }
     }
     Enums: {
