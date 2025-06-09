@@ -7,32 +7,55 @@ import { isPartnerProject } from "@/server/webhook-service";
 
 interface ProjectCardProps {
   project: Project;
-  onUpdate: (id: string, updates: Partial<Project>) => void;
-  onDelete: () => void;
+  draggingId: string | null;
+  updatingStatus: boolean;
+  onDragStart: (e: React.DragEvent, projectId: string) => void;
+  onStatusChange: (projectId: string, newStatus: string) => void;
+  statusOptions: Array<{value: string; color: string}>;
+  onProjectDeleted?: () => void;
 }
 
-export default function ProjectCard({ project, onUpdate, onDelete }: ProjectCardProps) {
+export default function ProjectCard({ 
+  project, 
+  draggingId, 
+  updatingStatus, 
+  onDragStart, 
+  onStatusChange, 
+  statusOptions, 
+  onProjectDeleted 
+}: ProjectCardProps) {
+  const handleViewEdit = (projectId: string, action: 'view' | 'edit') => {
+    const baseUrl = action === 'view' ? '/projeto' : '/projeto/editar';
+    window.open(`${baseUrl}/${projectId}`, '_blank');
+  };
+
   return (
-    <Card className="p-4 bg-white shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-primary/20">
+    <Card 
+      className="p-4 bg-white shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-primary/20 cursor-move"
+      draggable
+      onDragStart={(e) => onDragStart(e, project.id)}
+      style={{ opacity: draggingId === project.id ? 0.5 : 1 }}
+    >
       {/* Indicador de projeto de parceiro */}
       {isPartnerProject(project) && project.partner_hash && (
         <PartnerIndicator partnerHash={project.partner_hash} />
       )}
       
       <ProjectCardHeader 
-        project={project}
-        onUpdate={onUpdate}
+        clientName={project.client_name}
+        template={project.template}
+        hasPendingCustomizations={project.hasPendingCustomizations || false}
       />
       
       <ProjectCardDomain 
-        project={project}
-        onUpdate={onUpdate}
+        domain={project.domain}
       />
       
       <ProjectCardActions 
-        project={project}
-        onUpdate={onUpdate}
-        onDelete={onDelete}
+        projectId={project.id}
+        projectName={project.client_name}
+        onViewEdit={handleViewEdit}
+        onProjectDeleted={onProjectDeleted}
       />
     </Card>
   );
