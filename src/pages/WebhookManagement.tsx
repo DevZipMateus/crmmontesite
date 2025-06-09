@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Webhook, 
   Send, 
-  Receive, 
+  Download as ReceiveIcon, 
   Settings, 
   Plus,
   ExternalLink,
@@ -55,7 +55,7 @@ export default function WebhookManagement() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Dados Recebidos</CardTitle>
-              <Receive className="h-4 w-4 text-muted-foreground" />
+              <ReceiveIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">156</div>

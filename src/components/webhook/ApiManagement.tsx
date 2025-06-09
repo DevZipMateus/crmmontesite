@@ -68,7 +68,7 @@ export const ApiManagement = () => {
     name: '',
     url: '',
     description: '',
-    method: 'POST' as const
+    method: 'POST' as 'GET' | 'POST' | 'PUT' | 'DELETE'
   });
 
   const handleSave = () => {
@@ -352,4 +352,81 @@ export const ApiManagement = () => {
       </Card>
     </div>
   );
+
+  function handleSave() {
+    if (editingApi) {
+      setApis(apis.map(api => 
+        api.id === editingApi.id 
+          ? { ...api, ...formData, lastTested: new Date().toISOString() }
+          : api
+      ));
+      toast({
+        title: "API atualizada",
+        description: "As configurações da API foram atualizadas com sucesso.",
+      });
+    } else {
+      const newApi: ApiEndpoint = {
+        id: Date.now().toString(),
+        ...formData,
+        status: 'active',
+        lastTested: new Date().toISOString()
+      };
+      setApis([...apis, newApi]);
+      toast({
+        title: "API adicionada",
+        description: "Nova API foi adicionada com sucesso.",
+      });
+    }
+    
+    setIsDialogOpen(false);
+    setEditingApi(null);
+    setFormData({ name: '', url: '', description: '', method: 'POST' });
+  }
+
+  function handleEdit(api: ApiEndpoint) {
+    setEditingApi(api);
+    setFormData({
+      name: api.name,
+      url: api.url,
+      description: api.description,
+      method: api.method
+    });
+    setIsDialogOpen(true);
+  }
+
+  function handleDelete(id: string) {
+    setApis(apis.filter(api => api.id !== id));
+    toast({
+      title: "API removida",
+      description: "A API foi removida com sucesso.",
+    });
+  }
+
+  function handleTest(api: ApiEndpoint) {
+    toast({
+      title: "Teste iniciado",
+      description: `Testando conexão com ${api.name}...`,
+    });
+    
+    // Simular teste
+    setTimeout(() => {
+      setApis(apis.map(a => 
+        a.id === api.id 
+          ? { ...a, lastTested: new Date().toISOString() }
+          : a
+      ));
+      toast({
+        title: "Teste concluído",
+        description: `API ${api.name} respondeu com sucesso.`,
+      });
+    }, 2000);
+  }
+
+  function toggleStatus(id: string) {
+    setApis(apis.map(api => 
+      api.id === id 
+        ? { ...api, status: api.status === 'active' ? 'inactive' : 'active' }
+        : api
+    ));
+  }
 };

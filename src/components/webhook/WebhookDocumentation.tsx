@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Download, 
   Send, 
-  Receive, 
+  Download as ReceiveIcon, 
   Code2, 
   FileText,
   Copy
@@ -48,7 +48,7 @@ export const WebhookDocumentation = () => {
       <Tabs defaultValue="receive" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="receive">
-            <Receive className="h-4 w-4 mr-2" />
+            <ReceiveIcon className="h-4 w-4 mr-2" />
             Dados que Recebemos
           </TabsTrigger>
           <TabsTrigger value="send">
@@ -61,7 +61,7 @@ export const WebhookDocumentation = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Receive className="h-5 w-5" />
+                <ReceiveIcon className="h-5 w-5" />
                 Estrutura de Dados Recebidos
               </CardTitle>
             </CardHeader>
