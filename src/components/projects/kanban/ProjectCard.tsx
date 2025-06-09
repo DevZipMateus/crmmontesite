@@ -5,6 +5,7 @@ import { ProjectCardHeader, ProjectCardDomain, ProjectCardActions } from "./Proj
 import { PartnerIndicator } from "./ProjectCardComponents/PartnerIndicator";
 import { isPartnerProject } from "@/server/webhook-service";
 import { useNavigate } from "react-router-dom";
+import { formatDate } from "@/utils/formatters";
 
 interface ProjectCardProps {
   project: Project;
@@ -48,6 +49,7 @@ export default function ProjectCard({
         clientName={project.client_name}
         template={project.template}
         hasPendingCustomizations={project.hasPendingCustomizations || false}
+        createdAt={project.created_at}
       />
       
       <ProjectCardDomain 

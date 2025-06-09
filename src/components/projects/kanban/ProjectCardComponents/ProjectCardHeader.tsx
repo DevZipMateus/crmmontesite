@@ -1,19 +1,22 @@
 
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Calendar } from "lucide-react";
+import { formatDate } from "@/utils/formatters";
 
 interface ProjectCardHeaderProps {
   clientName: string;
   template: string;
   hasPendingCustomizations: boolean;
   isLoading?: boolean;
+  createdAt: string;
 }
 
 export const ProjectCardHeader = ({ 
   clientName, 
   template, 
   hasPendingCustomizations,
-  isLoading = false
+  isLoading = false,
+  createdAt
 }: ProjectCardHeaderProps) => {
   return (
     <div className="flex flex-col space-y-1.5">
@@ -33,6 +36,11 @@ export const ProjectCardHeader = ({
         ) : (
           template || "Sem modelo"
         )}
+      </div>
+      
+      <div className="flex items-center gap-1 text-xs text-gray-400">
+        <Calendar className="h-3 w-3" />
+        <span>Criado em {formatDate(createdAt)}</span>
       </div>
     </div>
   );

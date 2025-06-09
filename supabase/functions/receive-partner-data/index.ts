@@ -53,7 +53,7 @@ serve(async (req) => {
       )
     }
 
-    // Criar projeto
+    // Criar projeto com client_type como "cliente_de_parceiro"
     const { data: project, error: projectError } = await supabase
       .from('projects')
       .insert({
@@ -63,7 +63,8 @@ serve(async (req) => {
         partner_hash: hash,
         partner_webhook_url: partner.webhook_url,
         project_source: 'parceiro',
-        responsible_name: partner.name
+        responsible_name: partner.name,
+        client_type: 'cliente_de_parceiro'
       })
       .select()
       .single()
