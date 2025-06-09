@@ -10,8 +10,14 @@ export interface Project {
   domain?: string;
   client_type?: string;
   blaster_link?: string;
-  partner_link?: string; // Added partner_link field
+  partner_link?: string;
   personalization_id?: string;
   provider_credentials?: string;
   hasPendingCustomizations?: boolean;
+  
+  // Novos campos para webhook/parceiros
+  partner_hash?: string;
+  partner_webhook_url?: string;
+  cnpj?: string;
+  project_source?: string;
 }

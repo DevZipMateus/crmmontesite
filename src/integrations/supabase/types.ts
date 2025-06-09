@@ -66,6 +66,39 @@ export type Database = {
         }
         Relationships: []
       }
+      partners: {
+        Row: {
+          active: boolean | null
+          auth_token: string | null
+          created_at: string | null
+          hash: string
+          id: string
+          name: string
+          updated_at: string | null
+          webhook_url: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          auth_token?: string | null
+          created_at?: string | null
+          hash: string
+          id?: string
+          name: string
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          auth_token?: string | null
+          created_at?: string | null
+          hash?: string
+          id?: string
+          name?: string
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
       project_customizations: {
         Row: {
           completed_at: string | null
@@ -118,11 +151,15 @@ export type Database = {
           blaster_link: string | null
           client_name: string
           client_type: string | null
+          cnpj: string | null
           created_at: string | null
           domain: string | null
           id: string
+          partner_hash: string | null
           partner_link: string | null
+          partner_webhook_url: string | null
           personalization_id: string | null
+          project_source: string | null
           provider_credentials: string | null
           responsible_name: string | null
           status: string | null
@@ -133,11 +170,15 @@ export type Database = {
           blaster_link?: string | null
           client_name: string
           client_type?: string | null
+          cnpj?: string | null
           created_at?: string | null
           domain?: string | null
           id?: string
+          partner_hash?: string | null
           partner_link?: string | null
+          partner_webhook_url?: string | null
           personalization_id?: string | null
+          project_source?: string | null
           provider_credentials?: string | null
           responsible_name?: string | null
           status?: string | null
@@ -148,11 +189,15 @@ export type Database = {
           blaster_link?: string | null
           client_name?: string
           client_type?: string | null
+          cnpj?: string | null
           created_at?: string | null
           domain?: string | null
           id?: string
+          partner_hash?: string | null
           partner_link?: string | null
+          partner_webhook_url?: string | null
           personalization_id?: string | null
+          project_source?: string | null
           provider_credentials?: string | null
           responsible_name?: string | null
           status?: string | null
@@ -343,6 +388,50 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhook_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          payload: Json
+          project_id: string | null
+          response: string | null
+          status: string
+          updated_at: string | null
+          webhook_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          payload: Json
+          project_id?: string | null
+          response?: string | null
+          status: string
+          updated_at?: string | null
+          webhook_type: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          payload?: Json
+          project_id?: string | null
+          response?: string | null
+          status?: string
+          updated_at?: string | null
+          webhook_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]

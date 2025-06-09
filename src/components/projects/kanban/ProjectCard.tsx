@@ -1,120 +1,39 @@
 
 import { Card } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase/client";
 import { Project } from "@/types/project";
-import { useModelDetails } from "@/utils/modelUtils";
-import {
-  ProjectCardHeader,
-  ProjectCardActions,
-  ProjectCardDomain,
-  StatusButtonsGrid
-} from "./ProjectCardComponents";
+import { ProjectCardHeader, ProjectCardDomain, ProjectCardActions } from "./ProjectCardComponents";
+import { PartnerIndicator } from "./ProjectCardComponents/PartnerIndicator";
+import { isPartnerProject } from "@/server/webhook-service";
 
 interface ProjectCardProps {
   project: Project;
-  onDragStart: (e: React.DragEvent, projectId: string) => void;
-  onStatusChange: (projectId: string, newStatus: string) => void;
-  draggingId: string | null;
-  updatingStatus: boolean;
-  statusOptions: Array<{ value: string; color: string }>;
-  onProjectDeleted?: () => void;
+  onUpdate: (id: string, updates: Partial<Project>) => void;
+  onDelete: () => void;
 }
 
-export default function ProjectCard({
-  project,
-  onDragStart,
-  onStatusChange,
-  draggingId,
-  updatingStatus,
-  statusOptions,
-  onProjectDeleted
-}: ProjectCardProps) {
-  const navigate = useNavigate();
-  const [hasPendingCustomizations, setHasPendingCustomizations] = useState(
-    project.hasPendingCustomizations || false
-  );
-  
-  // Use the new hook to get the model name
-  const { modelName, isLoading } = useModelDetails(project.template);
-
-  useEffect(() => {
-    // Verifica customizações pendentes se ainda não foram verificadas
-    if (project.hasPendingCustomizations === undefined) {
-      checkPendingCustomizations();
-    }
-  }, [project.id]);
-
-  const checkPendingCustomizations = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("project_customizations")
-        .select("id")
-        .eq("project_id", project.id)
-        .in("status", ["Solicitado", "Em andamento"])
-        .limit(1);
-
-      if (error) {
-        console.error("Erro ao verificar customizações:", error);
-        return;
-      }
-
-      setHasPendingCustomizations(data && data.length > 0);
-    } catch (error) {
-      console.error("Erro ao verificar customizações:", error);
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
-  };
-
-  const handleViewEdit = (projectId: string, action: 'view' | 'edit') => {
-    navigate(`/projeto/${projectId}${action === 'edit' ? '/editar' : ''}`);
-  };
-
-  const handleStatusChange = (newStatus: string) => {
-    onStatusChange(project.id, newStatus);
-  };
-
+export default function ProjectCard({ project, onUpdate, onDelete }: ProjectCardProps) {
   return (
-    <Card 
-      key={project.id} 
-      className={`p-3 shadow-sm hover:shadow-md transition-shadow cursor-move ${draggingId === project.id ? 'opacity-50' : ''} animate-fade-in ${hasPendingCustomizations ? 'border-l-4 border-l-orange-500' : ''}`}
-      draggable="true"
-      onDragStart={(e) => onDragStart(e, project.id)}
-    >
+    <Card className="p-4 bg-white shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-primary/20">
+      {/* Indicador de projeto de parceiro */}
+      {isPartnerProject(project) && project.partner_hash && (
+        <PartnerIndicator partnerHash={project.partner_hash} />
+      )}
+      
       <ProjectCardHeader 
-        clientName={project.client_name} 
-        template={modelName}
-        isLoading={isLoading}
-        hasPendingCustomizations={hasPendingCustomizations}
+        project={project}
+        onUpdate={onUpdate}
       />
       
-      <ProjectCardDomain domain={project.domain} />
-
-      <div className="flex justify-between items-center mt-3">
-        <span className="text-xs text-gray-500">
-          {formatDate(project.created_at)}
-        </span>
-        
-        <ProjectCardActions 
-          projectId={project.id}
-          projectName={project.client_name}
-          onViewEdit={handleViewEdit}
-          onProjectDeleted={onProjectDeleted}
-        />
-      </div>
+      <ProjectCardDomain 
+        project={project}
+        onUpdate={onUpdate}
+      />
       
-      <div className="mt-2 pt-2 border-t">
-        <StatusButtonsGrid
-          currentStatus={project.status}
-          statusOptions={statusOptions}
-          updatingStatus={updatingStatus}
-          onStatusChange={handleStatusChange}
-        />
-      </div>
+      <ProjectCardActions 
+        project={project}
+        onUpdate={onUpdate}
+        onDelete={onDelete}
+      />
     </Card>
   );
 }
