@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -19,6 +20,7 @@ import AuthGuard from "./components/auth/AuthGuard";
 import PublicPersonalizeForm from "./pages/PublicPersonalizeForm";
 import CustomUrlAdmin from "./pages/CustomUrlAdmin";
 import PersonalizacaoDetalhe from "@/pages/PersonalizacaoDetalhe";
+import Parceiros from "./pages/Parceiros";
 
 const queryClient = new QueryClient();
 
@@ -103,6 +105,13 @@ const App = () => {
             <Route path="/custom-urls" element={
               <AuthGuard>
                 <CustomUrlAdmin />
+              </AuthGuard>
+            } />
+            
+            {/* Rota para gestão de parceiros */}
+            <Route path="/parceiros" element={
+              <AuthGuard>
+                <Parceiros />
               </AuthGuard>
             } />
             
