@@ -4,6 +4,7 @@ import { Project } from "@/types/project";
 import { ProjectCardHeader, ProjectCardDomain, ProjectCardActions } from "./ProjectCardComponents";
 import { PartnerIndicator } from "./ProjectCardComponents/PartnerIndicator";
 import { isPartnerProject } from "@/server/webhook-service";
+import { useNavigate } from "react-router-dom";
 
 interface ProjectCardProps {
   project: Project;
@@ -24,9 +25,11 @@ export default function ProjectCard({
   statusOptions, 
   onProjectDeleted 
 }: ProjectCardProps) {
+  const navigate = useNavigate();
+
   const handleViewEdit = (projectId: string, action: 'view' | 'edit') => {
     const baseUrl = action === 'view' ? '/projeto' : '/projeto/editar';
-    window.open(`${baseUrl}/${projectId}`, '_blank');
+    navigate(`${baseUrl}/${projectId}`);
   };
 
   return (
