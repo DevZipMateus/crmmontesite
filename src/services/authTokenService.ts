@@ -1,6 +1,5 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { createHash } from 'crypto';
 
 export interface AuthToken {
   token: string;
@@ -35,17 +34,23 @@ export class AuthTokenService {
     };
   }
 
-  // Hash do token para armazenamento seguro
-  static hashToken(token: string): string {
-    return createHash('sha256').update(token).digest('hex');
+  // Hash do token para armazenamento seguro usando Web Crypto API
+  static async hashToken(token: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(token);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
   // Salvar token para parceiro
   static async saveTokenForPartner(partnerId: string, authToken: AuthToken) {
+    const tokenHash = await this.hashToken(authToken.token);
+    
     const { error } = await supabase
       .from('partners')
       .update({
-        token_hash: authToken.hash,
+        token_hash: tokenHash,
         token_expires_at: authToken.expiresAt?.toISOString(),
         auth_token: authToken.token // Manter para exibição (será removido após primeira visualização)
       })
