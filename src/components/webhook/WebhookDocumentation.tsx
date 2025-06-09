@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,9 +8,13 @@ import {
   Download as ReceiveIcon, 
   Code2, 
   FileText,
-  Copy
+  Copy,
+  AlertTriangle,
+  BookOpen
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ApiGuide } from "./api-documentation/ApiGuide";
+import { ErrorHandling } from "./api-documentation/ErrorHandling";
 
 export const WebhookDocumentation = () => {
   const { toast } = useToast();
@@ -45,17 +48,83 @@ export const WebhookDocumentation = () => {
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="receive" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="overview">
+            <ReceiveIcon className="h-4 w-4 mr-2" />
+            Visão Geral
+          </TabsTrigger>
           <TabsTrigger value="receive">
             <ReceiveIcon className="h-4 w-4 mr-2" />
-            Dados que Recebemos
+            Dados Recebidos
           </TabsTrigger>
           <TabsTrigger value="send">
             <Send className="h-4 w-4 mr-2" />
-            Dados que Enviamos
+            Dados Enviados
+          </TabsTrigger>
+          <TabsTrigger value="implementation">
+            <Code2 className="h-4 w-4 mr-2" />
+            Implementação
+          </TabsTrigger>
+          <TabsTrigger value="errors">
+            <AlertTriangle className="h-4 w-4 mr-2" />
+            Tratamento de Erros
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="overview" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5" />
+                Documentação da API de Webhooks
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-2">🔄 Fluxo Bidirecional</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Nossa API permite tanto o envio de dados de clientes quanto o recebimento de atualizações de status.
+                  </p>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-2">🔐 Autenticação Segura</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Todas as comunicações são protegidas por tokens Bearer e validação de parceiros.
+                  </p>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-2">📊 Logs Completos</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Mantenha rastro de todas as interações com logs detalhados de autenticação e webhooks.
+                  </p>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-2">⚡ Tempo Real</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Receba atualizações instantâneas sobre mudanças de status dos projetos.
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                <h4 className="font-semibold text-blue-800 mb-2">URLs da API</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline">POST</Badge>
+                    <code className="text-sm bg-white px-2 py-1 rounded">
+                      https://vaabpicspdbolvutnscp.supabase.co/functions/v1/receive-partner-data
+                    </code>
+                  </div>
+                  <p className="text-xs text-blue-700">
+                    Endpoint para parceiros enviarem dados de novos clientes
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="receive" className="space-y-4">
           <Card>
@@ -204,30 +273,15 @@ export const WebhookDocumentation = () => {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Code2 className="h-5 w-5" />
-            Guias de Implementação
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button variant="outline" className="h-auto p-4 flex-col">
-              <FileText className="h-8 w-8 mb-2" />
-              <span className="font-medium">Documentação API</span>
-              <span className="text-xs text-muted-foreground">Guia completo da API</span>
-            </Button>
-            <Button variant="outline" className="h-auto p-4 flex-col">
-              <Download className="h-8 w-8 mb-2" />
-              <span className="font-medium">Postman Collection</span>
-              <span className="text-xs text-muted-foreground">Baixar coleção para testes</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        <TabsContent value="implementation" className="space-y-4">
+          <ApiGuide />
+        </TabsContent>
+
+        <TabsContent value="errors" className="space-y-4">
+          <ErrorHandling />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
