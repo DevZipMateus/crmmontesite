@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -138,12 +136,40 @@ export const WebhookConfiguration = () => {
   // Mutação para gerar novo token
   const generateTokenMutation = useMutation({
     mutationFn: async () => {
-      if (!config.id) throw new Error("Configuração deve ser salva primeiro");
-      
+      // Gerar o token primeiro
       const authToken = await AuthTokenService.generateToken();
-      await AuthTokenService.saveTokenForPartner(config.id, authToken);
       
-      return authToken.token;
+      // Se não existe configuração, criar uma nova
+      if (!config.id) {
+        const { data: newPartner, error } = await supabase
+          .from('partners')
+          .insert({
+            name: config.name,
+            hash: 'system_' + Date.now(),
+            webhook_url: config.webhook_url || null,
+            active: config.active
+          })
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        // Salvar token para o novo parceiro
+        await AuthTokenService.saveTokenForPartner(newPartner.id, authToken);
+        
+        // Atualizar estado local
+        setConfig(prev => ({ 
+          ...prev, 
+          id: newPartner.id,
+          auth_token: authToken.token 
+        }));
+        
+        return authToken.token;
+      } else {
+        // Se já existe configuração, apenas regenerar o token
+        await AuthTokenService.saveTokenForPartner(config.id, authToken);
+        return authToken.token;
+      }
     },
     onSuccess: (newToken) => {
       setConfig(prev => ({ ...prev, auth_token: newToken }));
