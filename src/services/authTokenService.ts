@@ -1,4 +1,5 @@
 
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface AuthToken {
@@ -20,12 +21,12 @@ export interface AuthLog {
 
 export class AuthTokenService {
   // Gerar novo token
-  static generateToken(): AuthToken {
+  static async generateToken(): Promise<AuthToken> {
     const token = 'tok_' + Math.random().toString(36).substring(2, 15) + 
                   Math.random().toString(36).substring(2, 15) + 
                   Math.random().toString(36).substring(2, 10);
     
-    const hash = this.hashToken(token);
+    const hash = await this.hashToken(token);
     
     return {
       token,

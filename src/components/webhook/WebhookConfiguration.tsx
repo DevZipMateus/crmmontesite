@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -92,7 +93,7 @@ export const WebhookConfiguration = () => {
         if (error) throw error;
       } else {
         // Criar novo
-        const authToken = AuthTokenService.generateToken();
+        const authToken = await AuthTokenService.generateToken();
         
         const { data: newPartner, error } = await supabase
           .from('partners')
@@ -139,7 +140,7 @@ export const WebhookConfiguration = () => {
     mutationFn: async () => {
       if (!config.id) throw new Error("Configuração deve ser salva primeiro");
       
-      const authToken = AuthTokenService.generateToken();
+      const authToken = await AuthTokenService.generateToken();
       await AuthTokenService.saveTokenForPartner(config.id, authToken);
       
       return authToken.token;
