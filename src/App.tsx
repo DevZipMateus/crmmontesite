@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -21,6 +20,7 @@ import PublicPersonalizeForm from "./pages/PublicPersonalizeForm";
 import CustomUrlAdmin from "./pages/CustomUrlAdmin";
 import PersonalizacaoDetalhe from "@/pages/PersonalizacaoDetalhe";
 import Parceiros from "./pages/Parceiros";
+import WebhookManagement from "./pages/WebhookManagement";
 
 const queryClient = new QueryClient();
 
@@ -112,6 +112,13 @@ const App = () => {
             <Route path="/parceiros" element={
               <AuthGuard>
                 <Parceiros />
+              </AuthGuard>
+            } />
+            
+            {/* Rota para gerenciamento de webhooks */}
+            <Route path="/webhooks" element={
+              <AuthGuard>
+                <WebhookManagement />
               </AuthGuard>
             } />
             

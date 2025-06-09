@@ -6,7 +6,8 @@ import {
   PlusCircle, 
   FilePlus, 
   Presentation, 
-  Link as LinkIcon 
+  Link as LinkIcon,
+  Webhook
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -40,7 +41,7 @@ const MainMenuSection: React.FC = () => {
     <section className="mb-8">
       <h2 className="text-2xl font-bold mb-4">Menu Principal</h2>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <MenuItem 
           icon={<LayoutGrid size={24} />}
           label="Ver Projetos"
@@ -74,6 +75,13 @@ const MainMenuSection: React.FC = () => {
           label="Modelos & URLs"
           href="/custom-urls"
           description="Gerenciar modelos e URLs para formulários"
+        />
+        
+        <MenuItem 
+          icon={<Webhook size={24} />}
+          label="Webhooks"
+          href="/webhooks"
+          description="Gerenciar APIs e integrações"
         />
       </div>
     </section>
