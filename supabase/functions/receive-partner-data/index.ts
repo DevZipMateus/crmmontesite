@@ -159,7 +159,7 @@ serve(async (req) => {
         partner_hash: payload.hash,
         partner_webhook_url: partner?.webhook_url,
         project_source: 'parceiro',
-        status: 'Em andamento'
+        status: 'Recebido'
       })
       .select()
       .single();
