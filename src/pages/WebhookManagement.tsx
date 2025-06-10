@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,9 @@ import {
   Code,
   Book,
   AlertCircle,
-  Shield
+  Shield,
+  Zap,
+  CheckCircle
 } from "lucide-react";
 import { WebhookConfiguration } from "@/components/webhook/WebhookConfiguration";
 import { WebhookDocumentation } from "@/components/webhook/WebhookDocumentation";
@@ -31,6 +34,10 @@ export default function WebhookManagement() {
       actions={
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="bg-green-100 text-green-700">
+            <Zap className="h-3 w-3 mr-1" />
+            Processamento Automático
+          </Badge>
+          <Badge variant="outline" className="bg-blue-100 text-blue-700">
             <Webhook className="h-3 w-3 mr-1" />
             Sistema Ativo
           </Badge>
@@ -38,6 +45,26 @@ export default function WebhookManagement() {
       }
     >
       <div className="space-y-6">
+        {/* Automation Status Card */}
+        <Card className="border-green-200 bg-green-50">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-green-800">
+              <CheckCircle className="h-5 w-5" />
+              Processamento Automático Ativado
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-sm text-green-700 space-y-1">
+              <p>✅ Webhooks são processados automaticamente quando criados</p>
+              <p>✅ Notificações instantâneas para parceiros</p>
+              <p>✅ Falhas são registradas automaticamente</p>
+              <p className="text-xs text-green-600 mt-2">
+                O sistema agora processa webhooks em tempo real usando triggers do banco de dados.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
