@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { updateProjectStatus } from "@/lib/supabase";
+import { updateProjectStatus } from "@/lib/supabase/projectStatus";
 
 interface Project {
   id: string;
@@ -43,6 +43,7 @@ export function useDragAndDrop(projects: Project[], setProjects: React.Dispatch<
     setUpdatingStatus(true);
     
     try {
+      console.log(`Atualizando status do projeto ${projectId} para ${newStatus}`);
       const result = await updateProjectStatus(projectId, newStatus);
       
       if (result.success) {
@@ -57,6 +58,7 @@ export function useDragAndDrop(projects: Project[], setProjects: React.Dispatch<
           )
         );
       } else {
+        console.error('Erro ao atualizar status:', result.error);
         throw new Error('Failed to update project status');
       }
     } catch (error) {
@@ -76,6 +78,7 @@ export function useDragAndDrop(projects: Project[], setProjects: React.Dispatch<
     setUpdatingStatus(true);
     
     try {
+      console.log(`Alterando status do projeto ${projectId} para ${newStatus}`);
       const result = await updateProjectStatus(projectId, newStatus);
       
       if (result.success) {
@@ -90,6 +93,7 @@ export function useDragAndDrop(projects: Project[], setProjects: React.Dispatch<
           )
         );
       } else {
+        console.error('Erro ao atualizar status:', result.error);
         throw new Error('Failed to update project status');
       }
     } catch (error) {
