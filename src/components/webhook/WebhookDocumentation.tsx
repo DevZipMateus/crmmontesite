@@ -170,10 +170,14 @@ export const WebhookDocumentation = () => {
                   <h5 className="font-medium">Campos Obrigatórios</h5>
                   <Badge variant="destructive">Obrigatório</Badge>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="border rounded p-3">
                     <code className="text-sm font-mono">nome</code>
                     <p className="text-xs text-muted-foreground mt-1">Nome do cliente (string)</p>
+                  </div>
+                  <div className="border rounded p-3">
+                    <code className="text-sm font-mono">telefone</code>
+                    <p className="text-xs text-muted-foreground mt-1">Telefone de contato (string)</p>
                   </div>
                   <div className="border rounded p-3">
                     <code className="text-sm font-mono">hash</code>
@@ -195,10 +199,6 @@ export const WebhookDocumentation = () => {
                   <div className="border rounded p-3">
                     <code className="text-sm font-mono">email</code>
                     <p className="text-xs text-muted-foreground mt-1">Email de contato (string)</p>
-                  </div>
-                  <div className="border rounded p-3">
-                    <code className="text-sm font-mono">telefone</code>
-                    <p className="text-xs text-muted-foreground mt-1">Telefone de contato (string)</p>
                   </div>
                 </div>
               </div>
@@ -223,10 +223,11 @@ export const WebhookDocumentation = () => {
               </div>
 
               <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
-                <h5 className="font-semibold text-amber-800 mb-2">⚠️ Importante - Hash Único</h5>
+                <h5 className="font-semibold text-amber-800 mb-2">⚠️ Importante - Campos Obrigatórios</h5>
                 <p className="text-sm text-amber-700">
-                  O campo <code>hash</code> deve ser único por parceiro. Se já existir um projeto com o mesmo hash, 
-                  a API retornará erro 409 (Conflict) com os dados do projeto existente.
+                  Os campos <code>nome</code>, <code>telefone</code> e <code>hash</code> são obrigatórios. 
+                  Se algum destes campos não for fornecido, a API retornará erro 400 (Bad Request).
+                  O campo <code>hash</code> deve ser único por parceiro.
                 </p>
               </div>
             </CardContent>

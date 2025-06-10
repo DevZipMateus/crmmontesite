@@ -11,7 +11,7 @@ interface PartnerDataPayload {
   nome: string;
   cnpj?: string;
   email?: string;
-  telefone?: string;
+  telefone: string;
   hash: string;
 }
 
@@ -105,11 +105,11 @@ serve(async (req) => {
     console.log('📋 Dados recebidos:', JSON.stringify(payload, null, 2));
     console.log('👤 Parceiro autenticado:', partnerName);
 
-    // Validar dados obrigatórios
-    if (!payload.nome || !payload.hash) {
+    // Validar dados obrigatórios - agora incluindo telefone
+    if (!payload.nome || !payload.hash || !payload.telefone) {
       console.log('❌ Dados obrigatórios não fornecidos');
       return new Response(
-        JSON.stringify({ error: 'Nome e hash são obrigatórios' }),
+        JSON.stringify({ error: 'Nome, hash e telefone são obrigatórios' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -149,13 +149,14 @@ serve(async (req) => {
 
     console.log('🔗 URL webhook do parceiro:', partner?.webhook_url);
 
-    // Criar novo projeto
+    // Criar novo projeto - agora incluindo telefone
     console.log('📝 Criando novo projeto...');
     const { data: newProject, error: projectError } = await supabase
       .from('projects')
       .insert({
         client_name: payload.nome,
         cnpj: payload.cnpj,
+        telefone: payload.telefone,
         partner_hash: payload.hash,
         partner_webhook_url: partner?.webhook_url,
         project_source: 'parceiro',

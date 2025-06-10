@@ -19,5 +19,6 @@ export interface Project {
   partner_hash?: string;
   partner_webhook_url?: string;
   cnpj?: string;
+  telefone?: string;
   project_source?: string;
 }

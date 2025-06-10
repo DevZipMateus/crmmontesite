@@ -48,7 +48,7 @@ async function sendClientData(clientData) {
         
       case 400:
         console.error('❌ Dados inválidos:', result.error);
-        // Verificar se nome e hash foram fornecidos
+        // Verificar se nome, telefone e hash foram fornecidos
         throw new Error('Dados inválidos: ' + result.error);
         
       default:
@@ -165,12 +165,12 @@ async function sendWithRetry(clientData, maxRetries = 3) {
                 </div>
                 <h4 className="font-semibold">Dados inválidos</h4>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Os campos obrigatórios (nome e hash) não foram fornecidos ou estão em formato inválido.
+                  Os campos obrigatórios (nome, telefone e hash) não foram fornecidos ou estão em formato inválido.
                 </p>
                 <div className="bg-muted p-3 rounded mt-2">
                   <code className="text-sm">
                     {JSON.stringify({
-                      error: "Nome e hash são obrigatórios"
+                      error: "Nome, hash e telefone são obrigatórios"
                     }, null, 2)}
                   </code>
                 </div>
@@ -220,7 +220,7 @@ async function sendWithRetry(clientData, maxRetries = 3) {
           <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
             <h4 className="font-semibold text-blue-800 mb-2">Boas Práticas Atualizadas</h4>
             <ul className="text-sm text-blue-700 space-y-1">
-              <li>• Sempre validar se nome e hash estão presentes antes do envio</li>
+              <li>• Sempre validar se nome, telefone e hash estão presentes antes do envio</li>
               <li>• Implementar logs detalhados para debugging de erros 401 e 409</li>
               <li>• Usar sistema de retry para falhas temporárias (não para erros 401/400)</li>
               <li>• Monitorar tokens e renovar antes do vencimento configurado</li>
@@ -228,6 +228,7 @@ async function sendWithRetry(clientData, maxRetries = 3) {
               <li>• Verificar logs de autenticação no painel para investigar falhas</li>
               <li>• Lembrar que projetos são criados automaticamente com status "Recebido"</li>
               <li>• Garantir que cada hash seja único por projeto no seu sistema</li>
+              <li>• O telefone deve estar em formato válido (ex: (11) 99999-9999)</li>
             </ul>
           </div>
 
@@ -240,6 +241,7 @@ async function sendWithRetry(clientData, maxRetries = 3) {
               <li>• Conferir se o token não tem espaços extras ou caracteres invisíveis</li>
               <li>• Validar se o hash fornecido não foi usado anteriormente</li>
               <li>• Verificar se os headers Content-Type e Authorization estão corretos</li>
+              <li>• Confirmar que nome, telefone e hash estão todos preenchidos</li>
               <li>• Testar primeiro com curl antes de implementar no código</li>
             </ul>
           </div>

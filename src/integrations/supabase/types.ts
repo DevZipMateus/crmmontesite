@@ -213,6 +213,7 @@ export type Database = {
           provider_credentials: string | null
           responsible_name: string | null
           status: string | null
+          telefone: string | null
           template: string | null
           updated_at: string | null
         }
@@ -232,6 +233,7 @@ export type Database = {
           provider_credentials?: string | null
           responsible_name?: string | null
           status?: string | null
+          telefone?: string | null
           template?: string | null
           updated_at?: string | null
         }
@@ -251,6 +253,7 @@ export type Database = {
           provider_credentials?: string | null
           responsible_name?: string | null
           status?: string | null
+          telefone?: string | null
           template?: string | null
           updated_at?: string | null
         }

@@ -46,6 +46,10 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
             <p className="mt-1">{project.domain || '—'}</p>
           </div>
           <div>
+            <p className="text-sm font-medium text-gray-500">Telefone</p>
+            <p className="mt-1">{project.telefone || '—'}</p>
+          </div>
+          <div>
             <p className="text-sm font-medium text-gray-500">Data de Criação</p>
             <p className="mt-1">
               {project.created_at ? new Date(project.created_at).toLocaleDateString('pt-BR') : '—'}

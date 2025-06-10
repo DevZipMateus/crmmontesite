@@ -26,7 +26,7 @@ export interface PartnerDataPayload {
   nome: string;
   cnpj?: string;
   email?: string;
-  telefone?: string;
+  telefone: string; // Agora obrigatório
   hash: string;
 }
 
