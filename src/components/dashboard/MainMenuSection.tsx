@@ -7,7 +7,8 @@ import {
   FilePlus, 
   Presentation, 
   Link as LinkIcon,
-  Webhook
+  Webhook,
+  Users
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -75,6 +76,13 @@ const MainMenuSection: React.FC = () => {
           label="Modelos & URLs"
           href="/custom-urls"
           description="Gerenciar modelos e URLs para formulários"
+        />
+        
+        <MenuItem 
+          icon={<Users size={24} />}
+          label="Parceiros"
+          href="/parceiros"
+          description="Gestão de parceiros e integrações"
         />
         
         <MenuItem 
