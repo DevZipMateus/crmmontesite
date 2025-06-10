@@ -1,340 +1,259 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Download, 
-  Send, 
-  Download as ReceiveIcon, 
-  Code2, 
-  FileText,
-  Copy,
-  AlertTriangle,
-  BookOpen
-} from "lucide-react";
+import { Copy, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { ApiGuide } from "./api-documentation/ApiGuide";
-import { ErrorHandling } from "./api-documentation/ErrorHandling";
 import { DocumentationDownloader } from "./DocumentationDownloader";
 
 export const WebhookDocumentation = () => {
   const { toast } = useToast();
 
-  const copyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
     toast({
-      title: "Código copiado!",
-      description: "O código foi copiado para a área de transferência.",
+      title: "Copiado!",
+      description: "Código copiado para a área de transferência.",
     });
   };
 
-  const receiveExample = `{
-  "nome": "João Silva",
-  "cnpj": "12.345.678/0001-90",
-  "email": "joao@exemplo.com",
+  const baseUrl = "https://vaabpicspdbolvutnscp.supabase.co/functions/v1";
+
+  const statusChangeExample = `{
+  "type": "status_change",
+  "status": "Concluído",
+  "previous_status": "Em produção",
+  "nome": "Cliente Exemplo",
+  "email": "cliente@exemplo.com",
   "telefone": "(11) 99999-9999",
-  "hash": "abc123def456"
+  "cnpj": "12.345.678/0001-90",
+  "hash": "unique_client_hash",
+  "data_status": "2024-01-15T10:30:00Z",
+  "domain": "clienteexemplo.com.br"
 }`;
 
-  const sendExample = `{
-  "status": "Recebido",
-  "nome": "João Silva",
-  "email": "placeholder@email.com",
-  "telefone": "placeholder",
+  const domainChangeExample = `{
+  "type": "domain_change",
+  "domain": "novocliente.com.br",
+  "previous_domain": "clienteantigo.com.br",
+  "nome": "Cliente Exemplo",
+  "telefone": "(11) 99999-9999",
   "cnpj": "12.345.678/0001-90",
-  "hash": "abc123def456",
-  "data_status": "2024-01-15T10:30:00Z",
-  "domain": null
+  "hash": "unique_client_hash",
+  "data_domain": "2024-01-15T14:20:00Z",
+  "status": "Em produção"
 }`;
+
+  const sendDataExample = `curl -X POST ${baseUrl}/receive-partner-data \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer SEU_TOKEN_AQUI" \\
+  -d '{
+    "nome": "Cliente Teste",
+    "telefone": "(11) 99999-9999",
+    "hash": "unique_test_123",
+    "cnpj": "12.345.678/0001-90"
+  }'`;
 
   return (
     <div className="space-y-6">
-      {/* Download Button */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold text-blue-800">📚 Documentação Completa</h3>
-            <p className="text-sm text-blue-700 mt-1">
-              Baixe toda a documentação em um arquivo HTML completo para consulta offline.
-            </p>
-          </div>
-          <DocumentationDownloader />
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold">Documentação da API</h2>
+          <p className="text-muted-foreground">
+            Guia completo para integração com nossos webhooks
+          </p>
         </div>
+        <DocumentationDownloader />
       </div>
 
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview">
-            <ReceiveIcon className="h-4 w-4 mr-2" />
-            Visão Geral
-          </TabsTrigger>
-          <TabsTrigger value="receive">
-            <ReceiveIcon className="h-4 w-4 mr-2" />
-            Dados Recebidos
-          </TabsTrigger>
-          <TabsTrigger value="send">
-            <Send className="h-4 w-4 mr-2" />
-            Dados Enviados
-          </TabsTrigger>
-          <TabsTrigger value="implementation">
-            <Code2 className="h-4 w-4 mr-2" />
-            Implementação
-          </TabsTrigger>
-          <TabsTrigger value="errors">
-            <AlertTriangle className="h-4 w-4 mr-2" />
-            Tratamento de Erros
-          </TabsTrigger>
-        </TabsList>
+      {/* Endpoints Disponíveis */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Endpoints Disponíveis</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">POST</Badge>
+              <code className="text-sm bg-muted px-2 py-1 rounded">
+                {baseUrl}/receive-partner-data
+              </code>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyToClipboard(`${baseUrl}/receive-partner-data`)}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Endpoint para envio de dados de novos projetos de parceiros
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="overview" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
-                Documentação da API de Webhooks
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-2">🔄 Fluxo Bidirecional</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Nossa API permite tanto o envio de dados de clientes quanto o recebimento de atualizações de status.
-                  </p>
-                </div>
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-2">🔐 Autenticação Segura</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Todas as comunicações são protegidas por tokens Bearer e validação de parceiros.
-                  </p>
-                </div>
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-2">📊 Logs Completos</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Mantenha rastro de todas as interações com logs detalhados de autenticação e webhooks.
-                  </p>
-                </div>
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-2">⚡ Tempo Real</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Receba atualizações instantâneas sobre mudanças de status dos projetos.
-                  </p>
-                </div>
-              </div>
+      {/* Enviando Dados */}
+      <Card>
+        <CardHeader>
+          <CardTitle>1. Enviando Dados de Projeto</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Use este endpoint para criar novos projetos através do sistema de parceiros.
+          </p>
+          
+          <div>
+            <h4 className="font-medium mb-2">Headers Obrigatórios:</h4>
+            <div className="bg-muted p-3 rounded text-sm space-y-1">
+              <div><strong>Content-Type:</strong> application/json</div>
+              <div><strong>Authorization:</strong> Bearer SEU_TOKEN</div>
+            </div>
+          </div>
 
-              <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-                <h4 className="font-semibold text-blue-800 mb-2">URLs da API</h4>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">POST</Badge>
-                    <code className="text-sm bg-white px-2 py-1 rounded">
-                      https://vaabpicspdbolvutnscp.supabase.co/functions/v1/receive-partner-data
-                    </code>
-                  </div>
-                  <p className="text-xs text-blue-700">
-                    Endpoint para parceiros enviarem dados de novos clientes
-                  </p>
-                </div>
-              </div>
+          <div>
+            <h4 className="font-medium mb-2">Campos Obrigatórios:</h4>
+            <ul className="text-sm space-y-1 ml-4">
+              <li>• <strong>nome:</strong> Nome do cliente</li>
+              <li>• <strong>telefone:</strong> Telefone de contato (obrigatório)</li>
+              <li>• <strong>hash:</strong> Identificador único do projeto</li>
+            </ul>
+          </div>
 
-              <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-                <h4 className="font-semibold text-yellow-800 mb-2">⚠️ Configuração Importante</h4>
-                <p className="text-sm text-yellow-700">
-                  Esta função está configurada com <code>verify_jwt = false</code> no arquivo <code>supabase/config.toml</code> 
-                  para permitir autenticação via Bearer Token customizado ao invés do JWT padrão do Supabase.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <div>
+            <h4 className="font-medium mb-2">Campos Opcionais:</h4>
+            <ul className="text-sm space-y-1 ml-4">
+              <li>• <strong>cnpj:</strong> CNPJ da empresa</li>
+              <li>• <strong>email:</strong> Email de contato</li>
+            </ul>
+          </div>
 
-        <TabsContent value="receive" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ReceiveIcon className="h-5 w-5" />
-                Estrutura de Dados Recebidos
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <h4 className="font-semibold">Endpoint para Parceiros</h4>
-                <p className="text-sm text-muted-foreground">
-                  Recebemos dados de novos clientes através dos nossos parceiros. O projeto é criado automaticamente com status "Recebido".
-                </p>
-              </div>
+          <div>
+            <h4 className="font-medium mb-2">Exemplo de Requisição:</h4>
+            <div className="relative">
+              <pre className="bg-muted p-3 rounded text-xs overflow-auto">
+                <code>{sendDataExample}</code>
+              </pre>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute top-2 right-2"
+                onClick={() => copyToClipboard(sendDataExample)}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h5 className="font-medium">Campos Obrigatórios</h5>
-                  <Badge variant="destructive">Obrigatório</Badge>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="border rounded p-3">
-                    <code className="text-sm font-mono">nome</code>
-                    <p className="text-xs text-muted-foreground mt-1">Nome do cliente (string)</p>
-                  </div>
-                  <div className="border rounded p-3">
-                    <code className="text-sm font-mono">telefone</code>
-                    <p className="text-xs text-muted-foreground mt-1">Telefone de contato (string)</p>
-                  </div>
-                  <div className="border rounded p-3">
-                    <code className="text-sm font-mono">hash</code>
-                    <p className="text-xs text-muted-foreground mt-1">Hash único do parceiro (string)</p>
-                  </div>
-                </div>
-              </div>
+      {/* Recebendo Webhooks */}
+      <Card>
+        <CardHeader>
+          <CardTitle>2. Recebendo Webhooks de Status</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Quando o status de um projeto muda, enviamos automaticamente um webhook para sua URL configurada.
+          </p>
 
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h5 className="font-medium">Campos Opcionais</h5>
-                  <Badge variant="outline">Opcional</Badge>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="border rounded p-3">
-                    <code className="text-sm font-mono">cnpj</code>
-                    <p className="text-xs text-muted-foreground mt-1">CNPJ da empresa (string)</p>
-                  </div>
-                  <div className="border rounded p-3">
-                    <code className="text-sm font-mono">email</code>
-                    <p className="text-xs text-muted-foreground mt-1">Email de contato (string)</p>
-                  </div>
-                </div>
-              </div>
+          <div>
+            <h4 className="font-medium mb-2">Webhook de Mudança de Status:</h4>
+            <div className="relative">
+              <pre className="bg-muted p-3 rounded text-xs overflow-auto">
+                <code>{statusChangeExample}</code>
+              </pre>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute top-2 right-2"
+                onClick={() => copyToClipboard(statusChangeExample)}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h5 className="font-medium">Exemplo de Payload</h5>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => copyCode(receiveExample)}
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copiar
-                  </Button>
-                </div>
-                <div className="bg-muted p-4 rounded-lg">
-                  <pre className="text-sm overflow-x-auto">
-                    <code>{receiveExample}</code>
-                  </pre>
-                </div>
-              </div>
+          <Separator />
 
-              <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
-                <h5 className="font-semibold text-amber-800 mb-2">⚠️ Importante - Campos Obrigatórios</h5>
-                <p className="text-sm text-amber-700">
-                  Os campos <code>nome</code>, <code>telefone</code> e <code>hash</code> são obrigatórios. 
-                  Se algum destes campos não for fornecido, a API retornará erro 400 (Bad Request).
-                  O campo <code>hash</code> deve ser único por parceiro.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <div>
+            <h4 className="font-medium mb-2">Webhook de Mudança de Domínio:</h4>
+            <div className="relative">
+              <pre className="bg-muted p-3 rounded text-xs overflow-auto">
+                <code>{domainChangeExample}</code>
+              </pre>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute top-2 right-2"
+                onClick={() => copyToClipboard(domainChangeExample)}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="send" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Send className="h-5 w-5" />
-                Estrutura de Dados Enviados
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <h4 className="font-semibold">Notificações de Status</h4>
-                <p className="text-sm text-muted-foreground">
-                  Enviamos atualizações de status dos projetos para os parceiros quando há mudanças.
-                  As notificações são enviadas automaticamente via trigger no banco de dados.
-                </p>
-              </div>
+      {/* Status Codes */}
+      <Card>
+        <CardHeader>
+          <CardTitle>3. Códigos de Resposta</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Badge className="bg-green-100 text-green-700">201</Badge>
+              <span className="text-sm">Projeto criado com sucesso</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="destructive">400</Badge>
+              <span className="text-sm">Dados obrigatórios não fornecidos</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="destructive">401</Badge>
+              <span className="text-sm">Token de autenticação inválido</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge className="bg-yellow-100 text-yellow-700">409</Badge>
+              <span className="text-sm">Projeto já existe (hash duplicado)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="destructive">500</Badge>
+              <span className="text-sm">Erro interno do servidor</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-              <div className="space-y-3">
-                <h5 className="font-medium">Campos Enviados</h5>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="border rounded p-3">
-                    <code className="text-sm font-mono">status</code>
-                    <p className="text-xs text-muted-foreground mt-1">Status atual do projeto</p>
-                  </div>
-                  <div className="border rounded p-3">
-                    <code className="text-sm font-mono">nome</code>
-                    <p className="text-xs text-muted-foreground mt-1">Nome do cliente</p>
-                  </div>
-                  <div className="border rounded p-3">
-                    <code className="text-sm font-mono">data_status</code>
-                    <p className="text-xs text-muted-foreground mt-1">Data da alteração (ISO 8601)</p>
-                  </div>
-                  <div className="border rounded p-3">
-                    <code className="text-sm font-mono">hash</code>
-                    <p className="text-xs text-muted-foreground mt-1">Hash único do parceiro</p>
-                  </div>
-                  <div className="border rounded p-3">
-                    <code className="text-sm font-mono">cnpj</code>
-                    <p className="text-xs text-muted-foreground mt-1">CNPJ do cliente (quando disponível)</p>
-                  </div>
-                  <div className="border rounded p-3">
-                    <code className="text-sm font-mono">domain</code>
-                    <p className="text-xs text-muted-foreground mt-1">Domínio do site (quando disponível)</p>
-                  </div>
-                </div>
-              </div>
+      {/* Configuração de Webhook */}
+      <Card>
+        <CardHeader>
+          <CardTitle>4. Configurando seu Endpoint</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Para receber webhooks, configure uma URL em seu sistema que aceite requisições POST.
+          </p>
 
-              <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-                <h5 className="font-semibold text-yellow-800 mb-2">📝 Nota sobre Email e Telefone</h5>
-                <p className="text-sm text-yellow-700">
-                  Atualmente os campos <code>email</code> e <code>telefone</code> são enviados como placeholders 
-                  (<code>"placeholder@email.com"</code> e <code>"placeholder"</code>) pois estes dados não estão 
-                  sendo armazenados na tabela de projetos no momento.
-                </p>
-              </div>
+          <div>
+            <h4 className="font-medium mb-2">Requisitos do seu endpoint:</h4>
+            <ul className="text-sm space-y-1 ml-4">
+              <li>• Aceitar requisições POST</li>
+              <li>• Processar JSON no body da requisição</li>
+              <li>• Retornar status HTTP 200 para confirmar recebimento</li>
+              <li>• Implementar timeout adequado (recomendado: 30 segundos)</li>
+            </ul>
+          </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h5 className="font-medium">Exemplo de Payload</h5>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => copyCode(sendExample)}
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copiar
-                  </Button>
-                </div>
-                <div className="bg-muted p-4 rounded-lg">
-                  <pre className="text-sm overflow-x-auto">
-                    <code>{sendExample}</code>
-                  </pre>
-                </div>
-              </div>
-
-              <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-                <h5 className="font-semibold text-blue-800 mb-2">Status Possíveis</h5>
-                <p className="text-sm text-blue-700 mb-3">
-                  Os status seguem a constraint definida no banco de dados:
-                </p>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  <Badge variant="outline">Recebido</Badge>
-                  <Badge variant="outline">Em análise</Badge>
-                  <Badge variant="outline">Em desenvolvimento</Badge>
-                  <Badge variant="outline">Em teste</Badge>
-                  <Badge variant="outline">Em produção</Badge>
-                  <Badge variant="outline">Finalizado</Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="implementation" className="space-y-4">
-          <ApiGuide />
-        </TabsContent>
-
-        <TabsContent value="errors" className="space-y-4">
-          <ErrorHandling />
-        </TabsContent>
-      </Tabs>
+          <div className="bg-blue-50 border border-blue-200 p-3 rounded">
+            <p className="text-sm text-blue-800">
+              <strong>Dica:</strong> Use ferramentas como webhook.site para testar o recebimento de webhooks durante o desenvolvimento.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

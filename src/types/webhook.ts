@@ -31,7 +31,9 @@ export interface PartnerDataPayload {
 }
 
 export interface StatusWebhookPayload {
+  type: 'status_change';
   status: string;
+  previous_status: string;
   nome: string;
   email?: string;
   telefone?: string;
@@ -40,3 +42,17 @@ export interface StatusWebhookPayload {
   data_status: string;
   domain?: string;
 }
+
+export interface DomainWebhookPayload {
+  type: 'domain_change';
+  domain: string;
+  previous_domain?: string;
+  nome: string;
+  telefone?: string;
+  cnpj?: string;
+  hash: string;
+  data_domain: string;
+  status: string;
+}
+
+export type WebhookPayload = StatusWebhookPayload | DomainWebhookPayload | PartnerDataPayload;
