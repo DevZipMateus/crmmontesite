@@ -16,8 +16,13 @@ interface PartnerDataPayload {
 }
 
 serve(async (req) => {
+  console.log('=== Recebendo requisição ===');
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
@@ -29,9 +34,12 @@ serve(async (req) => {
 
     // Extrair token de autenticação
     const authHeader = req.headers.get('Authorization');
+    console.log('Auth header presente:', !!authHeader);
+    
     const token = authHeader?.replace('Bearer ', '');
     
     if (!token) {
+      console.log('❌ Token não fornecido');
       await logAuthAttempt(supabase, {
         tokenUsed: 'missing',
         requestIp: req.headers.get('x-forwarded-for') || 'unknown',
@@ -49,11 +57,17 @@ serve(async (req) => {
       );
     }
 
+    console.log('🔍 Validando token:', token.substring(0, 10) + '...');
+
     // Validar token
     const { data: validationResult, error: validationError } = await supabase
       .rpc('validate_auth_token', { token_input: token });
 
+    console.log('Resultado da validação:', validationResult);
+    console.log('Erro na validação:', validationError);
+
     if (validationError || !validationResult?.[0]?.is_valid) {
+      console.log('❌ Token inválido ou expirado');
       await logAuthAttempt(supabase, {
         tokenUsed: token,
         requestIp: req.headers.get('x-forwarded-for') || 'unknown',
@@ -74,6 +88,8 @@ serve(async (req) => {
     const partnerId = validationResult[0].partner_id;
     const partnerName = validationResult[0].partner_name;
 
+    console.log('✅ Token válido para parceiro:', partnerName);
+
     // Log tentativa de autenticação bem-sucedida
     await logAuthAttempt(supabase, {
       partnerId,
@@ -86,11 +102,12 @@ serve(async (req) => {
     // Processar dados do parceiro
     const payload: PartnerDataPayload = await req.json();
     
-    console.log('Received partner data:', payload);
-    console.log('Authenticated partner:', partnerName);
+    console.log('📋 Dados recebidos:', JSON.stringify(payload, null, 2));
+    console.log('👤 Parceiro autenticado:', partnerName);
 
     // Validar dados obrigatórios
     if (!payload.nome || !payload.hash) {
+      console.log('❌ Dados obrigatórios não fornecidos');
       return new Response(
         JSON.stringify({ error: 'Nome e hash são obrigatórios' }),
         { 
@@ -101,6 +118,7 @@ serve(async (req) => {
     }
 
     // Verificar se já existe projeto com esse hash
+    console.log('🔍 Verificando se projeto já existe com hash:', payload.hash);
     const { data: existingProject } = await supabase
       .from('projects')
       .select('id, client_name')
@@ -108,6 +126,7 @@ serve(async (req) => {
       .maybeSingle();
 
     if (existingProject) {
+      console.log('⚠️ Projeto já existe:', existingProject.id);
       return new Response(
         JSON.stringify({ 
           error: 'Projeto já existe',
@@ -128,7 +147,10 @@ serve(async (req) => {
       .eq('id', partnerId)
       .single();
 
+    console.log('🔗 URL webhook do parceiro:', partner?.webhook_url);
+
     // Criar novo projeto
+    console.log('📝 Criando novo projeto...');
     const { data: newProject, error: projectError } = await supabase
       .from('projects')
       .insert({
@@ -143,7 +165,7 @@ serve(async (req) => {
       .single();
 
     if (projectError) {
-      console.error('Error creating project:', projectError);
+      console.error('❌ Erro ao criar projeto:', projectError);
       return new Response(
         JSON.stringify({ error: 'Erro ao criar projeto' }),
         { 
@@ -153,7 +175,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Project created successfully:', newProject);
+    console.log('✅ Projeto criado com sucesso:', newProject.id);
 
     return new Response(
       JSON.stringify({ 
@@ -169,7 +191,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error processing request:', error);
+    console.error('💥 Erro inesperado:', error);
     
     return new Response(
       JSON.stringify({ error: 'Erro interno do servidor' }),
