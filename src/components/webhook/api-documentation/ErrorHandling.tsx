@@ -33,21 +33,22 @@ async function sendClientData(clientData) {
     switch (response.status) {
       case 201:
         console.log('✅ Cliente criado com sucesso:', result);
+        // O projeto é criado automaticamente com status "Recebido"
         return result;
         
       case 409:
-        console.log('⚠️ Cliente já existe:', result);
-        // Decidir se atualiza ou ignora
+        console.log('⚠️ Cliente já existe com este hash:', result);
+        // Verificar se é realmente uma duplicação ou erro no hash
         return result;
         
       case 401:
         console.error('🔒 Token inválido ou expirado');
-        // Renovar token ou notificar usuário
+        // Verificar se o token está correto e não expirou
         throw new Error('Token inválido');
         
       case 400:
         console.error('❌ Dados inválidos:', result.error);
-        // Validar dados antes de reenviar
+        // Verificar se nome e hash foram fornecidos
         throw new Error('Dados inválidos: ' + result.error);
         
       default:
@@ -102,15 +103,15 @@ async function sendWithRetry(clientData, maxRetries = 3) {
                 </div>
                 <h4 className="font-semibold">Cliente criado com sucesso</h4>
                 <p className="text-sm text-muted-foreground mt-1">
-                  O cliente foi cadastrado no sistema e um novo projeto foi iniciado.
+                  O cliente foi cadastrado no sistema e um novo projeto foi iniciado com status "Recebido".
                 </p>
                 <div className="bg-muted p-3 rounded mt-2">
                   <code className="text-sm">
                     {JSON.stringify({
                       success: true,
-                      project_id: "uuid-do-projeto",
+                      project_id: "af734d38-b423-4d23-a076-04a04c7135d4",
                       message: "Projeto criado com sucesso",
-                      partner: "Nome do Parceiro"
+                      partner: "Sistema Principal"
                     }, null, 2)}
                   </code>
                 </div>
@@ -143,7 +144,7 @@ async function sendWithRetry(clientData, maxRetries = 3) {
                 </div>
                 <h4 className="font-semibold">Token inválido ou ausente</h4>
                 <p className="text-sm text-muted-foreground mt-1">
-                  O token de autenticação não foi fornecido ou é inválido/expirado.
+                  O token de autenticação não foi fornecido, é inválido ou expirou.
                 </p>
                 <div className="bg-muted p-3 rounded mt-2">
                   <code className="text-sm">
@@ -152,6 +153,9 @@ async function sendWithRetry(clientData, maxRetries = 3) {
                     }, null, 2)}
                   </code>
                 </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  <strong>Nota:</strong> Todas as tentativas de autenticação são logadas na tabela auth_logs para auditoria.
+                </p>
               </div>
 
               <div className="border rounded-lg p-4">
@@ -161,7 +165,7 @@ async function sendWithRetry(clientData, maxRetries = 3) {
                 </div>
                 <h4 className="font-semibold">Dados inválidos</h4>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Os campos obrigatórios não foram fornecidos ou estão em formato inválido.
+                  Os campos obrigatórios (nome e hash) não foram fornecidos ou estão em formato inválido.
                 </p>
                 <div className="bg-muted p-3 rounded mt-2">
                   <code className="text-sm">
@@ -214,14 +218,29 @@ async function sendWithRetry(clientData, maxRetries = 3) {
 
           {/* Best Practices */}
           <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-            <h4 className="font-semibold text-blue-800 mb-2">Boas Práticas</h4>
+            <h4 className="font-semibold text-blue-800 mb-2">Boas Práticas Atualizadas</h4>
             <ul className="text-sm text-blue-700 space-y-1">
-              <li>• Sempre validar dados antes do envio</li>
-              <li>• Implementar logs detalhados para debugging</li>
-              <li>• Usar sistema de retry para falhas temporárias</li>
-              <li>• Monitorar tokens e renovar antes do vencimento</li>
-              <li>• Tratar cada código de status adequadamente</li>
-              <li>• Implementar fallbacks para casos críticos</li>
+              <li>• Sempre validar se nome e hash estão presentes antes do envio</li>
+              <li>• Implementar logs detalhados para debugging de erros 401 e 409</li>
+              <li>• Usar sistema de retry para falhas temporárias (não para erros 401/400)</li>
+              <li>• Monitorar tokens e renovar antes do vencimento configurado</li>
+              <li>• Tratar especificamente o erro 409 (projeto já existe) sem rejeitar</li>
+              <li>• Verificar logs de autenticação no painel para investigar falhas</li>
+              <li>• Lembrar que projetos são criados automaticamente com status "Recebido"</li>
+              <li>• Garantir que cada hash seja único por projeto no seu sistema</li>
+            </ul>
+          </div>
+
+          {/* Debugging Tips */}
+          <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
+            <h4 className="font-semibold text-amber-800 mb-2">🔍 Dicas de Debug</h4>
+            <ul className="text-sm text-amber-700 space-y-1">
+              <li>• Verificar a aba "Autenticação" no painel para logs de tentativas de auth</li>
+              <li>• Consultar a aba "Logs" no painel para detalhes dos webhooks</li>
+              <li>• Conferir se o token não tem espaços extras ou caracteres invisíveis</li>
+              <li>• Validar se o hash fornecido não foi usado anteriormente</li>
+              <li>• Verificar se os headers Content-Type e Authorization estão corretos</li>
+              <li>• Testar primeiro com curl antes de implementar no código</li>
             </ul>
           </div>
         </CardContent>

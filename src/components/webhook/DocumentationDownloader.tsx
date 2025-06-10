@@ -130,7 +130,7 @@ export const DocumentationDownloader = () => {
         <ul>
             <li><strong>📤 Envio de Dados:</strong> Parceiros enviam dados de novos clientes</li>
             <li><strong>📥 Recebimento de Updates:</strong> Sistema envia atualizações de status dos projetos</li>
-            <li><strong>🔐 Segurança:</strong> Autenticação via Bearer Token</li>
+            <li><strong>🔐 Segurança:</strong> Autenticação via Bearer Token customizado</li>
             <li><strong>📊 Logs:</strong> Rastreamento completo de todas as interações</li>
         </ul>
 
@@ -138,17 +138,29 @@ export const DocumentationDownloader = () => {
             <strong>🌐 URL Base da API:</strong><br>
             <code>https://vaabpicspdbolvutnscp.supabase.co/functions/v1</code>
         </div>
+
+        <div class="warning-box">
+            <strong>⚠️ Configuração Especial:</strong> Esta função está configurada com <code>verify_jwt = false</code> 
+            no arquivo <code>supabase/config.toml</code> para permitir autenticação via Bearer Token customizado 
+            ao invés do JWT padrão do Supabase.
+        </div>
     </div>
 
     <div id="authentication" class="section">
         <h2>🔐 2. Autenticação</h2>
-        <p>Todas as requisições devem incluir o header de autorização:</p>
+        <p>Todas as requisições devem incluir o header de autorização com seu token específico:</p>
         <div class="code-block">
-            <pre><code>Authorization: Bearer SEU_TOKEN_AQUI</code></pre>
+            <pre><code>Authorization: Bearer tok_exemplo123456789</code></pre>
         </div>
         
         <div class="warning-box">
-            <strong>⚠️ Importante:</strong> Mantenha seu token seguro e renovie-o antes do vencimento.
+            <strong>⚠️ Importante:</strong> 
+            <ul>
+                <li>Cada parceiro possui um token único e específico</li>
+                <li>Os tokens são validados contra a tabela de parceiros no banco de dados</li>
+                <li>Tokens podem ter data de expiração configurada</li>
+                <li>Todas as tentativas de autenticação são logadas na tabela auth_logs</li>
+            </ul>
         </div>
     </div>
 
@@ -190,6 +202,11 @@ export const DocumentationDownloader = () => {
   "hash": "abc123def456"
 }</code></pre>
         </div>
+
+        <div class="warning-box">
+            <strong>⚠️ Hash Único:</strong> O campo <code>hash</code> deve ser único por projeto. 
+            Se já existir um projeto com o mesmo hash, a API retornará erro 409 (Conflict).
+        </div>
     </div>
 
     <div id="send-data" class="section">
@@ -201,8 +218,8 @@ export const DocumentationDownloader = () => {
             <tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr>
             <tr><td><code>status</code></td><td>string</td><td>Status atual do projeto</td></tr>
             <tr><td><code>nome</code></td><td>string</td><td>Nome do cliente</td></tr>
-            <tr><td><code>email</code></td><td>string</td><td>Email do cliente</td></tr>
-            <tr><td><code>telefone</code></td><td>string</td><td>Telefone do cliente</td></tr>
+            <tr><td><code>email</code></td><td>string</td><td>Email do cliente (placeholder atual)</td></tr>
+            <tr><td><code>telefone</code></td><td>string</td><td>Telefone do cliente (placeholder atual)</td></tr>
             <tr><td><code>cnpj</code></td><td>string</td><td>CNPJ do cliente</td></tr>
             <tr><td><code>hash</code></td><td>string</td><td>Hash único do parceiro</td></tr>
             <tr><td><code>data_status</code></td><td>string (ISO)</td><td>Data da alteração</td></tr>
@@ -211,7 +228,7 @@ export const DocumentationDownloader = () => {
 
         <h3>Status Possíveis</h3>
         <ul>
-            <li>Recebido</li>
+            <li>Recebido (status inicial quando projeto é criado)</li>
             <li>Em análise</li>
             <li>Em desenvolvimento</li>
             <li>Em teste</li>
@@ -222,15 +239,20 @@ export const DocumentationDownloader = () => {
         <h3>Exemplo de Notificação</h3>
         <div class="code-block">
             <pre><code>{
-  "status": "Em produção",
+  "status": "Recebido",
   "nome": "João Silva",
-  "email": "joao@exemplo.com",
-  "telefone": "(11) 99999-9999",
+  "email": "placeholder@email.com",
+  "telefone": "placeholder",
   "cnpj": "12.345.678/0001-90",
   "hash": "abc123def456",
   "data_status": "2024-01-15T10:30:00Z",
-  "domain": "joaosilva.com.br"
+  "domain": null
 }</code></pre>
+        </div>
+
+        <div class="warning-box">
+            <strong>📝 Nota sobre Placeholders:</strong> Atualmente os campos <code>email</code> e <code>telefone</code> 
+            são enviados como placeholders pois estes dados não estão sendo armazenados na tabela de projetos.
         </div>
     </div>
 
@@ -238,7 +260,7 @@ export const DocumentationDownloader = () => {
         <h2>📊 6. Códigos de Status HTTP</h2>
         
         <div class="status-code status-201">201 Created</div>
-        <p><strong>Cliente criado com sucesso</strong> - O cliente foi cadastrado e um novo projeto foi iniciado.</p>
+        <p><strong>Cliente criado com sucesso</strong> - O cliente foi cadastrado e um novo projeto foi iniciado com status "Recebido".</p>
         <div class="code-block">
             <pre><code>{
   "success": true,
@@ -351,7 +373,7 @@ export const DocumentationDownloader = () => {
             <pre><code># Enviar dados de cliente
 curl -X POST "https://vaabpicspdbolvutnscp.supabase.co/functions/v1/receive-partner-data" \\
   -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer SEU_TOKEN_AQUI" \\
+  -H "Authorization: Bearer tok_exemplo123456789" \\
   -d '{
     "nome": "João Silva",
     "cnpj": "12.345.678/0001-90",
@@ -367,7 +389,7 @@ curl -X POST "https://vaabpicspdbolvutnscp.supabase.co/functions/v1/receive-part
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer SEU_TOKEN_AQUI'
+    'Authorization': 'Bearer tok_exemplo123456789'
   },
   body: JSON.stringify({
     nome: 'João Silva',
@@ -399,7 +421,7 @@ curl_setopt($ch, CURLOPT_POST, 1);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'Content-Type: application/json',
-    'Authorization: Bearer SEU_TOKEN_AQUI'
+    'Authorization: Bearer tok_exemplo123456789'
 ]);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
@@ -420,7 +442,7 @@ url = "https://vaabpicspdbolvutnscp.supabase.co/functions/v1/receive-partner-dat
 
 headers = {
     "Content-Type": "application/json",
-    "Authorization": "Bearer SEU_TOKEN_AQUI"
+    "Authorization": "Bearer tok_exemplo123456789"
 }
 
 data = {
@@ -469,6 +491,8 @@ print(result)</code></pre>
             <li>🛡️ <strong>Fallbacks:</strong> Implementar fallbacks para casos críticos</li>
             <li>⚡ <strong>Performance:</strong> Usar requests assíncronos quando possível</li>
             <li>🔒 <strong>Segurança:</strong> Nunca expor tokens em logs ou URLs</li>
+            <li>📋 <strong>Hash Único:</strong> Garantir que cada hash seja único por projeto</li>
+            <li>🔍 <strong>Monitoramento:</strong> Verificar logs de autenticação e webhook regularmente</li>
         </ul>
     </div>
 
@@ -476,6 +500,7 @@ print(result)</code></pre>
         <p>📚 <strong>Documentação da API de Webhooks</strong><br>
         Sistema de Parceiros - Gerado em ${new Date().toLocaleDateString('pt-BR')}</p>
         <p><small>Para suporte técnico, entre em contato com nossa equipe de desenvolvimento.</small></p>
+        <p><small>⚠️ Lembre-se: Esta API usa autenticação customizada via Bearer Token, não JWT padrão do Supabase.</small></p>
     </div>
 </body>
 </html>`;
