@@ -3,18 +3,15 @@ import { supabase } from "@/integrations/supabase/client";
 
 export async function processWebhookQueue() {
   try {
-    const response = await fetch('/functions/v1/send-status-webhook', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      }
+    const response = await supabase.functions.invoke('send-status-webhook', {
+      body: {}
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (response.error) {
+      throw new Error(response.error.message || 'Erro ao processar webhooks');
     }
 
-    const result = await response.json();
+    const result = response.data;
     console.log('Webhook queue processed:', result);
     return result;
   } catch (error) {
@@ -31,19 +28,15 @@ export async function createPartnerProject(partnerData: {
   hash: string;
 }) {
   try {
-    const response = await fetch('/functions/v1/receive-partner-data', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(partnerData)
+    const response = await supabase.functions.invoke('receive-partner-data', {
+      body: partnerData
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (response.error) {
+      throw new Error(response.error.message || 'Erro ao criar projeto do parceiro');
     }
 
-    const result = await response.json();
+    const result = response.data;
     console.log('Partner project created:', result);
     return result;
   } catch (error) {

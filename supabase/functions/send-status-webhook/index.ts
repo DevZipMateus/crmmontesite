@@ -18,16 +18,12 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    console.log('Iniciando processamento de webhooks pendentes...')
+
     // Buscar webhooks pendentes
     const { data: pendingWebhooks, error: fetchError } = await supabase
       .from('webhook_logs')
-      .select(`
-        *,
-        projects (
-          *,
-          partners!projects_partner_hash_fkey (webhook_url, auth_token)
-        )
-      `)
+      .select('*')
       .eq('webhook_type', 'sent')
       .eq('status', 'pending')
       .limit(10)
@@ -40,16 +36,45 @@ serve(async (req) => {
       )
     }
 
+    console.log(`Encontrados ${pendingWebhooks?.length || 0} webhooks pendentes`)
+
     const results = []
 
     for (const webhook of pendingWebhooks || []) {
-      const project = webhook.projects
-      const partner = project?.partners?.[0]
+      console.log(`Processando webhook ${webhook.id} para projeto ${webhook.project_id}`)
+      
+      // Buscar dados do projeto
+      const { data: project, error: projectError } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', webhook.project_id)
+        .single()
 
-      if (!partner?.webhook_url) {
-        console.log(`No webhook URL for project ${project?.id}`)
+      if (projectError || !project) {
+        console.log(`Projeto não encontrado para webhook ${webhook.id}`)
         
-        // Marcar como falha
+        await supabase
+          .from('webhook_logs')
+          .update({ 
+            status: 'failed', 
+            error_message: 'Projeto não encontrado',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', webhook.id)
+        
+        continue
+      }
+
+      // Buscar dados do parceiro usando o partner_hash do projeto
+      const { data: partner, error: partnerError } = await supabase
+        .from('partners')
+        .select('webhook_url, auth_token')
+        .eq('hash', project.partner_hash)
+        .single()
+
+      if (partnerError || !partner?.webhook_url) {
+        console.log(`Parceiro não encontrado ou sem URL de webhook para hash ${project.partner_hash}`)
+        
         await supabase
           .from('webhook_logs')
           .update({ 
@@ -72,7 +97,7 @@ serve(async (req) => {
           headers['Authorization'] = `Bearer ${partner.auth_token}`
         }
 
-        console.log(`Sending webhook to ${partner.webhook_url}`)
+        console.log(`Enviando webhook para ${partner.webhook_url}`)
         
         const response = await fetch(partner.webhook_url, {
           method: 'POST',
@@ -81,6 +106,7 @@ serve(async (req) => {
         })
 
         const responseText = await response.text()
+        console.log(`Resposta do webhook: ${response.status} - ${responseText}`)
         
         if (response.ok) {
           // Sucesso
@@ -96,7 +122,7 @@ serve(async (req) => {
           results.push({ 
             webhook_id: webhook.id, 
             status: 'success',
-            project_id: project?.id 
+            project_id: project.id 
           })
         } else {
           // Falha HTTP
@@ -114,7 +140,7 @@ serve(async (req) => {
             webhook_id: webhook.id, 
             status: 'failed',
             error: `HTTP ${response.status}`,
-            project_id: project?.id
+            project_id: project.id
           })
         }
 
@@ -135,10 +161,12 @@ serve(async (req) => {
           webhook_id: webhook.id, 
           status: 'failed',
           error: error.message,
-          project_id: project?.id
+          project_id: project.id
         })
       }
     }
+
+    console.log(`Processamento concluído. Resultados:`, results)
 
     return new Response(
       JSON.stringify({ 

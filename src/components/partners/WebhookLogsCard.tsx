@@ -35,24 +35,22 @@ export function WebhookLogsCard() {
 
   const triggerWebhookProcessing = async () => {
     try {
-      const response = await fetch('/functions/v1/send-status-webhook', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
+      const response = await supabase.functions.invoke('send-status-webhook', {
+        body: {}
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        toast({
-          title: "Webhooks processados",
-          description: `${result.processed} webhooks foram processados.`
-        });
-        refetch();
-      } else {
-        throw new Error('Erro ao processar webhooks');
+      if (response.error) {
+        throw new Error(response.error.message || 'Erro ao processar webhooks');
       }
+
+      const result = response.data;
+      toast({
+        title: "Webhooks processados",
+        description: `${result.processed || 0} webhooks foram processados.`
+      });
+      refetch();
     } catch (error) {
+      console.error('Erro ao processar webhooks:', error);
       toast({
         title: "Erro",
         description: "Não foi possível processar os webhooks.",
