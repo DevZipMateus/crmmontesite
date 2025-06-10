@@ -15,10 +15,17 @@ export interface Project {
   provider_credentials?: string;
   hasPendingCustomizations?: boolean;
   
-  // Novos campos para webhook/parceiros
+  // Campos para webhook/parceiros
   partner_hash?: string;
   partner_webhook_url?: string;
   cnpj?: string;
   telefone?: string;
   project_source?: string;
+  
+  // Novos campos para formulário de personalização
+  modelo_escolhido?: string;
+  observacoes_cliente?: string;
+  email_complementar?: string;
+  formulario_preenchido?: boolean;
+  data_formulario?: string;
 }

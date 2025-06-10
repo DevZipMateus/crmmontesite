@@ -203,8 +203,13 @@ export type Database = {
           client_type: string | null
           cnpj: string | null
           created_at: string | null
+          data_formulario: string | null
           domain: string | null
+          email_complementar: string | null
+          formulario_preenchido: boolean | null
           id: string
+          modelo_escolhido: string | null
+          observacoes_cliente: string | null
           partner_hash: string | null
           partner_link: string | null
           partner_webhook_url: string | null
@@ -223,8 +228,13 @@ export type Database = {
           client_type?: string | null
           cnpj?: string | null
           created_at?: string | null
+          data_formulario?: string | null
           domain?: string | null
+          email_complementar?: string | null
+          formulario_preenchido?: boolean | null
           id?: string
+          modelo_escolhido?: string | null
+          observacoes_cliente?: string | null
           partner_hash?: string | null
           partner_link?: string | null
           partner_webhook_url?: string | null
@@ -243,8 +253,13 @@ export type Database = {
           client_type?: string | null
           cnpj?: string | null
           created_at?: string | null
+          data_formulario?: string | null
           domain?: string | null
+          email_complementar?: string | null
+          formulario_preenchido?: boolean | null
           id?: string
+          modelo_escolhido?: string | null
+          observacoes_cliente?: string | null
           partner_hash?: string | null
           partner_link?: string | null
           partner_webhook_url?: string | null

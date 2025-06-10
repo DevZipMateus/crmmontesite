@@ -3,6 +3,8 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Project } from "@/types/project";
 import { useModelDetails } from "@/utils/modelUtils";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle2, Clock } from "lucide-react";
 
 interface ProjectInformationProps {
   project: Project;
@@ -49,6 +51,81 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
             <p className="text-sm font-medium text-gray-500">Telefone</p>
             <p className="mt-1">{project.telefone || '—'}</p>
           </div>
+          
+          {/* Seção específica para projetos de parceiros */}
+          {project.partner_hash && (
+            <>
+              <div className="col-span-2">
+                <p className="text-sm font-medium text-gray-500">Status do Formulário</p>
+                <div className="mt-1">
+                  {project.formulario_preenchido ? (
+                    <Badge variant="default" className="bg-green-100 text-green-700 border-green-300">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      Formulário preenchido
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-orange-100 text-orange-700 border-orange-300">
+                      <Clock className="h-3 w-3 mr-1" />
+                      Aguardando preenchimento
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              
+              {project.modelo_escolhido && (
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Modelo Escolhido</p>
+                  <p className="mt-1 font-medium">{project.modelo_escolhido}</p>
+                </div>
+              )}
+              
+              {project.data_formulario && (
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Data do Formulário</p>
+                  <p className="mt-1">
+                    {new Date(project.data_formulario).toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+              )}
+              
+              {project.email_complementar && (
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Email Complementar</p>
+                  <p className="mt-1">{project.email_complementar}</p>
+                </div>
+              )}
+              
+              {project.observacoes_cliente && (
+                <div className="col-span-2">
+                  <p className="text-sm font-medium text-gray-500">Observações do Cliente</p>
+                  <div className="mt-1 p-3 bg-blue-50 rounded-md">
+                    <p className="text-blue-700">{project.observacoes_cliente}</p>
+                  </div>
+                </div>
+              )}
+              
+              <div className="col-span-2">
+                <p className="text-sm font-medium text-gray-500">Link do Formulário</p>
+                <p className="mt-1">
+                  <a 
+                    href={`https://montesite.com.br/${project.partner_hash}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-blue-600 hover:underline break-all"
+                  >
+                    https://montesite.com.br/{project.partner_hash}
+                  </a>
+                </p>
+              </div>
+            </>
+          )}
+          
           <div>
             <p className="text-sm font-medium text-gray-500">Data de Criação</p>
             <p className="mt-1">

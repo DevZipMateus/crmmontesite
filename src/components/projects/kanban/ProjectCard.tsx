@@ -1,11 +1,15 @@
 
 import { Card } from "@/components/ui/card";
 import { Project } from "@/types/project";
-import { ProjectCardHeader, ProjectCardDomain, ProjectCardActions } from "./ProjectCardComponents";
+import { 
+  ProjectCardHeader, 
+  ProjectCardDomain, 
+  ProjectCardActions,
+  FormStatusIndicator 
+} from "./ProjectCardComponents";
 import { PartnerIndicator } from "./ProjectCardComponents/PartnerIndicator";
 import { isPartnerProject } from "@/server/webhook-service";
 import { useNavigate } from "react-router-dom";
-import { formatDate } from "@/utils/formatters";
 
 interface ProjectCardProps {
   project: Project;
@@ -50,10 +54,37 @@ export default function ProjectCard({
       
       <ProjectCardHeader 
         clientName={project.client_name}
-        template={project.template}
+        template={project.modelo_escolhido || project.template}
         hasPendingCustomizations={project.hasPendingCustomizations || false}
         createdAt={project.created_at}
       />
+      
+      {/* Status do formulário de personalização */}
+      {isPartnerProject(project) && (
+        <div className="mt-3">
+          <FormStatusIndicator
+            formularioPreenchido={project.formulario_preenchido || false}
+            partnerHash={project.partner_hash}
+            modeloEscolhido={project.modelo_escolhido}
+            dataFormulario={project.data_formulario}
+          />
+        </div>
+      )}
+      
+      {/* Observações do cliente (se houver) */}
+      {project.observacoes_cliente && (
+        <div className="mt-3 p-2 bg-blue-50 rounded-md">
+          <div className="text-xs font-medium text-blue-700 mb-1">Observações do cliente:</div>
+          <div className="text-xs text-blue-600">{project.observacoes_cliente}</div>
+        </div>
+      )}
+      
+      {/* Email complementar (se houver) */}
+      {project.email_complementar && (
+        <div className="mt-2 text-xs text-gray-600">
+          Email adicional: <span className="font-medium">{project.email_complementar}</span>
+        </div>
+      )}
       
       <ProjectCardDomain 
         domain={project.domain}
