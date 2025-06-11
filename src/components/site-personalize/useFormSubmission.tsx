@@ -50,7 +50,23 @@ export const useFormSubmission = (props: SubmissionProps) => {
 
       // FLUXO PARA CLIENTES DE PARCEIROS (COM HASH)
       if (hash) {
-        await submitPartnerClient(data, modeloSelecionado || "Modelo 1", hash);
+        // Primeiro, criar os dados de personalização
+        const result = await submitPartnerClient(data, modeloSelecionado || "Modelo 1", hash);
+        
+        // Se temos arquivos para upload e um personalization_id
+        if ((logoFile || depoimentoFiles.length > 0 || midiaFiles.length > 0) && result.personalization_id) {
+          console.log("📤 Uploading files for partner client...");
+          
+          await uploadFiles(
+            logoFile,
+            depoimentoFiles,
+            midiaFiles,
+            midiaCaptions,
+            updateProgress,
+            toast,
+            result.personalization_id
+          );
+        }
 
         toast({
           title: "Formulário enviado com sucesso!",

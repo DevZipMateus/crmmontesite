@@ -1,6 +1,6 @@
 
-import { uploadFileWithRetry } from "@/lib/file-upload-service";
-import { UploadProgress } from "../types/submission";
+import { supabase } from "@/integrations/supabase/client";
+import { sanitizeFileName } from "@/lib/sanitize-file";
 
 export const uploadFiles = async (
   logoFile: File | null,
@@ -8,90 +8,113 @@ export const uploadFiles = async (
   midiaFiles: File[],
   midiaCaptions: string[],
   updateProgress: (fileType: string, index: number, progress: number) => void,
-  toast: any
+  toast: any,
+  personalizationId?: string
 ) => {
-  let logoUrl = null;
+  console.log("🔄 Starting file uploads...");
+  
+  let logoUrl: string | null = null;
   const depoimentoUrls: string[] = [];
-  const midiaItems: string[] = [];
+  const midiaItems: any[] = [];
 
-  // Process logo upload with retry
+  // Upload logo
   if (logoFile) {
-    console.log("📁 Uploading logo file:", logoFile.name);
+    console.log("📤 Uploading logo...");
+    updateProgress("logo", 0, 0);
     
-    const { success, filePath, error } = await uploadFileWithRetry(logoFile, {
-      folderPath: "logos",
-      onProgress: (progress) => updateProgress("logo", 0, progress)
-    });
+    const sanitizedLogoName = sanitizeFileName(logoFile.name);
+    const logoPath = `logos/${Date.now()}_${sanitizedLogoName}`;
     
-    if (!success || !filePath) {
-      console.error("❌ Logo upload error:", error);
-      throw new Error(`Erro ao fazer upload da logo: ${error?.message || 'Falha desconhecida'}`);
+    const { data: logoData, error: logoError } = await supabase.storage
+      .from("site_personalizacoes")
+      .upload(logoPath, logoFile);
+
+    if (logoError) {
+      console.error("❌ Logo upload error:", logoError);
+      throw new Error(`Erro no upload da logo: ${logoError.message}`);
     }
 
-    logoUrl = filePath;
-    console.log("✅ Logo uploaded successfully:", logoUrl);
+    logoUrl = logoPath;
+    updateProgress("logo", 0, 100);
+    console.log("✅ Logo uploaded:", logoUrl);
   }
 
-  // Process depoimento uploads with retry
-  for (let i = 0; i < depoimentoFiles.length; i++) {
-    const file = depoimentoFiles[i];
-    console.log("📁 Uploading depoimento file:", file.name);
+  // Upload depoimento files
+  if (depoimentoFiles.length > 0) {
+    console.log("📤 Uploading depoimento files...");
     
-    try {
-      const { success, filePath, error } = await uploadFileWithRetry(file, {
-        folderPath: "depoimentos",
-        onProgress: (progress) => updateProgress("depoimento", i, progress)
-      });
+    for (let i = 0; i < depoimentoFiles.length; i++) {
+      const file = depoimentoFiles[i];
+      updateProgress("depoimento", i, 0);
       
-      if (!success || !filePath) {
-        console.error("❌ Depoimento upload error:", error);
-        throw error;
+      const sanitizedFileName = sanitizeFileName(file.name);
+      const filePath = `depoimentos/${Date.now()}_${i}_${sanitizedFileName}`;
+      
+      const { data, error } = await supabase.storage
+        .from("site_personalizacoes")
+        .upload(filePath, file);
+
+      if (error) {
+        console.error(`❌ Depoimento file ${i} upload error:`, error);
+        throw new Error(`Erro no upload do arquivo de depoimento ${i + 1}: ${error.message}`);
       }
 
       depoimentoUrls.push(filePath);
-      console.log("✅ Depoimento uploaded successfully:", filePath);
-    } catch (fileError) {
-      console.error("❌ Error in depoimento upload:", fileError);
-      toast({
-        description: `Erro ao enviar ${file.name}. Tentando continuar com os outros arquivos.`,
-        variant: "destructive",
-      });
+      updateProgress("depoimento", i, 100);
+      console.log(`✅ Depoimento file ${i} uploaded:`, filePath);
     }
   }
 
-  // Process media items with captions and retry
-  for (let i = 0; i < midiaFiles.length; i++) {
-    const file = midiaFiles[i];
-    const caption = i < midiaCaptions.length ? midiaCaptions[i] : "";
+  // Upload midia files
+  if (midiaFiles.length > 0) {
+    console.log("📤 Uploading midia files...");
     
-    console.log(`📁 Uploading midia file ${i+1}/${midiaFiles.length}:`, file.name, "Caption:", caption);
-    
-    try {
-      const { success, filePath, error } = await uploadFileWithRetry(file, {
-        folderPath: "midias",
-        onProgress: (progress) => updateProgress("midia", i, progress)
-      });
+    for (let i = 0; i < midiaFiles.length; i++) {
+      const file = midiaFiles[i];
+      updateProgress("midia", i, 0);
       
-      if (!success || !filePath) {
-        console.error("❌ Midia upload error:", error);
-        throw error;
+      const sanitizedFileName = sanitizeFileName(file.name);
+      const filePath = `midias/${Date.now()}_${i}_${sanitizedFileName}`;
+      
+      const { data, error } = await supabase.storage
+        .from("site_personalizacoes")
+        .upload(filePath, file);
+
+      if (error) {
+        console.error(`❌ Midia file ${i} upload error:`, error);
+        throw new Error(`Erro no upload do arquivo de mídia ${i + 1}: ${error.message}`);
       }
 
-      const mediaItemObj = {
+      const midiaItem = {
         url: filePath,
-        caption: caption
+        caption: midiaCaptions[i] || ""
       };
       
-      const serializedMediaItem = JSON.stringify(mediaItemObj);
-      midiaItems.push(serializedMediaItem);
-      
-      console.log("✅ Midia uploaded successfully with caption:", filePath, caption);
-    } catch (fileError) {
-      console.error("❌ Error in midia upload:", fileError);
-      toast({
-        description: `Erro ao enviar ${file.name}. Tentando continuar com os outros arquivos.`,
-        variant: "destructive",
-      });
+      midiaItems.push(midiaItem);
+      updateProgress("midia", i, 100);
+      console.log(`✅ Midia file ${i} uploaded:`, filePath);
+    }
+  }
+
+  // Se temos um personalizationId, atualizar com as URLs dos arquivos
+  if (personalizationId && (logoUrl || depoimentoUrls.length > 0 || midiaItems.length > 0)) {
+    console.log("📝 Updating personalization with file URLs...");
+    
+    const updateData: any = {};
+    if (logoUrl) updateData.logo_url = logoUrl;
+    if (depoimentoUrls.length > 0) updateData.depoimento_urls = depoimentoUrls;
+    if (midiaItems.length > 0) updateData.midia_urls = midiaItems;
+
+    const { error: updateError } = await supabase
+      .from("site_personalizacoes")
+      .update(updateData)
+      .eq('id', personalizationId);
+
+    if (updateError) {
+      console.error("❌ Error updating personalization with files:", updateError);
+      // Não vamos falhar aqui, apenas logar
+    } else {
+      console.log("✅ Personalization updated with file URLs");
     }
   }
 

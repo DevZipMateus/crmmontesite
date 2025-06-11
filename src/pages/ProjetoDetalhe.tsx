@@ -27,7 +27,7 @@ export default function ProjetoDetalhe() {
 
   // Query to fetch personalization data
   const { data: personalization, isLoading: personalizationLoading } = useQuery({
-    queryKey: ["personalization", project?.personalization_id],
+    queryKey: ["personalization", project?.personalization_id, project?.partner_hash],
     queryFn: async () => {
       if (!project) return null;
       
@@ -43,6 +43,61 @@ export default function ProjetoDetalhe() {
           console.log("Personalization found using personalization_id:", data);
           return data;
         }
+      }
+      
+      // For partner projects, try to find personalization by project data
+      if (project.partner_hash && project.observacoes_cliente) {
+        console.log("Creating virtual personalization for partner project");
+        
+        // Extract structured data from observacoes_cliente
+        const observacoes = project.observacoes_cliente || "";
+        const parts = observacoes.split(" | ");
+        
+        let servicos = "";
+        let depoimentos = "";
+        let planos = "";
+        let descricao = parts[0] || "";
+        
+        parts.forEach(part => {
+          if (part.startsWith("Serviços: ")) {
+            servicos = part.replace("Serviços: ", "");
+          } else if (part.startsWith("Depoimentos: ")) {
+            depoimentos = part.replace("Depoimentos: ", "");
+          } else if (part.startsWith("Planos: ")) {
+            planos = part.replace("Planos: ", "");
+          }
+        });
+        
+        // Create a virtual personalization object
+        const virtualPersonalization = {
+          id: `virtual-${project.id}`,
+          officenome: project.client_name,
+          responsavelnome: project.client_name,
+          telefone: project.telefone || "Não informado",
+          email: project.email_complementar || "Não informado",
+          endereco: "",
+          redessociais: "",
+          fonte: "",
+          paletacores: "",
+          descricao: descricao,
+          slogan: "",
+          possuiplanos: planos ? true : false,
+          planos: planos,
+          servicos: servicos,
+          depoimentos: depoimentos,
+          botaowhatsapp: true,
+          possuimapa: false,
+          linkmapa: "",
+          modelo: project.modelo_escolhido || project.template || "",
+          logo_url: null,
+          depoimento_urls: null,
+          midia_urls: null,
+          created_at: project.created_at,
+          updated_at: project.updated_at,
+          status: 'partner_project'
+        };
+        
+        return virtualPersonalization;
       }
       
       // Backward compatibility: try using blaster_link if personalization_id is not available
