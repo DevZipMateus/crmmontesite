@@ -125,7 +125,7 @@ class WebhookError extends Error {
 }
 
 const handleWebhookResponse = async (response, context = '') => {
-  console.log(\`Processando resposta \${context}:`, response.status);
+  console.log(\`Processando resposta \${context}:\`, response.status);
   
   if (response.ok) {
     const data = await response.json();
