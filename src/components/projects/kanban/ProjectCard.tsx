@@ -71,14 +71,6 @@ export default function ProjectCard({
         </div>
       )}
       
-      {/* Observações do cliente (se houver) */}
-      {project.observacoes_cliente && (
-        <div className="mt-3 p-2 bg-blue-50 rounded-md">
-          <div className="text-xs font-medium text-blue-700 mb-1">Observações do cliente:</div>
-          <div className="text-xs text-blue-600">{project.observacoes_cliente}</div>
-        </div>
-      )}
-      
       {/* Email complementar (se houver) */}
       {project.email_complementar && (
         <div className="mt-2 text-xs text-gray-600">
