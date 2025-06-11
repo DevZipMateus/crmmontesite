@@ -2,6 +2,7 @@
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Calendar } from "lucide-react";
 import { formatDate } from "@/utils/formatters";
+import { useModelDetails } from "@/utils/modelUtils";
 
 interface ProjectCardHeaderProps {
   clientName: string;
@@ -18,6 +19,8 @@ export const ProjectCardHeader = ({
   isLoading = false,
   createdAt
 }: ProjectCardHeaderProps) => {
+  const { modelName, isLoading: modelLoading } = useModelDetails(template);
+
   return (
     <div className="flex flex-col space-y-1.5">
       <div className="flex justify-between">
@@ -31,10 +34,10 @@ export const ProjectCardHeader = ({
       </div>
       
       <div className="text-sm text-gray-500">
-        {isLoading ? (
+        {isLoading || modelLoading ? (
           <span className="text-gray-400">Carregando modelo...</span>
         ) : (
-          template || "Sem modelo"
+          modelName || "Sem modelo"
         )}
       </div>
       
