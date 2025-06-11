@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import {
   Card,
@@ -27,6 +27,10 @@ export default function PublicPersonalizeForm() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { modelo: modeloParam } = useParams<{ modelo: string }>();
+  const [searchParams] = useSearchParams();
+  
+  // Capturar hash da URL
+  const hashFromUrl = searchParams.get('hash');
   
   // State for form data to enable retry functionality
   const [formData, setFormData] = useState<FormValues | null>(null);
@@ -56,12 +60,13 @@ export default function PublicPersonalizeForm() {
     setMidiaCaptions
   });
 
-  // Initialize form submission handler with retry capability
+  // Initialize form submission handler with hash
   const { onSubmit, retrySubmit, isSubmitting, uploadProgress } = useFormSubmission({
     logoFile,
     depoimentoFiles,
     midiaFiles,
-    midiaCaptions
+    midiaCaptions,
+    hashFromUrl
   });
 
   // Wrapped onSubmit to save form data for retry
@@ -127,6 +132,30 @@ export default function PublicPersonalizeForm() {
     );
   }
 
+  // Verificar se hash existe na URL
+  if (!hashFromUrl) {
+    return (
+      <div className="container py-6 md:py-10 max-w-4xl mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl md:text-3xl font-bold text-red-600">Acesso Inválido</CardTitle>
+            <CardDescription>
+              Este formulário deve ser acessado através de um link específico com hash de projeto.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Parâmetro hash não encontrado na URL. Verifique se você está usando o link correto fornecido.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="container py-6 md:py-10 max-w-4xl mx-auto">
       <Card>
@@ -135,6 +164,14 @@ export default function PublicPersonalizeForm() {
           <CardDescription>
             Preencha o formulário abaixo com as informações da sua empresa/escritório para personalizar seu site.
           </CardDescription>
+          
+          {hashFromUrl && (
+            <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+              <p className="text-sm text-blue-700">
+                <strong>Projeto identificado:</strong> {hashFromUrl.substring(0, 8)}...
+              </p>
+            </div>
+          )}
           
           {modeloDetails && (
             <div className="pt-4">

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -12,13 +11,14 @@ export interface SubmissionProps {
   depoimentoFiles: File[];
   midiaFiles: File[];
   midiaCaptions?: string[];
+  hashFromUrl?: string | null;
 }
 
 // Maximum file size in MB
 const MAX_FILE_SIZE_MB = 10;
 
 export const useFormSubmission = (props: SubmissionProps) => {
-  const { logoFile, depoimentoFiles, midiaFiles, midiaCaptions = [] } = props;
+  const { logoFile, depoimentoFiles, midiaFiles, midiaCaptions = [], hashFromUrl } = props;
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,12 +35,56 @@ export const useFormSubmission = (props: SubmissionProps) => {
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     console.log("Starting form submission process...");
+    console.log("Hash from URL:", hashFromUrl);
 
     try {
       // Validate required fields
       if (!data.officeNome || !data.responsavelNome || !data.telefone || 
           !data.email || !data.endereco || !data.descricao || !data.servicos) {
         throw new Error("Por favor, preencha todos os campos obrigatórios");
+      }
+
+      // Validate hash
+      if (!hashFromUrl) {
+        throw new Error("Hash do projeto não encontrada. Verifique se você está usando o link correto.");
+      }
+
+      // Se há hash, usar o endpoint de formulário do parceiro
+      if (hashFromUrl) {
+        console.log("Using partner form endpoint with hash:", hashFromUrl);
+        
+        // Preparar dados para o endpoint receive-form-data
+        const formPayload = {
+          modelo: data.modelo,
+          observacoes: data.descricao + (data.slogan ? ` | Slogan: ${data.slogan}` : '') + 
+                      (data.servicos ? ` | Serviços: ${data.servicos}` : '') +
+                      (data.depoimentos ? ` | Depoimentos: ${data.depoimentos}` : '') +
+                      (data.planos ? ` | Planos: ${data.planos}` : ''),
+          email: data.email,
+          hash: hashFromUrl
+        };
+
+        console.log("Sending to receive-form-data endpoint:", formPayload);
+
+        // Chamar a edge function diretamente
+        const { data: result, error } = await supabase.functions.invoke('receive-form-data', {
+          body: formPayload
+        });
+
+        if (error) {
+          console.error("Error from receive-form-data:", error);
+          throw new Error(`Erro ao processar formulário: ${error.message}`);
+        }
+
+        console.log("Form data processed successfully:", result);
+
+        toast({
+          title: "Formulário enviado com sucesso!",
+          description: "Suas informações foram processadas e o projeto foi atualizado.",
+        });
+
+        navigate("/confirmacao");
+        return;
       }
 
       const formData = {
