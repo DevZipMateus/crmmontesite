@@ -11,6 +11,7 @@ import { PersonalizeServicosForm } from "./PersonalizeServicosForm";
 import { PersonalizeConfigForm } from "./PersonalizeConfigForm";
 import { useFileUploadHandlers } from "./FileUploadHandlers";
 import { useFormSubmission } from "./useFormSubmission";
+import type { FormValues } from "./PersonalizeBasicForm";
 
 const formSchema = z.object({
   nome_empresa: z.string().min(2, "Nome da empresa é obrigatório"),
@@ -24,9 +25,13 @@ const formSchema = z.object({
   cores_preferidas: z.string().optional(),
   estilo_visual: z.string().optional(),
   observacoes: z.string().optional(),
+  possuiPlanos: z.boolean().optional(),
+  planos: z.string().optional(),
+  depoimentos: z.string().optional(),
+  botaoWhatsapp: z.boolean().optional(),
+  possuiMapa: z.boolean().optional(),
+  linkMapa: z.string().optional(),
 });
-
-type FormData = z.infer<typeof formSchema>;
 
 interface PersonalizeFormProps {
   modeloSelecionado: string;
@@ -61,7 +66,7 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     setMidiaCaptions
   });
 
-  const form = useForm<FormData>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       nome_empresa: "",
@@ -75,10 +80,16 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
       cores_preferidas: "",
       estilo_visual: "",
       observacoes: "",
+      possuiPlanos: false,
+      planos: "",
+      depoimentos: "",
+      botaoWhatsapp: false,
+      possuiMapa: false,
+      linkMapa: "",
     },
   });
 
-  const { isLoading, onSubmit } = useFormSubmission({
+  const { isSubmitting, onSubmit } = useFormSubmission({
     logoFile,
     depoimentoFiles,
     midiaFiles,
@@ -117,11 +128,23 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
             </TabsContent>
 
             <TabsContent value="servicos" className="space-y-6 mt-6">
-              <PersonalizeServicosForm form={form} />
+              <PersonalizeServicosForm 
+                form={form}
+                depoimentoPreviews={depoimentoPreviews}
+                handleDepoimentoUpload={fileHandlers.handleDepoimentoUpload}
+                handleRemoveDepoimento={fileHandlers.handleRemoveDepoimento}
+              />
             </TabsContent>
 
             <TabsContent value="config" className="space-y-6 mt-6">
-              <PersonalizeConfigForm form={form} />
+              <PersonalizeConfigForm 
+                form={form}
+                midiaPreviews={midiaPreviews}
+                midiaCaptions={midiaCaptions}
+                handleMidiaUpload={fileHandlers.handleMidiaUpload}
+                handleRemoveMidia={fileHandlers.handleRemoveMidia}
+                handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
+              />
             </TabsContent>
           </Tabs>
 
@@ -129,10 +152,10 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
             <Button 
               type="submit" 
               size="lg" 
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="min-w-[200px]"
             >
-              {isLoading ? "Enviando..." : "Enviar Personalização"}
+              {isSubmitting ? "Enviando..." : "Enviar Personalização"}
             </Button>
           </div>
         </form>
@@ -140,3 +163,5 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     </div>
   );
 };
+
+export default PersonalizeForm;

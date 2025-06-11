@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import PersonalizeForm from "@/components/site-personalize/PersonalizeForm";
+import { PersonalizeForm } from "@/components/site-personalize/PersonalizeForm";
 import { useFileUploadHandlers } from "@/components/site-personalize/FileUploadHandlers";
 import { useFormSubmission } from "@/components/site-personalize/useFormSubmission";
 import ModeloDetails from "@/components/site-personalize/ModeloDetails";
@@ -112,19 +112,7 @@ export default function PersonalizeSite() {
         </CardHeader>
         <CardContent>
           <PersonalizeForm
-            modeloSelecionado={modeloSelecionado}
-            logoPreview={logoPreview}
-            depoimentoPreviews={depoimentoPreviews}
-            midiaPreviews={midiaPreviews}
-            midiaCaptions={midiaCaptions}
-            isSubmitting={isSubmitting}
-            handleLogoUpload={fileHandlers.handleLogoUpload}
-            handleDepoimentoUpload={fileHandlers.handleDepoimentoUpload}
-            handleRemoveDepoimento={fileHandlers.handleRemoveDepoimento}
-            handleMidiaUpload={fileHandlers.handleMidiaUpload}
-            handleRemoveMidia={fileHandlers.handleRemoveMidia}
-            handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
-            onSubmit={onSubmit}
+            modeloSelecionado={modeloSelecionado || "Modelo 1"}
           />
         </CardContent>
       </Card>

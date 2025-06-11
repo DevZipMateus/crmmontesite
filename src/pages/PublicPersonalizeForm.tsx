@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -11,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import PersonalizeForm from "@/components/site-personalize/PersonalizeForm";
+import { PersonalizeForm } from "@/components/site-personalize/PersonalizeForm";
 import { useFileUploadHandlers } from "@/components/site-personalize/FileUploadHandlers";
 import { useFormSubmission } from "@/components/site-personalize/useFormSubmission";
 import ModeloDetails from "@/components/site-personalize/ModeloDetails";
@@ -225,19 +224,8 @@ export default function PublicPersonalizeForm() {
         <CardContent>
           <PersonalizeForm
             modeloSelecionado={modeloSelecionado}
-            logoPreview={logoPreview}
-            depoimentoPreviews={depoimentoPreviews}
-            midiaPreviews={midiaPreviews}
-            midiaCaptions={midiaCaptions}
-            isSubmitting={isSubmitting}
-            uploadProgress={uploadProgress}
-            handleLogoUpload={fileHandlers.handleLogoUpload}
-            handleDepoimentoUpload={fileHandlers.handleDepoimentoUpload}
-            handleRemoveDepoimento={fileHandlers.handleRemoveDepoimento}
-            handleMidiaUpload={fileHandlers.handleMidiaUpload}
-            handleRemoveMidia={fileHandlers.handleRemoveMidia}
-            handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
-            onSubmit={handleSubmit}
+            projectHash={hashFromUrl || undefined}
+            onSuccess={() => setShowRetryButton(false)}
           />
         </CardContent>
         <CardFooter className="flex flex-col gap-4">

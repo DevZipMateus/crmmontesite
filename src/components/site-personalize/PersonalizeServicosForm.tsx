@@ -2,7 +2,6 @@
 import React from "react";
 import {
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -21,7 +20,7 @@ interface PersonalizeServicosFormProps {
   handleRemoveDepoimento: (index: number) => void;
 }
 
-const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = ({
+export const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = ({
   form,
   depoimentoPreviews,
   handleDepoimentoUpload,
@@ -106,10 +105,6 @@ const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = ({
           )}
         />
 
-        <FormLabel className="flex items-center gap-2 mt-4">
-          Imagens para Depoimentos
-        </FormLabel>
-        
         <MediaUploader 
           label="Imagens para Depoimentos"
           description="Adicione imagens relacionadas aos depoimentos. Múltiplas imagens permitidas."
@@ -123,5 +118,3 @@ const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = ({
     </div>
   );
 };
-
-export default PersonalizeServicosForm;

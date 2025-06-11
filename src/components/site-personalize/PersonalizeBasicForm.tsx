@@ -7,8 +7,28 @@ import LogoUploader from "./LogoUploader";
 import MediaUploader from "./MediaUploader";
 import { UseFormReturn } from "react-hook-form";
 
+export interface FormValues {
+  nome_empresa: string;
+  email: string;
+  telefone: string;
+  sobre_empresa?: string;
+  servicos?: string;
+  endereco?: string;
+  horario_funcionamento?: string;
+  redes_sociais?: string;
+  cores_preferidas?: string;
+  estilo_visual?: string;
+  observacoes?: string;
+  possuiPlanos?: boolean;
+  planos?: string;
+  depoimentos?: string;
+  botaoWhatsapp?: boolean;
+  possuiMapa?: boolean;
+  linkMapa?: string;
+}
+
 interface PersonalizeBasicFormProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<FormValues>;
   logoPreview: string | null;
   depoimentoPreviews: string[];
   midiaPreviews: string[];
@@ -121,19 +141,18 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
 
       {/* Depoimentos Upload */}
       <MediaUploader
-        title="Depoimentos de Clientes"
+        label="Depoimentos de Clientes"
         description="Faça upload de imagens com depoimentos dos seus clientes"
         accept="image/*"
         multiple={true}
         previews={depoimentoPreviews}
         onUpload={handleDepoimentoUpload}
         onRemove={handleRemoveDepoimento}
-        type="depoimento"
       />
 
       {/* Mídias Upload */}
       <MediaUploader
-        title="Mídias da Empresa"
+        label="Mídias da Empresa"
         description="Fotos, vídeos ou outras mídias da sua empresa"
         accept="image/*,video/*"
         multiple={true}
@@ -142,8 +161,7 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
         onUpload={handleMidiaUpload}
         onRemove={handleRemoveMidia}
         onUpdateCaption={handleUpdateMidiaCaption}
-        type="midia"
-        showCaptions={true}
+        allowCaptions={true}
       />
     </div>
   );

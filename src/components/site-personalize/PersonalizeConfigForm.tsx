@@ -13,12 +13,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { UseFormReturn } from "react-hook-form";
 import { FormValues } from "./PersonalizeBasicForm";
 import MediaUploader from "./MediaUploader";
-import { modelosDisponiveis } from "./modelosData";
-import { getModelTemplateById } from "@/services/modelTemplateService";
 
 interface PersonalizeConfigFormProps {
   form: UseFormReturn<FormValues>;
-  modeloSelecionado: string | null;
   midiaPreviews: string[];
   midiaCaptions: string[];
   handleMidiaUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -26,9 +23,8 @@ interface PersonalizeConfigFormProps {
   handleUpdateMidiaCaption: (index: number, caption: string) => void;
 }
 
-const PersonalizeConfigForm: React.FC<PersonalizeConfigFormProps> = ({
+export const PersonalizeConfigForm: React.FC<PersonalizeConfigFormProps> = ({
   form,
-  modeloSelecionado,
   midiaPreviews,
   midiaCaptions,
   handleMidiaUpload,
@@ -39,10 +35,6 @@ const PersonalizeConfigForm: React.FC<PersonalizeConfigFormProps> = ({
     <>
       <div className="space-y-4 pt-4 border-t">
         <h3 className="text-lg font-medium">Mídias do Site</h3>
-        
-        <FormLabel className="flex items-center gap-2">
-          Upload de Mídias (Imagens, Vídeos, GIFs)
-        </FormLabel>
         
         <MediaUploader 
           label="Upload de Mídias"
@@ -114,12 +106,7 @@ const PersonalizeConfigForm: React.FC<PersonalizeConfigFormProps> = ({
             )}
           />
         )}
-
-        {/* Campo "Modelo Selecionado" removido */}
       </div>
     </>
   );
 };
-
-export default PersonalizeConfigForm;
-
