@@ -72,13 +72,6 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
                 </div>
               </div>
               
-              {project.modelo_escolhido && (
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Modelo Escolhido</p>
-                  <p className="mt-1 font-medium">{project.modelo_escolhido}</p>
-                </div>
-              )}
-              
               {project.data_formulario && (
                 <div>
                   <p className="text-sm font-medium text-gray-500">Data do Formulário</p>
@@ -98,15 +91,6 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
                 <div>
                   <p className="text-sm font-medium text-gray-500">Email Complementar</p>
                   <p className="mt-1">{project.email_complementar}</p>
-                </div>
-              )}
-              
-              {project.observacoes_cliente && (
-                <div className="col-span-2">
-                  <p className="text-sm font-medium text-gray-500">Observações do Cliente</p>
-                  <div className="mt-1 p-3 bg-blue-50 rounded-md">
-                    <p className="text-blue-700">{project.observacoes_cliente}</p>
-                  </div>
                 </div>
               )}
               
