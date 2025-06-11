@@ -65,7 +65,7 @@ export default function PublicPersonalizeForm() {
     depoimentoFiles,
     midiaFiles,
     midiaCaptions,
-    hashFromUrl
+    hashFromUrl: hashFromUrl || undefined
   });
 
   // Wrapped onSubmit to save form data for retry
