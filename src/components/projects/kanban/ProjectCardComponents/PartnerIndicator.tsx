@@ -19,9 +19,11 @@ export function PartnerIndicator({ partnerHash }: PartnerIndicatorProps) {
 
   return (
     <div className="flex items-center gap-2 mb-2">
-      <Badge variant="secondary" className="flex items-center gap-1">
-        <Users className="h-3 w-3" />
-        Parceiro: {partnerName || partnerHash}
+      <Badge variant="secondary" className="flex items-center gap-1 text-xs max-w-full">
+        <Users className="h-3 w-3 flex-shrink-0" />
+        <span className="truncate">
+          Cliente de parceiro: {partnerName || partnerHash}
+        </span>
       </Badge>
     </div>
   );
