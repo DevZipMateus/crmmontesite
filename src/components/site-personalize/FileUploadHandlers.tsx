@@ -67,6 +67,23 @@ export const useFileUploadHandlers = (props: FileHandlersProps) => {
     }
   };
 
+  const handleRemoveLogo = () => {
+    // Clean up the current preview URL to prevent memory leaks
+    setLogoPreview((currentPreview) => {
+      if (currentPreview) {
+        URL.revokeObjectURL(currentPreview);
+      }
+      return null;
+    });
+    
+    // Clear the file state
+    setLogoFile(null);
+    
+    toast({
+      description: "Logo removida com sucesso",
+    });
+  };
+
   const handleDepoimentoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
@@ -178,6 +195,7 @@ export const useFileUploadHandlers = (props: FileHandlersProps) => {
 
   return {
     handleLogoUpload,
+    handleRemoveLogo,
     handleDepoimentoUpload,
     handleRemoveDepoimento,
     handleMidiaUpload,

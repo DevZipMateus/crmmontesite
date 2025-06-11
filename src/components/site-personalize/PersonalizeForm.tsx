@@ -1,173 +1,142 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { Loader2, Info, AlertTriangle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import PersonalizeBasicForm, { personalizeFormSchema, FormValues } from "./PersonalizeBasicForm";
-import PersonalizeServicosForm from "./PersonalizeServicosForm";
-import PersonalizeConfigForm from "./PersonalizeConfigForm";
-import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PersonalizeBasicForm } from "./PersonalizeBasicForm";
+import { PersonalizeServicosForm } from "./PersonalizeServicosForm";
+import { PersonalizeConfigForm } from "./PersonalizeConfigForm";
+import { useFileUploadHandlers } from "./FileUploadHandlers";
+import { useFormSubmission } from "./useFormSubmission";
+
+const formSchema = z.object({
+  nome_empresa: z.string().min(2, "Nome da empresa é obrigatório"),
+  email: z.string().email("Email inválido"),
+  telefone: z.string().min(10, "Telefone é obrigatório"),
+  sobre_empresa: z.string().optional(),
+  servicos: z.string().optional(),
+  endereco: z.string().optional(),
+  horario_funcionamento: z.string().optional(),
+  redes_sociais: z.string().optional(),
+  cores_preferidas: z.string().optional(),
+  estilo_visual: z.string().optional(),
+  observacoes: z.string().optional(),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 interface PersonalizeFormProps {
-  modeloSelecionado: string | null;
-  logoPreview: string | null;
-  depoimentoPreviews: string[];
-  midiaPreviews: string[];
-  midiaCaptions: string[];
-  isSubmitting: boolean;
-  uploadProgress?: {[key: string]: number};
-  handleLogoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleDepoimentoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveDepoimento: (index: number) => void;
-  handleMidiaUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveMidia: (index: number) => void;
-  handleUpdateMidiaCaption: (index: number, caption: string) => void;
-  onSubmit: (data: FormValues) => Promise<void>;
+  modeloSelecionado: string;
+  projectHash?: string;
+  onSuccess?: () => void;
 }
 
-const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
+export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
   modeloSelecionado,
-  logoPreview,
-  depoimentoPreviews,
-  midiaPreviews,
-  midiaCaptions,
-  isSubmitting,
-  uploadProgress = {},
-  handleLogoUpload,
-  handleDepoimentoUpload,
-  handleRemoveDepoimento,
-  handleMidiaUpload,
-  handleRemoveMidia,
-  handleUpdateMidiaCaption,
-  onSubmit,
+  projectHash,
+  onSuccess
 }) => {
-  const form = useForm<FormValues>({
-    resolver: zodResolver(personalizeFormSchema),
+  const [activeTab, setActiveTab] = useState("basico");
+  
+  // File states
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [depoimentoFiles, setDepoimentoFiles] = useState<File[]>([]);
+  const [depoimentoPreviews, setDepoimentoPreviews] = useState<string[]>([]);
+  const [midiaFiles, setMidiaFiles] = useState<File[]>([]);
+  const [midiaPreviews, setMidiaPreviews] = useState<string[]>([]);
+  const [midiaCaptions, setMidiaCaptions] = useState<string[]>([]);
+
+  // File upload handlers
+  const fileHandlers = useFileUploadHandlers({
+    setLogoFile,
+    setLogoPreview,
+    setDepoimentoFiles,
+    setDepoimentoPreviews,
+    setMidiaFiles,
+    setMidiaPreviews,
+    setMidiaCaptions
+  });
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      officeNome: "",
-      responsavelNome: "",
-      telefone: "",
+      nome_empresa: "",
       email: "",
-      endereco: "",
-      redesSociais: "",
-      fonte: "",
-      paletaCores: "",
-      descricao: "",
-      slogan: "",
-      possuiPlanos: false,
-      planos: "",
+      telefone: "",
+      sobre_empresa: "",
       servicos: "",
-      depoimentos: "",
-      botaoWhatsapp: true,
-      possuiMapa: false,
-      linkMapa: "",
-      modelo: modeloSelecionado || "",
+      endereco: "",
+      horario_funcionamento: "",
+      redes_sociais: "",
+      cores_preferidas: "",
+      estilo_visual: "",
+      observacoes: "",
     },
   });
 
-  // Calculate overall progress for display
-  const calculateOverallProgress = () => {
-    if (!isSubmitting || Object.keys(uploadProgress).length === 0) return 0;
-    
-    const progressValues = Object.values(uploadProgress);
-    if (progressValues.length === 0) return 0;
-    
-    const totalProgress = progressValues.reduce((sum, value) => sum + value, 0);
-    return Math.round(totalProgress / progressValues.length);
-  };
-
-  const handleFormSubmit = async (data: FormValues) => {
-    // Ensure the modelo field is properly set before submission
-    if (!data.modelo && modeloSelecionado) {
-      data.modelo = modeloSelecionado;
-    }
-    
-    console.log("Form submission started with data:", data);
-    
-    // Check if there are files selected for upload
-    const hasFiles = logoPreview || depoimentoPreviews.length > 0 || midiaPreviews.length > 0;
-    if (!hasFiles) {
-      if (!window.confirm("Você não enviou nenhum arquivo (logo, depoimentos ou mídias). Deseja continuar assim mesmo?")) {
-        return;
-      }
-    }
-    
-    await onSubmit(data);
-  };
+  const { isLoading, onSubmit } = useFormSubmission({
+    logoFile,
+    depoimentoFiles,
+    midiaFiles,
+    midiaCaptions,
+    modeloSelecionado,
+    projectHash,
+    onSuccess
+  });
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-        <Alert className="bg-blue-50 border-blue-200 mb-4">
-          <Info className="h-4 w-4 text-blue-500" />
-          <AlertDescription className="text-blue-700">
-            Todos os campos com * são obrigatórios. O tamanho máximo para cada arquivo é de 10MB.
-          </AlertDescription>
-        </Alert>
-        
-        <Alert className="bg-yellow-50 border-yellow-200 mb-4">
-          <AlertTriangle className="h-4 w-4 text-yellow-500" />
-          <AlertDescription className="text-yellow-700">
-            <strong>Dicas para evitar erros:</strong>
-            <ul className="list-disc pl-5 mt-1">
-              <li>Use nomes de arquivos simples sem caracteres especiais ou acentos</li>
-              <li>Verifique sua conexão com a internet antes de enviar</li>
-              <li>Para arquivos grandes, aguarde o upload completo</li>
-            </ul>
-          </AlertDescription>
-        </Alert>
-        
-        <div className="space-y-4">
-          <PersonalizeBasicForm 
-            form={form} 
-            logoPreview={logoPreview}
-            handleLogoUpload={handleLogoUpload}
-          />
-          
-          <PersonalizeServicosForm 
-            form={form}
-            depoimentoPreviews={depoimentoPreviews}
-            handleDepoimentoUpload={handleDepoimentoUpload}
-            handleRemoveDepoimento={handleRemoveDepoimento}
-          />
-          
-          <PersonalizeConfigForm 
-            form={form}
-            modeloSelecionado={modeloSelecionado}
-            midiaPreviews={midiaPreviews}
-            midiaCaptions={midiaCaptions}
-            handleMidiaUpload={handleMidiaUpload}
-            handleRemoveMidia={handleRemoveMidia}
-            handleUpdateMidiaCaption={handleUpdateMidiaCaption}
-          />
-        </div>
+    <div className="space-y-6">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="basico">Informações Básicas</TabsTrigger>
+              <TabsTrigger value="servicos">Serviços & Conteúdo</TabsTrigger>
+              <TabsTrigger value="config">Configurações</TabsTrigger>
+            </TabsList>
 
-        {isSubmitting && (
-          <div className="space-y-2 mb-4">
-            <div className="flex justify-between text-sm">
-              <span>Enviando dados e arquivos...</span>
-              <span>{calculateOverallProgress()}%</span>
-            </div>
-            <Progress value={calculateOverallProgress()} className="h-2" />
+            <TabsContent value="basico" className="space-y-6 mt-6">
+              <PersonalizeBasicForm
+                form={form}
+                logoPreview={logoPreview}
+                depoimentoPreviews={depoimentoPreviews}
+                midiaPreviews={midiaPreviews}
+                midiaCaptions={midiaCaptions}
+                handleLogoUpload={fileHandlers.handleLogoUpload}
+                handleRemoveLogo={fileHandlers.handleRemoveLogo}
+                handleDepoimentoUpload={fileHandlers.handleDepoimentoUpload}
+                handleRemoveDepoimento={fileHandlers.handleRemoveDepoimento}
+                handleMidiaUpload={fileHandlers.handleMidiaUpload}
+                handleRemoveMidia={fileHandlers.handleRemoveMidia}
+                handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
+              />
+            </TabsContent>
+
+            <TabsContent value="servicos" className="space-y-6 mt-6">
+              <PersonalizeServicosForm form={form} />
+            </TabsContent>
+
+            <TabsContent value="config" className="space-y-6 mt-6">
+              <PersonalizeConfigForm form={form} />
+            </TabsContent>
+          </Tabs>
+
+          <div className="flex justify-center pt-6">
+            <Button 
+              type="submit" 
+              size="lg" 
+              disabled={isLoading}
+              className="min-w-[200px]"
+            >
+              {isLoading ? "Enviando..." : "Enviar Personalização"}
+            </Button>
           </div>
-        )}
-
-        <div className="flex justify-end">
-          <Button 
-            type="submit" 
-            disabled={isSubmitting}
-            className="px-6"
-          >
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isSubmitting ? "Enviando..." : "Enviar Personalização"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </div>
   );
 };
-
-export default PersonalizeForm;

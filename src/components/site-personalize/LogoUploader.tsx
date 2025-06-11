@@ -13,9 +13,10 @@ const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024; // Convert to bytes
 interface LogoUploaderProps {
   preview: string | null;
   onUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemove: () => void;
 }
 
-const LogoUploader = ({ preview, onUpload }: LogoUploaderProps) => {
+const LogoUploader = ({ preview, onUpload, onRemove }: LogoUploaderProps) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -76,6 +77,16 @@ const LogoUploader = ({ preview, onUpload }: LogoUploaderProps) => {
       onUpload(event);
     }
   };
+
+  const handleRemoveClick = () => {
+    // Clear the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    
+    // Call the remove function
+    onRemove();
+  };
   
   return (
     <div className="space-y-3">
@@ -135,12 +146,7 @@ const LogoUploader = ({ preview, onUpload }: LogoUploaderProps) => {
             variant="destructive"
             size="sm"
             className="absolute top-2 right-2"
-            onClick={() => {
-              if (fileInputRef.current) {
-                fileInputRef.current.value = "";
-              }
-              onUpload({ target: { files: null } } as React.ChangeEvent<HTMLInputElement>);
-            }}
+            onClick={handleRemoveClick}
           >
             <Trash2 className="h-4 w-4" />
           </Button>

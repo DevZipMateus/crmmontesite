@@ -1,227 +1,150 @@
+
 import React from "react";
-import { z } from "zod";
-import { useForm, UseFormReturn } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import LogoUploader from "./LogoUploader";
-
-export const personalizeFormSchema = z.object({
-  officeNome: z.string().min(2, "Nome da empresa/escritório é obrigatório"),
-  responsavelNome: z.string().min(2, "Nome do responsável é obrigatório"),
-  telefone: z.string().min(10, "Telefone deve conter pelo menos 10 dígitos"),
-  email: z.string().email("Email inválido"),
-  endereco: z.string().min(5, "Endereço completo é obrigatório"),
-  redesSociais: z.string().optional(),
-  logo: z.any().optional(),
-  fonte: z.string().optional(),
-  paletaCores: z.string().optional(),
-  descricao: z.string().min(10, "Descreva seu escritório com pelo menos 10 caracteres"),
-  slogan: z.string().optional(),
-  possuiPlanos: z.boolean().default(false),
-  planos: z.string().optional(),
-  servicos: z.string().min(5, "Liste pelo menos um serviço de destaque"),
-  depoimentos: z.string().optional(),
-  botaoWhatsapp: z.boolean().default(true),
-  possuiMapa: z.boolean().default(false),
-  linkMapa: z.string().optional(),
-  modelo: z.string().optional(),
-  midias: z.any().optional(),
-});
-
-export type FormValues = z.infer<typeof personalizeFormSchema>;
+import MediaUploader from "./MediaUploader";
+import { UseFormReturn } from "react-hook-form";
 
 interface PersonalizeBasicFormProps {
-  form: UseFormReturn<FormValues>;
+  form: UseFormReturn<any>;
   logoPreview: string | null;
+  depoimentoPreviews: string[];
+  midiaPreviews: string[];
+  midiaCaptions: string[];
   handleLogoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveLogo: () => void;
+  handleDepoimentoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveDepoimento: (index: number) => void;
+  handleMidiaUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveMidia: (index: number) => void;
+  handleUpdateMidiaCaption: (index: number, caption: string) => void;
 }
 
-const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
+export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
   form,
   logoPreview,
+  depoimentoPreviews,
+  midiaPreviews,
+  midiaCaptions,
   handleLogoUpload,
+  handleRemoveLogo,
+  handleDepoimentoUpload,
+  handleRemoveDepoimento,
+  handleMidiaUpload,
+  handleRemoveMidia,
+  handleUpdateMidiaCaption,
 }) => {
   return (
-    <>
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Informações Básicas</h3>
-        
-        <FormField
-          control={form.control}
-          name="officeNome"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome da Empresa/Escritório*</FormLabel>
-              <FormControl>
-                <Input placeholder="Nome da sua empresa ou escritório" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <div className="space-y-6">
+      {/* Nome da empresa */}
+      <FormField
+        control={form.control}
+        name="nome_empresa"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Nome da Empresa *</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="Digite o nome da sua empresa"
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <FormField
-          control={form.control}
-          name="responsavelNome"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome do Responsável*</FormLabel>
-              <FormControl>
-                <Input placeholder="Nome do responsável" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      {/* Email */}
+      <FormField
+        control={form.control}
+        name="email"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Email *</FormLabel>
+            <FormControl>
+              <Input 
+                type="email"
+                placeholder="seu@email.com"
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="telefone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Telefone/WhatsApp*</FormLabel>
-                <FormControl>
-                  <Input placeholder="(00) 00000-0000" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      {/* Telefone */}
+      <FormField
+        control={form.control}
+        name="telefone"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Telefone *</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="(11) 99999-9999"
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>E-mail para Contato*</FormLabel>
-                <FormControl>
-                  <Input placeholder="seuemail@exemplo.com" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+      {/* Sobre a empresa */}
+      <FormField
+        control={form.control}
+        name="sobre_empresa"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Sobre a Empresa</FormLabel>
+            <FormControl>
+              <Textarea 
+                placeholder="Conte um pouco sobre sua empresa..."
+                className="min-h-[100px]"
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <FormField
-          control={form.control}
-          name="endereco"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Endereço Completo*</FormLabel>
-              <FormControl>
-                <Input placeholder="Rua, número, bairro, cidade, estado, CEP" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      {/* Logo Upload */}
+      <LogoUploader 
+        preview={logoPreview}
+        onUpload={handleLogoUpload}
+        onRemove={handleRemoveLogo}
+      />
 
-        <FormField
-          control={form.control}
-          name="redesSociais"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Redes Sociais</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Instagram: @seuinsta&#10;Facebook: /suapagina&#10;LinkedIn: /suapagina" 
-                  {...field} 
-                />
-              </FormControl>
-              <FormDescription>
-                Inclua os links das suas redes sociais separados por quebra de linha.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      {/* Depoimentos Upload */}
+      <MediaUploader
+        title="Depoimentos de Clientes"
+        description="Faça upload de imagens com depoimentos dos seus clientes"
+        accept="image/*"
+        multiple={true}
+        previews={depoimentoPreviews}
+        onUpload={handleDepoimentoUpload}
+        onRemove={handleRemoveDepoimento}
+        type="depoimento"
+      />
 
-      <div className="space-y-4 pt-4 border-t">
-        <h3 className="text-lg font-medium">Identidade Visual</h3>
-        
-        <LogoUploader preview={logoPreview} onUpload={handleLogoUpload} />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="fonte"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fonte Preferida (opcional)</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ex: Roboto, Open Sans, etc." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="paletaCores"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Paleta de Cores (opcional)</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ex: Azul, cinza e branco" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="descricao"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descrição do Escritório*</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Descreva seu escritório, histórico, diferenciais..."
-                  rows={4}
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="slogan"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Frase ou Slogan</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="Um slogan que represente seu escritório" 
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-    </>
+      {/* Mídias Upload */}
+      <MediaUploader
+        title="Mídias da Empresa"
+        description="Fotos, vídeos ou outras mídias da sua empresa"
+        accept="image/*,video/*"
+        multiple={true}
+        previews={midiaPreviews}
+        captions={midiaCaptions}
+        onUpload={handleMidiaUpload}
+        onRemove={handleRemoveMidia}
+        onUpdateCaption={handleUpdateMidiaCaption}
+        type="midia"
+        showCaptions={true}
+      />
+    </div>
   );
 };
-
-export default PersonalizeBasicForm;
