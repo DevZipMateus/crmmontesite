@@ -12,14 +12,16 @@ export interface SubmissionProps {
   depoimentoFiles: File[];
   midiaFiles: File[];
   midiaCaptions?: string[];
-  hashFromUrl?: string | null;
+  modeloSelecionado?: string;
+  projectHash?: string;
+  onSuccess?: () => void;
 }
 
 // Maximum file size in MB
 const MAX_FILE_SIZE_MB = 10;
 
 export const useFormSubmission = (props: SubmissionProps) => {
-  const { logoFile, depoimentoFiles, midiaFiles, midiaCaptions = [], hashFromUrl } = props;
+  const { logoFile, depoimentoFiles, midiaFiles, midiaCaptions = [], modeloSelecionado, projectHash, onSuccess } = props;
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,30 +39,28 @@ export const useFormSubmission = (props: SubmissionProps) => {
     setIsSubmitting(true);
     
     console.log("=== FORM SUBMISSION STARTED ===");
-    console.log("Hash from URL:", hashFromUrl);
+    console.log("Hash from URL:", projectHash);
     console.log("Form data:", data);
-    console.log("Submission type:", hashFromUrl ? "Partner client (update existing)" : "Direct client (create new)");
+    console.log("Submission type:", projectHash ? "Partner client (update existing)" : "Direct client (create new)");
 
     try {
       // Validate required fields
-      if (!data.officeNome || !data.responsavelNome || !data.telefone || 
-          !data.email || !data.endereco || !data.descricao || !data.servicos) {
+      if (!data.nome_empresa || !data.telefone || !data.email) {
         throw new Error("Por favor, preencha todos os campos obrigatórios");
       }
 
       // FLUXO PARA CLIENTES DE PARCEIROS (COM HASH)
-      if (hashFromUrl) {
-        console.log("🔄 Processing as partner client with hash:", hashFromUrl);
+      if (projectHash) {
+        console.log("🔄 Processing as partner client with hash:", projectHash);
         
         // Preparar dados para o endpoint receive-form-data
         const formPayload = {
-          modelo: data.modelo,
-          observacoes: data.descricao + (data.slogan ? ` | Slogan: ${data.slogan}` : '') + 
-                      (data.servicos ? ` | Serviços: ${data.servicos}` : '') +
+          modelo: modeloSelecionado || "Modelo 1",
+          observacoes: data.sobre_empresa + (data.servicos ? ` | Serviços: ${data.servicos}` : '') +
                       (data.depoimentos ? ` | Depoimentos: ${data.depoimentos}` : '') +
                       (data.planos ? ` | Planos: ${data.planos}` : ''),
           email: data.email,
-          hash: hashFromUrl
+          hash: projectHash
         };
 
         console.log("📤 Sending to receive-form-data endpoint:");
@@ -87,7 +87,11 @@ export const useFormSubmission = (props: SubmissionProps) => {
           description: "Suas informações foram processadas e o projeto foi atualizado.",
         });
 
-        navigate("/confirmacao");
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate("/confirmacao");
+        }
         return;
       }
 
@@ -96,12 +100,12 @@ export const useFormSubmission = (props: SubmissionProps) => {
 
       const formData = {
         ...data,
-        modelo: data.modelo,
+        modelo: modeloSelecionado || "Modelo 1",
         created_at: new Date().toISOString(),
       };
 
       console.log("Form data prepared for new project:", formData);
-      console.log("Selected model:", data.modelo);
+      console.log("Selected model:", modeloSelecionado);
       
       // Process logo upload with retry
       let logoUrl = null;
@@ -201,23 +205,23 @@ export const useFormSubmission = (props: SubmissionProps) => {
       const { data: personalizationData, error: personalizationError } = await supabase
         .from("site_personalizacoes")
         .insert({
-          officenome: formData.officeNome,
-          responsavelnome: formData.responsavelNome,
+          officenome: formData.nome_empresa,
+          responsavelnome: formData.nome_empresa, // Using company name as responsible name since it's not separate
           telefone: formData.telefone,
           email: formData.email,
-          endereco: formData.endereco,
-          redessociais: formData.redesSociais,
-          fonte: formData.fonte,
-          paletacores: formData.paletaCores,
-          descricao: formData.descricao,
-          slogan: formData.slogan,
-          possuiplanos: formData.possuiPlanos,
-          planos: formData.planos,
-          servicos: formData.servicos,
-          depoimentos: formData.depoimentos,
-          botaowhatsapp: formData.botaoWhatsapp,
-          possuimapa: formData.possuiMapa,
-          linkmapa: formData.linkMapa,
+          endereco: formData.endereco || "",
+          redessociais: formData.redes_sociais || "",
+          fonte: "", // Not in current form
+          paletacores: formData.cores_preferidas || "",
+          descricao: formData.sobre_empresa || "",
+          slogan: "", // Not in current form
+          possuiplanos: formData.possuiPlanos || false,
+          planos: formData.planos || "",
+          servicos: formData.servicos || "",
+          depoimentos: formData.depoimentos || "",
+          botaowhatsapp: formData.botaoWhatsapp || false,
+          possuimapa: formData.possuiMapa || false,
+          linkmapa: formData.linkMapa || "",
           modelo: formData.modelo,
           logo_url: logoUrl,
           depoimento_urls: depoimentoUrls.length > 0 ? depoimentoUrls : null,
@@ -239,8 +243,8 @@ export const useFormSubmission = (props: SubmissionProps) => {
         const { data: projectData, error: projectError } = await supabase
           .from("projects")
           .insert({
-            client_name: formData.officeNome,
-            responsible_name: formData.responsavelNome,
+            client_name: formData.nome_empresa,
+            responsible_name: formData.nome_empresa,
             template: formData.modelo,
             status: "Recebido",
             client_type: "cliente_final",
@@ -268,7 +272,11 @@ export const useFormSubmission = (props: SubmissionProps) => {
         description: "Suas informações foram enviadas e um projeto foi criado.",
       });
 
-      navigate("/confirmacao");
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate("/confirmacao");
+      }
     } catch (error) {
       console.error("💥 Form submission error:", error);
       
