@@ -20,7 +20,7 @@ import { LoadingState } from "@/components/site-personalize/LoadingState";
 import { ErrorState } from "@/components/site-personalize/ErrorState";
 import { useModelFromUrl } from "@/components/site-personalize/useModelFromUrl";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw, WifiOff, HelpCircle } from "lucide-react";
+import { AlertCircle, RefreshCw, WifiOff, HelpCircle, Users, User } from "lucide-react";
 import { FormValues } from "@/components/site-personalize/PersonalizeBasicForm";
 
 export default function PublicPersonalizeForm() {
@@ -29,7 +29,7 @@ export default function PublicPersonalizeForm() {
   const { modelo: modeloParam } = useParams<{ modelo: string }>();
   const [searchParams] = useSearchParams();
   
-  // Capturar hash da URL
+  // Capturar hash da URL (opcional)
   const hashFromUrl = searchParams.get('hash');
   
   // State for form data to enable retry functionality
@@ -60,7 +60,7 @@ export default function PublicPersonalizeForm() {
     setMidiaCaptions
   });
 
-  // Initialize form submission handler with hash
+  // Initialize form submission handler with hash (opcional)
   const { onSubmit, retrySubmit, isSubmitting, uploadProgress } = useFormSubmission({
     logoFile,
     depoimentoFiles,
@@ -132,30 +132,6 @@ export default function PublicPersonalizeForm() {
     );
   }
 
-  // Verificar se hash existe na URL
-  if (!hashFromUrl) {
-    return (
-      <div className="container py-6 md:py-10 max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl md:text-3xl font-bold text-red-600">Acesso Inválido</CardTitle>
-            <CardDescription>
-              Este formulário deve ser acessado através de um link específico com hash de projeto.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Parâmetro hash não encontrado na URL. Verifique se você está usando o link correto fornecido.
-              </AlertDescription>
-            </Alert>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="container py-6 md:py-10 max-w-4xl mx-auto">
       <Card>
@@ -165,10 +141,29 @@ export default function PublicPersonalizeForm() {
             Preencha o formulário abaixo com as informações da sua empresa/escritório para personalizar seu site.
           </CardDescription>
           
-          {hashFromUrl && (
+          {/* Mostrar tipo de cliente baseado na presença da hash */}
+          {hashFromUrl ? (
             <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
-              <p className="text-sm text-blue-700">
-                <strong>Projeto identificado:</strong> {hashFromUrl.substring(0, 8)}...
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-blue-600" />
+                <p className="text-sm text-blue-700">
+                  <strong>Cliente Parceiro:</strong> Projeto identificado {hashFromUrl.substring(0, 8)}...
+                </p>
+              </div>
+              <p className="text-xs text-blue-600 mt-1">
+                Este formulário atualizará seu projeto existente
+              </p>
+            </div>
+          ) : (
+            <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-green-600" />
+                <p className="text-sm text-green-700">
+                  <strong>Cliente Direto:</strong> Novo projeto será criado
+                </p>
+              </div>
+              <p className="text-xs text-green-600 mt-1">
+                Um novo projeto será criado com suas informações
               </p>
             </div>
           )}

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -36,6 +37,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
     setIsSubmitting(true);
     console.log("Starting form submission process...");
     console.log("Hash from URL:", hashFromUrl);
+    console.log("Submission type:", hashFromUrl ? "Partner client (update existing)" : "Direct client (create new)");
 
     try {
       // Validate required fields
@@ -44,14 +46,9 @@ export const useFormSubmission = (props: SubmissionProps) => {
         throw new Error("Por favor, preencha todos os campos obrigatórios");
       }
 
-      // Validate hash
-      if (!hashFromUrl) {
-        throw new Error("Hash do projeto não encontrada. Verifique se você está usando o link correto.");
-      }
-
-      // Se há hash, usar o endpoint de formulário do parceiro
+      // FLUXO PARA CLIENTES DE PARCEIROS (COM HASH)
       if (hashFromUrl) {
-        console.log("Using partner form endpoint with hash:", hashFromUrl);
+        console.log("Processing as partner client with hash:", hashFromUrl);
         
         // Preparar dados para o endpoint receive-form-data
         const formPayload = {
@@ -66,7 +63,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
 
         console.log("Sending to receive-form-data endpoint:", formPayload);
 
-        // Chamar a edge function diretamente
+        // Chamar a edge function para atualizar projeto existente
         const { data: result, error } = await supabase.functions.invoke('receive-form-data', {
           body: formPayload
         });
@@ -76,7 +73,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
           throw new Error(`Erro ao processar formulário: ${error.message}`);
         }
 
-        console.log("Form data processed successfully:", result);
+        console.log("Partner project updated successfully:", result);
 
         toast({
           title: "Formulário enviado com sucesso!",
@@ -87,13 +84,16 @@ export const useFormSubmission = (props: SubmissionProps) => {
         return;
       }
 
+      // FLUXO PARA CLIENTES DIRETOS (SEM HASH) - CRIAR NOVO PROJETO
+      console.log("Processing as direct client - creating new project");
+
       const formData = {
         ...data,
         modelo: data.modelo,
         created_at: new Date().toISOString(),
       };
 
-      console.log("Form data prepared:", formData);
+      console.log("Form data prepared for new project:", formData);
       console.log("Selected model:", data.modelo);
       
       // Process logo upload with retry
