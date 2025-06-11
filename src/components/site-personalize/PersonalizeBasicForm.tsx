@@ -12,6 +12,7 @@ export interface FormValues {
   email: string;
   telefone: string;
   sobre_empresa?: string;
+  slogan?: string;
   servicos?: string;
   endereco?: string;
   horario_funcionamento?: string;
@@ -124,6 +125,24 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
               <Textarea 
                 placeholder="Conte um pouco sobre sua empresa..."
                 className="min-h-[100px]"
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Slogan */}
+      <FormField
+        control={form.control}
+        name="slogan"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Slogan da Empresa</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="Digite o slogan da sua empresa"
                 {...field}
               />
             </FormControl>

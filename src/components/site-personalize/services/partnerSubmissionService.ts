@@ -31,7 +31,7 @@ export const submitPartnerClient = async (
     fonte: "",
     paletacores: data.cores_preferidas || "",
     descricao: data.sobre_empresa || "",
-    slogan: "", // Extraído das observações se fornecido
+    slogan: data.slogan || "",
     possuiplanos: data.possuiPlanos || false,
     planos: data.planos || "",
     servicos: data.servicos || "",
@@ -66,7 +66,8 @@ export const submitPartnerClient = async (
   const observacoes = data.sobre_empresa + 
     (data.servicos ? ` | Serviços: ${data.servicos}` : '') +
     (data.depoimentos ? ` | Depoimentos: ${data.depoimentos}` : '') +
-    (data.planos ? ` | Planos: ${data.planos}` : '');
+    (data.planos ? ` | Planos: ${data.planos}` : '') +
+    (data.slogan ? ` | Slogan: ${data.slogan}` : '');
 
   // Preparar dados para o endpoint receive-form-data
   const formPayload = {

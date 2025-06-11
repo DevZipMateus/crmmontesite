@@ -22,7 +22,7 @@ export const savePersonalizationData = async (
       fonte: "",
       paletacores: formData.cores_preferidas || "",
       descricao: formData.sobre_empresa || "",
-      slogan: "",
+      slogan: formData.slogan || "",
       possuiplanos: formData.possuiPlanos || false,
       planos: formData.planos || "",
       servicos: formData.servicos || "",
