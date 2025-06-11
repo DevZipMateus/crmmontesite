@@ -35,8 +35,10 @@ export const useFormSubmission = (props: SubmissionProps) => {
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
-    console.log("Starting form submission process...");
+    
+    console.log("=== FORM SUBMISSION STARTED ===");
     console.log("Hash from URL:", hashFromUrl);
+    console.log("Form data:", data);
     console.log("Submission type:", hashFromUrl ? "Partner client (update existing)" : "Direct client (create new)");
 
     try {
@@ -48,7 +50,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
 
       // FLUXO PARA CLIENTES DE PARCEIROS (COM HASH)
       if (hashFromUrl) {
-        console.log("Processing as partner client with hash:", hashFromUrl);
+        console.log("🔄 Processing as partner client with hash:", hashFromUrl);
         
         // Preparar dados para o endpoint receive-form-data
         const formPayload = {
@@ -61,19 +63,24 @@ export const useFormSubmission = (props: SubmissionProps) => {
           hash: hashFromUrl
         };
 
-        console.log("Sending to receive-form-data endpoint:", formPayload);
+        console.log("📤 Sending to receive-form-data endpoint:");
+        console.log("Payload:", formPayload);
 
         // Chamar a edge function para atualizar projeto existente
         const { data: result, error } = await supabase.functions.invoke('receive-form-data', {
           body: formPayload
         });
 
+        console.log("📥 Response from receive-form-data:");
+        console.log("Result:", result);
+        console.log("Error:", error);
+
         if (error) {
-          console.error("Error from receive-form-data:", error);
+          console.error("❌ Error from receive-form-data:", error);
           throw new Error(`Erro ao processar formulário: ${error.message}`);
         }
 
-        console.log("Partner project updated successfully:", result);
+        console.log("✅ Partner project updated successfully:", result);
 
         toast({
           title: "Formulário enviado com sucesso!",
@@ -85,7 +92,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
       }
 
       // FLUXO PARA CLIENTES DIRETOS (SEM HASH) - CRIAR NOVO PROJETO
-      console.log("Processing as direct client - creating new project");
+      console.log("🆕 Processing as direct client - creating new project");
 
       const formData = {
         ...data,
@@ -99,7 +106,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
       // Process logo upload with retry
       let logoUrl = null;
       if (logoFile) {
-        console.log("Uploading logo file:", logoFile.name);
+        console.log("📁 Uploading logo file:", logoFile.name);
         
         const { success, filePath, error } = await uploadFileWithRetry(logoFile, {
           folderPath: "logos",
@@ -107,19 +114,19 @@ export const useFormSubmission = (props: SubmissionProps) => {
         });
         
         if (!success || !filePath) {
-          console.error("Logo upload error:", error);
+          console.error("❌ Logo upload error:", error);
           throw new Error(`Erro ao fazer upload da logo: ${error?.message || 'Falha desconhecida'}`);
         }
 
         logoUrl = filePath;
-        console.log("Logo uploaded successfully:", logoUrl);
+        console.log("✅ Logo uploaded successfully:", logoUrl);
       }
 
       // Process depoimento uploads with retry - Store as a string array
       const depoimentoUrls: string[] = [];
       for (let i = 0; i < depoimentoFiles.length; i++) {
         const file = depoimentoFiles[i];
-        console.log("Uploading depoimento file:", file.name);
+        console.log("📁 Uploading depoimento file:", file.name);
         
         try {
           const { success, filePath, error } = await uploadFileWithRetry(file, {
@@ -128,14 +135,14 @@ export const useFormSubmission = (props: SubmissionProps) => {
           });
           
           if (!success || !filePath) {
-            console.error("Depoimento upload error:", error);
+            console.error("❌ Depoimento upload error:", error);
             throw error;
           }
 
           depoimentoUrls.push(filePath);
-          console.log("Depoimento uploaded successfully:", filePath);
+          console.log("✅ Depoimento uploaded successfully:", filePath);
         } catch (fileError) {
-          console.error("Error in depoimento upload:", fileError);
+          console.error("❌ Error in depoimento upload:", fileError);
           // Continue with other files instead of failing completely
           toast({
             description: `Erro ao enviar ${file.name}. Tentando continuar com os outros arquivos.`,
@@ -151,7 +158,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
         const file = midiaFiles[i];
         const caption = i < midiaCaptions.length ? midiaCaptions[i] : "";
         
-        console.log(`Uploading midia file ${i+1}/${midiaFiles.length}:`, file.name, "Caption:", caption);
+        console.log(`📁 Uploading midia file ${i+1}/${midiaFiles.length}:`, file.name, "Caption:", caption);
         
         try {
           const { success, filePath, error } = await uploadFileWithRetry(file, {
@@ -160,7 +167,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
           });
           
           if (!success || !filePath) {
-            console.error("Midia upload error:", error);
+            console.error("❌ Midia upload error:", error);
             throw error;
           }
 
@@ -174,10 +181,10 @@ export const useFormSubmission = (props: SubmissionProps) => {
           const serializedMediaItem = JSON.stringify(mediaItemObj);
           midiaItems.push(serializedMediaItem);
           
-          console.log("Midia uploaded successfully with caption:", filePath, caption);
+          console.log("✅ Midia uploaded successfully with caption:", filePath, caption);
           console.log("Serialized media item:", serializedMediaItem);
         } catch (fileError) {
-          console.error("Error in midia upload:", fileError);
+          console.error("❌ Error in midia upload:", fileError);
           // Continue with other files instead of failing completely
           toast({
             description: `Erro ao enviar ${file.name}. Tentando continuar com os outros arquivos.`,
@@ -186,7 +193,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
         }
       }
 
-      console.log("All files uploaded successfully, saving to database...");
+      console.log("✅ All files uploaded successfully, saving to database...");
       console.log("Depoimento URLs:", depoimentoUrls);
       console.log("Midia Items (serialized):", midiaItems);
 
@@ -220,11 +227,11 @@ export const useFormSubmission = (props: SubmissionProps) => {
         .select();
 
       if (personalizationError) {
-        console.error("Personalization error:", personalizationError);
+        console.error("❌ Personalization error:", personalizationError);
         throw new Error(`Erro ao salvar personalização: ${personalizationError.message}`);
       }
 
-      console.log("Personalization saved successfully:", personalizationData);
+      console.log("✅ Personalization saved successfully:", personalizationData);
       const personalizationId = personalizationData[0].id;
 
       // Step 2: Create project with reference to the personalization using personalization_id field
@@ -242,17 +249,17 @@ export const useFormSubmission = (props: SubmissionProps) => {
           .select();
 
         if (projectError) {
-          console.error("Project creation error:", projectError);
+          console.error("❌ Project creation error:", projectError);
           // We don't throw here because the personalization was successful
           toast({
             title: "Aviso",
             description: "Sua personalização foi salva, mas houve um problema na criação do projeto.",
           });
         } else {
-          console.log("Project created successfully:", projectData);
+          console.log("✅ Project created successfully:", projectData);
         }
       } catch (projectError) {
-        console.error("Project creation exception:", projectError);
+        console.error("❌ Project creation exception:", projectError);
         // We don't throw here because the personalization was successful
       }
 
@@ -263,7 +270,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
 
       navigate("/confirmacao");
     } catch (error) {
-      console.error("Form submission error:", error);
+      console.error("💥 Form submission error:", error);
       
       let errorMessage = "Ocorreu um erro ao enviar o formulário. Tente novamente.";
       if (error instanceof Error) {
@@ -288,7 +295,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
   };
 
   const retrySubmit = async (data: FormValues) => {
-    console.log("Retrying form submission...");
+    console.log("🔄 Retrying form submission...");
     await onSubmit(data);
   };
 
