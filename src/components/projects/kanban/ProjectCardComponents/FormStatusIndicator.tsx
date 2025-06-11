@@ -25,12 +25,11 @@ export const FormStatusIndicator = ({
           <CheckCircle2 className="h-3 w-3 mr-1" />
           Formulário preenchido
         </Badge>
-        <div className="text-xs text-gray-600">
-          <div>Modelo: <span className="font-medium">{modeloEscolhido}</span></div>
-          {dataFormulario && (
-            <div>Em: {new Date(dataFormulario).toLocaleDateString('pt-BR')}</div>
-          )}
-        </div>
+        {dataFormulario && (
+          <div className="text-xs text-gray-600">
+            Em: {new Date(dataFormulario).toLocaleDateString('pt-BR')}
+          </div>
+        )}
       </div>
     );
   }
