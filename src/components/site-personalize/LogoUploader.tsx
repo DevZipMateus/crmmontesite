@@ -78,14 +78,24 @@ const LogoUploader = ({ preview, onUpload, onRemove }: LogoUploaderProps) => {
     }
   };
 
-  const handleRemoveClick = () => {
+  const handleRemoveClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
     // Clear the file input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
     
+    // Clear any file error
+    setFileError(null);
+    
     // Call the remove function
     onRemove();
+    
+    toast({
+      description: "Logo removida com sucesso",
+    });
   };
   
   return (
