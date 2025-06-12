@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Project } from "@/types/project";
 import { fetchPersonalizationData } from "@/services/personalizationService";
@@ -21,6 +22,11 @@ const parseObservacoes = (observacoes: string | null) => {
   // Split por " | " para separar os campos
   const sections = observacoes.split(' | ');
   
+  // Primeira seção pode ser a descrição da empresa (se não tiver ":")
+  if (sections.length > 0 && !sections[0].includes(':')) {
+    data.descricao = sections[0].trim();
+  }
+  
   sections.forEach(section => {
     if (section.includes(':')) {
       const [key, ...valueParts] = section.split(':');
@@ -42,6 +48,7 @@ const parseObservacoes = (observacoes: string | null) => {
       } else if (keyLower.includes('redes') || keyLower.includes('social')) {
         data.redessociais = value;
       } else if (keyLower.includes('descrição') || keyLower.includes('descricao')) {
+        // Se há uma descrição explícita, ela sobrescreve a primeira seção
         data.descricao = value;
       } else if (keyLower.includes('fonte')) {
         data.fonte = value;
