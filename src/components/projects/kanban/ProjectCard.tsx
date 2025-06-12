@@ -10,6 +10,7 @@ import {
 import { PartnerIndicator } from "./ProjectCardComponents/PartnerIndicator";
 import { isPartnerProject } from "@/server/webhook-service";
 import { useNavigate } from "react-router-dom";
+import { Phone } from "lucide-react";
 
 interface ProjectCardProps {
   project: Project;
@@ -71,10 +72,11 @@ export default function ProjectCard({
         </div>
       )}
       
-      {/* Email complementar (se houver) */}
-      {project.email_complementar && (
-        <div className="mt-2 text-xs text-gray-600">
-          Email adicional: <span className="font-medium">{project.email_complementar}</span>
+      {/* Telefone para projetos de parceiro */}
+      {isPartnerProject(project) && project.telefone && (
+        <div className="mt-2 flex items-center gap-1 text-xs text-gray-600">
+          <Phone className="h-3 w-3" />
+          <span className="font-medium">{project.telefone}</span>
         </div>
       )}
       
