@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Project } from "@/types/project";
 import { fetchPersonalizationData } from "@/services/personalizationService";
@@ -26,15 +25,26 @@ const parseObservacoes = (observacoes: string | null) => {
     if (section.includes(':')) {
       const [key, ...valueParts] = section.split(':');
       const value = valueParts.join(':').trim();
+      const keyLower = key.toLowerCase();
       
-      if (key.toLowerCase().includes('serviços') || key.toLowerCase().includes('servicos')) {
+      if (keyLower.includes('serviços') || keyLower.includes('servicos')) {
         data.servicos = value;
-      } else if (key.toLowerCase().includes('depoimento')) {
+      } else if (keyLower.includes('depoimento')) {
         data.depoimentos = value;
-      } else if (key.toLowerCase().includes('plano')) {
+      } else if (keyLower.includes('plano')) {
         data.planos = value;
-      } else if (key.toLowerCase().includes('slogan')) {
+      } else if (keyLower.includes('slogan')) {
         data.slogan = value;
+      } else if (keyLower.includes('paleta') || keyLower.includes('cores')) {
+        data.paletacores = value;
+      } else if (keyLower.includes('endereço') || keyLower.includes('endereco')) {
+        data.endereco = value;
+      } else if (keyLower.includes('redes') || keyLower.includes('social')) {
+        data.redessociais = value;
+      } else if (keyLower.includes('descrição') || keyLower.includes('descricao')) {
+        data.descricao = value;
+      } else if (keyLower.includes('fonte')) {
+        data.fonte = value;
       }
     }
   });
@@ -50,31 +60,37 @@ const generatePartnerCommand = (project: Project) => {
   
   return `Vou lhe mantar as informações de uma empresa para implementar nesse layout. Otimize o site para SEO e cuide para não quebrar no mobile e deixar rolagem na horizontal. Mantenha responsivo.
 Logo é a imagem que lhe envio 
-Paleta de cores use as cores da logo e utilize a regra 60,30,10 para as proporções das cores onde 60% é branco
+${observacoesData.paletacores ? `Paleta de cores: ${observacoesData.paletacores}` : 'Paleta de cores: use as cores da logo e utilize a regra 60,30,10 para as proporções das cores onde 60% é branco'}
 
 ## INFORMAÇÕES BÁSICAS DA EMPRESA
-Nome da empresa: ${project.client_name || 'Não informado'}
-Responsável: ${project.responsible_name || 'Não informado'}
-Domínio: ${project.domain || 'Não informado'}
-Telefone: ${project.telefone || 'Não informado'}
-Email: ${project.email_complementar || 'Não informado'}
-CNPJ: ${project.cnpj || 'Não informado'}
+Nome da empresa: ${formatTextField(project.client_name)}
+Responsável: ${formatTextField(project.responsible_name)}
+Domínio: ${formatTextField(project.domain)}
+Telefone: ${formatTextField(project.telefone)}
+Email: ${formatTextField(project.email_complementar)}
+${observacoesData.endereco ? `Endereço: ${formatTextField(observacoesData.endereco)}` : ''}
+${observacoesData.redessociais ? `Redes Sociais: ${formatTextField(observacoesData.redessociais)}` : ''}
 
-## MODELO E PERSONALIZAÇÃO
-Modelo escolhido: ${project.modelo_escolhido || 'Não informado'}
-${observacoesData.slogan ? `Slogan: ${observacoesData.slogan}` : ''}
+## IDENTIDADE VISUAL
+Fonte: ${formatTextField(observacoesData.fonte)}
+Descrição: ${formatTextField(observacoesData.descricao)}
+Slogan: ${formatTextField(observacoesData.slogan)}
 
-## SERVIÇOS E CONTEÚDO
-${observacoesData.servicos ? `Serviços: ${observacoesData.servicos}` : 'Serviços: Não informado'}
-${observacoesData.depoimentos ? `Depoimentos: ${observacoesData.depoimentos}` : ''}
-${observacoesData.planos ? `Planos: ${observacoesData.planos}` : ''}
+## SERVIÇOS E PLANOS
+Possui planos: ${observacoesData.planos ? 'Sim' : 'Não'}
+${observacoesData.planos ? `Planos:\n${formatTextField(observacoesData.planos)}` : ''}
+Serviços: ${formatTextField(observacoesData.servicos)}
+Depoimentos: ${formatTextField(observacoesData.depoimentos)}
 
-## STATUS DO FORMULÁRIO
-Formulário preenchido: ${project.formulario_preenchido ? 'Sim' : 'Não'}
-${project.data_formulario ? `Data do preenchimento: ${new Date(project.data_formulario).toLocaleDateString('pt-BR')}` : ''}
+## CONFIGURAÇÕES ADICIONAIS
+Botão WhatsApp: Sim
+Possui Mapa: Não informado
+Modelo escolhido: ${formatTextField(project.modelo_escolhido)}
 
-## OBSERVAÇÕES COMPLETAS
-${project.observacoes_cliente || 'Nenhuma observação adicional'}`;
+## ARQUIVOS
+Logo: Não informado
+Depoimentos (imagens): Nenhum
+Mídias (fotos, vídeos): Nenhum`;
 };
 
 /**
