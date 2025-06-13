@@ -1,5 +1,6 @@
 
 import React from "react";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
@@ -17,14 +18,16 @@ export const Logo: React.FC<LogoProps> = ({ className, size = "md" }) => {
 
   return (
     <div className={cn("flex items-center", className)}>
-      <img 
-        src="/logocrm.png" 
-        alt="MonteSite CRM Logo" 
-        className={cn(
-          "object-contain max-w-full max-h-full",
-          sizeClasses[size]
-        )}
-      />
+      <Link to="/home">
+        <img 
+          src="/logocrm.png" 
+          alt="MonteSite CRM Logo" 
+          className={cn(
+            "object-contain max-w-full max-h-full cursor-pointer hover:opacity-80 transition-opacity",
+            sizeClasses[size]
+          )}
+        />
+      </Link>
     </div>
   );
 };
