@@ -20,19 +20,20 @@ export const StatusButtonsGrid = ({
   // Filter out the current status
   const availableStatuses = statusOptions.filter(s => s.value !== currentStatus);
   
-  // For mobile, only show first 2 statuses
+  // For mobile, only show first 2 statuses, for desktop show first 4
   const displayStatuses = isMobile
     ? availableStatuses.slice(0, 2)
-    : availableStatuses;
+    : availableStatuses.slice(0, 4);
     
   return (
-    <div className="grid grid-cols-2 gap-1">
+    <div className={`grid gap-1 ${isMobile ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3'}`}>
       {displayStatuses.map(status => (
         <StatusButton 
           key={status.value}
           status={status}
           onStatusChange={() => onStatusChange(status.value)}
           updatingStatus={updatingStatus}
+          size="sm"
         />
       ))}
     </div>

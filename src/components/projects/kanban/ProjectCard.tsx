@@ -48,14 +48,16 @@ export default function ProjectCard({
 
   return (
     <Card 
-      className="p-4 bg-white shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-primary/20 cursor-move"
+      className="p-3 bg-white shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-primary/20 cursor-move"
       draggable
       onDragStart={(e) => onDragStart(e, project.id)}
       style={{ opacity: draggingId === project.id ? 0.5 : 1 }}
     >
       {/* Indicador de projeto de parceiro */}
       {isPartnerProject(project) && project.partner_hash && (
-        <PartnerIndicator partnerHash={project.partner_hash} />
+        <div className="mb-2">
+          <PartnerIndicator partnerHash={project.partner_hash} />
+        </div>
       )}
       
       <ProjectCardHeader 
@@ -67,7 +69,7 @@ export default function ProjectCard({
       
       {/* Status do formulário de personalização */}
       {isPartnerProject(project) && (
-        <div className="mt-3">
+        <div className="mt-2 mb-2">
           <FormStatusIndicator
             formularioPreenchido={project.formulario_preenchido || false}
             partnerHash={project.partner_hash}
@@ -79,19 +81,21 @@ export default function ProjectCard({
       
       {/* Telefone para projetos de parceiro */}
       {isPartnerProject(project) && project.telefone && (
-        <div className="mt-2 flex items-center gap-1 text-xs text-gray-600">
+        <div className="mt-2 mb-2 flex items-center gap-1 text-xs text-gray-600">
           <Phone className="h-3 w-3" />
           <span className="font-medium">{project.telefone}</span>
         </div>
       )}
       
-      <ProjectCardDomain 
-        domain={project.domain}
-      />
+      <div className="mb-2">
+        <ProjectCardDomain 
+          domain={project.domain}
+        />
+      </div>
       
       {/* Botões de mudança de status */}
-      <div className="mt-3 border-t border-gray-100 pt-3">
-        <div className="text-xs text-gray-500 mb-2">Alterar status:</div>
+      <div className="mb-3 border-t border-gray-100 pt-2">
+        <div className="text-xs text-gray-500 mb-1.5 font-medium">Alterar status:</div>
         <StatusButtonsGrid
           currentStatus={project.status}
           statusOptions={statusOptions}
@@ -100,12 +104,15 @@ export default function ProjectCard({
         />
       </div>
       
-      <ProjectCardActions 
-        projectId={project.id}
-        projectName={project.client_name}
-        onViewEdit={handleViewEdit}
-        onProjectDeleted={onProjectDeleted}
-      />
+      {/* Ações do projeto */}
+      <div className="border-t border-gray-100 pt-2">
+        <ProjectCardActions 
+          projectId={project.id}
+          projectName={project.client_name}
+          onViewEdit={handleViewEdit}
+          onProjectDeleted={onProjectDeleted}
+        />
+      </div>
     </Card>
   );
 }
