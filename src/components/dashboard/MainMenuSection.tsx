@@ -3,12 +3,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { 
   LayoutGrid, 
-  PlusCircle, 
-  FilePlus, 
-  Presentation, 
+  Plus, 
+  Terminal,
   Link as LinkIcon,
-  Webhook,
-  Users
+  Settings
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -42,7 +40,7 @@ const MainMenuSection: React.FC = () => {
     <section className="mb-8">
       <h2 className="text-2xl font-bold mb-4">Menu Principal</h2>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <MenuItem 
           icon={<LayoutGrid size={24} />}
           label="Ver Projetos"
@@ -51,24 +49,17 @@ const MainMenuSection: React.FC = () => {
         />
         
         <MenuItem 
-          icon={<PlusCircle size={24} />}
-          label="Novo Projeto"
-          href="/novo-projeto"
-          description="Criar um novo projeto"
+          icon={<Plus size={24} />}
+          label="Criar Projetos"
+          href="/criar-projetos"
+          description="Criar novos projetos e personalizar sites"
         />
         
         <MenuItem 
-          icon={<FilePlus size={24} />}
-          label="Personalizar Site"
-          href="/personalize-site"
-          description="Personalizar modelos de site"
-        />
-        
-        <MenuItem 
-          icon={<Presentation size={24} />}
-          label="Sites em Produção"
+          icon={<Terminal size={24} />}
+          label="Gerar Comandos"
           href="/producao-sites"
-          description="Gerenciar sites em desenvolvimento"
+          description="Gerar comandos de produção"
         />
         
         <MenuItem 
@@ -79,17 +70,10 @@ const MainMenuSection: React.FC = () => {
         />
         
         <MenuItem 
-          icon={<Users size={24} />}
-          label="Parceiros"
-          href="/parceiros"
-          description="Gestão de parceiros e integrações"
-        />
-        
-        <MenuItem 
-          icon={<Webhook size={24} />}
-          label="Webhooks"
+          icon={<Settings size={24} />}
+          label="Configurações"
           href="/webhooks"
-          description="Gerenciar APIs e integrações"
+          description="Webhooks, APIs e parceiros"
         />
       </div>
     </section>

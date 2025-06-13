@@ -1,5 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,22 +18,75 @@ import {
   AlertCircle,
   Shield,
   Zap,
-  CheckCircle
+  CheckCircle,
+  Users
 } from "lucide-react";
 import { WebhookConfiguration } from "@/components/webhook/WebhookConfiguration";
 import { WebhookDocumentation } from "@/components/webhook/WebhookDocumentation";
 import { WebhookLogs } from "@/components/webhook/WebhookLogs";
 import { ApiManagement } from "@/components/webhook/ApiManagement";
 import { AuthenticationLogs } from "@/components/webhook/AuthenticationLogs";
+import { PartnersTable } from "@/components/partners/PartnersTable";
+import { PartnerDialog } from "@/components/partners/PartnerDialog";
+import { WebhookLogsCard } from "@/components/partners/WebhookLogsCard";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Partner } from "@/types/webhook";
 
 export default function WebhookManagement() {
-  const [activeTab, setActiveTab] = useState("config");
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "config");
+  const [isPartnerDialogOpen, setIsPartnerDialogOpen] = useState(false);
+  const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
+
+  // Partners data
+  const { data: partners, isLoading: partnersLoading, refetch: refetchPartners } = useQuery({
+    queryKey: ['partners'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('partners')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as Partner[];
+    }
+  });
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  const handleEditPartner = (partner: Partner) => {
+    setSelectedPartner(partner);
+    setIsPartnerDialogOpen(true);
+  };
+
+  const handleNewPartner = () => {
+    setSelectedPartner(null);
+    setIsPartnerDialogOpen(true);
+  };
+
+  const handleClosePartnerDialog = () => {
+    setIsPartnerDialogOpen(false);
+    setSelectedPartner(null);
+    refetchPartners();
+  };
 
   return (
     <PageLayout 
-      title="Gerenciamento de Webhooks"
+      title="Configurações e Integrações"
       actions={
         <div className="flex items-center gap-2">
+          {activeTab === "partners" && (
+            <Button onClick={handleNewPartner} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Novo Parceiro
+            </Button>
+          )}
           <Badge variant="outline" className="bg-green-100 text-green-700">
             <Zap className="h-3 w-3 mr-1" />
             Processamento Automático
@@ -109,7 +163,7 @@ export default function WebhookManagement() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="config">
               <Settings className="h-4 w-4 mr-2" />
               Configuração
@@ -129,6 +183,10 @@ export default function WebhookManagement() {
             <TabsTrigger value="apis">
               <ExternalLink className="h-4 w-4 mr-2" />
               APIs
+            </TabsTrigger>
+            <TabsTrigger value="partners">
+              <Users className="h-4 w-4 mr-2" />
+              Parceiros
             </TabsTrigger>
           </TabsList>
 
@@ -150,6 +208,25 @@ export default function WebhookManagement() {
 
           <TabsContent value="apis" className="space-y-4">
             <ApiManagement />
+          </TabsContent>
+
+          <TabsContent value="partners" className="space-y-4">
+            <div className="space-y-6">
+              <PartnersTable 
+                partners={partners || []}
+                loading={partnersLoading}
+                onEdit={handleEditPartner}
+                onRefresh={refetchPartners}
+              />
+              
+              <WebhookLogsCard />
+              
+              <PartnerDialog
+                open={isPartnerDialogOpen}
+                onClose={handleClosePartnerDialog}
+                partner={selectedPartner}
+              />
+            </div>
           </TabsContent>
         </Tabs>
       </div>

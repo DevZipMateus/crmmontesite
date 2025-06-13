@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -19,8 +20,8 @@ import AuthGuard from "./components/auth/AuthGuard";
 import PublicPersonalizeForm from "./pages/PublicPersonalizeForm";
 import CustomUrlAdmin from "./pages/CustomUrlAdmin";
 import PersonalizacaoDetalhe from "@/pages/PersonalizacaoDetalhe";
-import Parceiros from "./pages/Parceiros";
 import WebhookManagement from "./pages/WebhookManagement";
+import CriarProjetos from "./pages/CriarProjetos";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,16 @@ const App = () => {
                 <Index />
               </AuthGuard>
             } />
+            
+            {/* Nova rota unificada para criar projetos */}
+            <Route path="/criar-projetos" element={
+              <AuthGuard>
+                <CriarProjetos />
+              </AuthGuard>
+            } />
+            
+            {/* Redirect parceiros para webhooks com tab ativa */}
+            <Route path="/parceiros" element={<Navigate to="/webhooks?tab=partners" replace />} />
             
             {/* Outras rotas protegidas */}
             <Route path="/projetos" element={
@@ -108,14 +119,7 @@ const App = () => {
               </AuthGuard>
             } />
             
-            {/* Rota para gestão de parceiros */}
-            <Route path="/parceiros" element={
-              <AuthGuard>
-                <Parceiros />
-              </AuthGuard>
-            } />
-            
-            {/* Rota para gerenciamento de webhooks */}
+            {/* Rota para gerenciamento de webhooks e configurações */}
             <Route path="/webhooks" element={
               <AuthGuard>
                 <WebhookManagement />
