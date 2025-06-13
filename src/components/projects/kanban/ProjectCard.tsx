@@ -7,6 +7,7 @@ import {
   ProjectCardActions,
   FormStatusIndicator 
 } from "./ProjectCardComponents";
+import { StatusButtonsGrid } from "./ProjectCardComponents/StatusButtonsGrid";
 import { PartnerIndicator } from "./ProjectCardComponents/PartnerIndicator";
 import { isPartnerProject } from "@/server/webhook-service";
 import { useNavigate } from "react-router-dom";
@@ -39,6 +40,10 @@ export default function ProjectCard({
     } else {
       navigate(`/projeto/${projectId}/editar`);
     }
+  };
+
+  const handleStatusChange = (newStatus: string) => {
+    onStatusChange(project.id, newStatus);
   };
 
   return (
@@ -83,6 +88,17 @@ export default function ProjectCard({
       <ProjectCardDomain 
         domain={project.domain}
       />
+      
+      {/* Botões de mudança de status */}
+      <div className="mt-3 border-t border-gray-100 pt-3">
+        <div className="text-xs text-gray-500 mb-2">Alterar status:</div>
+        <StatusButtonsGrid
+          currentStatus={project.status}
+          statusOptions={statusOptions}
+          updatingStatus={updatingStatus}
+          onStatusChange={handleStatusChange}
+        />
+      </div>
       
       <ProjectCardActions 
         projectId={project.id}
