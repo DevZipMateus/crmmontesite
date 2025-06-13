@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Project } from "@/types/project";
 import { fetchPersonalizationData } from "@/services/personalizationService";
@@ -10,6 +9,77 @@ export interface SiteCommandGeneratorProps {
   setIsGenerating: (isGenerating: boolean) => void;
   setGeneratedText: (text: string) => void;
 }
+
+/**
+ * Nova introdução melhorada para todos os comandos
+ */
+const getImprovedIntroduction = () => {
+  return `Crie um site institucional completo com base nas informações da empresa que irei fornecer a seguir.
+
+⚙️ CONFIGURAÇÕES TÉCNICAS
+Otimizar completamente o site para SEO, aplicando:
+
+Heading tags bem estruturadas (H1, H2, H3)
+
+Meta descriptions exclusivas e atrativas
+
+URLs amigáveis
+
+Texto alternativo (alt) em todas as imagens
+
+Criar automaticamente os arquivos:
+
+sitemap.xml (para indexação nos buscadores)
+
+robots.txt (permitindo todos os bots, exceto caminhos irrelevantes como /admin ou /login)
+
+O site deve ser totalmente responsivo, adaptando-se a celulares, tablets e desktops, sem rolagem horizontal e com bom desempenho em 3G.
+
+Garantir carregamento rápido, otimizando imagens e elementos visuais.
+
+Inserir botão flutuante do WhatsApp com número informado.
+
+Embutir um mapa interativo com a localização exata da empresa (caso endereço seja fornecido).
+
+Incluir menu fixo no topo com navegação por âncoras suaves para as seções: "Início", "Sobre", "Serviços", "Planos", "Depoimentos", "Localização", "Contato".
+
+Usar a logo enviada como referência de identidade visual.
+
+Paleta de cores baseada na regra 60/30/10:
+
+60% branco (plano de fundo principal)
+
+30% cor primária da logo
+
+10% cor de destaque da logo
+
+🎨 ESTILO VISUAL (ESTÉTICA E PERSONALIDADE)
+Evitar visual genérico ou padrão. Criar um layout moderno, bonito e único.
+
+Usar fontes elegantes ou aconchegantes (dependendo do segmento).
+
+Usar ícones personalizados e imagens com boa resolução.
+
+Aplicar transições suaves entre seções e scroll leve.
+
+Valorização dos diferenciais da empresa em seções visuais com destaque.
+
+Trabalhar com espaços em branco bem distribuídos, blocos bem definidos e harmonia visual.
+
+♿ ACESSIBILIDADE (UX INCLUSIVO)
+Garantir bom contraste de cores.
+
+Utilizar textos legíveis, com espaçamento adequado.
+
+Tornar o site navegável por teclado e compatível com leitores de tela.
+
+Evitar texto em imagens quando possível.
+
+📊 OPCIONAIS DE RASTREAMENTO E MÍDIA
+Preparar estrutura do site para futura integração com Google Analytics e Pixel do Facebook.
+
+Incluir meta tags para Open Graph (OG) e Twitter Card, para uma boa visualização ao compartilhar o site nas redes sociais.`;
+};
 
 /**
  * Extrai informações estruturadas do campo observacoes_cliente
@@ -65,8 +135,7 @@ const parseObservacoes = (observacoes: string | null) => {
 const generatePartnerCommand = (project: Project) => {
   const observacoesData = parseObservacoes(project.observacoes_cliente);
   
-  return `Vou lhe mantar as informações de uma empresa para implementar nesse layout. Otimize o site para SEO e cuide para não quebrar no mobile e deixar rolagem na horizontal. Mantenha responsivo.
-Logo é a imagem que lhe envio 
+  return `${getImprovedIntroduction()}
 ${observacoesData.paletacores ? `Paleta de cores: ${observacoesData.paletacores}` : 'Paleta de cores: use as cores da logo e utilize a regra 60,30,10 para as proporções das cores onde 60% é branco'}
 
 ## INFORMAÇÕES BÁSICAS DA EMPRESA
@@ -120,10 +189,8 @@ export const generateSiteCommand = async ({
     
     // Verifica se o projeto tem um ID de personalização
     if (!project.personalization_id) {
-      // Se não tiver, gera comando básico como antes
-      const basicCommandText = `Vou lhe mantar as informações de uma empresa para implementar nesse layout. Otimize o site para SEO e cuide para não quebrar no mobile e deixar rolagem na horizontal. Mantenha responsivo.
-Logo é a imagem que lhe envio 
-Paleta de cores use as cores da logo e utilize a regra 60,30,10 para as proporções das cores onde 60% é branco
+      // Se não tiver, gera comando básico com nova introdução
+      const basicCommandText = `${getImprovedIntroduction()}
 
 Nome da empresa: ${project.client_name || 'Não informado'}
 Responsável: ${project.responsible_name || 'Não informado'}
@@ -138,8 +205,7 @@ Domínio: ${project.domain || 'Não informado'}`;
     
     if (personalizationData) {
       // Gera um comando completo com todos os dados disponíveis
-      const completeCommandText = `Vou lhe mantar as informações de uma empresa para implementar nesse layout. Otimize o site para SEO e cuide para não quebrar no mobile e deixar rolagem na horizontal. Mantenha responsivo.
-Logo é a imagem que lhe envio 
+      const completeCommandText = `${getImprovedIntroduction()}
 ${personalizationData.paletacores ? `Paleta de cores: ${personalizationData.paletacores}` : 'Paleta de cores: use as cores da logo e utilize a regra 60,30,10 para as proporções das cores onde 60% é branco'}
 
 ## INFORMAÇÕES BÁSICAS DA EMPRESA
@@ -175,10 +241,8 @@ Mídias (fotos, vídeos): ${formatArrayField(personalizationData.midia_urls)}`;
 
       setGeneratedText(completeCommandText);
     } else {
-      // Fallback para o formato básico
-      const basicCommandText = `Vou lhe mantar as informações de uma empresa para implementar nesse layout. Otimize o site para SEO e cuide para não quebrar no mobile e deixar rolagem na horizontal. Mantenha responsivo.
-Logo é a imagem que lhe envio 
-Paleta de cores use as cores da logo e utilize a regra 60,30,10 para as proporções das cores onde 60% é branco
+      // Fallback para o formato básico com nova introdução
+      const basicCommandText = `${getImprovedIntroduction()}
 
 Nome da empresa: ${project.client_name || 'Não informado'}
 Responsável: ${project.responsible_name || 'Não informado'}
