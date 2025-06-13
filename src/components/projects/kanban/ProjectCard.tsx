@@ -9,6 +9,7 @@ import {
 } from "./ProjectCardComponents";
 import { StatusButtonsGrid } from "./ProjectCardComponents/StatusButtonsGrid";
 import { PartnerIndicator } from "./ProjectCardComponents/PartnerIndicator";
+import { CustomizationDeadlineIndicator } from "./ProjectCardComponents/CustomizationDeadlineIndicator";
 import { isPartnerProject } from "@/server/webhook-service";
 import { useNavigate } from "react-router-dom";
 import { Phone } from "lucide-react";
@@ -92,6 +93,14 @@ export default function ProjectCard({
           domain={project.domain}
         />
       </div>
+      
+      {/* Indicador de prazo de customização */}
+      <CustomizationDeadlineIndicator
+        status={project.status}
+        siteReadyDate={project.site_ready_date}
+        customizationDeadline={project.customization_deadline}
+        requiresPaidCustomization={project.requires_paid_customization}
+      />
       
       {/* Botões de mudança de status */}
       <div className="mb-3 border-t border-gray-100 pt-2">

@@ -203,6 +203,7 @@ export type Database = {
           client_type: string | null
           cnpj: string | null
           created_at: string | null
+          customization_deadline: string | null
           data_formulario: string | null
           domain: string | null
           email_complementar: string | null
@@ -216,7 +217,9 @@ export type Database = {
           personalization_id: string | null
           project_source: string | null
           provider_credentials: string | null
+          requires_paid_customization: boolean | null
           responsible_name: string | null
+          site_ready_date: string | null
           status: string | null
           telefone: string | null
           template: string | null
@@ -228,6 +231,7 @@ export type Database = {
           client_type?: string | null
           cnpj?: string | null
           created_at?: string | null
+          customization_deadline?: string | null
           data_formulario?: string | null
           domain?: string | null
           email_complementar?: string | null
@@ -241,7 +245,9 @@ export type Database = {
           personalization_id?: string | null
           project_source?: string | null
           provider_credentials?: string | null
+          requires_paid_customization?: boolean | null
           responsible_name?: string | null
+          site_ready_date?: string | null
           status?: string | null
           telefone?: string | null
           template?: string | null
@@ -253,6 +259,7 @@ export type Database = {
           client_type?: string | null
           cnpj?: string | null
           created_at?: string | null
+          customization_deadline?: string | null
           data_formulario?: string | null
           domain?: string | null
           email_complementar?: string | null
@@ -266,7 +273,9 @@ export type Database = {
           personalization_id?: string | null
           project_source?: string | null
           provider_credentials?: string | null
+          requires_paid_customization?: boolean | null
           responsible_name?: string | null
+          site_ready_date?: string | null
           status?: string | null
           telefone?: string | null
           template?: string | null
@@ -509,6 +518,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_business_days: {
+        Args: { start_date: string; days_to_add: number }
+        Returns: string
+      }
       create_bucket_policy: {
         Args: { bucket_name: string }
         Returns: boolean

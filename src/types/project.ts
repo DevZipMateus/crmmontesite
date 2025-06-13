@@ -28,4 +28,9 @@ export interface Project {
   email_complementar?: string;
   formulario_preenchido?: boolean;
   data_formulario?: string;
+  
+  // Campos para controle de prazo de customização
+  site_ready_date?: string;
+  customization_deadline?: string;
+  requires_paid_customization?: boolean;
 }
