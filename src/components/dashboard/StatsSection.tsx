@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from "react";
-import { Briefcase, Globe, CheckCircle2, Users } from "lucide-react";
+import { Briefcase, Globe, CheckCircle2, Users, UserCheck } from "lucide-react";
 import StatsItem from "./StatsItem";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -8,6 +9,7 @@ interface DashboardStats {
   totalClients: number;
   partnerClients: number;
   finalClients: number;
+  partnerProjectsCount: number;
   sitesInProduction: number;
   sitesPublished: number;
   sitesReady: number;
@@ -18,6 +20,7 @@ const StatsSection: React.FC = () => {
     totalClients: 0,
     partnerClients: 0,
     finalClients: 0,
+    partnerProjectsCount: 0,
     sitesInProduction: 0,
     sitesPublished: 0,
     sitesReady: 0
@@ -46,6 +49,12 @@ const StatsSection: React.FC = () => {
           .select('*', { count: 'exact', head: true })
           .eq('client_type', 'cliente_final');
         
+        // Get partner projects count (projects with partner_hash)
+        const { count: partnerProjectsCount } = await supabase
+          .from('projects')
+          .select('*', { count: 'exact', head: true })
+          .not('partner_hash', 'is', null);
+        
         // Get sites in production count (Recebido e Criando site)
         const { count: productionCount } = await supabase
           .from('projects')
@@ -68,6 +77,7 @@ const StatsSection: React.FC = () => {
           totalClients: totalCount || 0,
           partnerClients: partnerCount || 0,
           finalClients: finalCount || 0,
+          partnerProjectsCount: partnerProjectsCount || 0,
           sitesInProduction: productionCount || 0,
           sitesPublished: publishedCount || 0,
           sitesReady: readyCount || 0
@@ -113,7 +123,7 @@ const StatsSection: React.FC = () => {
         />
       </div>
       
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatsItem
           title="Parceiros"
           value={stats.partnerClients}
@@ -128,6 +138,14 @@ const StatsSection: React.FC = () => {
           icon={<Users className="h-6 w-6 text-indigo-600" />}
           iconBgColor="bg-indigo-100"
           iconColor="text-indigo-600"
+          loading={loading}
+        />
+        <StatsItem
+          title="Projetos de Parceiros"
+          value={stats.partnerProjectsCount}
+          icon={<UserCheck className="h-6 w-6 text-purple-600" />}
+          iconBgColor="bg-purple-100"
+          iconColor="text-purple-600"
           loading={loading}
         />
       </div>
