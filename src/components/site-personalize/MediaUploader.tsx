@@ -46,36 +46,89 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
     }
   };
 
-  const renderPreview = (src: string, index: number) => {
-    const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(src);
-    const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(src);
+  const isImageFile = (src: string) => {
+    // Check if it's a blob URL (from createObjectURL)
+    if (src.startsWith('blob:')) {
+      return true; // Assume blob URLs from file input are images since we're filtering by accept
+    }
     
-    if (isImage) {
+    // Check file extension for regular URLs
+    return /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(src);
+  };
+
+  const isVideoFile = (src: string) => {
+    // For blob URLs, check if video is in accept types
+    if (src.startsWith('blob:') && accept.includes('video')) {
+      return false; // We'll handle video detection differently if needed
+    }
+    
+    return /\.(mp4|webm|ogg|mov)$/i.test(src);
+  };
+
+  const renderPreview = (src: string, index: number) => {
+    console.log(`Rendering preview for index ${index}:`, src);
+    
+    // Try to render as image first for most cases
+    if (isImageFile(src) || src.startsWith('blob:')) {
       return (
         <img
           src={src}
           alt={`Preview ${index + 1}`}
           className="w-full h-32 object-cover rounded-t-md"
+          onError={(e) => {
+            console.error(`Error loading image preview for index ${index}:`, src);
+            // Don't replace with placeholder, let the error show
+          }}
+          onLoad={() => {
+            console.log(`Successfully loaded image preview for index ${index}`);
+          }}
         />
       );
     }
     
-    if (isVideo) {
+    if (isVideoFile(src)) {
       return (
         <video
           src={src}
           controls
           className="w-full h-32 object-cover rounded-t-md"
+          onError={(e) => {
+            console.error(`Error loading video preview for index ${index}:`, src);
+          }}
         />
       );
     }
     
+    // Fallback - try as image anyway in case our detection failed
     return (
-      <div className="w-full h-32 flex items-center justify-center bg-gray-100 rounded-t-md">
-        <FileImage className="h-12 w-12 text-gray-400" />
-      </div>
+      <img
+        src={src}
+        alt={`Preview ${index + 1}`}
+        className="w-full h-32 object-cover rounded-t-md"
+        onError={(e) => {
+          console.error(`Fallback image failed for index ${index}:`, src);
+          // Replace with file icon only if image load fails
+          const target = e.target as HTMLImageElement;
+          target.style.display = 'none';
+          const parent = target.parentElement;
+          if (parent) {
+            parent.innerHTML = `
+              <div class="w-full h-32 flex items-center justify-center bg-gray-100 rounded-t-md">
+                <svg class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            `;
+          }
+        }}
+        onLoad={() => {
+          console.log(`Fallback image loaded successfully for index ${index}`);
+        }}
+      />
     );
   };
+
+  console.log(`MediaUploader rendering - Previews count: ${previews.length}`, previews);
 
   return (
     <div className="space-y-4">
