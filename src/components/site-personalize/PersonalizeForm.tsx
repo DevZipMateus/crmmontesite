@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PersonalizeBasicForm } from "./PersonalizeBasicForm";
 import { PersonalizeServicosForm } from "./PersonalizeServicosForm";
 import { PersonalizeConfigForm } from "./PersonalizeConfigForm";
@@ -45,8 +44,6 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
   projectHash,
   onSuccess
 }) => {
-  const [activeTab, setActiveTab] = useState("basico");
-  
   // File states
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -104,51 +101,58 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
   return (
     <div className="space-y-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="basico">Informações Básicas</TabsTrigger>
-              <TabsTrigger value="servicos">Serviços & Conteúdo</TabsTrigger>
-              <TabsTrigger value="config">Configurações</TabsTrigger>
-            </TabsList>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          {/* Informações Básicas */}
+          <div className="space-y-6">
+            <div className="border-b pb-4">
+              <h3 className="text-lg font-medium text-gray-900">Informações Básicas</h3>
+              <p className="text-sm text-gray-500 mt-1">Dados principais da sua empresa</p>
+            </div>
+            <PersonalizeBasicForm
+              form={form}
+              logoPreview={logoPreview}
+              depoimentoPreviews={depoimentoPreviews}
+              midiaPreviews={midiaPreviews}
+              midiaCaptions={midiaCaptions}
+              handleLogoUpload={fileHandlers.handleLogoUpload}
+              handleRemoveLogo={fileHandlers.handleRemoveLogo}
+              handleDepoimentoUpload={fileHandlers.handleDepoimentoUpload}
+              handleRemoveDepoimento={fileHandlers.handleRemoveDepoimento}
+              handleMidiaUpload={fileHandlers.handleMidiaUpload}
+              handleRemoveMidia={fileHandlers.handleRemoveMidia}
+              handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
+            />
+          </div>
 
-            <TabsContent value="basico" className="space-y-6 mt-6">
-              <PersonalizeBasicForm
-                form={form}
-                logoPreview={logoPreview}
-                depoimentoPreviews={depoimentoPreviews}
-                midiaPreviews={midiaPreviews}
-                midiaCaptions={midiaCaptions}
-                handleLogoUpload={fileHandlers.handleLogoUpload}
-                handleRemoveLogo={fileHandlers.handleRemoveLogo}
-                handleDepoimentoUpload={fileHandlers.handleDepoimentoUpload}
-                handleRemoveDepoimento={fileHandlers.handleRemoveDepoimento}
-                handleMidiaUpload={fileHandlers.handleMidiaUpload}
-                handleRemoveMidia={fileHandlers.handleRemoveMidia}
-                handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
-              />
-            </TabsContent>
+          {/* Serviços & Conteúdo */}
+          <div className="space-y-6">
+            <div className="border-b pb-4">
+              <h3 className="text-lg font-medium text-gray-900">Serviços & Conteúdo</h3>
+              <p className="text-sm text-gray-500 mt-1">Detalhes sobre seus serviços e depoimentos</p>
+            </div>
+            <PersonalizeServicosForm 
+              form={form}
+              depoimentoPreviews={depoimentoPreviews}
+              handleDepoimentoUpload={fileHandlers.handleDepoimentoUpload}
+              handleRemoveDepoimento={fileHandlers.handleRemoveDepoimento}
+            />
+          </div>
 
-            <TabsContent value="servicos" className="space-y-6 mt-6">
-              <PersonalizeServicosForm 
-                form={form}
-                depoimentoPreviews={depoimentoPreviews}
-                handleDepoimentoUpload={fileHandlers.handleDepoimentoUpload}
-                handleRemoveDepoimento={fileHandlers.handleRemoveDepoimento}
-              />
-            </TabsContent>
-
-            <TabsContent value="config" className="space-y-6 mt-6">
-              <PersonalizeConfigForm 
-                form={form}
-                midiaPreviews={midiaPreviews}
-                midiaCaptions={midiaCaptions}
-                handleMidiaUpload={fileHandlers.handleMidiaUpload}
-                handleRemoveMidia={fileHandlers.handleRemoveMidia}
-                handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
-              />
-            </TabsContent>
-          </Tabs>
+          {/* Configurações */}
+          <div className="space-y-6">
+            <div className="border-b pb-4">
+              <h3 className="text-lg font-medium text-gray-900">Configurações</h3>
+              <p className="text-sm text-gray-500 mt-1">Configurações adicionais do seu site</p>
+            </div>
+            <PersonalizeConfigForm 
+              form={form}
+              midiaPreviews={midiaPreviews}
+              midiaCaptions={midiaCaptions}
+              handleMidiaUpload={fileHandlers.handleMidiaUpload}
+              handleRemoveMidia={fileHandlers.handleRemoveMidia}
+              handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
+            />
+          </div>
 
           <div className="flex justify-center pt-6">
             <Button 
