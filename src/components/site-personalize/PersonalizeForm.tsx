@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -110,13 +111,8 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
             <PersonalizeBasicForm
               form={form}
               logoPreview={logoPreview}
-              midiaPreviews={midiaPreviews}
-              midiaCaptions={midiaCaptions}
               handleLogoUpload={fileHandlers.handleLogoUpload}
               handleRemoveLogo={fileHandlers.handleRemoveLogo}
-              handleMidiaUpload={fileHandlers.handleMidiaUpload}
-              handleRemoveMidia={fileHandlers.handleRemoveMidia}
-              handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
             />
           </div>
 

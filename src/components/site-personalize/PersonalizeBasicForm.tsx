@@ -4,7 +4,6 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import LogoUploader from "./LogoUploader";
-import MediaUploader from "./MediaUploader";
 import { UseFormReturn } from "react-hook-form";
 
 export interface FormValues {
@@ -31,25 +30,15 @@ export interface FormValues {
 interface PersonalizeBasicFormProps {
   form: UseFormReturn<FormValues>;
   logoPreview: string | null;
-  midiaPreviews: string[];
-  midiaCaptions: string[];
   handleLogoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveLogo: () => void;
-  handleMidiaUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveMidia: (index: number) => void;
-  handleUpdateMidiaCaption: (index: number, caption: string) => void;
 }
 
 export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
   form,
   logoPreview,
-  midiaPreviews,
-  midiaCaptions,
   handleLogoUpload,
   handleRemoveLogo,
-  handleMidiaUpload,
-  handleRemoveMidia,
-  handleUpdateMidiaCaption,
 }) => {
   return (
     <div className="space-y-6">
@@ -150,20 +139,6 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
         preview={logoPreview}
         onUpload={handleLogoUpload}
         onRemove={handleRemoveLogo}
-      />
-
-      {/* Mídias Upload */}
-      <MediaUploader
-        label="Mídias da Empresa"
-        description="Fotos, vídeos ou outras mídias da sua empresa"
-        accept="image/*,video/*"
-        multiple={true}
-        previews={midiaPreviews}
-        captions={midiaCaptions}
-        onUpload={handleMidiaUpload}
-        onRemove={handleRemoveMidia}
-        onUpdateCaption={handleUpdateMidiaCaption}
-        allowCaptions={true}
       />
     </div>
   );
