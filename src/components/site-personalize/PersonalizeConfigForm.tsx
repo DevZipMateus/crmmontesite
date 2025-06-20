@@ -9,6 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { UseFormReturn } from "react-hook-form";
 import { FormValues } from "./PersonalizeBasicForm";
@@ -106,6 +107,25 @@ export const PersonalizeConfigForm: React.FC<PersonalizeConfigFormProps> = ({
             )}
           />
         )}
+
+        {/* Observações */}
+        <FormField
+          control={form.control}
+          name="observacoes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Observações Adicionais</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Inclua aqui observações especiais, funcionalidades específicas que deseja, ou qualquer outra informação importante para seu projeto..."
+                  className="min-h-[100px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
     </>
   );

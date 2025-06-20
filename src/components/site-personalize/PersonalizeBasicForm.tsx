@@ -97,6 +97,42 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
         )}
       />
 
+      {/* Endereço */}
+      <FormField
+        control={form.control}
+        name="endereco"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Endereço</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="Rua, número, bairro, cidade - CEP"
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Horário de Funcionamento */}
+      <FormField
+        control={form.control}
+        name="horario_funcionamento"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Horário de Funcionamento</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="Ex: Segunda a Sexta: 8h às 18h, Sábado: 8h às 12h"
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       {/* Sobre a empresa */}
       <FormField
         control={form.control}
@@ -106,7 +142,7 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
             <FormLabel>Sobre a Empresa</FormLabel>
             <FormControl>
               <Textarea 
-                placeholder="Conte um pouco sobre sua empresa..."
+                placeholder="Conte um pouco sobre sua empresa, história, missão, valores..."
                 className="min-h-[100px]"
                 {...field}
               />
@@ -134,11 +170,67 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
         )}
       />
 
+      {/* Redes Sociais */}
+      <FormField
+        control={form.control}
+        name="redes_sociais"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Redes Sociais</FormLabel>
+            <FormControl>
+              <Textarea 
+                placeholder="Links das suas redes sociais (Instagram, Facebook, LinkedIn, etc.)"
+                className="min-h-[80px]"
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       {/* Logo Upload */}
       <LogoUploader 
         preview={logoPreview}
         onUpload={handleLogoUpload}
         onRemove={handleRemoveLogo}
+      />
+
+      {/* Cores Preferidas */}
+      <FormField
+        control={form.control}
+        name="cores_preferidas"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Cores Preferidas</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="Ex: Azul marinho, branco, dourado"
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Estilo Visual */}
+      <FormField
+        control={form.control}
+        name="estilo_visual"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Estilo Visual Desejado</FormLabel>
+            <FormControl>
+              <Textarea 
+                placeholder="Descreva o estilo visual que deseja (moderno, clássico, minimalista, etc.)"
+                className="min-h-[80px]"
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
       />
     </div>
   );
