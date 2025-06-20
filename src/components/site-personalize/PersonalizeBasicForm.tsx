@@ -31,13 +31,10 @@ export interface FormValues {
 interface PersonalizeBasicFormProps {
   form: UseFormReturn<FormValues>;
   logoPreview: string | null;
-  depoimentoPreviews: string[];
   midiaPreviews: string[];
   midiaCaptions: string[];
   handleLogoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveLogo: () => void;
-  handleDepoimentoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveDepoimento: (index: number) => void;
   handleMidiaUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveMidia: (index: number) => void;
   handleUpdateMidiaCaption: (index: number, caption: string) => void;
@@ -46,13 +43,10 @@ interface PersonalizeBasicFormProps {
 export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
   form,
   logoPreview,
-  depoimentoPreviews,
   midiaPreviews,
   midiaCaptions,
   handleLogoUpload,
   handleRemoveLogo,
-  handleDepoimentoUpload,
-  handleRemoveDepoimento,
   handleMidiaUpload,
   handleRemoveMidia,
   handleUpdateMidiaCaption,
@@ -156,17 +150,6 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
         preview={logoPreview}
         onUpload={handleLogoUpload}
         onRemove={handleRemoveLogo}
-      />
-
-      {/* Depoimentos Upload */}
-      <MediaUploader
-        label="Depoimentos de Clientes"
-        description="Faça upload de imagens com depoimentos dos seus clientes"
-        accept="image/*"
-        multiple={true}
-        previews={depoimentoPreviews}
-        onUpload={handleDepoimentoUpload}
-        onRemove={handleRemoveDepoimento}
       />
 
       {/* Mídias Upload */}
