@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -19,7 +20,7 @@ import { LoadingState } from "@/components/site-personalize/LoadingState";
 import { ErrorState } from "@/components/site-personalize/ErrorState";
 import { useModelFromUrl } from "@/components/site-personalize/useModelFromUrl";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw, WifiOff, HelpCircle, Users, User } from "lucide-react";
+import { AlertCircle, RefreshCw, WifiOff, HelpCircle } from "lucide-react";
 import { FormValues } from "@/components/site-personalize/PersonalizeBasicForm";
 
 export default function PublicPersonalizeForm() {
@@ -139,33 +140,6 @@ export default function PublicPersonalizeForm() {
           <CardDescription>
             Preencha o formulário abaixo com as informações da sua empresa/escritório para personalizar seu site.
           </CardDescription>
-          
-          {/* Mostrar tipo de cliente baseado na presença da hash */}
-          {hashFromUrl ? (
-            <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-blue-600" />
-                <p className="text-sm text-blue-700">
-                  <strong>Cliente Parceiro:</strong> Projeto identificado {hashFromUrl.substring(0, 8)}...
-                </p>
-              </div>
-              <p className="text-xs text-blue-600 mt-1">
-                Este formulário atualizará seu projeto existente
-              </p>
-            </div>
-          ) : (
-            <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-green-600" />
-                <p className="text-sm text-green-700">
-                  <strong>Cliente Direto:</strong> Novo projeto será criado
-                </p>
-              </div>
-              <p className="text-xs text-green-600 mt-1">
-                Um novo projeto será criado com suas informações
-              </p>
-            </div>
-          )}
           
           {modeloDetails && (
             <div className="pt-4">
