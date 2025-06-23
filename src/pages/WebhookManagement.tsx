@@ -29,6 +29,7 @@ import { AuthenticationLogs } from "@/components/webhook/AuthenticationLogs";
 import { PartnersTable } from "@/components/partners/PartnersTable";
 import { PartnerDialog } from "@/components/partners/PartnerDialog";
 import { WebhookLogsCard } from "@/components/partners/WebhookLogsCard";
+import { EGestorIntegrationCard } from "@/components/webhook/egestor/EGestorIntegrationCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Partner } from "@/types/webhook";
@@ -99,6 +100,9 @@ export default function WebhookManagement() {
       }
     >
       <div className="space-y-6">
+        {/* eGestor Integration Card */}
+        <EGestorIntegrationCard />
+
         {/* Automation Status Card */}
         <Card className="border-green-200 bg-green-50">
           <CardHeader className="pb-3">
@@ -112,6 +116,7 @@ export default function WebhookManagement() {
               <p>✅ Webhooks são processados automaticamente quando criados</p>
               <p>✅ Notificações instantâneas para parceiros</p>
               <p>✅ Falhas são registradas automaticamente</p>
+              <p>✅ Integração com eGestor configurada</p>
               <p className="text-xs text-green-600 mt-2">
                 O sistema agora processa webhooks em tempo real usando triggers do banco de dados.
               </p>
@@ -127,9 +132,9 @@ export default function WebhookManagement() {
               <Settings className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">2</div>
+              <div className="text-2xl font-bold">3</div>
               <p className="text-xs text-muted-foreground">
-                Endpoints ativos
+                Endpoints ativos (incluindo eGestor)
               </p>
             </CardContent>
           </Card>

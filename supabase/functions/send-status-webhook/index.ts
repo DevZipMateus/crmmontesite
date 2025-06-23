@@ -7,6 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const EGESTOR_TOKEN = "whk_b6cc05805dab54348f903d55f2c18133217fdb0a032c0400fb022417fc61ef12";
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -65,26 +67,39 @@ serve(async (req) => {
         continue
       }
 
-      // Buscar dados do parceiro usando o partner_hash do projeto
-      const { data: partner, error: partnerError } = await supabase
-        .from('partners')
-        .select('webhook_url, auth_token')
-        .eq('hash', project.partner_hash)
-        .single()
+      // Verificar se é projeto do eGestor ou buscar dados do parceiro
+      let webhookUrl: string | null = null;
+      let authToken: string | null = null;
 
-      if (partnerError || !partner?.webhook_url) {
-        console.log(`Parceiro não encontrado ou sem URL de webhook para hash ${project.partner_hash}`)
-        
-        await supabase
-          .from('webhook_logs')
-          .update({ 
-            status: 'failed', 
-            error_message: 'URL do webhook não configurada',
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', webhook.id)
-        
-        continue
+      if (project.partner_hash === 'egestor_painel_parceiros') {
+        console.log('Projeto do eGestor detectado');
+        webhookUrl = 'https://v4.egestor.com.br/parceiros2/webhook_receiver.php';
+        authToken = EGESTOR_TOKEN;
+      } else {
+        // Buscar dados do parceiro usando o partner_hash do projeto
+        const { data: partner, error: partnerError } = await supabase
+          .from('partners')
+          .select('webhook_url, auth_token')
+          .eq('hash', project.partner_hash)
+          .single()
+
+        if (partnerError || !partner?.webhook_url) {
+          console.log(`Parceiro não encontrado ou sem URL de webhook para hash ${project.partner_hash}`)
+          
+          await supabase
+            .from('webhook_logs')
+            .update({ 
+              status: 'failed', 
+              error_message: 'URL do webhook não configurada',
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', webhook.id)
+          
+          continue
+        }
+
+        webhookUrl = partner.webhook_url;
+        authToken = partner.auth_token;
       }
 
       try {
@@ -93,13 +108,13 @@ serve(async (req) => {
         }
 
         // Adicionar autenticação se disponível
-        if (partner.auth_token) {
-          headers['Authorization'] = `Bearer ${partner.auth_token}`
+        if (authToken) {
+          headers['Authorization'] = `Bearer ${authToken}`
         }
 
-        console.log(`Enviando webhook para ${partner.webhook_url}`)
+        console.log(`Enviando webhook para ${webhookUrl}`)
         
-        const response = await fetch(partner.webhook_url, {
+        const response = await fetch(webhookUrl, {
           method: 'POST',
           headers,
           body: JSON.stringify(webhook.payload)
@@ -122,7 +137,8 @@ serve(async (req) => {
           results.push({ 
             webhook_id: webhook.id, 
             status: 'success',
-            project_id: project.id 
+            project_id: project.id,
+            partner_hash: project.partner_hash
           })
         } else {
           // Falha HTTP
@@ -140,7 +156,8 @@ serve(async (req) => {
             webhook_id: webhook.id, 
             status: 'failed',
             error: `HTTP ${response.status}`,
-            project_id: project.id
+            project_id: project.id,
+            partner_hash: project.partner_hash
           })
         }
 
@@ -161,7 +178,8 @@ serve(async (req) => {
           webhook_id: webhook.id, 
           status: 'failed',
           error: error.message,
-          project_id: project.id
+          project_id: project.id,
+          partner_hash: project.partner_hash
         })
       }
     }

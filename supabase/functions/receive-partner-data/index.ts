@@ -15,6 +15,8 @@ interface PartnerDataPayload {
   hash: string;
 }
 
+const EGESTOR_TOKEN = "whk_b6cc05805dab54348f903d55f2c18133217fdb0a032c0400fb022417fc61ef12";
+
 serve(async (req) => {
   console.log('=== Recebendo requisição ===');
   console.log('Method:', req.method);
@@ -59,14 +61,66 @@ serve(async (req) => {
 
     console.log('🔍 Validando token:', token.substring(0, 10) + '...');
 
-    // Validar token
-    const { data: validationResult, error: validationError } = await supabase
-      .rpc('validate_auth_token', { token_input: token });
+    let partnerId: string | null = null;
+    let partnerName: string | null = null;
+    let isValidToken = false;
 
-    console.log('Resultado da validação:', validationResult);
-    console.log('Erro na validação:', validationError);
+    // Verificar se é o token do eGestor
+    if (token === EGESTOR_TOKEN) {
+      console.log('✅ Token do eGestor detectado');
+      
+      // Buscar ou criar parceiro eGestor
+      const { data: egestorPartner, error: egestorError } = await supabase
+        .from('partners')
+        .select('*')
+        .eq('hash', 'egestor_painel_parceiros')
+        .single();
 
-    if (validationError || !validationResult?.[0]?.is_valid) {
+      if (egestorError && egestorError.code === 'PGRST116') {
+        // Parceiro não existe, criar
+        console.log('Criando parceiro eGestor...');
+        const { data: newPartner, error: createError } = await supabase
+          .from('partners')
+          .insert({
+            name: 'eGestor - Painel Parceiros',
+            hash: 'egestor_painel_parceiros',
+            webhook_url: 'https://v4.egestor.com.br/parceiros2/webhook_receiver.php',
+            auth_token: EGESTOR_TOKEN,
+            token_hash: await hashToken(EGESTOR_TOKEN),
+            active: true
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Erro ao criar parceiro eGestor:', createError);
+          throw createError;
+        }
+
+        partnerId = newPartner.id;
+        partnerName = newPartner.name;
+      } else if (!egestorError) {
+        partnerId = egestorPartner.id;
+        partnerName = egestorPartner.name;
+      }
+
+      isValidToken = true;
+    } else {
+      // Validar token usando a função existente
+      const { data: validationResult, error: validationError } = await supabase
+        .rpc('validate_auth_token', { token_input: token });
+
+      console.log('Resultado da validação:', validationResult);
+      console.log('Erro na validação:', validationError);
+
+      if (!validationError && validationResult?.[0]?.is_valid) {
+        partnerId = validationResult[0].partner_id;
+        partnerName = validationResult[0].partner_name;
+        isValidToken = true;
+      }
+    }
+
+    if (!isValidToken) {
       console.log('❌ Token inválido ou expirado');
       await logAuthAttempt(supabase, {
         tokenUsed: token,
@@ -84,9 +138,6 @@ serve(async (req) => {
         }
       );
     }
-
-    const partnerId = validationResult[0].partner_id;
-    const partnerName = validationResult[0].partner_name;
 
     console.log('✅ Token válido para parceiro:', partnerName);
 
@@ -149,7 +200,7 @@ serve(async (req) => {
 
     console.log('🔗 URL webhook do parceiro:', partner?.webhook_url);
 
-    // Criar novo projeto - agora incluindo telefone
+    // Criar novo projeto
     console.log('📝 Criando novo projeto...');
     const { data: newProject, error: projectError } = await supabase
       .from('projects')
@@ -203,6 +254,14 @@ serve(async (req) => {
     );
   }
 });
+
+async function hashToken(token: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(token);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 async function logAuthAttempt(supabase: any, data: {
   partnerId?: string;
