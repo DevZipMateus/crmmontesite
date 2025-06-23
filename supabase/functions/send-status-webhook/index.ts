@@ -7,7 +7,23 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const EGESTOR_TOKEN = "whk_b6cc05805dab54348f903d55f2c18133217fdb0a032c0400fb022417fc61ef12";
+const EGESTOR_CONFIG = {
+  webhook_url: "https://v4.egestor.com.br/parceiros2/webhook_receiver.php",
+  auth_token: "whk_b6cc05805dab54348f903d55f2c18133217fdb0a032c0400fb022417fc61ef12",
+  name: "eGestor - Painel Parceiros"
+};
+
+// Função para identificar se um hash pertence ao eGestor
+function isEGestorHash(hash: string): boolean {
+  if (!hash) return false;
+  
+  // Hash padrão do eGestor
+  if (hash === 'egestor_painel_parceiros') return true;
+  
+  // Padrão de hashes individuais do eGestor (32 caracteres hexadecimais)
+  const egestorHashPattern = /^[a-f0-9]{32}$/i;
+  return egestorHashPattern.test(hash);
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -70,16 +86,34 @@ serve(async (req) => {
       // Verificar se é projeto do eGestor ou buscar dados do parceiro
       let webhookUrl: string | null = null;
       let authToken: string | null = null;
+      let partnerName: string = 'Parceiro';
 
-      if (project.partner_hash === 'egestor_painel_parceiros') {
-        console.log('Projeto do eGestor detectado');
-        webhookUrl = 'https://v4.egestor.com.br/parceiros2/webhook_receiver.php';
-        authToken = EGESTOR_TOKEN;
+      // Primeiro verificar se é um hash do eGestor
+      if (isEGestorHash(project.partner_hash)) {
+        console.log(`Hash ${project.partner_hash} identificado como eGestor`);
+        webhookUrl = EGESTOR_CONFIG.webhook_url;
+        authToken = EGESTOR_CONFIG.auth_token;
+        partnerName = EGESTOR_CONFIG.name;
+
+        // Atualizar o projeto para facilitar futuras identificações
+        await supabase
+          .from('projects')
+          .update({ 
+            partner_webhook_url: EGESTOR_CONFIG.webhook_url,
+            project_source: 'parceiro'
+          })
+          .eq('id', project.id);
+
+      } else if (project.partner_hash === 'egestor_painel_parceiros') {
+        console.log('Projeto do eGestor (hash padrão) detectado');
+        webhookUrl = EGESTOR_CONFIG.webhook_url;
+        authToken = EGESTOR_CONFIG.auth_token;
+        partnerName = EGESTOR_CONFIG.name;
       } else {
         // Buscar dados do parceiro usando o partner_hash do projeto
         const { data: partner, error: partnerError } = await supabase
           .from('partners')
-          .select('webhook_url, auth_token')
+          .select('webhook_url, auth_token, name')
           .eq('hash', project.partner_hash)
           .single()
 
@@ -90,7 +124,7 @@ serve(async (req) => {
             .from('webhook_logs')
             .update({ 
               status: 'failed', 
-              error_message: 'URL do webhook não configurada',
+              error_message: 'URL do webhook não configurada - hash não reconhecido',
               updated_at: new Date().toISOString()
             })
             .eq('id', webhook.id)
@@ -100,19 +134,22 @@ serve(async (req) => {
 
         webhookUrl = partner.webhook_url;
         authToken = partner.auth_token;
+        partnerName = partner.name || 'Parceiro';
       }
 
       try {
         const headers: Record<string, string> = {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'User-Agent': 'MonteSite-CRM/1.0'
         }
 
         // Adicionar autenticação se disponível
         if (authToken) {
-          headers['Authorization'] = `Bearer ${authToken}`
+          headers['Authorization'] = `Bearer ${authToken}`;
         }
 
-        console.log(`Enviando webhook para ${webhookUrl}`)
+        console.log(`Enviando webhook para ${webhookUrl} (${partnerName})`)
+        console.log('Payload:', JSON.stringify(webhook.payload, null, 2))
         
         const response = await fetch(webhookUrl, {
           method: 'POST',
@@ -138,7 +175,8 @@ serve(async (req) => {
             webhook_id: webhook.id, 
             status: 'success',
             project_id: project.id,
-            partner_hash: project.partner_hash
+            partner_hash: project.partner_hash,
+            partner_name: partnerName
           })
         } else {
           // Falha HTTP
@@ -157,7 +195,8 @@ serve(async (req) => {
             status: 'failed',
             error: `HTTP ${response.status}`,
             project_id: project.id,
-            partner_hash: project.partner_hash
+            partner_hash: project.partner_hash,
+            partner_name: partnerName
           })
         }
 
@@ -179,7 +218,8 @@ serve(async (req) => {
           status: 'failed',
           error: error.message,
           project_id: project.id,
-          partner_hash: project.partner_hash
+          partner_hash: project.partner_hash,
+          partner_name: partnerName
         })
       }
     }
