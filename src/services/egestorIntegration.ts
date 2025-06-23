@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { AuthTokenService } from "./authTokenService";
 
@@ -73,40 +72,39 @@ export class EGestorIntegrationService {
     return token === this.EGESTOR_CONFIG.auth_token;
   }
 
-  // Testar conexão com o webhook do eGestor
+  // Testar conexão com o webhook do eGestor usando Edge Function
   static async testWebhookConnection(): Promise<{ success: boolean; message: string }> {
     try {
-      const testPayload = {
-        type: 'test',
-        message: 'Teste de conexão do sistema',
-        timestamp: new Date().toISOString(),
-        source: 'MonteSite CRM'
-      };
-
-      const response = await fetch(this.EGESTOR_CONFIG.webhook_url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.EGESTOR_CONFIG.auth_token}`
-        },
-        body: JSON.stringify(testPayload)
+      console.log('Iniciando teste de conexão via Edge Function...');
+      
+      const { data, error } = await supabase.functions.invoke('test-webhook-connection', {
+        body: {
+          webhook_url: this.EGESTOR_CONFIG.webhook_url,
+          auth_token: this.EGESTOR_CONFIG.auth_token,
+          partner_name: this.EGESTOR_CONFIG.name
+        }
       });
 
-      if (response.ok) {
-        return {
-          success: true,
-          message: 'Conexão com eGestor estabelecida com sucesso'
-        };
-      } else {
+      if (error) {
+        console.error('Erro ao chamar Edge Function:', error);
         return {
           success: false,
-          message: `Erro na conexão: HTTP ${response.status}`
+          message: `Erro ao testar conexão: ${error.message}`
         };
       }
+
+      console.log('Resultado do teste:', data);
+      
+      return {
+        success: data.success,
+        message: data.message
+      };
+
     } catch (error) {
+      console.error('Erro inesperado no teste:', error);
       return {
         success: false,
-        message: `Erro de rede: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
+        message: `Erro inesperado: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
       };
     }
   }

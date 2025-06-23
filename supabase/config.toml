@@ -3,3 +3,6 @@ project_id = "vaabpicspdbolvutnscp"
 
 [functions.receive-partner-data]
 verify_jwt = false
+
+[functions.test-webhook-connection]
+verify_jwt = false
