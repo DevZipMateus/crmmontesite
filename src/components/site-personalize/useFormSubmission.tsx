@@ -23,6 +23,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress>({});
   
   // Helper to handle upload progress
@@ -33,7 +34,33 @@ export const useFormSubmission = (props: SubmissionProps) => {
     }));
   };
 
+  // Helper to redirect to confirmation with timeout
+  const redirectToConfirmation = () => {
+    console.log("🔄 Iniciando redirecionamento para página de confirmação...");
+    
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      // Redirecionamento imediato
+      navigate("/confirmacao", { replace: true });
+      
+      // Fallback com timeout caso o redirecionamento não funcione
+      setTimeout(() => {
+        if (window.location.pathname !== "/confirmacao") {
+          console.log("🔄 Redirecionamento de fallback ativado");
+          window.location.href = "/confirmacao";
+        }
+      }, 1000);
+    }
+  };
+
   const onSubmit = async (data: FormValues) => {
+    // Prevenir múltiplas submissões
+    if (isSubmitting || isSubmitted) {
+      console.log("⚠️ Submissão bloqueada - formulário já foi enviado");
+      return;
+    }
+
     setIsSubmitting(true);
     
     console.log("=== FORM SUBMISSION STARTED ===");
@@ -48,37 +75,70 @@ export const useFormSubmission = (props: SubmissionProps) => {
         throw new Error("Por favor, preencha todos os campos obrigatórios");
       }
 
+      let formProcessedSuccessfully = false;
+
       // FLUXO PARA CLIENTES DE PARCEIROS (COM HASH)
       if (hash) {
-        // Primeiro, criar os dados de personalização
-        const result = await submitPartnerClient(data, modeloSelecionado || "Modelo 1", hash);
+        console.log("📤 Processing partner client submission...");
         
-        // Se temos arquivos para upload e um personalization_id
-        if ((logoFile || depoimentoFiles.length > 0 || midiaFiles.length > 0) && result.personalization_id) {
-          console.log("📤 Uploading files for partner client...");
+        try {
+          // Primeiro, criar os dados de personalização
+          const result = await submitPartnerClient(data, modeloSelecionado || "Modelo 1", hash);
+          formProcessedSuccessfully = true;
           
-          await uploadFiles(
-            logoFile,
-            depoimentoFiles,
-            midiaFiles,
-            midiaCaptions,
-            updateProgress,
-            toast,
-            result.personalization_id
-          );
-        }
+          // Se temos arquivos para upload e um personalization_id
+          if ((logoFile || depoimentoFiles.length > 0 || midiaFiles.length > 0) && result.personalization_id) {
+            console.log("📤 Uploading files for partner client...");
+            
+            try {
+              await uploadFiles(
+                logoFile,
+                depoimentoFiles,
+                midiaFiles,
+                midiaCaptions,
+                updateProgress,
+                toast,
+                result.personalization_id
+              );
+              console.log("✅ Files uploaded successfully");
+            } catch (uploadError) {
+              console.error("⚠️ File upload failed, but form was processed:", uploadError);
+              // Não falhar a operação principal se o formulário foi processado
+              toast({
+                title: "Formulário enviado com avisos",
+                description: "Suas informações foram processadas, mas alguns arquivos podem não ter sido enviados.",
+                variant: "default",
+              });
+            }
+          }
 
-        toast({
-          title: "Formulário enviado com sucesso!",
-          description: "Suas informações foram processadas e o projeto foi atualizado.",
-        });
+          // Marcar como enviado com sucesso
+          setIsSubmitted(true);
 
-        if (onSuccess) {
-          onSuccess();
-        } else {
-          navigate("/confirmacao");
+          toast({
+            title: "Formulário enviado com sucesso!",
+            description: "Suas informações foram processadas e o projeto foi atualizado.",
+          });
+
+          // Redirecionar para confirmação
+          redirectToConfirmation();
+          return;
+
+        } catch (partnerError) {
+          console.error("❌ Partner client submission failed:", partnerError);
+          
+          // Se foi erro de formulário já enviado, ainda redirecionar para confirmação
+          if (partnerError instanceof Error && 
+              (partnerError.message.includes("já foi preenchido") || 
+               partnerError.message.includes("already filled"))) {
+            console.log("ℹ️ Form already filled, redirecting to confirmation");
+            setIsSubmitted(true);
+            redirectToConfirmation();
+            return;
+          }
+          
+          throw partnerError;
         }
-        return;
       }
 
       // FLUXO PARA CLIENTES DIRETOS (SEM HASH) - CRIAR NOVO PROJETO
@@ -92,37 +152,45 @@ export const useFormSubmission = (props: SubmissionProps) => {
 
       console.log("Form data prepared for new project:", formData);
       
-      // Upload all files
-      const { logoUrl, depoimentoUrls, midiaItems } = await uploadFiles(
-        logoFile,
-        depoimentoFiles,
-        midiaFiles,
-        midiaCaptions,
-        updateProgress,
-        toast
-      );
+      try {
+        // Upload all files
+        const { logoUrl, depoimentoUrls, midiaItems } = await uploadFiles(
+          logoFile,
+          depoimentoFiles,
+          midiaFiles,
+          midiaCaptions,
+          updateProgress,
+          toast
+        );
 
-      // Save personalization data
-      const personalizationId = await savePersonalizationData(
-        formData,
-        logoUrl,
-        depoimentoUrls,
-        midiaItems
-      );
+        // Save personalization data
+        const personalizationId = await savePersonalizationData(
+          formData,
+          logoUrl,
+          depoimentoUrls,
+          midiaItems
+        );
 
-      // Create project
-      await createProject(formData, personalizationId, toast);
+        // Create project
+        await createProject(formData, personalizationId, toast);
+        formProcessedSuccessfully = true;
 
-      toast({
-        title: "Personalização salva com sucesso!",
-        description: "Suas informações foram enviadas e um projeto foi criado.",
-      });
+        // Marcar como enviado com sucesso
+        setIsSubmitted(true);
 
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        navigate("/confirmacao");
+        toast({
+          title: "Personalização salva com sucesso!",
+          description: "Suas informações foram enviadas e um projeto foi criado.",
+        });
+
+        // Redirecionar para confirmação
+        redirectToConfirmation();
+
+      } catch (directError) {
+        console.error("❌ Direct client submission failed:", directError);
+        throw directError;
       }
+
     } catch (error) {
       console.error("💥 Form submission error:", error);
       
@@ -150,6 +218,8 @@ export const useFormSubmission = (props: SubmissionProps) => {
 
   const retrySubmit = async (data: FormValues) => {
     console.log("🔄 Retrying form submission...");
+    // Reset submitted state for retry
+    setIsSubmitted(false);
     await onSubmit(data);
   };
 
@@ -157,6 +227,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
     onSubmit, 
     retrySubmit, 
     isSubmitting, 
+    isSubmitted,
     uploadProgress 
   };
 };

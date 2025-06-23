@@ -11,6 +11,7 @@ import { PersonalizeConfigForm } from "./PersonalizeConfigForm";
 import { useFileUploadHandlers } from "./FileUploadHandlers";
 import { useFormSubmission } from "./useFormSubmission";
 import type { FormValues } from "./PersonalizeBasicForm";
+import { CheckCircle } from "lucide-react";
 
 const formSchema = z.object({
   nome_empresa: z.string().min(2, "Nome da empresa é obrigatório"),
@@ -88,7 +89,7 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     },
   });
 
-  const { isSubmitting, onSubmit } = useFormSubmission({
+  const { isSubmitting, isSubmitted, onSubmit } = useFormSubmission({
     logoFile,
     depoimentoFiles,
     midiaFiles,
@@ -97,6 +98,27 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     projectHash,
     onSuccess
   });
+
+  // Se o formulário foi enviado com sucesso, mostrar estado de confirmação
+  if (isSubmitted) {
+    return (
+      <div className="space-y-6 text-center py-12">
+        <div className="flex justify-center">
+          <div className="rounded-full bg-green-100 p-3">
+            <CheckCircle className="h-12 w-12 text-green-500" />
+          </div>
+        </div>
+        <div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            Formulário Enviado com Sucesso!
+          </h3>
+          <p className="text-gray-600">
+            Suas informações foram processadas. Você será redirecionado em instantes...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -150,10 +172,10 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
             <Button 
               type="submit" 
               size="lg" 
-              disabled={isSubmitting}
+              disabled={isSubmitting || isSubmitted}
               className="min-w-[200px]"
             >
-              {isSubmitting ? "Enviando..." : "Enviar Personalização"}
+              {isSubmitting ? "Enviando..." : isSubmitted ? "Formulário Enviado" : "Enviar Personalização"}
             </Button>
           </div>
         </form>

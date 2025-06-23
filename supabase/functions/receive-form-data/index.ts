@@ -67,6 +67,36 @@ serve(async (req) => {
     console.log('Status atual:', project.status)
     console.log('Formulário preenchido:', project.formulario_preenchido)
 
+    // ✅ VERIFICAR SE O FORMULÁRIO JÁ FOI PREENCHIDO
+    if (project.formulario_preenchido === true && project.data_formulario) {
+      console.log('⚠️ Formulário já foi preenchido anteriormente em:', project.data_formulario)
+      
+      // Retornar sucesso mesmo se já foi preenchido para evitar erro na UI
+      const response = {
+        success: true,
+        message: 'Formulário já foi processado anteriormente',
+        already_filled: true,
+        project: {
+          id: project.id,
+          client_name: project.client_name,
+          modelo_escolhido: project.modelo_escolhido,
+          status: project.status,
+          formulario_preenchido: project.formulario_preenchido,
+          data_formulario: project.data_formulario
+        }
+      }
+
+      console.log('📤 Enviando resposta (já preenchido):', response)
+
+      return new Response(
+        JSON.stringify(response),
+        { 
+          status: 200, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
     // Atualizar projeto com dados do formulário
     const updateData = {
       modelo_escolhido: modelo,

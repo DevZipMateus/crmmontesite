@@ -12,16 +12,12 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PersonalizeForm } from "@/components/site-personalize/PersonalizeForm";
-import { useFileUploadHandlers } from "@/components/site-personalize/FileUploadHandlers";
-import { useFormSubmission } from "@/components/site-personalize/useFormSubmission";
 import ModeloDetails from "@/components/site-personalize/ModeloDetails";
-import { modelosDisponiveis } from "@/components/site-personalize/modelosData";
 import { LoadingState } from "@/components/site-personalize/LoadingState";
 import { ErrorState } from "@/components/site-personalize/ErrorState";
 import { useModelFromUrl } from "@/components/site-personalize/useModelFromUrl";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw, WifiOff, HelpCircle } from "lucide-react";
-import { FormValues } from "@/components/site-personalize/PersonalizeBasicForm";
 
 export default function PublicPersonalizeForm() {
   const { toast } = useToast();
@@ -32,88 +28,27 @@ export default function PublicPersonalizeForm() {
   // Capturar hash da URL (opcional)
   const hashFromUrl = searchParams.get('hash');
   
-  // State for form data to enable retry functionality
-  const [formData, setFormData] = useState<FormValues | null>(null);
-  const [showRetryButton, setShowRetryButton] = useState(false);
+  // State for connection errors
   const [networkError, setNetworkError] = useState<string | null>(null);
   
   // Use the hook to load model data
   const { modeloSelecionado, modeloDetails, loading, error } = useModelFromUrl(modeloParam);
 
-  // File state management - same as PersonalizeSite component
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [depoimentoFiles, setDepoimentoFiles] = useState<File[]>([]);
-  const [depoimentoPreviews, setDepoimentoPreviews] = useState<string[]>([]);
-  const [midiaFiles, setMidiaFiles] = useState<File[]>([]);
-  const [midiaPreviews, setMidiaPreviews] = useState<string[]>([]);
-  const [midiaCaptions, setMidiaCaptions] = useState<string[]>([]);
-
-  // Initialize file upload handlers
-  const fileHandlers = useFileUploadHandlers({
-    setLogoFile,
-    setLogoPreview,
-    setDepoimentoFiles,
-    setDepoimentoPreviews,
-    setMidiaFiles,
-    setMidiaPreviews,
-    setMidiaCaptions
-  });
-
-  // Initialize form submission handler with hash (opcional)
-  const { onSubmit, retrySubmit, isSubmitting, uploadProgress } = useFormSubmission({
-    logoFile,
-    depoimentoFiles,
-    midiaFiles,
-    midiaCaptions,
-    hashFromUrl: hashFromUrl || undefined
-  });
-
-  // Wrapped onSubmit to save form data for retry
-  const handleSubmit = async (data: FormValues) => {
-    setFormData(data);
+  // Handle successful form submission
+  const handleFormSuccess = () => {
+    console.log("📋 Form submitted successfully, redirecting to confirmation...");
     setNetworkError(null);
     
-    try {
-      await onSubmit(data);
-      setShowRetryButton(false);
-    } catch (error) {
-      console.error("Form submission error in PublicPersonalizeForm:", error);
-      setShowRetryButton(true);
-      
-      // Check if it's a network error
-      if (error instanceof Error && 
-         (error.message.includes("Failed to fetch") || 
-          error.message.includes("NetworkError") ||
-          error.message.includes("connection"))) {
-        setNetworkError("Erro de conexão detectado. Verifique sua conexão de internet.");
+    // Immediate redirect
+    navigate("/confirmacao", { replace: true });
+    
+    // Fallback redirect with timeout
+    setTimeout(() => {
+      if (window.location.pathname !== "/confirmacao") {
+        console.log("🔄 Fallback redirect triggered");
+        window.location.href = "/confirmacao";
       }
-    }
-  };
-
-  const handleRetry = async () => {
-    if (formData) {
-      setNetworkError(null);
-      try {
-        await retrySubmit(formData);
-        setShowRetryButton(false);
-      } catch (error) {
-        console.error("Form retry error:", error);
-        // Check if it's a network error
-        if (error instanceof Error && 
-           (error.message.includes("Failed to fetch") || 
-            error.message.includes("NetworkError") ||
-            error.message.includes("connection"))) {
-          setNetworkError("Erro de conexão persistente. Verifique sua conexão de internet.");
-        }
-      }
-    } else {
-      toast({
-        title: "Erro",
-        description: "Não há dados do formulário para reenviar. Por favor, preencha novamente.",
-        variant: "destructive"
-      });
-    }
+    }, 1000);
   };
 
   if (loading) {
@@ -153,44 +88,22 @@ export default function PublicPersonalizeForm() {
           )}
         </CardHeader>
         
-        {showRetryButton && (
+        {networkError && (
           <div className="px-6">
             <Alert variant="destructive" className="mb-4">
-              {networkError ? (
-                <>
-                  <WifiOff className="h-4 w-4" />
-                  <AlertDescription>
-                    {networkError} 
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="ml-2 bg-white" 
-                      onClick={handleRetry}
-                      disabled={isSubmitting}
-                    >
-                      <RefreshCw className="h-4 w-4 mr-1" />
-                      {isSubmitting ? "Tentando..." : "Tentar Novamente"}
-                    </Button>
-                  </AlertDescription>
-                </>
-              ) : (
-                <>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Houve um erro ao enviar o formulário. Verifique sua conexão e tente novamente.
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="ml-2 bg-white" 
-                      onClick={handleRetry}
-                      disabled={isSubmitting}
-                    >
-                      <RefreshCw className="h-4 w-4 mr-1" />
-                      {isSubmitting ? "Reenviando..." : "Tentar Novamente"}
-                    </Button>
-                  </AlertDescription>
-                </>
-              )}
+              <WifiOff className="h-4 w-4" />
+              <AlertDescription>
+                {networkError}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="ml-2 bg-white" 
+                  onClick={() => window.location.reload()}
+                >
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                  Tentar Novamente
+                </Button>
+              </AlertDescription>
             </Alert>
           </div>
         )}
@@ -199,7 +112,7 @@ export default function PublicPersonalizeForm() {
           <PersonalizeForm
             modeloSelecionado={modeloSelecionado}
             projectHash={hashFromUrl || undefined}
-            onSuccess={() => setShowRetryButton(false)}
+            onSuccess={handleFormSuccess}
           />
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
