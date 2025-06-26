@@ -34,40 +34,50 @@ export const useFormSubmission = (props: SubmissionProps) => {
     }));
   };
 
-  // Helper to redirect to confirmation with timeout
+  // Helper to redirect to confirmation - SIMPLIFIED
   const redirectToConfirmation = () => {
-    console.log("🔄 Iniciando redirecionamento para página de confirmação...");
+    console.log("🔄 INICIANDO REDIRECIONAMENTO PARA CONFIRMAÇÃO");
     
+    // Marcar como enviado ANTES do redirecionamento
+    setIsSubmitted(true);
+    
+    // Usar callback se fornecido
     if (onSuccess) {
+      console.log("📞 Chamando callback onSuccess");
       onSuccess();
-    } else {
-      // Redirecionamento imediato
-      navigate("/confirmacao", { replace: true });
-      
-      // Fallback com timeout caso o redirecionamento não funcione
-      setTimeout(() => {
-        if (window.location.pathname !== "/confirmacao") {
-          console.log("🔄 Redirecionamento de fallback ativado");
-          window.location.href = "/confirmacao";
-        }
-      }, 1000);
+      return;
     }
+    
+    // Redirecionamento direto com replace
+    console.log("➡️ Redirecionando para /confirmacao");
+    navigate("/confirmacao", { replace: true });
+    
+    // Fallback adicional para garantir redirecionamento
+    setTimeout(() => {
+      console.log("🔄 Verificando se redirecionamento funcionou...");
+      if (window.location.pathname !== "/confirmacao") {
+        console.log("⚠️ Redirecionamento falhou, usando window.location");
+        window.location.href = "/confirmacao";
+      }
+    }, 500);
   };
 
   const onSubmit = async (data: FormValues) => {
+    console.log("=== INÍCIO DA SUBMISSÃO DO FORMULÁRIO ===");
+    console.log("Estados atuais:", { isSubmitting, isSubmitted });
+    
     // Prevenir múltiplas submissões
     if (isSubmitting || isSubmitted) {
-      console.log("⚠️ Submissão bloqueada - formulário já foi enviado");
+      console.log("⚠️ SUBMISSÃO BLOQUEADA - Formulário já processado");
       return;
     }
 
     setIsSubmitting(true);
     
-    console.log("=== FORM SUBMISSION STARTED ===");
     const hash = projectHash || hashFromUrl;
-    console.log("Hash from URL:", hash);
-    console.log("Form data:", data);
-    console.log("Submission type:", hash ? "Partner client (update existing)" : "Direct client (create new)");
+    console.log("Hash detectada:", hash);
+    console.log("Tipo de submissão:", hash ? "Cliente de parceiro" : "Cliente direto");
+    console.log("Dados do formulário:", data);
 
     try {
       // Validate required fields
@@ -79,16 +89,16 @@ export const useFormSubmission = (props: SubmissionProps) => {
 
       // FLUXO PARA CLIENTES DE PARCEIROS (COM HASH)
       if (hash) {
-        console.log("📤 Processing partner client submission...");
+        console.log("📤 Processando cliente de parceiro...");
         
         try {
-          // Primeiro, criar os dados de personalização
           const result = await submitPartnerClient(data, modeloSelecionado || "Modelo 1", hash);
+          console.log("✅ Dados do parceiro processados com sucesso:", result);
           formProcessedSuccessfully = true;
           
-          // Se temos arquivos para upload e um personalization_id
+          // Upload de arquivos se necessário
           if ((logoFile || depoimentoFiles.length > 0 || midiaFiles.length > 0) && result.personalization_id) {
-            console.log("📤 Uploading files for partner client...");
+            console.log("📤 Fazendo upload de arquivos...");
             
             try {
               await uploadFiles(
@@ -100,39 +110,36 @@ export const useFormSubmission = (props: SubmissionProps) => {
                 toast,
                 result.personalization_id
               );
-              console.log("✅ Files uploaded successfully");
+              console.log("✅ Upload de arquivos concluído");
             } catch (uploadError) {
-              console.error("⚠️ File upload failed, but form was processed:", uploadError);
+              console.error("⚠️ Erro no upload de arquivos:", uploadError);
               // Não falhar a operação principal se o formulário foi processado
-              toast({
-                title: "Formulário enviado com avisos",
-                description: "Suas informações foram processadas, mas alguns arquivos podem não ter sido enviados.",
-                variant: "default",
-              });
             }
           }
-
-          // Marcar como enviado com sucesso
-          setIsSubmitted(true);
 
           toast({
             title: "Formulário enviado com sucesso!",
             description: "Suas informações foram processadas e o projeto foi atualizado.",
           });
 
-          // Redirecionar para confirmação
+          // REDIRECIONAMENTO GARANTIDO
+          console.log("🎯 Formulário processado com sucesso - redirecionando...");
           redirectToConfirmation();
           return;
 
         } catch (partnerError) {
-          console.error("❌ Partner client submission failed:", partnerError);
+          console.error("❌ Erro na submissão do parceiro:", partnerError);
           
-          // Se foi erro de formulário já enviado, ainda redirecionar para confirmação
+          // Se foi erro de formulário já enviado, ainda redirecionar
           if (partnerError instanceof Error && 
               (partnerError.message.includes("já foi preenchido") || 
-               partnerError.message.includes("already filled"))) {
-            console.log("ℹ️ Form already filled, redirecting to confirmation");
-            setIsSubmitted(true);
+               partnerError.message.includes("already filled") ||
+               partnerError.message.includes("já foi processado"))) {
+            console.log("ℹ️ Formulário já foi preenchido - redirecionando para confirmação");
+            toast({
+              title: "Formulário já processado",
+              description: "Suas informações já foram recebidas anteriormente.",
+            });
             redirectToConfirmation();
             return;
           }
@@ -141,8 +148,8 @@ export const useFormSubmission = (props: SubmissionProps) => {
         }
       }
 
-      // FLUXO PARA CLIENTES DIRETOS (SEM HASH) - CRIAR NOVO PROJETO
-      console.log("🆕 Processing as direct client - creating new project");
+      // FLUXO PARA CLIENTES DIRETOS (SEM HASH)
+      console.log("🆕 Processando cliente direto - criando novo projeto");
 
       const formData = {
         ...data,
@@ -150,10 +157,10 @@ export const useFormSubmission = (props: SubmissionProps) => {
         created_at: new Date().toISOString(),
       };
 
-      console.log("Form data prepared for new project:", formData);
+      console.log("Dados preparados para novo projeto:", formData);
       
       try {
-        // Upload all files
+        // Upload de arquivos
         const { logoUrl, depoimentoUrls, midiaItems } = await uploadFiles(
           logoFile,
           depoimentoFiles,
@@ -163,7 +170,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
           toast
         );
 
-        // Save personalization data
+        // Salvar dados de personalização
         const personalizationId = await savePersonalizationData(
           formData,
           logoUrl,
@@ -171,28 +178,26 @@ export const useFormSubmission = (props: SubmissionProps) => {
           midiaItems
         );
 
-        // Create project
+        // Criar projeto
         await createProject(formData, personalizationId, toast);
         formProcessedSuccessfully = true;
-
-        // Marcar como enviado com sucesso
-        setIsSubmitted(true);
 
         toast({
           title: "Personalização salva com sucesso!",
           description: "Suas informações foram enviadas e um projeto foi criado.",
         });
 
-        // Redirecionar para confirmação
+        // REDIRECIONAMENTO GARANTIDO
+        console.log("🎯 Cliente direto processado com sucesso - redirecionando...");
         redirectToConfirmation();
 
       } catch (directError) {
-        console.error("❌ Direct client submission failed:", directError);
+        console.error("❌ Erro na submissão do cliente direto:", directError);
         throw directError;
       }
 
     } catch (error) {
-      console.error("💥 Form submission error:", error);
+      console.error("💥 Erro geral na submissão:", error);
       
       let errorMessage = "Ocorreu um erro ao enviar o formulário. Tente novamente.";
       if (error instanceof Error) {
@@ -213,11 +218,12 @@ export const useFormSubmission = (props: SubmissionProps) => {
       });
     } finally {
       setIsSubmitting(false);
+      console.log("=== FIM DA SUBMISSÃO DO FORMULÁRIO ===");
     }
   };
 
   const retrySubmit = async (data: FormValues) => {
-    console.log("🔄 Retrying form submission...");
+    console.log("🔄 Tentando reenviar formulário...");
     // Reset submitted state for retry
     setIsSubmitted(false);
     await onSubmit(data);

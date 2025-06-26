@@ -99,8 +99,9 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     onSuccess
   });
 
-  // Se o formulário foi enviado com sucesso, mostrar estado de confirmação
+  // Estado de confirmação MELHORADO
   if (isSubmitted) {
+    console.log("✅ Exibindo estado de confirmação");
     return (
       <div className="space-y-6 text-center py-12">
         <div className="flex justify-center">
@@ -112,9 +113,12 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
             Formulário Enviado com Sucesso!
           </h3>
-          <p className="text-gray-600">
-            Suas informações foram processadas. Você será redirecionado em instantes...
+          <p className="text-gray-600 mb-4">
+            Suas informações foram processadas. Você será redirecionado para a página de confirmação...
           </p>
+          <div className="text-sm text-gray-500">
+            Se não for redirecionado automaticamente, <a href="/confirmacao" className="text-blue-600 hover:underline">clique aqui</a>.
+          </div>
         </div>
       </div>
     );

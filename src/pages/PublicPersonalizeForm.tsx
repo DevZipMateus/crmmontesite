@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -34,21 +33,21 @@ export default function PublicPersonalizeForm() {
   // Use the hook to load model data
   const { modeloSelecionado, modeloDetails, loading, error } = useModelFromUrl(modeloParam);
 
-  // Handle successful form submission
+  // Handle successful form submission - SIMPLIFICADO
   const handleFormSuccess = () => {
-    console.log("📋 Form submitted successfully, redirecting to confirmation...");
+    console.log("📋 handleFormSuccess chamado - redirecionando para confirmação...");
     setNetworkError(null);
     
-    // Immediate redirect
+    // Redirecionamento imediato e direto
     navigate("/confirmacao", { replace: true });
     
-    // Fallback redirect with timeout
+    // Fallback para garantir redirecionamento
     setTimeout(() => {
       if (window.location.pathname !== "/confirmacao") {
-        console.log("🔄 Fallback redirect triggered");
+        console.log("🔄 Fallback de redirecionamento ativado");
         window.location.href = "/confirmacao";
       }
-    }, 1000);
+    }, 100);
   };
 
   if (loading) {
@@ -115,6 +114,7 @@ export default function PublicPersonalizeForm() {
             onSuccess={handleFormSuccess}
           />
         </CardContent>
+        
         <CardFooter className="flex flex-col gap-4">
           <div className="bg-gray-50 w-full p-4 rounded-md">
             <div className="flex items-start gap-2">
