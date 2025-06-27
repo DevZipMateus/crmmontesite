@@ -97,19 +97,20 @@ serve(async (req) => {
       )
     }
 
-    // Atualizar projeto com dados do formulário
+    // Atualizar projeto com dados do formulário - MANTENDO O STATUS ATUAL
     const updateData = {
       modelo_escolhido: modelo,
       observacoes_cliente: observacoes || null,
       email_complementar: email || null,
       template: modelo, // Atualizar também o campo template para compatibilidade
-      status: 'Criando site', // Avançar status quando formulário for preenchido
+      // ✅ REMOVIDO: status: 'Criando site' - Manter status atual
       formulario_preenchido: true, // ✅ IMPORTANTE: Marcar como preenchido
       data_formulario: new Date().toISOString() // ✅ IMPORTANTE: Data do preenchimento
     }
 
     console.log('📝 Atualizando projeto com dados do formulário...')
     console.log('Dados de atualização:', updateData)
+    console.log('⚠️ STATUS MANTIDO:', project.status, '(não será alterado automaticamente)')
 
     const { data: updatedProject, error: updateError } = await supabase
       .from('projects')
@@ -127,7 +128,7 @@ serve(async (req) => {
     }
 
     console.log('✅ Projeto atualizado com sucesso!')
-    console.log('Novo status:', updatedProject.status)
+    console.log('Status mantido:', updatedProject.status)
     console.log('Formulário preenchido:', updatedProject.formulario_preenchido)
 
     // Se é um projeto de parceiro, criar webhook de notificação
@@ -142,7 +143,7 @@ serve(async (req) => {
           modelo_escolhido: modelo,
           observacoes_cliente: observacoes,
           email_complementar: email,
-          status: 'Criando site',
+          status: updatedProject.status, // ✅ USAR O STATUS ATUAL EM VEZ DE FORÇAR "Criando site"
           data_formulario: new Date().toISOString()
         }
 
