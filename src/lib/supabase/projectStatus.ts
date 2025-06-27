@@ -1,5 +1,4 @@
 import { supabase } from './client';
-import { processWebhookQueue } from '@/server/webhook-service';
 
 // Function to ensure consistent status values
 export const PROJECT_STATUS_TYPES = [
@@ -37,16 +36,8 @@ export async function updateProjectStatus(projectId: string, newStatus: string) 
     
     console.log(`Project status updated from ${oldStatus} to ${newStatus}`);
     
-    // Se é um projeto de parceiro, processar fila de webhooks automaticamente
-    if (currentProject?.partner_hash) {
-      console.log('Partner project detected, processing webhook queue...');
-      try {
-        await processWebhookQueue();
-      } catch (webhookError) {
-        console.error('Error processing webhook queue:', webhookError);
-        // Não falhar a atualização de status por erro de webhook
-      }
-    }
+    // Removida a chamada manual de processWebhookQueue() para evitar duplicação
+    // O trigger do banco de dados trigger_status_webhook() já gerencia os webhooks automaticamente
     
     return { success: true, oldStatus, newStatus, projectName: currentProject?.client_name };
   } catch (error) {
