@@ -10,6 +10,7 @@ import {
 import { StatusButtonsGrid } from "./ProjectCardComponents/StatusButtonsGrid";
 import { PartnerIndicator } from "./ProjectCardComponents/PartnerIndicator";
 import { CustomizationDeadlineIndicator } from "./ProjectCardComponents/CustomizationDeadlineIndicator";
+import { ChatButton } from "./ProjectCardComponents/ChatButton";
 import { isPartnerProject } from "@/server/webhook-service";
 import { useNavigate } from "react-router-dom";
 import { Phone } from "lucide-react";
@@ -85,6 +86,17 @@ export default function ProjectCard({
         <div className="mt-2 mb-2 flex items-center gap-1 text-xs text-gray-600">
           <Phone className="h-3 w-3" />
           <span className="font-medium">{project.telefone}</span>
+        </div>
+      )}
+
+      {/* Botão de Chat para projetos de parceiro */}
+      {isPartnerProject(project) && project.partner_hash && (
+        <div className="mt-2 mb-2">
+          <ChatButton
+            projectId={project.id}
+            projectName={project.client_name}
+            partnerHash={project.partner_hash}
+          />
         </div>
       )}
       
