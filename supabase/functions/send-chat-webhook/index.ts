@@ -131,12 +131,16 @@ serve(async (req) => {
         'User-Agent': 'MonteSite-CRM/1.0'
       }
 
-      // Adicionar autenticação se disponível
+      // 🔑 ADICIONAR TOKEN DE AUTENTICAÇÃO
       if (authToken) {
         headers['Authorization'] = `Bearer ${authToken}`;
+        console.log(`🔑 Adicionando token de autenticação: Bearer ${authToken.substring(0, 20)}...`);
+      } else {
+        console.warn('⚠️ Nenhum token de autenticação encontrado');
       }
 
       console.log(`📤 Enviando webhook para ${webhookUrl} (${partnerName})`)
+      console.log('Headers:', JSON.stringify(headers, null, 2))
       
       const response = await fetch(webhookUrl, {
         method: 'POST',
@@ -147,7 +151,7 @@ serve(async (req) => {
       const responseText = await response.text()
       console.log(`Resposta do webhook: ${response.status} - ${responseText}`)
       
-      // Registrar o log do webhook (opcional)
+      // Registrar o log do webhook
       await supabase
         .from('webhook_logs')
         .insert({
