@@ -112,15 +112,41 @@ serve(async (req) => {
       partnerName = partner.name || 'Parceiro';
     }
 
-    // Preparar payload do webhook
-    const webhookPayload = {
-      type: 'open_chat',
-      nome: project.client_name,
-      telefone: project.telefone || 'Não informado',
-      email: project.email_complementar || 'Não informado',
-      hash: project.partner_hash,
-      project_id: project.id,
-      data_solicitacao: new Date().toISOString()
+    // Preparar payload específico para eGestor
+    let webhookPayload: any;
+    
+    if (isEGestorHash(project.partner_hash)) {
+      // Payload específico para eGestor - formato esperado pela API
+      webhookPayload = {
+        acao: 'abrir_chat',
+        cliente: {
+          nome: project.client_name,
+          telefone: project.telefone || '',
+          email: project.email_complementar || ''
+        },
+        projeto: {
+          id: project.id,
+          hash: project.partner_hash,
+          status: project.status || 'Em andamento'
+        },
+        solicitacao: {
+          tipo: 'suporte',
+          assunto: `Solicitação de suporte - ${project.client_name}`,
+          mensagem: `Cliente ${project.client_name} solicita abertura de chat/ticket de suporte.`,
+          data: new Date().toISOString()
+        }
+      }
+    } else {
+      // Payload genérico para outros parceiros
+      webhookPayload = {
+        type: 'open_chat',
+        nome: project.client_name,
+        telefone: project.telefone || 'Não informado',
+        email: project.email_complementar || 'Não informado',
+        hash: project.partner_hash,
+        project_id: project.id,
+        data_solicitacao: new Date().toISOString()
+      }
     }
 
     console.log('Payload do webhook:', JSON.stringify(webhookPayload, null, 2))
@@ -181,7 +207,8 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({ 
             error: 'Falha ao enviar webhook',
-            details: `HTTP ${response.status}: ${response.statusText}`
+            details: `HTTP ${response.status}: ${response.statusText}`,
+            response: responseText
           }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
