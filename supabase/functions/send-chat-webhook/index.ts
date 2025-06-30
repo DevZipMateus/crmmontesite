@@ -116,7 +116,7 @@ serve(async (req) => {
     let webhookPayload: any;
     
     if (isEGestorHash(project.partner_hash)) {
-      // Payload específico para eGestor - formato esperado pela API open_chat.php
+      // Payload simplificado para eGestor - apenas os campos essenciais
       webhookPayload = {
         acao: 'abrir_chat',
         cliente: {
@@ -128,12 +128,6 @@ serve(async (req) => {
           id: project.id,
           hash: project.partner_hash,
           status: project.status || 'Em andamento'
-        },
-        solicitacao: {
-          tipo: 'suporte',
-          assunto: `Solicitação de suporte - ${project.client_name}`,
-          mensagem: `Cliente ${project.client_name} solicita abertura de chat/ticket de suporte.`,
-          data: new Date().toISOString()
         }
       }
     } else {
