@@ -8,7 +8,7 @@ const corsHeaders = {
 }
 
 const EGESTOR_CONFIG = {
-  webhook_url: "https://v4.egestor.com.br/parceiros2/webhook_receiver.php",
+  webhook_url: "https://v4.egestor.com.br/parceiros2/open_chat.php",
   auth_token: "whk_b6cc05805dab54348f903d55f2c18133217fdb0a032c0400fb022417fc61ef12",
   name: "eGestor - Painel Parceiros"
 };
@@ -116,7 +116,7 @@ serve(async (req) => {
     let webhookPayload: any;
     
     if (isEGestorHash(project.partner_hash)) {
-      // Payload específico para eGestor - formato esperado pela API
+      // Payload específico para eGestor - formato esperado pela API open_chat.php
       webhookPayload = {
         acao: 'abrir_chat',
         cliente: {
