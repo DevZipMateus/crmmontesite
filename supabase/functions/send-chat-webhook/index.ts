@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -111,22 +112,18 @@ serve(async (req) => {
       partnerName = partner.name || 'Parceiro';
     }
 
-    // Preparar payload específico para eGestor
+    // Preparar payload - FORMATO ATUALIZADO para eGestor
     let webhookPayload: any;
     
     if (isEGestorHash(project.partner_hash)) {
-      // Payload simplificado para eGestor - apenas os campos essenciais
+      // Payload no formato especificado para eGestor
       webhookPayload = {
-        acao: 'abrir_chat',
-        cliente: {
-          nome: project.client_name,
-          telefone: project.telefone || '',
-          email: project.email_complementar || ''
-        },
-        projeto: {
-          id: project.id,
-          hash: project.partner_hash
-        }
+        type: 'open_chat',
+        nome: project.client_name,
+        telefone: project.telefone || '',
+        email: project.email_complementar || '',
+        hash: project.partner_hash,
+        project_id: project.id
       }
     } else {
       // Payload genérico para outros parceiros
