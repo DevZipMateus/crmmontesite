@@ -18,7 +18,14 @@ const MediaSelectionContext = createContext<MediaSelectionContextType | null>(nu
 export const useMediaSelection = () => {
   const context = useContext(MediaSelectionContext);
   if (!context) {
-    throw new Error('useMediaSelection must be used within MediaSelectionProvider');
+    // Return safe defaults when outside provider
+    return {
+      selectedMedia: new Set<number>(),
+      toggleMediaSelection: () => {},
+      selectAllMedia: () => {},
+      clearSelection: () => {},
+      totalMediaCount: 0
+    };
   }
   return context;
 };
