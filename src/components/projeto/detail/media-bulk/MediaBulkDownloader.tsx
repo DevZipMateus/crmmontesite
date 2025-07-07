@@ -1,9 +1,12 @@
 
 import React, { useState, createContext, useContext } from "react";
 import { Button } from "@/components/ui/button";
-import { Download, CheckSquare, Square } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Download, CheckSquare, Square, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import JSZip from "jszip";
+import { ImageConversionService, ConversionOptions } from "@/services/imageConversionService";
 
 interface MediaSelectionContextType {
   selectedMedia: Set<number>;
@@ -85,8 +88,32 @@ export const MediaBulkDownloader: React.FC<MediaBulkDownloaderProps> = ({
   projectName
 }) => {
   const [isDownloading, setIsDownloading] = useState(false);
+  const [convertImages, setConvertImages] = useState(true);
+  const [conversionOptions, setConversionOptions] = useState<ConversionOptions>({
+    outputFormat: 'jpeg',
+    quality: 0.9
+  });
   const { selectedMedia, selectAllMedia, clearSelection } = useMediaSelection();
   const { toast } = useToast();
+
+  // Get list of formats that can be converted
+  const getFileNamesFromMedia = () => {
+    return midiaUrls.map((media, index) => {
+      let filename = `midia_${index + 1}`;
+      
+      if (typeof media === 'object' && media.url) {
+        const urlPath = media.url;
+        const extensionMatch = urlPath.match(/\.([^.]+)$/);
+        if (extensionMatch) {
+          filename += `.${extensionMatch[1]}`;
+        }
+      }
+      
+      return filename;
+    });
+  };
+
+  const convertibleFormats = ImageConversionService.getConvertibleFormats(getFileNamesFromMedia());
 
   const downloadMediaAsZip = async (mediaIndices: number[]) => {
     if (mediaIndices.length === 0) {
@@ -104,6 +131,7 @@ export const MediaBulkDownloader: React.FC<MediaBulkDownloaderProps> = ({
       const zip = new JSZip();
       let successCount = 0;
       let errorCount = 0;
+      let convertedCount = 0;
 
       for (const index of mediaIndices) {
         try {
@@ -126,7 +154,7 @@ export const MediaBulkDownloader: React.FC<MediaBulkDownloaderProps> = ({
             continue;
           }
 
-          const blob = await response.blob();
+          let blob = await response.blob();
           
           // Generate filename
           let filename = `midia_${index + 1}`;
@@ -165,6 +193,27 @@ export const MediaBulkDownloader: React.FC<MediaBulkDownloaderProps> = ({
           }
 
           filename += extension;
+
+          // Convert image if needed and enabled
+          if (convertImages && blob.type.startsWith('image/')) {
+            try {
+              const conversionResult = await ImageConversionService.convertImage(
+                blob, 
+                filename, 
+                conversionOptions
+              );
+              
+              blob = conversionResult.blob;
+              filename = conversionResult.newFileName;
+              
+              if (conversionResult.converted) {
+                convertedCount++;
+              }
+            } catch (conversionError) {
+              console.error(`Failed to convert image ${index}:`, conversionError);
+              // Continue with original file
+            }
+          }
           
           zip.file(filename, blob);
           successCount++;
@@ -202,9 +251,17 @@ export const MediaBulkDownloader: React.FC<MediaBulkDownloaderProps> = ({
       // Clear selection after successful download
       clearSelection();
 
+      let description = `${successCount} mídia(s) baixada(s) com sucesso`;
+      if (convertedCount > 0) {
+        description += `. ${convertedCount} imagem(s) convertida(s) para ${conversionOptions.outputFormat.toUpperCase()}`;
+      }
+      if (errorCount > 0) {
+        description += `. ${errorCount} arquivo(s) falharam`;
+      }
+
       toast({
         title: "Download concluído",
-        description: `${successCount} mídia(s) baixada(s) com sucesso${errorCount > 0 ? `. ${errorCount} arquivo(s) falharam.` : '.'}`,
+        description: description + '.',
       });
 
     } catch (error) {
@@ -231,43 +288,79 @@ export const MediaBulkDownloader: React.FC<MediaBulkDownloaderProps> = ({
   const isAllSelected = selectedMedia.size === midiaUrls.length && midiaUrls.length > 0;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 mb-4">
-      <Button
-        onClick={handleDownloadAll}
-        disabled={isDownloading || midiaUrls.length === 0}
-        size="sm"
-        variant="outline"
-      >
-        <Download className="h-4 w-4 mr-1" />
-        {isDownloading ? "Gerando ZIP..." : "Baixar Todas as Mídias"}
-      </Button>
-
-      {midiaUrls.length > 1 && (
-        <>
-          <Button
-            onClick={isAllSelected ? clearSelection : selectAllMedia}
-            size="sm"
-            variant="ghost"
-          >
-            {isAllSelected ? (
-              <><CheckSquare className="h-4 w-4 mr-1" /> Desmarcar Todas</>
-            ) : (
-              <><Square className="h-4 w-4 mr-1" /> Selecionar Todas</>
-            )}
-          </Button>
-
-          {selectedMedia.size > 0 && (
-            <Button
-              onClick={handleDownloadSelected}
-              disabled={isDownloading}
-              size="sm"
-            >
-              <Download className="h-4 w-4 mr-1" />
-              Baixar Selecionadas ({selectedMedia.size})
-            </Button>
+    <div className="space-y-3">
+      {/* Conversion Options */}
+      {convertibleFormats.length > 0 && (
+        <div className="flex items-center gap-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="convert-images"
+              checked={convertImages}
+              onCheckedChange={(checked) => setConvertImages(checked === true)}
+            />
+            <Label htmlFor="convert-images" className="text-sm font-medium">
+              Converter formatos ({convertibleFormats.join(', ')}) para JPG/PNG
+            </Label>
+          </div>
+          
+          {convertImages && (
+            <div className="flex items-center gap-2">
+              <Label className="text-xs text-gray-600">Formato:</Label>
+              <select
+                value={conversionOptions.outputFormat}
+                onChange={(e) => setConversionOptions({
+                  ...conversionOptions,
+                  outputFormat: e.target.value as 'jpeg' | 'png'
+                })}
+                className="text-xs border rounded px-2 py-1"
+              >
+                <option value="jpeg">JPG</option>
+                <option value="png">PNG</option>
+              </select>
+            </div>
           )}
-        </>
+        </div>
       )}
+
+      {/* Download Buttons */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          onClick={handleDownloadAll}
+          disabled={isDownloading || midiaUrls.length === 0}
+          size="sm"
+          variant="outline"
+        >
+          <Download className="h-4 w-4 mr-1" />
+          {isDownloading ? "Gerando ZIP..." : "Baixar Todas as Mídias"}
+        </Button>
+
+        {midiaUrls.length > 1 && (
+          <>
+            <Button
+              onClick={isAllSelected ? clearSelection : selectAllMedia}
+              size="sm"
+              variant="ghost"
+            >
+              {isAllSelected ? (
+                <><CheckSquare className="h-4 w-4 mr-1" /> Desmarcar Todas</>
+              ) : (
+                <><Square className="h-4 w-4 mr-1" /> Selecionar Todas</>
+              )}
+            </Button>
+
+            {selectedMedia.size > 0 && (
+              <Button
+                onClick={handleDownloadSelected}
+                disabled={isDownloading}
+                size="sm"
+              >
+                <Download className="h-4 w-4 mr-1" />
+                Baixar Selecionadas ({selectedMedia.size})
+              </Button>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };
