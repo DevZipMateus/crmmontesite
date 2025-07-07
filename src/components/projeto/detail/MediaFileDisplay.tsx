@@ -6,6 +6,7 @@ import { ImageDisplay } from "./media-display/ImageDisplay";
 import { FileDisplay } from "./media-display/FileDisplay";
 import { MediaActions } from "./media-display/MediaActions";
 import { MediaInfo } from "./media-display/MediaInfo";
+import { MediaCheckbox } from "./media-bulk/MediaCheckbox";
 import { processFilePath, isImageFile } from "./media-display/processFilePath";
 import { getSignedUrl } from "@/lib/supabase/storage";
 
@@ -97,6 +98,7 @@ export const MediaFileDisplay: React.FC<MediaFileDisplayProps> = ({
   return (
     <div className="flex flex-col">
       <div className="relative group">
+        <MediaCheckbox index={index || 0} type={type} />
         {isImage ? (
           <ImageDisplay 
             fileUrl={fileUrl} 

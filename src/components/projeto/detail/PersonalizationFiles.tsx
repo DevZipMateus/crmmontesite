@@ -3,6 +3,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MediaFileDisplay } from "./MediaFileDisplay";
 import { Badge } from "@/components/ui/badge";
+import { MediaSelectionProvider, MediaBulkDownloader } from "./media-bulk/MediaBulkDownloader";
 
 interface PersonalizationFilesProps {
   personalization: any;
@@ -87,21 +88,32 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
 
         {/* Midia Files Section */}
         {hasMidia && (
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <h3 className="text-sm font-medium text-gray-500 mb-3">Mídias</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {midiaUrls.map((media: any, index: number) => (
-                <MediaFileDisplay 
-                  key={index} 
-                  filePath={media} 
-                  type="midia" 
-                  index={index} 
-                  caption={typeof media === 'object' && media?.caption ? media.caption : ''} 
-                  getFileUrl={getFileUrl}
-                />
-              ))}
+          <MediaSelectionProvider totalMediaCount={midiaUrls.length}>
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-gray-500">Mídias</h3>
+              </div>
+              
+              <MediaBulkDownloader 
+                midiaUrls={midiaUrls}
+                getFileUrl={getFileUrl}
+                projectName={personalization.officenome || 'Projeto'}
+              />
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {midiaUrls.map((media: any, index: number) => (
+                  <MediaFileDisplay 
+                    key={index} 
+                    filePath={media} 
+                    type="midia" 
+                    index={index} 
+                    caption={typeof media === 'object' && media?.caption ? media.caption : ''} 
+                    getFileUrl={getFileUrl}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          </MediaSelectionProvider>
         )}
       </CardContent>
     </Card>
