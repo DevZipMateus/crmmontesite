@@ -55,6 +55,7 @@ export default function SalesProjectTable({
                 <TableHead>Nome do cliente</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Domínio</TableHead>
                 <TableHead>Data de criação</TableHead>
                 <TableHead>Responsável</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
@@ -72,6 +73,7 @@ export default function SalesProjectTable({
                   <TableCell>
                     <StatusBadge status={project.status || 'Recebido'} />
                   </TableCell>
+                  <TableCell>{project.domain || '—'}</TableCell>
                   <TableCell>{formatDate(project.created_at)}</TableCell>
                   <TableCell>{project.responsible_name || '—'}</TableCell>
                   <TableCell className="text-right">
