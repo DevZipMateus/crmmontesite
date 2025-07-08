@@ -9,7 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SalesLandingPage } from "@/types/salesLandingPage";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { Search, Copy, Eye, Terminal, Users, ExternalLink } from "lucide-react";
+import { Search, Copy, Eye, Terminal, Users, ExternalLink, Image } from "lucide-react";
+import { VendedorImageViewer } from "@/components/site-personalize/VendedorImageViewer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -243,6 +244,7 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
                       <TableHead>Nome</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Área de Atuação</TableHead>
+                      <TableHead>Foto</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Data</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
@@ -254,6 +256,16 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
                         <TableCell className="font-medium">{page.nome_completo}</TableCell>
                         <TableCell>{page.email_profissional}</TableCell>
                         <TableCell>{page.area_atuacao}</TableCell>
+                        <TableCell>
+                          {page.foto_profissional_url ? (
+                            <div className="flex items-center gap-2">
+                              <Image className="h-4 w-4 text-green-600" />
+                              <span className="text-sm text-green-600">Enviada</span>
+                            </div>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">Não enviada</span>
+                          )}
+                        </TableCell>
                         <TableCell>{getStatusBadge(page.status, page.comando_gerado)}</TableCell>
                         <TableCell>{formatDate(page.created_at)}</TableCell>
                         <TableCell className="text-right">
@@ -276,7 +288,13 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
                                       <p><strong>Email:</strong> {page.email_profissional}</p>
                                       <p><strong>Telefone:</strong> {page.telefone_whatsapp}</p>
                                       {page.foto_profissional_url && (
-                                        <p><strong>Foto:</strong> Enviada</p>
+                                        <div className="mt-3">
+                                          <p className="font-semibold mb-2">Foto Profissional:</p>
+                                          <VendedorImageViewer 
+                                            imageUrl={page.foto_profissional_url}
+                                            vendedorName={page.nome_completo}
+                                          />
+                                        </div>
                                       )}
                                     </div>
                                     
