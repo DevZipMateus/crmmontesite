@@ -29,6 +29,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
   personalizationId
 }) => {
   const navigate = useNavigate();
+  const userType = localStorage.getItem('userType');
   
   return (
     <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
@@ -37,7 +38,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
           <Button
             variant="outline"
             size="icon"
-            onClick={() => navigate('/projetos')}
+            onClick={() => navigate(userType === 'sales' ? '/painel-vendas' : '/projetos')}
           >
             <ChevronDownIcon className="h-4 w-4 rotate-90" />
           </Button>
@@ -56,22 +57,26 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
           </Button>
         )}
         
-        <Button 
-          variant="outline"
-          className="flex items-center gap-2"
-          onClick={() => navigate(`/projeto/${projectId}/editar`)}
-        >
-          <Edit className="h-4 w-4" /> 
-          Editar
-        </Button>
+        {userType === 'admin' && (
+          <Button 
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={() => navigate(`/projeto/${projectId}/editar`)}
+          >
+            <Edit className="h-4 w-4" /> 
+            Editar
+          </Button>
+        )}
         
-        <DeleteProjectDialog 
-          projectId={projectId}
-          projectName={projectName}
-          onDelete={handleProjectDeleted}
-          variant="button"
-          size="default"
-        />
+        {userType === 'admin' && (
+          <DeleteProjectDialog 
+            projectId={projectId}
+            projectName={projectName}
+            onDelete={handleProjectDeleted}
+            variant="button"
+            size="default"
+          />
+        )}
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
