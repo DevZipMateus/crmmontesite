@@ -36,7 +36,7 @@ export default function PainelVendas() {
         <SalesSearchInput 
           value={searchQuery} 
           onChange={setSearchQuery} 
-          placeholder="Buscar por nome do cliente ou email..."
+          placeholder="Buscar por nome, email, domínio ou link..."
           className="rounded-xl shadow-sm"
         />
       </div>

@@ -12,7 +12,7 @@ interface SalesSearchInputProps {
 export default function SalesSearchInput({
   value,
   onChange,
-  placeholder = "Buscar projetos...",
+  placeholder = "Buscar por nome, email, domínio ou link...",
   className
 }: SalesSearchInputProps) {
   return (
