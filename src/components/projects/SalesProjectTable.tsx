@@ -1,4 +1,4 @@
-import { Eye } from "lucide-react";
+import { Eye, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import StatusBadge from "./list/StatusBadge";
@@ -23,6 +23,15 @@ export default function SalesProjectTable({
 
   const handleView = (projectId: string) => {
     navigate(`/projeto/${projectId}`);
+  };
+
+  const formatDomainUrl = (domain: string) => {
+    if (!domain) return '';
+    // Adicionar https:// se não tiver protocolo
+    if (!domain.startsWith('http://') && !domain.startsWith('https://')) {
+      return `https://${domain}`;
+    }
+    return domain;
   };
 
   if (loading) {
@@ -73,7 +82,19 @@ export default function SalesProjectTable({
                   <TableCell>
                     <StatusBadge status={project.status || 'Recebido'} />
                   </TableCell>
-                  <TableCell>{project.domain || '—'}</TableCell>
+                  <TableCell>
+                    {project.domain ? (
+                      <a 
+                        href={formatDomainUrl(project.domain)} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-primary hover:underline"
+                      >
+                        {project.domain}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    ) : '—'}
+                  </TableCell>
                   <TableCell>{formatDate(project.created_at)}</TableCell>
                   <TableCell>{project.responsible_name || '—'}</TableCell>
                   <TableCell className="text-right">
