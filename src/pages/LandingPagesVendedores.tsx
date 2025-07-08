@@ -9,9 +9,10 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SalesLandingPage } from "@/types/salesLandingPage";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { Search, Copy, Eye, Terminal, Users, ExternalLink, Image, FileText } from "lucide-react";
+import { Search, Copy, Eye, Terminal, Users, ExternalLink, Image, FileText, Trash2 } from "lucide-react";
 import { VendedorImageViewer } from "@/components/site-personalize/VendedorImageViewer";
 import { CurriculoPDFGenerator } from "@/components/site-personalize/CurriculoPDFGenerator";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -135,6 +136,34 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
       );
     } catch (error) {
       console.error('Error updating command status:', error);
+    }
+  };
+
+  const deleteLandingPage = async (pageId: string, pageName: string) => {
+    try {
+      const { error } = await supabase
+        .from('sales_landing_pages')
+        .delete()
+        .eq('id', pageId);
+
+      if (error) {
+        throw error;
+      }
+
+      // Atualizar estado local removendo a página excluída
+      setLandingPages(prev => prev.filter(page => page.id !== pageId));
+      
+      toast({
+        title: "Excluído com sucesso!",
+        description: `Landing page de ${pageName} foi excluída.`,
+      });
+    } catch (error) {
+      console.error('Error deleting landing page:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir landing page.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -351,6 +380,33 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
                              >
                                <Terminal className="h-4 w-4" />
                              </Button>
+
+                             <AlertDialog>
+                               <AlertDialogTrigger asChild>
+                                 <Button variant="destructive" size="sm">
+                                   <Trash2 className="h-4 w-4" />
+                                 </Button>
+                               </AlertDialogTrigger>
+                               <AlertDialogContent>
+                                 <AlertDialogHeader>
+                                   <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                                   <AlertDialogDescription>
+                                     Tem certeza que deseja excluir a landing page de <strong>{page.nome_completo}</strong>?
+                                     <br />
+                                     Esta ação não pode ser desfeita.
+                                   </AlertDialogDescription>
+                                 </AlertDialogHeader>
+                                 <AlertDialogFooter>
+                                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                   <AlertDialogAction
+                                     onClick={() => deleteLandingPage(page.id, page.nome_completo)}
+                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                   >
+                                     Excluir
+                                   </AlertDialogAction>
+                                 </AlertDialogFooter>
+                               </AlertDialogContent>
+                             </AlertDialog>
                           </div>
                         </TableCell>
                       </TableRow>
