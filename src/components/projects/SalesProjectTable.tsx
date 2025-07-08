@@ -64,7 +64,11 @@ export default function SalesProjectTable({
               {projects.map((project) => (
                 <TableRow key={project.id} className="hover:bg-muted/50">
                   <TableCell className="font-medium">{project.client_name}</TableCell>
-                  <TableCell>{project.email_complementar || '—'}</TableCell>
+                  <TableCell>
+                    {project.email_complementar || 
+                     project.site_personalizacoes?.email || 
+                     '—'}
+                  </TableCell>
                   <TableCell>
                     <StatusBadge status={project.status || 'Recebido'} />
                   </TableCell>

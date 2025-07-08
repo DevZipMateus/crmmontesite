@@ -37,7 +37,10 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
       try {
         const supabase = getSupabaseClient();
         
-        let query = supabase.from('projects').select('*');
+        let query = supabase.from('projects').select(`
+          *,
+          site_personalizacoes:personalization_id(email)
+        `);
         
         // Aplicar filtros ao query
         if (statusFilter) {
@@ -79,7 +82,9 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
           filteredProjects = filteredProjects.filter(project => 
             project.client_name?.toLowerCase().includes(lowercaseQuery) || 
             project.template?.toLowerCase().includes(lowercaseQuery) ||
-            project.responsible_name?.toLowerCase().includes(lowercaseQuery)
+            project.responsible_name?.toLowerCase().includes(lowercaseQuery) ||
+            project.email_complementar?.toLowerCase().includes(lowercaseQuery) ||
+            project.site_personalizacoes?.email?.toLowerCase().includes(lowercaseQuery)
           );
         }
         

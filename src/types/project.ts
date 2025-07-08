@@ -33,4 +33,9 @@ export interface Project {
   site_ready_date?: string;
   customization_deadline?: string;
   requires_paid_customization?: boolean;
+  
+  // Campo para JOIN com personalização
+  site_personalizacoes?: {
+    email?: string;
+  };
 }
