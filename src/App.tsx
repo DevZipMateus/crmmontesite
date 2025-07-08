@@ -22,6 +22,7 @@ import CustomUrlAdmin from "./pages/CustomUrlAdmin";
 import PersonalizacaoDetalhe from "@/pages/PersonalizacaoDetalhe";
 import WebhookManagement from "./pages/WebhookManagement";
 import CriarProjetos from "./pages/CriarProjetos";
+import PainelVendas from "./pages/PainelVendas";
 
 const queryClient = new QueryClient();
 
@@ -54,14 +55,21 @@ const App = () => {
             
             {/* Página inicial - acessível apenas após login */}
             <Route path="/home" element={
-              <AuthGuard>
+              <AuthGuard requiredUserType="admin">
                 <Index />
+              </AuthGuard>
+            } />
+            
+            {/* Painel de vendas - acessível apenas para vendedores */}
+            <Route path="/painel-vendas" element={
+              <AuthGuard requiredUserType="sales">
+                <PainelVendas />
               </AuthGuard>
             } />
             
             {/* Nova rota unificada para criar projetos */}
             <Route path="/criar-projetos" element={
-              <AuthGuard>
+              <AuthGuard requiredUserType="admin">
                 <CriarProjetos />
               </AuthGuard>
             } />
@@ -71,12 +79,12 @@ const App = () => {
             
             {/* Outras rotas protegidas */}
             <Route path="/projetos" element={
-              <AuthGuard>
+              <AuthGuard requiredUserType="admin">
                 <Projetos />
               </AuthGuard>
             } />
             <Route path="/novo-projeto" element={
-              <AuthGuard>
+              <AuthGuard requiredUserType="admin">
                 <NovoProjeto />
               </AuthGuard>
             } />
@@ -86,42 +94,42 @@ const App = () => {
               </AuthGuard>
             } />
             <Route path="/projeto/:id/editar" element={
-              <AuthGuard>
+              <AuthGuard requiredUserType="admin">
                 <ProjetoEditar />
               </AuthGuard>
             } />
             {/* Personalize site routes - default and with model parameter */}
             <Route path="/personalize-site" element={
-              <AuthGuard>
+              <AuthGuard requiredUserType="admin">
                 <PersonalizeSite />
               </AuthGuard>
             } />
             <Route path="/personalize-site/:modelo" element={
-              <AuthGuard>
+              <AuthGuard requiredUserType="admin">
                 <PersonalizeSite />
               </AuthGuard>
             } />
             <Route path="/site/:id" element={
-              <AuthGuard>
+              <AuthGuard requiredUserType="admin">
                 <SiteDetalhe />
               </AuthGuard>
             } />
             <Route path="/producao-sites" element={
-              <AuthGuard>
+              <AuthGuard requiredUserType="admin">
                 <ProducaoSites />
               </AuthGuard>
             } />
             
             {/* Rota para gerenciamento de modelos e URLs personalizadas */}
             <Route path="/custom-urls" element={
-              <AuthGuard>
+              <AuthGuard requiredUserType="admin">
                 <CustomUrlAdmin />
               </AuthGuard>
             } />
             
             {/* Rota para gerenciamento de webhooks e configurações */}
             <Route path="/webhooks" element={
-              <AuthGuard>
+              <AuthGuard requiredUserType="admin">
                 <WebhookManagement />
               </AuthGuard>
             } />

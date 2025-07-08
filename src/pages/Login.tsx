@@ -33,12 +33,12 @@ const Login: React.FC = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Simple hardcoded authentication
+    // Dual authentication system
     if (username === "adm" && password === "zipline") {
-      // Store login status in localStorage
+      // Admin login
       localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userType", "admin");
       
-      // Login successful
       toast({
         title: "Login bem-sucedido",
         description: "Bem-vindo ao sistema administrativo.",
@@ -52,6 +52,17 @@ const Login: React.FC = () => {
       } else {
         navigate("/home");
       }
+    } else if (username === "vendas" && password === "zipline123456") {
+      // Sales login
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userType", "sales");
+      
+      toast({
+        title: "Login bem-sucedido",
+        description: "Bem-vindo ao painel de vendas.",
+      });
+      
+      navigate("/painel-vendas");
     } else {
       // Login failed
       toast({
