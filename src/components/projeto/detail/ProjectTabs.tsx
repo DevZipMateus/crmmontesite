@@ -100,11 +100,10 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({ project }) => {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-      <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-4">
+      <TabsList className="grid grid-cols-3 mb-4">
         <TabsTrigger value="info">Informações</TabsTrigger>
         <TabsTrigger value="customization">Personalizações</TabsTrigger>
         <TabsTrigger value="upload">Uploads</TabsTrigger>
-        <TabsTrigger value="gdocs">Google Docs</TabsTrigger>
       </TabsList>
 
       <TabsContent value="info" className="space-y-4">
@@ -134,11 +133,6 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({ project }) => {
         )}
       </TabsContent>
 
-      <TabsContent value="gdocs" className="space-y-4">
-        <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Google Docs - Em desenvolvimento</p>
-        </div>
-      </TabsContent>
     </Tabs>
   );
 };
