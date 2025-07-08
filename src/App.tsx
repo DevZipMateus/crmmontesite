@@ -23,6 +23,8 @@ import PersonalizacaoDetalhe from "@/pages/PersonalizacaoDetalhe";
 import WebhookManagement from "./pages/WebhookManagement";
 import CriarProjetos from "./pages/CriarProjetos";
 import PainelVendas from "./pages/PainelVendas";
+import LandingPagesVendedores from "./pages/LandingPagesVendedores";
+import VendedorLandingForm from "./pages/VendedorLandingForm";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +68,16 @@ const App = () => {
                 <PainelVendas />
               </AuthGuard>
             } />
+            
+            {/* Landing Pages para Vendedores */}
+            <Route path="/landing-pages-vendedores" element={
+              <AuthGuard requiredUserType="admin">
+                <LandingPagesVendedores />
+              </AuthGuard>
+            } />
+            
+            {/* Formulário público para vendedores */}
+            <Route path="/formulario-vendedor" element={<VendedorLandingForm />} />
             
             {/* Nova rota unificada para criar projetos */}
             <Route path="/criar-projetos" element={

@@ -83,6 +83,13 @@ const MainMenuSection: React.FC = () => {
           href="/painel-vendas"
           description="Visualizar projetos (somente leitura)"
         />
+        
+        <MenuItem 
+          icon={<Users size={24} />}
+          label="Landing Pages Vendedores"
+          href="/landing-pages-vendedores"
+          description="Gerenciar formulários e gerar comandos para landing pages"
+        />
       </div>
     </section>
   );

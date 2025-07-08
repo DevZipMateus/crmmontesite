@@ -296,6 +296,69 @@ export type Database = {
           },
         ]
       }
+      sales_landing_pages: {
+        Row: {
+          area_atuacao: string
+          cidade_regiao: string | null
+          comando_gerado: boolean | null
+          cores_preferidas: string | null
+          created_at: string
+          diferenciais: string | null
+          email_profissional: string
+          estilo_visual: string | null
+          foto_profissional_url: string | null
+          id: string
+          mini_bio: string
+          nome_completo: string
+          principais_servicos: string
+          redes_sociais: string | null
+          slogan: string | null
+          status: string
+          telefone_whatsapp: string
+          updated_at: string
+        }
+        Insert: {
+          area_atuacao: string
+          cidade_regiao?: string | null
+          comando_gerado?: boolean | null
+          cores_preferidas?: string | null
+          created_at?: string
+          diferenciais?: string | null
+          email_profissional: string
+          estilo_visual?: string | null
+          foto_profissional_url?: string | null
+          id?: string
+          mini_bio: string
+          nome_completo: string
+          principais_servicos: string
+          redes_sociais?: string | null
+          slogan?: string | null
+          status?: string
+          telefone_whatsapp: string
+          updated_at?: string
+        }
+        Update: {
+          area_atuacao?: string
+          cidade_regiao?: string | null
+          comando_gerado?: boolean | null
+          cores_preferidas?: string | null
+          created_at?: string
+          diferenciais?: string | null
+          email_profissional?: string
+          estilo_visual?: string | null
+          foto_profissional_url?: string | null
+          id?: string
+          mini_bio?: string
+          nome_completo?: string
+          principais_servicos?: string
+          redes_sociais?: string | null
+          slogan?: string | null
+          status?: string
+          telefone_whatsapp?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       showcases: {
         Row: {
           category_id: string | null
