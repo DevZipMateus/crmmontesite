@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Download, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SalesLandingPage } from "@/types/salesLandingPage";
+import { getSignedUrl } from "@/lib/supabase/storage";
 import jsPDF from "jspdf";
 
 interface CurriculoPDFGeneratorProps {
@@ -14,8 +15,38 @@ export const CurriculoPDFGenerator: React.FC<CurriculoPDFGeneratorProps> = ({
 }) => {
   const { toast } = useToast();
 
-  const generatePDF = () => {
+  const loadImageAsBase64 = async (imageUrl: string): Promise<string | null> => {
     try {
+      const signedUrl = await getSignedUrl(imageUrl, 'vendedor-fotos');
+      if (!signedUrl) return null;
+
+      const response = await fetch(signedUrl);
+      const blob = await response.blob();
+      
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Error loading image:', error);
+      return null;
+    }
+  };
+
+  const generatePDF = async () => {
+    try {
+      // Carregar foto se disponível
+      let fotoBase64: string | null = null;
+      if (vendedor.foto_profissional_url) {
+        toast({
+          title: "Carregando foto...",
+          description: "Preparando currículo com foto.",
+        });
+        fotoBase64 = await loadImageAsBase64(vendedor.foto_profissional_url);
+      }
+
       const pdf = new jsPDF();
       const pageWidth = pdf.internal.pageSize.width;
       const margin = 20;
@@ -24,6 +55,20 @@ export const CurriculoPDFGenerator: React.FC<CurriculoPDFGeneratorProps> = ({
 
       // Configurar fonte
       pdf.setFont("helvetica");
+
+      // Adicionar foto se disponível
+      if (fotoBase64) {
+        try {
+          const imgWidth = 30;
+          const imgHeight = 30;
+          const imgX = pageWidth - margin - imgWidth;
+          const imgY = 20;
+          
+          pdf.addImage(fotoBase64, 'JPEG', imgX, imgY, imgWidth, imgHeight);
+        } catch (imgError) {
+          console.error('Error adding image to PDF:', imgError);
+        }
+      }
 
       // Título do documento
       pdf.setFontSize(20);
@@ -176,8 +221,21 @@ export const CurriculoPDFGenerator: React.FC<CurriculoPDFGeneratorProps> = ({
     }
   };
 
+  const handleGeneratePDF = async () => {
+    try {
+      await generatePDF();
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast({
+        title: "Erro",
+        description: "Erro ao gerar o currículo em PDF.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <Button onClick={generatePDF} variant="outline" size="sm">
+    <Button onClick={handleGeneratePDF} variant="outline" size="sm">
       <FileText className="h-4 w-4 mr-2" />
       Baixar Currículo PDF
     </Button>
