@@ -9,8 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SalesLandingPage } from "@/types/salesLandingPage";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { Search, Copy, Eye, Terminal, Users, ExternalLink, Image } from "lucide-react";
+import { Search, Copy, Eye, Terminal, Users, ExternalLink, Image, FileText } from "lucide-react";
 import { VendedorImageViewer } from "@/components/site-personalize/VendedorImageViewer";
+import { CurriculoPDFGenerator } from "@/components/site-personalize/CurriculoPDFGenerator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -68,11 +69,15 @@ Nome: ${page.nome_completo}
 Email: ${page.email_profissional}
 Telefone/WhatsApp: ${page.telefone_whatsapp}
 Área de Atuação: ${page.area_atuacao}
+${page.cargo ? `Cargo: ${page.cargo}` : ''}
 ${page.cidade_regiao ? `Região: ${page.cidade_regiao}` : ''}
 
 ## Apresentação:
 ${page.mini_bio}
 ${page.slogan ? `Slogan: "${page.slogan}"` : ''}
+
+${page.formacao_certificacoes ? `## Qualificações:
+${page.formacao_certificacoes}` : ''}
 
 ## Serviços Oferecidos:
 ${page.principais_servicos}
@@ -93,10 +98,11 @@ URL: ${page.foto_profissional_url}` : ''}
 ## Instruções de Criação:
 1. Criar página responsiva e moderna
 2. Incluir seção hero com foto e apresentação
-3. Seção de serviços destacando os principais oferecidos
-4. Área de contato com WhatsApp em evidência
-5. Aplicar cores e estilo visual solicitados
-6. Otimizar para conversão e geração de leads
+3. Destacar qualificações e experiências profissionais
+4. Seção de serviços destacando os principais oferecidos
+5. Área de contato com WhatsApp em evidência
+6. Aplicar cores e estilo visual solicitados
+7. Otimizar para conversão e geração de leads
 
 Data de criação: ${new Date().toLocaleDateString('pt-BR')}
 `;
@@ -238,24 +244,29 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Área de Atuação</TableHead>
-                      <TableHead>Foto</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Nome</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Área / Cargo</TableHead>
+                          <TableHead>Foto</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Data</TableHead>
+                          <TableHead className="text-right">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
                   <TableBody>
                     {filteredPages.map((page) => (
                       <TableRow key={page.id}>
                         <TableCell className="font-medium">{page.nome_completo}</TableCell>
                         <TableCell>{page.email_profissional}</TableCell>
-                        <TableCell>{page.area_atuacao}</TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{page.area_atuacao}</div>
+                            {page.cargo && <div className="text-sm text-muted-foreground">{page.cargo}</div>}
+                          </div>
+                        </TableCell>
                         <TableCell>
                           {page.foto_profissional_url ? (
                             <div className="flex items-center gap-2">
@@ -301,11 +312,19 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
                                     <div>
                                       <h4 className="font-semibold">Perfil Profissional</h4>
                                       <p><strong>Área:</strong> {page.area_atuacao}</p>
+                                      {page.cargo && <p><strong>Cargo:</strong> {page.cargo}</p>}
                                       {page.cidade_regiao && <p><strong>Região:</strong> {page.cidade_regiao}</p>}
                                       <p><strong>Bio:</strong> {page.mini_bio}</p>
                                       {page.slogan && <p><strong>Slogan:</strong> {page.slogan}</p>}
                                       {page.redes_sociais && <p><strong>Redes Sociais:</strong> {page.redes_sociais}</p>}
                                     </div>
+
+                                    {page.formacao_certificacoes && (
+                                      <div>
+                                        <h4 className="font-semibold">Formação e Certificações</h4>
+                                        <p>{page.formacao_certificacoes}</p>
+                                      </div>
+                                    )}
                                     
                                     <div>
                                       <h4 className="font-semibold">Serviços</h4>
@@ -318,18 +337,20 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
                                       {page.cores_preferidas && <p><strong>Cores:</strong> {page.cores_preferidas}</p>}
                                       {page.estilo_visual && <p><strong>Estilo:</strong> {page.estilo_visual}</p>}
                                     </div>
-                                  </div>
-                                </ScrollArea>
-                              </DialogContent>
-                            </Dialog>
-                            
-                            <Button
-                              variant="default"
-                              size="sm"
-                              onClick={() => generateCommand(page)}
-                            >
-                              <Terminal className="h-4 w-4" />
-                            </Button>
+                                   </div>
+                                 </ScrollArea>
+                               </DialogContent>
+                             </Dialog>
+                             
+                             <CurriculoPDFGenerator vendedor={page} />
+                             
+                             <Button
+                               variant="default"
+                               size="sm"
+                               onClick={() => generateCommand(page)}
+                             >
+                               <Terminal className="h-4 w-4" />
+                             </Button>
                           </div>
                         </TableCell>
                       </TableRow>

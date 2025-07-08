@@ -5,12 +5,14 @@ export interface SalesLandingPage {
   telefone_whatsapp: string;
   foto_profissional_url?: string;
   area_atuacao: string;
+  cargo?: string;
   cidade_regiao?: string;
   mini_bio: string;
   slogan?: string;
   redes_sociais?: string;
   principais_servicos: string;
   diferenciais?: string;
+  formacao_certificacoes?: string;
   cores_preferidas?: string;
   estilo_visual?: string;
   status: string;
@@ -25,12 +27,14 @@ export interface SalesLandingPageInsert {
   telefone_whatsapp: string;
   foto_profissional_url?: string;
   area_atuacao: string;
+  cargo?: string;
   cidade_regiao?: string;
   mini_bio: string;
   slogan?: string;
   redes_sociais?: string;
   principais_servicos: string;
   diferenciais?: string;
+  formacao_certificacoes?: string;
   cores_preferidas?: string;
   estilo_visual?: string;
 }

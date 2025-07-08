@@ -19,12 +19,14 @@ const formSchema = z.object({
   email_profissional: z.string().email("Email inválido"),
   telefone_whatsapp: z.string().min(10, "Telefone é obrigatório"),
   area_atuacao: z.string().min(2, "Área de atuação é obrigatória"),
+  cargo: z.string().min(2, "Cargo é obrigatório"),
   cidade_regiao: z.string().optional(),
   mini_bio: z.string().min(10, "Mini bio é obrigatória"),
   slogan: z.string().optional(),
   redes_sociais: z.string().optional(),
   principais_servicos: z.string().min(10, "Principais serviços são obrigatórios"),
   diferenciais: z.string().optional(),
+  formacao_certificacoes: z.string().optional(),
   cores_preferidas: z.string().optional(),
   estilo_visual: z.string().optional(),
 });
@@ -45,12 +47,14 @@ export default function VendedorLandingForm() {
       email_profissional: "",
       telefone_whatsapp: "",
       area_atuacao: "",
+      cargo: "",
       cidade_regiao: "",
       mini_bio: "",
       slogan: "",
       redes_sociais: "",
       principais_servicos: "",
       diferenciais: "",
+      formacao_certificacoes: "",
       cores_preferidas: "",
       estilo_visual: "",
     },
@@ -116,6 +120,7 @@ export default function VendedorLandingForm() {
         email_profissional: data.email_profissional,
         telefone_whatsapp: data.telefone_whatsapp,
         area_atuacao: data.area_atuacao,
+        cargo: data.cargo,
         mini_bio: data.mini_bio,
         principais_servicos: data.principais_servicos,
         foto_profissional_url: uploadedPhotoUrl || undefined,
@@ -123,6 +128,7 @@ export default function VendedorLandingForm() {
         slogan: data.slogan || undefined,
         redes_sociais: data.redes_sociais || undefined,
         diferenciais: data.diferenciais || undefined,
+        formacao_certificacoes: data.formacao_certificacoes || undefined,
         cores_preferidas: data.cores_preferidas || undefined,
         estilo_visual: data.estilo_visual || undefined,
       };
@@ -273,6 +279,20 @@ export default function VendedorLandingForm() {
 
                   <FormField
                     control={form.control}
+                    name="cargo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cargo Atual *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: Consultor Sênior, Gerente de Vendas, Especialista Técnico" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
                     name="cidade_regiao"
                     render={({ field }) => (
                       <FormItem>
@@ -326,6 +346,32 @@ export default function VendedorLandingForm() {
                         <FormControl>
                           <Textarea 
                             placeholder="Inclua links do Instagram, Facebook, LinkedIn ou outros canais que você utiliza"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Qualificações Profissionais */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold flex items-center gap-2 text-primary">
+                    <Briefcase className="h-5 w-5" />
+                    Qualificações Profissionais
+                  </h3>
+
+                  <FormField
+                    control={form.control}
+                    name="formacao_certificacoes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Formação / Certificações</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Liste suas formações acadêmicas, cursos, certificações e especializações profissionais"
+                            className="min-h-[100px]"
                             {...field} 
                           />
                         </FormControl>

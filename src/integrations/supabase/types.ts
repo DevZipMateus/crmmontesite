@@ -299,6 +299,7 @@ export type Database = {
       sales_landing_pages: {
         Row: {
           area_atuacao: string
+          cargo: string | null
           cidade_regiao: string | null
           comando_gerado: boolean | null
           cores_preferidas: string | null
@@ -306,6 +307,7 @@ export type Database = {
           diferenciais: string | null
           email_profissional: string
           estilo_visual: string | null
+          formacao_certificacoes: string | null
           foto_profissional_url: string | null
           id: string
           mini_bio: string
@@ -319,6 +321,7 @@ export type Database = {
         }
         Insert: {
           area_atuacao: string
+          cargo?: string | null
           cidade_regiao?: string | null
           comando_gerado?: boolean | null
           cores_preferidas?: string | null
@@ -326,6 +329,7 @@ export type Database = {
           diferenciais?: string | null
           email_profissional: string
           estilo_visual?: string | null
+          formacao_certificacoes?: string | null
           foto_profissional_url?: string | null
           id?: string
           mini_bio: string
@@ -339,6 +343,7 @@ export type Database = {
         }
         Update: {
           area_atuacao?: string
+          cargo?: string | null
           cidade_regiao?: string | null
           comando_gerado?: boolean | null
           cores_preferidas?: string | null
@@ -346,6 +351,7 @@ export type Database = {
           diferenciais?: string | null
           email_profissional?: string
           estilo_visual?: string | null
+          formacao_certificacoes?: string | null
           foto_profissional_url?: string | null
           id?: string
           mini_bio?: string
