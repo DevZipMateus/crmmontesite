@@ -346,7 +346,6 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
                           <TableHead>Nome</TableHead>
                           <TableHead>Email</TableHead>
                           <TableHead>Área / Cargo</TableHead>
-                          <TableHead>Foto</TableHead>
                           <TableHead>Mídias</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Data</TableHead>
@@ -364,16 +363,6 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
                             {page.cargo && <div className="text-sm text-muted-foreground">{page.cargo}</div>}
                           </div>
                         </TableCell>
-                         <TableCell>
-                           {page.foto_profissional_url ? (
-                             <div className="flex items-center gap-2">
-                               <Image className="h-4 w-4 text-green-600" />
-                               <span className="text-sm text-green-600">Enviada</span>
-                             </div>
-                           ) : (
-                             <span className="text-sm text-muted-foreground">Não enviada</span>
-                           )}
-                         </TableCell>
                          <TableCell>
                            {page.media_urls ? (
                              <div className="flex items-center gap-2">
@@ -459,7 +448,9 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
                                </DialogContent>
                              </Dialog>
                              
-                             <CurriculoPDFGenerator vendedor={page} />
+                              <div className="flex">
+                                <CurriculoPDFGenerator vendedor={page} />
+                              </div>
                              
                              <Button
                                variant="default"
