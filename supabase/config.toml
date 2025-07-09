@@ -6,3 +6,6 @@ verify_jwt = false
 
 [functions.test-webhook-connection]
 verify_jwt = false
+
+[functions.export-sales-data]
+verify_jwt = false
