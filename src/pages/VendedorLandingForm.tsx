@@ -36,7 +36,9 @@ type FormData = z.infer<typeof formSchema>;
 export default function VendedorLandingForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState<string | null>(null);
+  const [uploadedMediaUrls, setUploadedMediaUrls] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const { toast } = useToast();
   const { uploadFile } = useFileUploader();
 
@@ -111,6 +113,59 @@ export default function VendedorLandingForm() {
     }
   };
 
+  const handleMediaUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploadingMedia(true);
+    
+    try {
+      const uploadPromises = Array.from(files).map(async (file) => {
+        // Validate file type
+        if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+          throw new Error(`Arquivo ${file.name} não é uma imagem ou vídeo válido`);
+        }
+
+        // Validate file size (50MB max for videos, 10MB for images)
+        const maxSize = file.type.startsWith('video/') ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+        if (file.size > maxSize) {
+          throw new Error(`Arquivo ${file.name} é muito grande. Máximo ${file.type.startsWith('video/') ? '50MB' : '10MB'}`);
+        }
+
+        const result = await uploadFile(file, {
+          bucketName: 'vendedor-fotos',
+          folderPath: 'media-files',
+        });
+
+        if (result.success && result.filePath) {
+          return result.filePath;
+        }
+        throw new Error(`Erro ao fazer upload de ${file.name}`);
+      });
+
+      const uploadedPaths = await Promise.all(uploadPromises);
+      setUploadedMediaUrls(prev => [...prev, ...uploadedPaths]);
+      
+      toast({
+        title: "Sucesso",
+        description: `${uploadedPaths.length} arquivo(s) carregado(s) com sucesso!`,
+      });
+    } catch (error) {
+      console.error('Error uploading media:', error);
+      toast({
+        title: "Erro",
+        description: error instanceof Error ? error.message : "Erro ao fazer upload das mídias. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingMedia(false);
+    }
+  };
+
+  const removeMedia = (indexToRemove: number) => {
+    setUploadedMediaUrls(prev => prev.filter((_, index) => index !== indexToRemove));
+  };
+
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
 
@@ -131,6 +186,8 @@ export default function VendedorLandingForm() {
         formacao_certificacoes: data.formacao_certificacoes || undefined,
         cores_preferidas: data.cores_preferidas || undefined,
         estilo_visual: data.estilo_visual || undefined,
+        // Store media URLs as JSON string for now - could be expanded to separate table later
+        media_urls: uploadedMediaUrls.length > 0 ? JSON.stringify(uploadedMediaUrls) : undefined,
       };
 
       const { error } = await supabase
@@ -148,6 +205,7 @@ export default function VendedorLandingForm() {
 
       form.reset();
       setUploadedPhotoUrl(null);
+      setUploadedMediaUrls([]);
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
@@ -381,11 +439,11 @@ export default function VendedorLandingForm() {
                   />
                 </div>
 
-                {/* Ofertas e Benefícios */}
+                {/* Produtos que voce oferece e beneficios pode oferecer */}
                 <div className="space-y-4">
                   <h3 className="text-xl font-semibold flex items-center gap-2 text-primary">
                     <Star className="h-5 w-5" />
-                    Ofertas e Benefícios
+                    Produtos que você oferece e benefícios pode oferecer
                   </h3>
 
                   <FormField
