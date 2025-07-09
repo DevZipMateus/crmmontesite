@@ -310,6 +310,7 @@ export type Database = {
           formacao_certificacoes: string | null
           foto_profissional_url: string | null
           id: string
+          media_urls: string | null
           mini_bio: string
           nome_completo: string
           principais_servicos: string
@@ -332,6 +333,7 @@ export type Database = {
           formacao_certificacoes?: string | null
           foto_profissional_url?: string | null
           id?: string
+          media_urls?: string | null
           mini_bio: string
           nome_completo: string
           principais_servicos: string
@@ -354,6 +356,7 @@ export type Database = {
           formacao_certificacoes?: string | null
           foto_profissional_url?: string | null
           id?: string
+          media_urls?: string | null
           mini_bio?: string
           nome_completo?: string
           principais_servicos?: string

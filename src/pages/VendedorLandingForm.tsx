@@ -410,8 +410,59 @@ export default function VendedorLandingForm() {
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
-                </div>
+                   />
+                   
+                   <div className="space-y-2">
+                     <Label>Fotos e Vídeos dos Seus Produtos/Serviços</Label>
+                     <p className="text-sm text-muted-foreground">
+                       Adicione fotos e vídeos que mostram seus produtos, serviços ou trabalhos realizados
+                     </p>
+                     <div className="flex items-center gap-4">
+                       <Button
+                         type="button"
+                         variant="outline"
+                         disabled={isUploadingMedia}
+                         className="relative"
+                       >
+                         <input
+                           type="file"
+                           accept="image/*,video/*"
+                           multiple
+                           onChange={handleMediaUpload}
+                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                           disabled={isUploadingMedia}
+                         />
+                         <Upload className="h-4 w-4 mr-2" />
+                         {isUploadingMedia ? "Carregando..." : "Upload Múltiplo (máx. 10MB imagens, 50MB vídeos)"}
+                       </Button>
+                       {uploadedMediaUrls.length > 0 && (
+                         <span className="text-sm text-green-600">✓ {uploadedMediaUrls.length} arquivo(s) carregado(s)</span>
+                       )}
+                     </div>
+                     
+                     {uploadedMediaUrls.length > 0 && (
+                       <div className="mt-4 space-y-2">
+                         <p className="text-sm font-medium">Arquivos carregados:</p>
+                         <div className="space-y-1">
+                           {uploadedMediaUrls.map((url, index) => (
+                             <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                               <span className="text-sm truncate">{url.split('/').pop()}</span>
+                               <Button
+                                 type="button"
+                                 variant="ghost"
+                                 size="sm"
+                                 onClick={() => removeMedia(index)}
+                                 className="text-red-500 hover:text-red-700"
+                               >
+                                 Remover
+                               </Button>
+                             </div>
+                           ))}
+                         </div>
+                       </div>
+                     )}
+                   </div>
+                 </div>
 
                 {/* Qualificações Profissionais */}
                 <div className="space-y-4">

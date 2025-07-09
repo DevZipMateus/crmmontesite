@@ -15,6 +15,7 @@ export interface SalesLandingPage {
   formacao_certificacoes?: string;
   cores_preferidas?: string;
   estilo_visual?: string;
+  media_urls?: string;
   status: string;
   comando_gerado: boolean;
   created_at: string;
@@ -37,4 +38,5 @@ export interface SalesLandingPageInsert {
   formacao_certificacoes?: string;
   cores_preferidas?: string;
   estilo_visual?: string;
+  media_urls?: string;
 }
