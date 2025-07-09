@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4'
 
 const corsHeaders = {
@@ -40,7 +41,6 @@ Deno.serve(async (req) => {
     const isValidToken = token === EGESTOR_TOKEN;
     
     if (!isValidToken) {
-      // Log failed auth attempt
       console.log('Failed authentication attempt with token:', token.substring(0, 10) + '...');
       
       return new Response(
@@ -52,21 +52,137 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Parse query parameters
+    const url = new URL(req.url);
+    const projectId = url.searchParams.get('id');
+    const fields = url.searchParams.get('fields');
+    const status = url.searchParams.get('status');
+    const since = url.searchParams.get('since');
+    const limit = url.searchParams.get('limit');
+    const offset = url.searchParams.get('offset');
+
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch all projects with site_personalizacoes data
-    const { data: projects, error } = await supabase
-      .from('projects')
-      .select(`
+    let query = supabase.from('projects');
+    let selectFields = '*';
+
+    // Handle specific project ID request
+    if (projectId) {
+      selectFields = `
         *,
         site_personalizacoes!inner(
           email
         )
-      `)
-      .order('created_at', { ascending: false });
+      `;
+      
+      const { data: project, error } = await query
+        .select(selectFields)
+        .eq('id', projectId)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return new Response(
+            JSON.stringify({ error: 'Projeto não encontrado' }),
+            { 
+              status: 404, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          );
+        }
+        console.error('Database error:', error);
+        return new Response(
+          JSON.stringify({ error: 'Erro ao buscar projeto' }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      // Log successful access
+      await supabase
+        .from('auth_logs')
+        .insert({
+          partner_id: null,
+          token_used: token.substring(0, 10) + '...',
+          request_ip: req.headers.get('x-forwarded-for') || 'unknown',
+          request_headers: {
+            'user-agent': req.headers.get('user-agent'),
+            'referer': req.headers.get('referer')
+          },
+          success: true,
+          error_message: null
+        });
+
+      console.log(`Successfully exported project: ${projectId}`);
+
+      return new Response(
+        JSON.stringify(project),
+        { 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json'
+          } 
+        }
+      );
+    }
+
+    // Handle fields selection for lightweight queries
+    if (fields) {
+      const allowedFields = ['id', 'client_name', 'status', 'created_at', 'updated_at', 'domain', 'template', 'responsible_name'];
+      const requestedFields = fields.split(',').map(f => f.trim());
+      const validFields = requestedFields.filter(f => allowedFields.includes(f));
+      
+      if (validFields.length > 0) {
+        selectFields = validFields.join(', ');
+      }
+    } else {
+      // Default full query with site_personalizacoes
+      selectFields = `
+        *,
+        site_personalizacoes!inner(
+          email
+        )
+      `;
+    }
+
+    // Build query with filters
+    query = query.select(selectFields);
+
+    // Apply status filter
+    if (status) {
+      query = query.eq('status', status);
+    }
+
+    // Apply date filter (projects created/updated since date)
+    if (since) {
+      const sinceDate = new Date(since);
+      if (!isNaN(sinceDate.getTime())) {
+        query = query.or(`created_at.gte.${sinceDate.toISOString()},updated_at.gte.${sinceDate.toISOString()}`);
+      }
+    }
+
+    // Apply pagination
+    if (limit) {
+      const limitNum = parseInt(limit);
+      if (!isNaN(limitNum) && limitNum > 0) {
+        query = query.limit(limitNum);
+        
+        if (offset) {
+          const offsetNum = parseInt(offset);
+          if (!isNaN(offsetNum) && offsetNum >= 0) {
+            query = query.range(offsetNum, offsetNum + limitNum - 1);
+          }
+        }
+      }
+    }
+
+    // Execute query
+    const { data: projects, error } = await query.order('created_at', { ascending: false });
 
     if (error) {
       console.error('Database error:', error);
@@ -83,18 +199,21 @@ Deno.serve(async (req) => {
     await supabase
       .from('auth_logs')
       .insert({
-        partner_id: null, // eGestor doesn't have a partner_id in our system
+        partner_id: null,
         token_used: token.substring(0, 10) + '...',
         request_ip: req.headers.get('x-forwarded-for') || 'unknown',
         request_headers: {
           'user-agent': req.headers.get('user-agent'),
-          'referer': req.headers.get('referer')
+          'referer': req.headers.get('referer'),
+          'query-params': Object.fromEntries(url.searchParams)
         },
         success: true,
         error_message: null
       });
 
-    console.log(`Successfully exported ${projects?.length || 0} projects`);
+    console.log(`Successfully exported ${projects?.length || 0} projects with filters:`, {
+      fields, status, since, limit, offset
+    });
 
     return new Response(
       JSON.stringify(projects || []),

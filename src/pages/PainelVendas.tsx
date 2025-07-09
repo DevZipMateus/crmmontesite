@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut, Download, Copy } from "lucide-react";
@@ -82,17 +83,17 @@ export default function PainelVendas() {
                 <Download className="h-4 w-4" /> Exportar Dados
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-4xl">
               <DialogHeader>
-                <DialogTitle>Exportação de Dados - Webhook</DialogTitle>
+                <DialogTitle>Exportação de Dados - API eGestor</DialogTitle>
                 <DialogDescription>
-                  Configure o webhook para exportar dados dos projetos de vendas
+                  Configure o acesso à API para exportar dados dos projetos de vendas
                 </DialogDescription>
               </DialogHeader>
               
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <label className="text-sm font-medium">URL do Webhook:</label>
+                  <label className="text-sm font-medium">URL Base da API:</label>
                   <div className="flex items-center gap-2 mt-1">
                     <code className="flex-1 p-2 bg-muted rounded text-sm">
                       {webhookUrl}
@@ -123,18 +124,69 @@ export default function PainelVendas() {
                 </div>
                 
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-900 mb-2">Como usar:</h4>
-                  <p className="text-sm text-blue-800 mb-2">
-                    Faça uma requisição GET para a URL acima incluindo o header:
-                  </p>
-                  <code className="block p-2 bg-blue-100 rounded text-xs">
+                  <h4 className="font-medium text-blue-900 mb-3">Endpoints Disponíveis:</h4>
+                  
+                  <div className="space-y-4 text-sm">
+                    <div>
+                      <h5 className="font-medium text-blue-800">1. Listar apenas IDs e informações básicas:</h5>
+                      <code className="block p-2 bg-blue-100 rounded text-xs mt-1">
+                        GET {webhookUrl}?fields=id,client_name,status,updated_at
+                      </code>
+                      <p className="text-blue-700 mt-1">Retorna lista leve com apenas os campos essenciais</p>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-blue-800">2. Buscar projeto específico por ID:</h5>
+                      <code className="block p-2 bg-blue-100 rounded text-xs mt-1">
+                        GET {webhookUrl}?id=PROJECT_ID
+                      </code>
+                      <p className="text-blue-700 mt-1">Retorna dados completos de um projeto específico</p>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-blue-800">3. Filtrar por status:</h5>
+                      <code className="block p-2 bg-blue-100 rounded text-xs mt-1">
+                        GET {webhookUrl}?status=Site pronto
+                      </code>
+                      <p className="text-blue-700 mt-1">Retorna apenas projetos com status específico</p>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-blue-800">4. Buscar atualizações desde data:</h5>
+                      <code className="block p-2 bg-blue-100 rounded text-xs mt-1">
+                        GET {webhookUrl}?since=2025-07-01
+                      </code>
+                      <p className="text-blue-700 mt-1">Retorna projetos criados/atualizados desde a data especificada</p>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-blue-800">5. Paginação:</h5>
+                      <code className="block p-2 bg-blue-100 rounded text-xs mt-1">
+                        GET {webhookUrl}?limit=20&offset=0
+                      </code>
+                      <p className="text-blue-700 mt-1">Controla quantos registros retornar e a partir de qual posição</p>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-blue-800">6. Todos os projetos (comportamento atual):</h5>
+                      <code className="block p-2 bg-blue-100 rounded text-xs mt-1">
+                        GET {webhookUrl}
+                      </code>
+                      <p className="text-blue-700 mt-1">Retorna todos os projetos com dados completos</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-green-900 mb-2">Header obrigatório:</h4>
+                  <code className="block p-2 bg-green-100 rounded text-xs">
                     Authorization: Bearer {egestorToken}
                   </code>
                 </div>
                 
                 <div className="flex gap-2">
                   <Button onClick={handleExportData} className="flex items-center gap-2">
-                    <Download className="h-4 w-4" /> Baixar JSON
+                    <Download className="h-4 w-4" /> Baixar JSON Completo
                   </Button>
                 </div>
               </div>
