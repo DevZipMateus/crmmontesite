@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SalesLandingPage } from "@/types/salesLandingPage";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { Search, Copy, Eye, Terminal, Users, ExternalLink, Image, FileText, Trash2 } from "lucide-react";
+import { Search, Copy, Eye, Terminal, Users, ExternalLink, Image, FileText, Trash2, Download } from "lucide-react";
 import { VendedorImageViewer } from "@/components/site-personalize/VendedorImageViewer";
 import { CurriculoPDFGenerator } from "@/components/site-personalize/CurriculoPDFGenerator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -202,6 +202,73 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
     });
   };
 
+  const downloadMediaFile = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+      
+      toast({
+        title: "Download iniciado!",
+        description: `Download de ${filename} iniciado.`,
+      });
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      toast({
+        title: "Erro no download",
+        description: "Erro ao baixar o arquivo.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const downloadAllMedia = async (mediaUrls: string, vendedorName: string) => {
+    if (!mediaUrls) return;
+    
+    try {
+      const urls = mediaUrls.split(',').filter(url => url.trim());
+      
+      if (urls.length === 0) {
+        toast({
+          title: "Nenhuma mídia encontrada",
+          description: "Este vendedor não possui mídias para download.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Download iniciado!",
+        description: `Iniciando download de ${urls.length} arquivo(s) de ${vendedorName}.`,
+      });
+
+      for (let i = 0; i < urls.length; i++) {
+        const url = urls[i].trim();
+        const filename = `${vendedorName}_midia_${i + 1}.${url.split('.').pop() || 'bin'}`;
+        await downloadMediaFile(url, filename);
+        
+        // Delay entre downloads para evitar sobrecarga
+        if (i < urls.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+    } catch (error) {
+      console.error('Error downloading media files:', error);
+      toast({
+        title: "Erro no download",
+        description: "Erro ao baixar as mídias.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <PageLayout title="Landing Pages para Vendedores">
       <div className="space-y-6">
@@ -280,6 +347,7 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
                           <TableHead>Email</TableHead>
                           <TableHead>Área / Cargo</TableHead>
                           <TableHead>Foto</TableHead>
+                          <TableHead>Mídias</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Data</TableHead>
                           <TableHead className="text-right">Ações</TableHead>
@@ -296,16 +364,36 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
                             {page.cargo && <div className="text-sm text-muted-foreground">{page.cargo}</div>}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          {page.foto_profissional_url ? (
-                            <div className="flex items-center gap-2">
-                              <Image className="h-4 w-4 text-green-600" />
-                              <span className="text-sm text-green-600">Enviada</span>
-                            </div>
-                          ) : (
-                            <span className="text-sm text-muted-foreground">Não enviada</span>
-                          )}
-                        </TableCell>
+                         <TableCell>
+                           {page.foto_profissional_url ? (
+                             <div className="flex items-center gap-2">
+                               <Image className="h-4 w-4 text-green-600" />
+                               <span className="text-sm text-green-600">Enviada</span>
+                             </div>
+                           ) : (
+                             <span className="text-sm text-muted-foreground">Não enviada</span>
+                           )}
+                         </TableCell>
+                         <TableCell>
+                           {page.media_urls ? (
+                             <div className="flex items-center gap-2">
+                               <FileText className="h-4 w-4 text-blue-600" />
+                               <span className="text-sm text-blue-600">
+                                 {page.media_urls.split(',').filter(url => url.trim()).length} arquivo(s)
+                               </span>
+                               <Button
+                                 variant="ghost"
+                                 size="sm"
+                                 onClick={() => downloadAllMedia(page.media_urls!, page.nome_completo)}
+                                 title="Download todas as mídias"
+                               >
+                                 <Download className="h-4 w-4" />
+                               </Button>
+                             </div>
+                           ) : (
+                             <span className="text-sm text-muted-foreground">Nenhuma mídia</span>
+                           )}
+                         </TableCell>
                         <TableCell>{getStatusBadge(page.status, page.comando_gerado)}</TableCell>
                         <TableCell>{formatDate(page.created_at)}</TableCell>
                         <TableCell className="text-right">
