@@ -15,6 +15,7 @@ import { CurriculoPDFGenerator } from "@/components/site-personalize/CurriculoPD
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getSignedUrl } from "@/lib/supabase/storage";
 
 export default function LandingPagesVendedores() {
   const [landingPages, setLandingPages] = useState<SalesLandingPage[]>([]);
@@ -233,9 +234,21 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
     if (!mediaUrls) return;
     
     try {
-      const urls = mediaUrls.split(',').filter(url => url.trim());
+      // Parse JSON array of media URLs
+      let urls: string[] = [];
+      try {
+        urls = JSON.parse(mediaUrls);
+      } catch (parseError) {
+        console.error('Error parsing media URLs JSON:', parseError);
+        toast({
+          title: "Erro no parsing",
+          description: "Formato de URLs de mídia inválido.",
+          variant: "destructive",
+        });
+        return;
+      }
       
-      if (urls.length === 0) {
+      if (!Array.isArray(urls) || urls.length === 0) {
         toast({
           title: "Nenhuma mídia encontrada",
           description: "Este vendedor não possui mídias para download.",
@@ -250,9 +263,23 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
       });
 
       for (let i = 0; i < urls.length; i++) {
-        const url = urls[i].trim();
-        const filename = `${vendedorName}_midia_${i + 1}.${url.split('.').pop() || 'bin'}`;
-        await downloadMediaFile(url, filename);
+        const filePath = urls[i].trim();
+        
+        // Generate signed URL for the file
+        const signedUrl = await getSignedUrl(filePath, 'vendedor-fotos');
+        
+        if (!signedUrl) {
+          console.error(`Failed to generate signed URL for: ${filePath}`);
+          toast({
+            title: "Erro no download",
+            description: `Erro ao gerar URL para o arquivo ${i + 1}.`,
+            variant: "destructive",
+          });
+          continue;
+        }
+        
+        const filename = `${vendedorName}_midia_${i + 1}.${filePath.split('.').pop() || 'bin'}`;
+        await downloadMediaFile(signedUrl, filename);
         
         // Delay entre downloads para evitar sobrecarga
         if (i < urls.length - 1) {
@@ -368,7 +395,14 @@ Data de criação: ${new Date().toLocaleDateString('pt-BR')}
                              <div className="flex items-center gap-2">
                                <FileText className="h-4 w-4 text-blue-600" />
                                <span className="text-sm text-blue-600">
-                                 {page.media_urls.split(',').filter(url => url.trim()).length} arquivo(s)
+                                 {(() => {
+                                   try {
+                                     const urls = JSON.parse(page.media_urls);
+                                     return Array.isArray(urls) ? urls.length : 0;
+                                   } catch {
+                                     return 0;
+                                   }
+                                 })()} arquivo(s)
                                </span>
                                <Button
                                  variant="ghost"
