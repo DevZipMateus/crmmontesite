@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Lead, LeadFilters } from "@/types/lead";
+import { Lead, LeadFilters, SITUACOES_PADRONIZADAS } from "@/types/lead";
 import { useToast } from "@/hooks/use-toast";
 
 export const useLeads = (filters?: LeadFilters) => {
@@ -115,4 +115,9 @@ export const useCreateLead = () => {
       });
     },
   });
+};
+
+// Hook para obter as situações padronizadas
+export const useSituacoesPadronizadas = () => {
+  return SITUACOES_PADRONIZADAS;
 };

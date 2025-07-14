@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ import LeadViewToggle from "@/components/leads/LeadViewToggle";
 import LeadPagination from "@/components/leads/LeadPagination";
 import LeadEditDialog from "@/components/leads/LeadEditDialog";
 import { useLeads } from "@/hooks/useLeads";
-import { Lead, LeadFilters as LeadFiltersType } from "@/types/lead";
+import { Lead, LeadFilters as LeadFiltersType, SITUACOES_PADRONIZADAS } from "@/types/lead";
 
 const Leads: React.FC = () => {
   const [filters, setFilters] = useState<LeadFiltersType>({});
@@ -19,20 +18,18 @@ const Leads: React.FC = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [view, setView] = useState<'cards' | 'table'>('table');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(50); // Aumentado para 50 para mostrar mais leads
+  const [pageSize, setPageSize] = useState(50);
 
   const { data: leads = [], isLoading, error } = useLeads(filters);
 
-  // Extrair vendedores e situações únicas para os filtros
+  // Extrair vendedores únicos para os filtros
   const vendedores = useMemo(() => {
     const uniqueVendedores = [...new Set(leads.map(lead => lead.vendedor).filter(Boolean))];
     return uniqueVendedores.sort();
   }, [leads]);
 
-  const situacoes = useMemo(() => {
-    const uniqueSituacoes = [...new Set(leads.map(lead => lead.situacao))];
-    return uniqueSituacoes.sort();
-  }, [leads]);
+  // Usar situações padronizadas
+  const situacoes = SITUACOES_PADRONIZADAS;
 
   // Paginação
   const totalPages = Math.ceil(leads.length / pageSize);
@@ -175,7 +172,6 @@ const Leads: React.FC = () => {
           setSelectedLead(null);
         }}
         vendedores={vendedores}
-        situacoes={situacoes}
       />
     </PageLayout>
   );
