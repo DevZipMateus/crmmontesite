@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import PageLayout from "@/components/layout/PageLayout";
+import { PageLayout } from "@/components/layout/PageLayout";
 import LeadCard from "@/components/leads/LeadCard";
 import LeadFilters from "@/components/leads/LeadFilters";
 import LeadMetrics from "@/components/leads/LeadMetrics";
@@ -38,7 +38,7 @@ const Leads: React.FC = () => {
 
   if (error) {
     return (
-      <PageLayout>
+      <PageLayout title="Gestão de Leads">
         <div className="p-6">
           <div className="text-center text-red-600">
             Erro ao carregar leads. Tente novamente.
@@ -49,8 +49,8 @@ const Leads: React.FC = () => {
   }
 
   return (
-    <PageLayout>
-      <div className="p-6 space-y-6">
+    <PageLayout title="Gestão de Leads">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
