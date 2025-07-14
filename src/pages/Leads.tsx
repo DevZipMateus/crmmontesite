@@ -19,7 +19,7 @@ const Leads: React.FC = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [view, setView] = useState<'cards' | 'table'>('table');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(50); // Aumentado para 50 para mostrar mais leads
 
   const { data: leads = [], isLoading, error } = useLeads(filters);
 
@@ -117,6 +117,11 @@ const Leads: React.FC = () => {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">
                   {leads.length} lead(s) encontrado(s)
+                  {leads.length !== paginatedLeads.length && (
+                    <span className="ml-2 text-gray-500">
+                      (mostrando {paginatedLeads.length} de {leads.length})
+                    </span>
+                  )}
                 </span>
               </div>
               
