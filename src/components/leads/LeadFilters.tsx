@@ -49,14 +49,14 @@ const LeadFiltersComponent: React.FC<LeadFiltersProps> = ({
         </div>
 
         <Select
-          value={filters.vendedor || ''}
-          onValueChange={(value) => onFiltersChange({ ...filters, vendedor: value })}
+          value={filters.vendedor || 'all'}
+          onValueChange={(value) => onFiltersChange({ ...filters, vendedor: value === 'all' ? undefined : value })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Todos os vendedores" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos os vendedores</SelectItem>
+            <SelectItem value="all">Todos os vendedores</SelectItem>
             {vendedores.map((vendedor) => (
               <SelectItem key={vendedor} value={vendedor}>
                 {vendedor}
@@ -66,14 +66,14 @@ const LeadFiltersComponent: React.FC<LeadFiltersProps> = ({
         </Select>
 
         <Select
-          value={filters.situacao || ''}
-          onValueChange={(value) => onFiltersChange({ ...filters, situacao: value })}
+          value={filters.situacao || 'all'}
+          onValueChange={(value) => onFiltersChange({ ...filters, situacao: value === 'all' ? undefined : value })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Todas as situações" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas as situações</SelectItem>
+            <SelectItem value="all">Todas as situações</SelectItem>
             {situacoes.map((situacao) => (
               <SelectItem key={situacao} value={situacao}>
                 {situacao}
@@ -83,17 +83,17 @@ const LeadFiltersComponent: React.FC<LeadFiltersProps> = ({
         </Select>
 
         <Select
-          value={filters.diasSemResposta?.toString() || ''}
+          value={filters.diasSemResposta?.toString() || 'all'}
           onValueChange={(value) => onFiltersChange({ 
             ...filters, 
-            diasSemResposta: value ? parseInt(value) : undefined 
+            diasSemResposta: value === 'all' ? undefined : parseInt(value)
           })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Dias sem resposta" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos</SelectItem>
+            <SelectItem value="all">Todos</SelectItem>
             <SelectItem value="3">Até 3 dias</SelectItem>
             <SelectItem value="7">Até 7 dias</SelectItem>
             <SelectItem value="14">Até 14 dias</SelectItem>
