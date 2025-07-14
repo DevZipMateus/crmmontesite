@@ -79,14 +79,14 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
             <div>
               <Label htmlFor="vendedor">Vendedor</Label>
               <Select
-                value={formData.vendedor || ''}
-                onValueChange={(value) => setFormData({ ...formData, vendedor: value })}
+                value={formData.vendedor || 'none'}
+                onValueChange={(value) => setFormData({ ...formData, vendedor: value === 'none' ? null : value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecionar vendedor" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum</SelectItem>
+                  <SelectItem value="none">Nenhum</SelectItem>
                   {vendedores.map((vendedor) => (
                     <SelectItem key={vendedor} value={vendedor}>
                       {vendedor}
