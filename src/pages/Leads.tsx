@@ -2,16 +2,24 @@
 import React, { useState, useMemo } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PageLayout } from "@/components/layout/PageLayout";
+import { { PageLayout } from "@/components/layout/PageLayout";
 import LeadCard from "@/components/leads/LeadCard";
 import LeadFilters from "@/components/leads/LeadFilters";
 import LeadMetrics from "@/components/leads/LeadMetrics";
+import LeadTableView from "@/components/leads/LeadTableView";
+import LeadViewToggle from "@/components/leads/LeadViewToggle";
+import LeadPagination from "@/components/leads/LeadPagination";
+import LeadEditDialog from "@/components/leads/LeadEditDialog";
 import { useLeads } from "@/hooks/useLeads";
 import { Lead, LeadFilters as LeadFiltersType } from "@/types/lead";
 
 const Leads: React.FC = () => {
   const [filters, setFilters] = useState<LeadFiltersType>({});
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [view, setView] = useState<'cards' | 'table'>('table');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   const { data: leads = [], isLoading, error } = useLeads(filters);
 
@@ -26,15 +34,33 @@ const Leads: React.FC = () => {
     return uniqueSituacoes.sort();
   }, [leads]);
 
+  // Paginação
+  const totalPages = Math.ceil(leads.length / pageSize);
+  const paginatedLeads = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return leads.slice(startIndex, endIndex);
+  }, [leads, currentPage, pageSize]);
+
   const handleClearFilters = () => {
     setFilters({});
+    setCurrentPage(1);
   };
 
   const handleEditLead = (lead: Lead) => {
     setSelectedLead(lead);
-    // TODO: Implementar modal de edição
-    console.log('Editar lead:', lead);
+    setIsEditDialogOpen(true);
   };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1);
+  };
+
+  // Reset page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
 
   if (error) {
     return (
@@ -59,10 +85,13 @@ const Leads: React.FC = () => {
               Acompanhe o status dos clientes potenciais e gerencie o funil de vendas
             </p>
           </div>
-          <Button>
-            <Plus size={18} className="mr-2" />
-            Novo Lead
-          </Button>
+          <div className="flex items-center gap-3">
+            <LeadViewToggle view={view} onViewChange={setView} />
+            <Button>
+              <Plus size={18} className="mr-2" />
+              Novo Lead
+            </Button>
+          </div>
         </div>
 
         {/* Métricas */}
@@ -80,10 +109,8 @@ const Leads: React.FC = () => {
         {/* Lista de Leads */}
         <div className="space-y-4">
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-gray-200 animate-pulse rounded-lg h-48"></div>
-              ))}
+            <div className="flex justify-center items-center py-12">
+              <div className="text-gray-500">Carregando leads...</div>
             </div>
           ) : leads.length > 0 ? (
             <>
@@ -92,15 +119,34 @@ const Leads: React.FC = () => {
                   {leads.length} lead(s) encontrado(s)
                 </span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {leads.map((lead) => (
-                  <LeadCard
-                    key={lead.id}
-                    lead={lead}
-                    onEdit={handleEditLead}
-                  />
-                ))}
-              </div>
+              
+              {view === 'table' ? (
+                <LeadTableView 
+                  leads={paginatedLeads} 
+                  onEdit={handleEditLead} 
+                />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {paginatedLeads.map((lead) => (
+                    <LeadCard
+                      key={lead.id}
+                      lead={lead}
+                      onEdit={handleEditLead}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {leads.length > pageSize && (
+                <LeadPagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  pageSize={pageSize}
+                  totalItems={leads.length}
+                  onPageChange={setCurrentPage}
+                  onPageSizeChange={handlePageSizeChange}
+                />
+              )}
             </>
           ) : (
             <div className="text-center py-12">
@@ -114,6 +160,18 @@ const Leads: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Dialog de Edição */}
+      <LeadEditDialog
+        lead={selectedLead}
+        isOpen={isEditDialogOpen}
+        onClose={() => {
+          setIsEditDialogOpen(false);
+          setSelectedLead(null);
+        }}
+        vendedores={vendedores}
+        situacoes={situacoes}
+      />
     </PageLayout>
   );
 };
