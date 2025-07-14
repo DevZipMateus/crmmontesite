@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { { PageLayout } from "@/components/layout/PageLayout";
+import { PageLayout } from "@/components/layout/PageLayout";
 import LeadCard from "@/components/leads/LeadCard";
 import LeadFilters from "@/components/leads/LeadFilters";
 import LeadMetrics from "@/components/leads/LeadMetrics";
