@@ -82,6 +82,48 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          created_at: string
+          data_ultimo_contato: string
+          empresa: string
+          id: string
+          link_blaster: string | null
+          link_chat: string | null
+          nome_cliente: string
+          observacoes: string | null
+          situacao: string
+          updated_at: string
+          vendedor: string | null
+        }
+        Insert: {
+          created_at?: string
+          data_ultimo_contato?: string
+          empresa: string
+          id?: string
+          link_blaster?: string | null
+          link_chat?: string | null
+          nome_cliente: string
+          observacoes?: string | null
+          situacao?: string
+          updated_at?: string
+          vendedor?: string | null
+        }
+        Update: {
+          created_at?: string
+          data_ultimo_contato?: string
+          empresa?: string
+          id?: string
+          link_blaster?: string | null
+          link_chat?: string | null
+          nome_cliente?: string
+          observacoes?: string | null
+          situacao?: string
+          updated_at?: string
+          vendedor?: string | null
+        }
+        Relationships: []
+      }
       model_templates: {
         Row: {
           created_at: string | null
@@ -598,6 +640,10 @@ export type Database = {
       add_business_days: {
         Args: { start_date: string; days_to_add: number }
         Returns: string
+      }
+      calcular_dias_sem_resposta: {
+        Args: { data_contato: string }
+        Returns: number
       }
       create_bucket_policy: {
         Args: { bucket_name: string }

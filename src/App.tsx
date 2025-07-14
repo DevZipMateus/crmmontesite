@@ -25,6 +25,7 @@ import CriarProjetos from "./pages/CriarProjetos";
 import PainelVendas from "./pages/PainelVendas";
 import LandingPagesVendedores from "./pages/LandingPagesVendedores";
 import VendedorLandingForm from "./pages/VendedorLandingForm";
+import Leads from "./pages/Leads";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,13 @@ const App = () => {
             <Route path="/criar-projetos" element={
               <AuthGuard requiredUserType="admin">
                 <CriarProjetos />
+              </AuthGuard>
+            } />
+            
+            {/* Gestão de Leads */}
+            <Route path="/leads" element={
+              <AuthGuard requiredUserType="admin">
+                <Leads />
               </AuthGuard>
             } />
             

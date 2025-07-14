@@ -7,7 +7,8 @@ import {
   Terminal,
   Link as LinkIcon,
   Settings,
-  Users
+  Users,
+  ContactRound
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -54,6 +55,13 @@ const MainMenuSection: React.FC = () => {
           label="Criar Projetos"
           href="/criar-projetos"
           description="Criar novos projetos e personalizar sites"
+        />
+        
+        <MenuItem 
+          icon={<ContactRound size={24} />}
+          label="Gestão de Leads"
+          href="/leads"
+          description="Acompanhar clientes potenciais pré-venda"
         />
         
         <MenuItem 
