@@ -28,8 +28,8 @@ const Leads: React.FC = () => {
     return uniqueVendedores.sort();
   }, [leads]);
 
-  // Usar situações padronizadas
-  const situacoes = SITUACOES_PADRONIZADAS;
+  // Converter situações padronizadas para array de strings
+  const situacoes = [...SITUACOES_PADRONIZADAS];
 
   // Paginação
   const totalPages = Math.ceil(leads.length / pageSize);
