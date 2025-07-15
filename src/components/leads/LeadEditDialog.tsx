@@ -1,14 +1,25 @@
 
-import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import React, { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Lead, SITUACOES_PADRONIZADAS } from "@/types/lead";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useUpdateLead } from "@/hooks/useLeads";
-import LeadNotesSection from "./LeadNotesSection";
+import { Lead, SITUACOES_PADRONIZADAS } from "@/types/lead";
+import LeadSchedulingSection from "./LeadSchedulingSection";
 
 interface LeadEditDialogProps {
   lead: Lead | null;
@@ -21,26 +32,54 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
   lead,
   isOpen,
   onClose,
-  vendedores
+  vendedores,
 }) => {
-  const [formData, setFormData] = useState<Partial<Lead>>({});
+  const [formData, setFormData] = useState({
+    empresa: "",
+    nome_cliente: "",
+    vendedor: "",
+    situacao: "",
+    link_blaster: "",
+    link_chat: "",
+    observacoes: "",
+  });
+
   const updateLead = useUpdateLead();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (lead) {
-      setFormData(lead);
+      setFormData({
+        empresa: lead.empresa || "",
+        nome_cliente: lead.nome_cliente || "",
+        vendedor: lead.vendedor || "",
+        situacao: lead.situacao || "",
+        link_blaster: lead.link_blaster || "",
+        link_chat: lead.link_chat || "",
+        observacoes: lead.observacoes || "",
+      });
     }
   }, [lead]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (lead && formData) {
-      updateLead.mutate({
+    if (!lead) return;
+
+    try {
+      await updateLead.mutateAsync({
         id: lead.id,
-        updates: formData
+        updates: {
+          ...formData,
+          data_ultimo_contato: new Date().toISOString(),
+        },
       });
       onClose();
+    } catch (error) {
+      console.error("Erro ao atualizar lead:", error);
     }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   if (!lead) return null;
@@ -54,41 +93,41 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Formulário de edição */}
-          <div>
+          <div className="space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="empresa">Empresa</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="empresa">Empresa *</Label>
                   <Input
                     id="empresa"
-                    value={formData.empresa || ''}
-                    onChange={(e) => setFormData({ ...formData, empresa: e.target.value })}
+                    value={formData.empresa}
+                    onChange={(e) => handleInputChange("empresa", e.target.value)}
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="nome_cliente">Nome do Cliente</Label>
+
+                <div className="space-y-2">
+                  <Label htmlFor="nome_cliente">Nome do Cliente *</Label>
                   <Input
                     id="nome_cliente"
-                    value={formData.nome_cliente || ''}
-                    onChange={(e) => setFormData({ ...formData, nome_cliente: e.target.value })}
+                    value={formData.nome_cliente}
+                    onChange={(e) => handleInputChange("nome_cliente", e.target.value)}
                     required
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="vendedor">Vendedor</Label>
                   <Select
-                    value={formData.vendedor || 'none'}
-                    onValueChange={(value) => setFormData({ ...formData, vendedor: value === 'none' ? null : value })}
+                    value={formData.vendedor}
+                    onValueChange={(value) => handleInputChange("vendedor", value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecionar vendedor" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">Nenhum</SelectItem>
                       {vendedores.map((vendedor) => (
                         <SelectItem key={vendedor} value={vendedor}>
                           {vendedor}
@@ -97,11 +136,12 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
+
+                <div className="space-y-2">
                   <Label htmlFor="situacao">Situação</Label>
                   <Select
-                    value={formData.situacao || ''}
-                    onValueChange={(value) => setFormData({ ...formData, situacao: value })}
+                    value={formData.situacao}
+                    onValueChange={(value) => handleInputChange("situacao", value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecionar situação" />
@@ -117,62 +157,54 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="link_blaster">Link Blaster</Label>
-                  <Input
-                    id="link_blaster"
-                    value={formData.link_blaster || ''}
-                    onChange={(e) => setFormData({ ...formData, link_blaster: e.target.value })}
-                    placeholder="https://..."
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="link_chat">Link Chat</Label>
-                  <Input
-                    id="link_chat"
-                    value={formData.link_chat || ''}
-                    onChange={(e) => setFormData({ ...formData, link_chat: e.target.value })}
-                    placeholder="https://..."
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="data_ultimo_contato">Data do Último Contato</Label>
+              <div className="space-y-2">
+                <Label htmlFor="link_blaster">Link Blaster</Label>
                 <Input
-                  id="data_ultimo_contato"
-                  type="date"
-                  value={formData.data_ultimo_contato ? new Date(formData.data_ultimo_contato).toISOString().split('T')[0] : ''}
-                  onChange={(e) => setFormData({ ...formData, data_ultimo_contato: e.target.value })}
+                  id="link_blaster"
+                  type="url"
+                  value={formData.link_blaster}
+                  onChange={(e) => handleInputChange("link_blaster", e.target.value)}
                 />
               </div>
 
-              <div>
+              <div className="space-y-2">
+                <Label htmlFor="link_chat">Link do Chat</Label>
+                <Input
+                  id="link_chat"
+                  type="url"
+                  value={formData.link_chat}
+                  onChange={(e) => handleInputChange("link_chat", e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="observacoes">Observações</Label>
                 <Textarea
                   id="observacoes"
-                  value={formData.observacoes || ''}
-                  onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
+                  value={formData.observacoes}
+                  onChange={(e) => handleInputChange("observacoes", e.target.value)}
                   rows={3}
-                  placeholder="Observações sobre o lead..."
                 />
               </div>
 
-              <DialogFooter>
+              <div className="flex gap-2">
+                <Button
+                  type="submit"
+                  disabled={updateLead.isPending}
+                  className="flex-1"
+                >
+                  {updateLead.isPending ? "Salvando..." : "Salvar Alterações"}
+                </Button>
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={updateLead.isPending}>
-                  {updateLead.isPending ? 'Salvando...' : 'Salvar'}
-                </Button>
-              </DialogFooter>
+              </div>
             </form>
           </div>
 
-          {/* Seção de anotações */}
+          {/* Seção de agendamentos e anotações */}
           <div>
-            <LeadNotesSection leadId={lead.id} />
+            <LeadSchedulingSection leadId={lead.id} />
           </div>
         </div>
       </DialogContent>

@@ -82,6 +82,59 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_agendamentos: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          data_agendamento: string
+          descricao: string | null
+          id: string
+          lead_id: string
+          notification_sent: boolean | null
+          original_time: string | null
+          postponed_count: number | null
+          status: string
+          titulo: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_agendamento: string
+          descricao?: string | null
+          id?: string
+          lead_id: string
+          notification_sent?: boolean | null
+          original_time?: string | null
+          postponed_count?: number | null
+          status?: string
+          titulo: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_agendamento?: string
+          descricao?: string | null
+          id?: string
+          lead_id?: string
+          notification_sent?: boolean | null
+          original_time?: string | null
+          postponed_count?: number | null
+          status?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_agendamentos_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_notes: {
         Row: {
           created_at: string
