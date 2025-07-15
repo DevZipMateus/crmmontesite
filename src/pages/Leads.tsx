@@ -9,6 +9,7 @@ import LeadTableView from "@/components/leads/LeadTableView";
 import LeadViewToggle from "@/components/leads/LeadViewToggle";
 import LeadPagination from "@/components/leads/LeadPagination";
 import LeadEditDialog from "@/components/leads/LeadEditDialog";
+import LeadCreateDialog from "@/components/leads/LeadCreateDialog";
 import { useLeads } from "@/hooks/useLeads";
 import { Lead, LeadFilters as LeadFiltersType, SITUACOES_PADRONIZADAS } from "@/types/lead";
 
@@ -16,6 +17,7 @@ const Leads: React.FC = () => {
   const [filters, setFilters] = useState<LeadFiltersType>({});
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [view, setView] = useState<'cards' | 'table'>('table');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
@@ -47,6 +49,10 @@ const Leads: React.FC = () => {
   const handleEditLead = (lead: Lead) => {
     setSelectedLead(lead);
     setIsEditDialogOpen(true);
+  };
+
+  const handleCreateLead = () => {
+    setIsCreateDialogOpen(true);
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
@@ -84,7 +90,7 @@ const Leads: React.FC = () => {
           </div>
           <div className="flex items-center gap-3">
             <LeadViewToggle view={view} onViewChange={setView} />
-            <Button>
+            <Button onClick={handleCreateLead}>
               <Plus size={18} className="mr-2" />
               Novo Lead
             </Button>
@@ -171,6 +177,13 @@ const Leads: React.FC = () => {
           setIsEditDialogOpen(false);
           setSelectedLead(null);
         }}
+        vendedores={vendedores}
+      />
+
+      {/* Dialog de Criação */}
+      <LeadCreateDialog
+        isOpen={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
         vendedores={vendedores}
       />
     </PageLayout>
