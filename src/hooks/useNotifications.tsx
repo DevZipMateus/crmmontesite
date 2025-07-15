@@ -6,6 +6,7 @@ import { Notification } from "@/types/notification";
 import { notificationStorage } from "@/services/notificationStorage";
 import { setupNotificationRealtime } from "@/services/notificationRealtimeService";
 import { formatDate, createNotificationId } from "@/utils/notificationUtils";
+import { notificationSoundService } from "@/services/notificationSoundService";
 
 /**
  * Hook for managing notifications
@@ -52,7 +53,7 @@ export function useNotifications() {
   
   // Listen for project status changes and create notifications
   useEffect(() => {
-    const addNotification = (newNotification: Notification) => {
+    const addNotification = async (newNotification: Notification) => {
       console.log('[useNotifications] Adding new notification:', newNotification);
       
       // Check if this notification already exists
@@ -76,7 +77,12 @@ export function useNotifications() {
           variant: newNotification.type === "error" ? "destructive" : "default",
         });
         
-        console.log('[useNotifications] Notification added and toast displayed');
+        // Play notification sound
+        notificationSoundService.playNotification(newNotification.type).catch(error => {
+          console.warn('[useNotifications] Failed to play notification sound:', error);
+        });
+        
+        console.log('[useNotifications] Notification added, toast displayed, and sound played');
         return updated;
       });
     };
@@ -130,7 +136,7 @@ export function useNotifications() {
   /**
    * Add a test notification - for debugging purposes
    */
-  const addTestNotification = () => {
+  const addTestNotification = async () => {
     const testNotificationId = createNotificationId('test');
     console.log('[useNotifications] Creating test notification with ID:', testNotificationId);
     
@@ -153,6 +159,20 @@ export function useNotifications() {
       title: "Notificação de teste criada",
       description: "Uma notificação de teste foi adicionada ao sistema.",
     });
+
+    // Play test sound
+    try {
+      await notificationSoundService.testSound();
+      console.log('[useNotifications] Test sound played successfully');
+    } catch (error) {
+      console.warn('[useNotifications] Failed to play test sound:', error);
+      
+      toast({
+        title: "Problema com o som",
+        description: "O som da notificação não pôde ser reproduzido. Verifique as configurações do navegador.",
+        variant: "destructive",
+      });
+    }
   };
 
   /**
