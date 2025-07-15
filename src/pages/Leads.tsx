@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import LeadViewToggle from "@/components/leads/LeadViewToggle";
 import LeadPagination from "@/components/leads/LeadPagination";
 import LeadEditDialog from "@/components/leads/LeadEditDialog";
 import LeadCreateDialog from "@/components/leads/LeadCreateDialog";
+import NotificationTestButton from "@/components/NotificationTestButton";
 import { useLeads } from "@/hooks/useLeads";
 import { Lead, LeadFilters as LeadFiltersType, SITUACOES_PADRONIZADAS } from "@/types/lead";
 
@@ -89,6 +91,7 @@ const Leads: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <NotificationTestButton />
             <LeadViewToggle view={view} onViewChange={setView} />
             <Button onClick={handleCreateLead}>
               <Plus size={18} className="mr-2" />

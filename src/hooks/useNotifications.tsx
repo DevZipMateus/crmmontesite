@@ -69,10 +69,11 @@ export function useNotifications() {
         // Put new notification at the top of the list
         const updated = [newNotification, ...prev];
         
-        // Show a toast
+        // Show a toast notification immediately
         toast({
           title: newNotification.title,
           description: newNotification.description,
+          variant: newNotification.type === "error" ? "destructive" : "default",
         });
         
         console.log('[useNotifications] Notification added and toast displayed');
@@ -127,7 +128,7 @@ export function useNotifications() {
   };
 
   /**
-   * Add a test notification
+   * Add a test notification - for debugging purposes
    */
   const addTestNotification = () => {
     const testNotificationId = createNotificationId('test');
@@ -147,6 +148,7 @@ export function useNotifications() {
     // Add notification using the same function used for real notifications
     setNotifications(prev => [testNotification, ...prev]);
     
+    // Show toast immediately for test
     toast({
       title: "Notificação de teste criada",
       description: "Uma notificação de teste foi adicionada ao sistema.",
