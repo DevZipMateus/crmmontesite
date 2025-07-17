@@ -14,13 +14,11 @@ interface Project {
 
 export function useDragAndDrop(projects: Project[], setProjects: React.Dispatch<React.SetStateAction<Project[]>>) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const handleDragStart = (e: React.DragEvent, projectId: string) => {
+  const handleDragStart = (projectId: string) => {
     setDraggingId(projectId);
-    e.dataTransfer.setData('text/plain', projectId);
-    e.dataTransfer.effectAllowed = 'move';
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -30,9 +28,9 @@ export function useDragAndDrop(projects: Project[], setProjects: React.Dispatch<
 
   const handleDrop = async (e: React.DragEvent, newStatus: string) => {
     e.preventDefault();
-    const projectId = e.dataTransfer.getData('text/plain');
+    const projectId = draggingId;
     
-    if (!projectId || !draggingId) return;
+    if (!projectId) return;
     
     const project = projects.find(p => p.id === projectId);
     if (project?.status === newStatus) {
@@ -40,7 +38,7 @@ export function useDragAndDrop(projects: Project[], setProjects: React.Dispatch<
       return;
     }
 
-    setUpdatingStatus(true);
+    setUpdatingStatus(projectId);
     
     try {
       console.log(`Atualizando status do projeto ${projectId} para ${newStatus}`);
@@ -70,12 +68,12 @@ export function useDragAndDrop(projects: Project[], setProjects: React.Dispatch<
       });
     } finally {
       setDraggingId(null);
-      setUpdatingStatus(false);
+      setUpdatingStatus(null);
     }
   };
 
   const handleStatusChange = async (projectId: string, newStatus: string) => {
-    setUpdatingStatus(true);
+    setUpdatingStatus(projectId);
     
     try {
       console.log(`Alterando status do projeto ${projectId} para ${newStatus}`);
@@ -104,7 +102,7 @@ export function useDragAndDrop(projects: Project[], setProjects: React.Dispatch<
         variant: "destructive",
       });
     } finally {
-      setUpdatingStatus(false);
+      setUpdatingStatus(null);
     }
   };
 
