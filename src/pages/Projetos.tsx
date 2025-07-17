@@ -7,6 +7,7 @@ import KanbanBoard from "@/components/projects/KanbanBoard";
 import ProjectListView from "@/components/projects/ProjectListView";
 import ViewToggle from "@/components/projects/ViewToggle";
 import SearchInput from "@/components/projects/SearchInput";
+import { AutoLinkingButton } from "@/components/projects/AutoLinkingButton";
 import { useProjects } from "@/hooks/use-projects";
 import { PageLayout } from "@/components/layout/PageLayout";
 
@@ -42,6 +43,11 @@ export default function Projetos() {
     fetchProjects();
   };
 
+  const handleLinkingComplete = () => {
+    // Refresh projects after linking
+    fetchProjects();
+  };
+
   const handleFilterChange = (filter: string, value: string | null | Date) => {
     switch (filter) {
       case 'status':
@@ -69,6 +75,7 @@ export default function Projetos() {
       title="Projetos"
       actions={
         <>
+          <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
           <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
           <Button 
             onClick={handleNewProject} 

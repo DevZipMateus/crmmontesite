@@ -1,52 +1,59 @@
 
 import React from "react";
-import { Lead } from "@/types/lead";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, MessageCircle, Edit, Clock } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { Edit, Calendar, ExternalLink } from "lucide-react";
+import { Lead } from "@/types/lead";
+import { ProjectLinkIndicator } from "./ProjectLinkIndicator";
 
 interface LeadTableViewProps {
   leads: Lead[];
   onEdit: (lead: Lead) => void;
 }
 
-const getStatusColor = (situacao: string) => {
-  const situacaoLower = situacao.toLowerCase();
-  
-  if (situacaoLower.includes('pronto') || situacaoLower.includes('finalizado')) {
-    return 'bg-green-100 text-green-800 border-green-200';
-  }
-  
-  if (situacaoLower.includes('aguardando') || situacaoLower.includes('esperando')) {
-    return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-  }
-  
-  if (situacaoLower.includes('cancelou') || situacaoLower.includes('cancelado')) {
-    return 'bg-gray-100 text-gray-800 border-gray-200';
-  }
-  
-  return 'bg-blue-100 text-blue-800 border-blue-200';
-};
+export default function LeadTableView({ leads, onEdit }: LeadTableViewProps) {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
 
-const getDaysWithoutResponse = (dataContato: string) => {
-  const today = new Date();
-  const contactDate = new Date(dataContato);
-  const diffTime = Math.abs(today.getTime() - contactDate.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays;
-};
+  const calculateDaysSinceContact = (dateString: string) => {
+    const contactDate = new Date(dateString);
+    const today = new Date();
+    const diffTime = Math.abs(today.getTime() - contactDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
 
-const getDaysColor = (days: number) => {
-  if (days <= 3) return 'text-green-600';
-  if (days <= 7) return 'text-yellow-600';
-  if (days <= 14) return 'text-orange-600';
-  return 'text-red-600';
-};
+  const getDaysColor = (days: number) => {
+    if (days <= 3) return "text-green-600";
+    if (days <= 7) return "text-yellow-600";
+    return "text-red-600";
+  };
 
-const LeadTableView: React.FC<LeadTableViewProps> = ({ leads, onEdit }) => {
+  const getSituacaoColor = (situacao: string) => {
+    switch (situacao.toLowerCase()) {
+      case 'em contato':
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case 'aguardando resposta':
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case 'em desenvolvimento':
+        return "bg-green-100 text-green-800 border-green-200";
+      case 'site pronto':
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      case 'cancelado':
+        return "bg-red-100 text-red-800 border-red-200";
+      case 'sem resposta':
+        return "bg-gray-100 text-gray-800 border-gray-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -54,6 +61,7 @@ const LeadTableView: React.FC<LeadTableViewProps> = ({ leads, onEdit }) => {
           <TableRow>
             <TableHead>Empresa</TableHead>
             <TableHead>Cliente</TableHead>
+            <TableHead>Projeto Vinculado</TableHead>
             <TableHead>Vendedor</TableHead>
             <TableHead>Situação</TableHead>
             <TableHead>Último Contato</TableHead>
@@ -63,72 +71,64 @@ const LeadTableView: React.FC<LeadTableViewProps> = ({ leads, onEdit }) => {
         </TableHeader>
         <TableBody>
           {leads.map((lead) => {
-            const diasSemResposta = getDaysWithoutResponse(lead.data_ultimo_contato);
-            const dataFormatada = formatDistanceToNow(new Date(lead.data_ultimo_contato), {
-              addSuffix: true,
-              locale: ptBR
-            });
-
+            const daysSinceContact = calculateDaysSinceContact(lead.data_ultimo_contato);
+            
             return (
-              <TableRow key={lead.id} className="hover:bg-gray-50">
-                <TableCell className="font-medium max-w-[200px]">
-                  <div className="truncate">{lead.empresa}</div>
-                </TableCell>
+              <TableRow key={lead.id} className="hover:bg-muted/50">
+                <TableCell className="font-medium">{lead.empresa}</TableCell>
                 <TableCell>{lead.nome_cliente}</TableCell>
                 <TableCell>
-                  {lead.vendedor && (
-                    <Badge variant="outline" className="text-xs">
-                      {lead.vendedor}
-                    </Badge>
+                  {lead.project_id ? (
+                    <ProjectLinkIndicator lead={lead} />
+                  ) : (
+                    <span className="text-gray-400 text-sm">—</span>
                   )}
                 </TableCell>
+                <TableCell>{lead.vendedor || '—'}</TableCell>
                 <TableCell>
-                  <Badge className={getStatusColor(lead.situacao)}>
+                  <Badge 
+                    variant="outline" 
+                    className={getSituacaoColor(lead.situacao)}
+                  >
                     {lead.situacao}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-sm text-gray-600">
-                  {new Date(lead.data_ultimo_contato).toLocaleDateString('pt-BR')}
-                  <div className="text-xs text-gray-500">{dataFormatada}</div>
-                </TableCell>
                 <TableCell>
-                  <div className={`flex items-center gap-1 ${getDaysColor(diasSemResposta)}`}>
-                    <Clock size={12} />
-                    <span className="text-sm font-medium">{diasSemResposta}d</span>
+                  <div className="flex items-center gap-1 text-sm">
+                    <Calendar className="h-4 w-4" />
+                    {formatDate(lead.data_ultimo_contato)}
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-1">
-                    {lead.link_blaster && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => window.open(lead.link_blaster, '_blank')}
-                        className="h-8 w-8 p-0"
-                      >
-                        <ExternalLink size={14} />
-                      </Button>
-                    )}
-                    
-                    {lead.link_chat && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => window.open(lead.link_chat, '_blank')}
-                        className="h-8 w-8 p-0"
-                      >
-                        <MessageCircle size={14} />
-                      </Button>
-                    )}
-                    
-                    <Button 
-                      variant="ghost" 
+                  <span className={`font-medium ${getDaysColor(daysSinceContact)}`}>
+                    {daysSinceContact}d
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => onEdit(lead)}
-                      className="h-8 w-8 p-0"
                     >
-                      <Edit size={14} />
+                      <Edit className="h-4 w-4" />
                     </Button>
+                    {lead.link_chat && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        asChild
+                      >
+                        <a
+                          href={lead.link_chat}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Abrir chat"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -138,6 +138,4 @@ const LeadTableView: React.FC<LeadTableViewProps> = ({ leads, onEdit }) => {
       </Table>
     </div>
   );
-};
-
-export default LeadTableView;
+}

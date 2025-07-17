@@ -10,7 +10,15 @@ export const useLeads = (filters?: LeadFilters) => {
     queryFn: async () => {
       let query = supabase
         .from('leads')
-        .select('*')
+        .select(`
+          *,
+          projects:project_id(
+            id,
+            client_name,
+            status,
+            template
+          )
+        `)
         .order('data_ultimo_contato', { ascending: false });
 
       if (filters?.empresa) {

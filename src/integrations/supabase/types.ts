@@ -175,8 +175,11 @@ export type Database = {
           id: string
           link_blaster: string | null
           link_chat: string | null
+          link_confidence_score: number | null
+          link_method: string | null
           nome_cliente: string
           observacoes: string | null
+          project_id: string | null
           situacao: string
           updated_at: string
           vendedor: string | null
@@ -188,8 +191,11 @@ export type Database = {
           id?: string
           link_blaster?: string | null
           link_chat?: string | null
+          link_confidence_score?: number | null
+          link_method?: string | null
           nome_cliente: string
           observacoes?: string | null
+          project_id?: string | null
           situacao?: string
           updated_at?: string
           vendedor?: string | null
@@ -201,13 +207,24 @@ export type Database = {
           id?: string
           link_blaster?: string | null
           link_chat?: string | null
+          link_confidence_score?: number | null
+          link_method?: string | null
           nome_cliente?: string
           observacoes?: string | null
+          project_id?: string | null
           situacao?: string
           updated_at?: string
           vendedor?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "leads_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       model_templates: {
         Row: {
@@ -341,6 +358,7 @@ export type Database = {
           email_complementar: string | null
           formulario_preenchido: boolean | null
           id: string
+          lead_id: string | null
           manually_archived: boolean | null
           modelo_escolhido: string | null
           observacoes_cliente: string | null
@@ -370,6 +388,7 @@ export type Database = {
           email_complementar?: string | null
           formulario_preenchido?: boolean | null
           id?: string
+          lead_id?: string | null
           manually_archived?: boolean | null
           modelo_escolhido?: string | null
           observacoes_cliente?: string | null
@@ -399,6 +418,7 @@ export type Database = {
           email_complementar?: string | null
           formulario_preenchido?: boolean | null
           id?: string
+          lead_id?: string | null
           manually_archived?: boolean | null
           modelo_escolhido?: string | null
           observacoes_cliente?: string | null
@@ -417,6 +437,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "projects_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "projects_personalization_id_fkey"
             columns: ["personalization_id"]
@@ -729,6 +756,15 @@ export type Database = {
         Args: { start_date: string; days_to_add: number }
         Returns: string
       }
+      auto_link_leads_projects: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          lead_id: string
+          project_id: string
+          confidence_score: number
+          link_method: string
+        }[]
+      }
       calcular_dias_sem_resposta: {
         Args: { data_contato: string }
         Returns: number
@@ -736,6 +772,14 @@ export type Database = {
       create_bucket_policy: {
         Args: { bucket_name: string }
         Returns: boolean
+      }
+      extract_blaster_id: {
+        Args: { blaster_url: string }
+        Returns: string
+      }
+      string_similarity: {
+        Args: { str1: string; str2: string }
+        Returns: number
       }
       validate_auth_token: {
         Args: { token_input: string }

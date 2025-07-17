@@ -40,4 +40,7 @@ export interface Project {
   site_personalizacoes?: {
     email?: string;
   };
+  
+  // Novo campo para vinculação com leads
+  lead_id?: string;
 }

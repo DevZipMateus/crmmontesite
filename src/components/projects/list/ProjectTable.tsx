@@ -6,6 +6,7 @@ import StatusBadge from "./StatusBadge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import DeleteProjectDialog from "../DeleteProjectDialog";
 import { ClientTypeBadge } from "@/components/projects/ClientTypeBadge";
+import { LeadLinkIndicator } from "../LeadLinkIndicator";
 import { Project } from "@/types/project";
 
 interface ProjectTableProps {
@@ -64,6 +65,7 @@ export default function ProjectTable({
         <TableHeader>
           <TableRow>
             <TableHead>Nome do cliente</TableHead>
+            <TableHead>Lead Vinculado</TableHead>
             <TableHead>Tipo de cliente</TableHead>
             <TableHead>Modelo escolhido</TableHead>
             <TableHead>Status</TableHead>
@@ -76,6 +78,13 @@ export default function ProjectTable({
           {projects.map((project) => (
             <TableRow key={project.id} className="hover:bg-muted/50">
               <TableCell className="font-medium">{project.client_name}</TableCell>
+              <TableCell>
+                {project.lead_id ? (
+                  <LeadLinkIndicator project={project} />
+                ) : (
+                  <span className="text-gray-400 text-sm">—</span>
+                )}
+              </TableCell>
               <TableCell>
                 <ClientTypeBadge project={project} />
               </TableCell>

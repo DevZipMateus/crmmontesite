@@ -12,6 +12,7 @@ import LeadPagination from "@/components/leads/LeadPagination";
 import LeadEditDialog from "@/components/leads/LeadEditDialog";
 import LeadCreateDialog from "@/components/leads/LeadCreateDialog";
 import NotificationTestButton from "@/components/NotificationTestButton";
+import { AutoLinkingButton } from "@/components/projects/AutoLinkingButton";
 import { useLeads } from "@/hooks/useLeads";
 import { Lead, LeadFilters as LeadFiltersType, SITUACOES_PADRONIZADAS } from "@/types/lead";
 
@@ -24,7 +25,7 @@ const Leads: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
 
-  const { data: leads = [], isLoading, error } = useLeads(filters);
+  const { data: leads = [], isLoading, error, refetch } = useLeads(filters);
 
   // Extrair vendedores únicos para os filtros
   const vendedores = useMemo(() => {
@@ -62,6 +63,11 @@ const Leads: React.FC = () => {
     setCurrentPage(1);
   };
 
+  const handleLinkingComplete = () => {
+    // Refresh leads after linking
+    refetch();
+  };
+
   // Reset page when filters change
   React.useEffect(() => {
     setCurrentPage(1);
@@ -92,6 +98,7 @@ const Leads: React.FC = () => {
           </div>
           <div className="flex items-center gap-3">
             <NotificationTestButton />
+            <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
             <LeadViewToggle view={view} onViewChange={setView} />
             <Button onClick={handleCreateLead}>
               <Plus size={18} className="mr-2" />

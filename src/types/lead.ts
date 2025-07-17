@@ -11,6 +11,10 @@ export interface Lead {
   observacoes?: string;
   created_at: string;
   updated_at: string;
+  // Novos campos para vinculação com projetos
+  project_id?: string;
+  link_confidence_score?: number;
+  link_method?: string;
 }
 
 export interface LeadNote {
@@ -41,3 +45,11 @@ export const SITUACOES_PADRONIZADAS = [
 ] as const;
 
 export type SituacaoLead = typeof SITUACOES_PADRONIZADAS[number];
+
+// Interface para resultados de vinculação automática
+export interface LeadProjectLink {
+  lead_id: string;
+  project_id: string;
+  confidence_score: number;
+  link_method: string;
+}
