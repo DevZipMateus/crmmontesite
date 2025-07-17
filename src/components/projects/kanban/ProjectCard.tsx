@@ -13,6 +13,7 @@ import {
   CustomizationDeadlineIndicator
 } from "./ProjectCardComponents";
 import { LeadLinkIndicator } from "../LeadLinkIndicator";
+import { useNavigate } from "react-router-dom";
 
 interface ProjectCardProps {
   project: Project;
@@ -32,6 +33,15 @@ export default function ProjectCard({
   onProjectDeleted,
 }: ProjectCardProps) {
   const isUpdating = updatingStatus === project.id;
+  const navigate = useNavigate();
+
+  const handleViewEdit = (projectId: string, action: 'view' | 'edit') => {
+    if (action === 'view') {
+      navigate(`/projeto/${projectId}`);
+    } else {
+      navigate(`/projeto/editar/${projectId}`);
+    }
+  };
 
   return (
     <Card
@@ -40,7 +50,12 @@ export default function ProjectCard({
       onDragStart={() => onDragStart(project.id)}
     >
       <div className="space-y-3">
-        <ProjectCardHeader project={project} />
+        <ProjectCardHeader 
+          clientName={project.client_name}
+          template={project.template || ''}
+          hasPendingCustomizations={project.hasPendingCustomizations || false}
+          createdAt={project.created_at}
+        />
         
         {/* Indicador de Lead Vinculado */}
         {project.lead_id && (
@@ -49,10 +64,25 @@ export default function ProjectCard({
           </div>
         )}
         
-        <PartnerIndicator project={project} />
-        <FormStatusIndicator project={project} />
-        <CustomizationDeadlineIndicator project={project} />
-        <ProjectCardDomain project={project} />
+        {project.partner_hash && (
+          <PartnerIndicator partnerHash={project.partner_hash} />
+        )}
+        
+        <FormStatusIndicator 
+          formularioPreenchido={project.formulario_preenchido || false}
+          partnerHash={project.partner_hash}
+          modeloEscolhido={project.modelo_escolhido}
+          dataFormulario={project.data_formulario}
+        />
+        
+        <CustomizationDeadlineIndicator 
+          status={project.status || ''}
+          siteReadyDate={project.site_ready_date}
+          customizationDeadline={project.customization_deadline}
+          requiresPaidCustomization={project.requires_paid_customization}
+        />
+        
+        <ProjectCardDomain domain={project.domain} />
         
         <StatusButtonsGrid
           project={project}
@@ -64,6 +94,7 @@ export default function ProjectCard({
         <ProjectCardActions 
           projectId={project.id}
           projectName={project.client_name}
+          onViewEdit={handleViewEdit}
           onProjectDeleted={onProjectDeleted}
         />
       </div>

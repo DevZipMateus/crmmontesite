@@ -14,10 +14,10 @@ interface KanbanColumnProps {
   };
   projects: Project[];
   draggingId: string | null;
-  updatingStatus: boolean;
+  updatingStatus: string | null;
   onDragOver: (e: React.DragEvent, status: string) => void;
   onDrop: (e: React.DragEvent, status: string) => void;
-  onDragStart: (e: React.DragEvent, projectId: string) => void;
+  onDragStart: (id: string) => void;
   onStatusChange: (projectId: string, newStatus: string) => void;
   statusOptions: Array<{value: string; color: string}>;
   onProjectDeleted?: () => void;
@@ -81,11 +81,10 @@ export default function KanbanColumn({
               <ProjectCard
                 key={project.id}
                 project={project}
-                draggingId={draggingId}
-                updatingStatus={updatingStatus}
+                statusOptions={statusOptions}
                 onDragStart={onDragStart}
                 onStatusChange={onStatusChange}
-                statusOptions={statusOptions}
+                updatingStatus={updatingStatus}
                 onProjectDeleted={onProjectDeleted}
               />
             ))}
