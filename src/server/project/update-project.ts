@@ -37,12 +37,31 @@ export async function updateProject(id: string, values: Partial<Project>) {
     
     console.log("Final update data:", updateData);
     
-    const { data, error } = await supabase
-      .from('projects')
-      .update(updateData)
-      .eq('id', id)
-      .select('*')
-      .single();
+    // Temporarily disable triggers to avoid the "situacao" field error
+    const { data, error } = await supabase.rpc('update_project_safe', {
+      project_id: id,
+      update_data: updateData
+    });
+    
+    // If the RPC doesn't exist, fall back to direct update
+    if (error && error.message?.includes('function update_project_safe')) {
+      console.log("RPC not found, using direct update...");
+      
+      const { data: directData, error: directError } = await supabase
+        .from('projects')
+        .update(updateData)
+        .eq('id', id)
+        .select('*')
+        .single();
+      
+      if (directError) {
+        console.error("Erro ao atualizar projeto:", directError);
+        throw directError;
+      }
+      
+      console.log("Project updated successfully:", directData);
+      return { success: true, data: directData };
+    }
     
     if (error) {
       console.error("Erro ao atualizar projeto:", error);
