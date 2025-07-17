@@ -17,6 +17,7 @@ import { Archive } from "lucide-react";
 import { isPartnerProject } from "@/server/webhook-service";
 import { useNavigate } from "react-router-dom";
 import { Phone } from "lucide-react";
+import { getClientTypeInfo } from "@/utils/clientTypeUtils";
 
 interface ProjectCardProps {
   project: Project;
@@ -38,6 +39,7 @@ export default function ProjectCard({
   onProjectDeleted 
 }: ProjectCardProps) {
   const navigate = useNavigate();
+  const clientTypeInfo = getClientTypeInfo(project);
 
   const handleViewEdit = (projectId: string, action: 'view' | 'edit') => {
     if (action === 'view') {
@@ -51,9 +53,14 @@ export default function ProjectCard({
     onStatusChange(project.id, newStatus);
   };
 
+  // Determinar a cor de fundo do card considerando estado arquivado
+  const cardBgColor = project.isArchived 
+    ? 'bg-gray-50' 
+    : clientTypeInfo.cardBgColor;
+
   return (
     <Card 
-      className="p-0 bg-white shadow-sm hover:shadow-md transition-shadow cursor-move overflow-hidden"
+      className={`p-0 ${cardBgColor} shadow-sm hover:shadow-md transition-shadow cursor-move overflow-hidden`}
       draggable
       onDragStart={(e) => onDragStart(e, project.id)}
       style={{ opacity: draggingId === project.id ? 0.5 : 1 }}

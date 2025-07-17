@@ -5,6 +5,7 @@ export interface ClientTypeInfo {
   color: string;
   bgColor: string;
   borderColor: string;
+  cardBgColor: string; // Nova propriedade para o fundo do card
 }
 
 export function getClientTypeInfo(project: {
@@ -19,7 +20,8 @@ export function getClientTypeInfo(project: {
       label: 'Cliente de Parceiro',
       color: 'text-orange-700',
       bgColor: 'bg-orange-100',
-      borderColor: 'border-orange-500'
+      borderColor: 'border-orange-500',
+      cardBgColor: 'bg-orange-50'
     };
   }
 
@@ -30,7 +32,8 @@ export function getClientTypeInfo(project: {
       label: 'Parceiro',
       color: 'text-green-700',
       bgColor: 'bg-green-100',
-      borderColor: 'border-green-500'
+      borderColor: 'border-green-500',
+      cardBgColor: 'bg-green-50'
     };
   }
 
@@ -41,7 +44,8 @@ export function getClientTypeInfo(project: {
       label: 'Outbound',
       color: 'text-purple-700',
       bgColor: 'bg-purple-100',
-      borderColor: 'border-purple-500'
+      borderColor: 'border-purple-500',
+      cardBgColor: 'bg-purple-50'
     };
   }
 
@@ -51,6 +55,7 @@ export function getClientTypeInfo(project: {
     label: 'Cliente Final',
     color: 'text-blue-700',
     bgColor: 'bg-blue-100',
-    borderColor: 'border-blue-500'
+    borderColor: 'border-blue-500',
+    cardBgColor: 'bg-blue-50'
   };
 }
