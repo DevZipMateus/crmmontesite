@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +17,7 @@ const ModelManagerAuth: React.FC = () => {
       <CardHeader>
         <CardTitle>Acesso Restrito</CardTitle>
         <CardDescription>
-          Você precisa estar autenticado para gerenciar modelos e URLs personalizadas.
+          Você precisa estar autenticado como administrador para gerenciar modelos e URLs personalizadas.
         </CardDescription>
       </CardHeader>
       <CardContent>

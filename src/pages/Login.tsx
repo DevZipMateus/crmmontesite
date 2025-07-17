@@ -33,7 +33,7 @@ const Login: React.FC = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Dual authentication system
+    // Single authentication system - only admin
     if (username === "adm" && password === "zipline") {
       // Admin login
       localStorage.setItem("isLoggedIn", "true");
@@ -52,17 +52,6 @@ const Login: React.FC = () => {
       } else {
         navigate("/home");
       }
-    } else if (username === "vendas" && password === "zipline123456") {
-      // Sales login
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userType", "sales");
-      
-      toast({
-        title: "Login bem-sucedido",
-        description: "Bem-vindo ao painel de vendas.",
-      });
-      
-      navigate("/painel-vendas");
     } else {
       // Login failed
       toast({

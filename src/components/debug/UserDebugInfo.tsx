@@ -10,7 +10,7 @@ interface UserDebugInfoProps {
 }
 
 export const UserDebugInfo: React.FC<UserDebugInfoProps> = ({ showInProduction = false }) => {
-  const { userType, isAdmin, isSales, isLoading } = useUserPermissions();
+  const { userType, isAdmin, isLoading } = useUserPermissions();
   
   // Only show in development or when explicitly requested
   const isDevelopment = process.env.NODE_ENV === 'development';
@@ -27,11 +27,12 @@ export const UserDebugInfo: React.FC<UserDebugInfoProps> = ({ showInProduction =
     window.location.reload();
   };
 
-  const handleTestSales = () => {
-    localStorage.setItem('userType', 'sales');
+  const handleClearAuth = () => {
+    localStorage.removeItem('userType');
+    localStorage.removeItem('isLoggedIn');
     toast({
-      title: "UserType alterado", 
-      description: "UserType definido como 'sales'",
+      title: "Autenticação limpa",
+      description: "Dados de autenticação removidos",
     });
     window.location.reload();
   };
@@ -56,12 +57,6 @@ export const UserDebugInfo: React.FC<UserDebugInfoProps> = ({ showInProduction =
             </Badge>
           </div>
           <div>
-            <strong>IsSales:</strong> 
-            <Badge variant={isSales ? "default" : "secondary"} className="ml-2">
-              {isSales.toString()}
-            </Badge>
-          </div>
-          <div>
             <strong>Loading:</strong> 
             <Badge variant={isLoading ? "outline" : "secondary"} className="ml-2">
               {isLoading.toString()}
@@ -73,8 +68,8 @@ export const UserDebugInfo: React.FC<UserDebugInfoProps> = ({ showInProduction =
           <Button size="sm" variant="outline" onClick={handleTestAdmin}>
             Definir como Admin
           </Button>
-          <Button size="sm" variant="outline" onClick={handleTestSales}>
-            Definir como Sales
+          <Button size="sm" variant="outline" onClick={handleClearAuth}>
+            Limpar Auth
           </Button>
         </div>
       </CardContent>

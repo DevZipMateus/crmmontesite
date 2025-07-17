@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -22,7 +21,6 @@ import CustomUrlAdmin from "./pages/CustomUrlAdmin";
 import PersonalizacaoDetalhe from "@/pages/PersonalizacaoDetalhe";
 import WebhookManagement from "./pages/WebhookManagement";
 import CriarProjetos from "./pages/CriarProjetos";
-import PainelVendas from "./pages/PainelVendas";
 import LandingPagesVendedores from "./pages/LandingPagesVendedores";
 import VendedorLandingForm from "./pages/VendedorLandingForm";
 import Leads from "./pages/Leads";
@@ -56,23 +54,16 @@ const App = () => {
             {/* Página de confirmação pública - Keep this accessible without authentication */}
             <Route path="/confirmacao" element={<Confirmacao />} />
             
-            {/* Página inicial - acessível apenas após login */}
+            {/* Página inicial - acessível apenas após login de admin */}
             <Route path="/home" element={
-              <AuthGuard requiredUserType="admin">
+              <AuthGuard>
                 <Index />
-              </AuthGuard>
-            } />
-            
-            {/* Painel de vendas - acessível apenas para vendedores */}
-            <Route path="/painel-vendas" element={
-              <AuthGuard requiredUserType="sales">
-                <PainelVendas />
               </AuthGuard>
             } />
             
             {/* Landing Pages para Vendedores */}
             <Route path="/landing-pages-vendedores" element={
-              <AuthGuard requiredUserType="admin">
+              <AuthGuard>
                 <LandingPagesVendedores />
               </AuthGuard>
             } />
@@ -82,14 +73,14 @@ const App = () => {
             
             {/* Nova rota unificada para criar projetos */}
             <Route path="/criar-projetos" element={
-              <AuthGuard requiredUserType="admin">
+              <AuthGuard>
                 <CriarProjetos />
               </AuthGuard>
             } />
             
             {/* Gestão de Leads */}
             <Route path="/leads" element={
-              <AuthGuard requiredUserType="admin">
+              <AuthGuard>
                 <Leads />
               </AuthGuard>
             } />
@@ -97,14 +88,14 @@ const App = () => {
             {/* Redirect parceiros para webhooks com tab ativa */}
             <Route path="/parceiros" element={<Navigate to="/webhooks?tab=partners" replace />} />
             
-            {/* Outras rotas protegidas */}
+            {/* Outras rotas protegidas - todas requerem admin */}
             <Route path="/projetos" element={
-              <AuthGuard requiredUserType="admin">
+              <AuthGuard>
                 <Projetos />
               </AuthGuard>
             } />
             <Route path="/novo-projeto" element={
-              <AuthGuard requiredUserType="admin">
+              <AuthGuard>
                 <NovoProjeto />
               </AuthGuard>
             } />
@@ -114,42 +105,42 @@ const App = () => {
               </AuthGuard>
             } />
             <Route path="/projeto/:id/editar" element={
-              <AuthGuard requiredUserType="admin">
+              <AuthGuard>
                 <ProjetoEditar />
               </AuthGuard>
             } />
             {/* Personalize site routes - default and with model parameter */}
             <Route path="/personalize-site" element={
-              <AuthGuard requiredUserType="admin">
+              <AuthGuard>
                 <PersonalizeSite />
               </AuthGuard>
             } />
             <Route path="/personalize-site/:modelo" element={
-              <AuthGuard requiredUserType="admin">
+              <AuthGuard>
                 <PersonalizeSite />
               </AuthGuard>
             } />
             <Route path="/site/:id" element={
-              <AuthGuard requiredUserType="admin">
+              <AuthGuard>
                 <SiteDetalhe />
               </AuthGuard>
             } />
             <Route path="/producao-sites" element={
-              <AuthGuard requiredUserType="admin">
+              <AuthGuard>
                 <ProducaoSites />
               </AuthGuard>
             } />
             
             {/* Rota para gerenciamento de modelos e URLs personalizadas */}
             <Route path="/custom-urls" element={
-              <AuthGuard requiredUserType="admin">
+              <AuthGuard>
                 <CustomUrlAdmin />
               </AuthGuard>
             } />
             
             {/* Rota para gerenciamento de webhooks e configurações */}
             <Route path="/webhooks" element={
-              <AuthGuard requiredUserType="admin">
+              <AuthGuard>
                 <WebhookManagement />
               </AuthGuard>
             } />

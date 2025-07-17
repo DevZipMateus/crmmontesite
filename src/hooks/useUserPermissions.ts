@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 interface UserPermissions {
   userType: string | null;
   isAdmin: boolean;
-  isSales: boolean;
   isLoading: boolean;
 }
 
@@ -44,19 +43,16 @@ export const useUserPermissions = (): UserPermissions => {
   }, []);
 
   const isAdmin = userType === 'admin';
-  const isSales = userType === 'sales';
 
   console.log('👤 UserPermissions Hook Result:', {
     userType,
     isAdmin,
-    isSales,
     isLoading
   });
 
   return {
     userType,
     isAdmin,
-    isSales,
     isLoading
   };
 };

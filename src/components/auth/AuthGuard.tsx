@@ -5,12 +5,11 @@ import { toast } from '@/hooks/use-toast';
 
 interface AuthGuardProps {
   children: React.ReactNode;
-  requiredUserType?: 'admin' | 'sales';
 }
 
-const AuthGuard: React.FC<AuthGuardProps> = ({ children, requiredUserType }) => {
+const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  const userType = localStorage.getItem('userType') as 'admin' | 'sales';
+  const userType = localStorage.getItem('userType') as 'admin';
   const location = useLocation();
   
   // Debug logging for AuthGuard
@@ -18,10 +17,9 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children, requiredUserType }) => 
     console.log('🛡️ AuthGuard Debug:', {
       isLoggedIn,
       userType,
-      requiredUserType,
       currentPath: location.pathname
     });
-  }, [isLoggedIn, userType, requiredUserType, location.pathname]);
+  }, [isLoggedIn, userType, location.pathname]);
   
   // Se não estiver logado e não estiver na página de login, redirecionar para o login
   if (!isLoggedIn && location.pathname !== '/login') {
@@ -31,22 +29,17 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children, requiredUserType }) => 
     return <Navigate to="/login" replace />;
   }
   
-  // Se estiver logado mas for o tipo de usuário errado
-  if (isLoggedIn && requiredUserType && userType !== requiredUserType) {
-    console.log('🚫 User type mismatch:', { userType, requiredUserType });
+  // Se estiver logado mas não for admin, redirecionar para login
+  if (isLoggedIn && userType !== 'admin') {
+    console.log('🚫 User type mismatch:', { userType });
     
     toast({
       title: "Acesso negado",
-      description: `Esta página requer permissões de ${requiredUserType}`,
+      description: "Esta aplicação requer permissões de administrador",
       variant: "destructive",
     });
     
-    // Redirecionar para a página apropriada
-    if (userType === 'admin') {
-      return <Navigate to="/home" replace />;
-    } else if (userType === 'sales') {
-      return <Navigate to="/painel-vendas" replace />;
-    }
+    return <Navigate to="/login" replace />;
   }
   
   return <>{children}</>;
