@@ -5,3 +5,4 @@ export { ProjectCardActions } from './ProjectCardActions';
 export { FormStatusIndicator } from './FormStatusIndicator';
 export { PartnerIndicator } from './PartnerIndicator';
 export { CustomizationDeadlineIndicator } from './CustomizationDeadlineIndicator';
+export { StatusButtonsGrid } from './StatusButtonsGrid';

@@ -3,7 +3,6 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Project } from "@/types/project";
-import { StatusType } from "@/lib/supabase/projectStatus";
 import { 
   ProjectCardHeader,
   ProjectCardActions,
@@ -17,7 +16,7 @@ import { LeadLinkIndicator } from "../LeadLinkIndicator";
 
 interface ProjectCardProps {
   project: Project;
-  statusOptions: StatusType[];
+  statusOptions: Array<{ value: string; color: string }>;
   onDragStart: (id: string) => void;
   onStatusChange: (projectId: string, newStatus: string) => void;
   updatingStatus: string | null;
@@ -63,7 +62,8 @@ export default function ProjectCard({
         />
         
         <ProjectCardActions 
-          project={project} 
+          projectId={project.id}
+          projectName={project.client_name}
           onProjectDeleted={onProjectDeleted}
         />
       </div>

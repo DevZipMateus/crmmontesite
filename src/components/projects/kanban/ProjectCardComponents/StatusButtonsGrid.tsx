@@ -1,24 +1,25 @@
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { StatusButton } from "./StatusButton";
+import { Project } from "@/types/project";
 
 interface StatusButtonsGridProps {
-  currentStatus: string;
+  project: Project;
   statusOptions: Array<{ value: string; color: string }>;
-  updatingStatus: boolean;
-  onStatusChange: (status: string) => void;
+  onStatusChange: (projectId: string, newStatus: string) => void;
+  isUpdating: boolean;
 }
 
 export const StatusButtonsGrid = ({
-  currentStatus,
+  project,
   statusOptions,
-  updatingStatus,
-  onStatusChange
+  onStatusChange,
+  isUpdating
 }: StatusButtonsGridProps) => {
   const isMobile = useIsMobile();
   
   // Filter out the current status
-  const availableStatuses = statusOptions.filter(s => s.value !== currentStatus);
+  const availableStatuses = statusOptions.filter(s => s.value !== project.status);
   
   // For mobile, only show first 2 statuses, for desktop show first 4
   const displayStatuses = isMobile
@@ -31,8 +32,8 @@ export const StatusButtonsGrid = ({
         <StatusButton 
           key={status.value}
           status={status}
-          onStatusChange={() => onStatusChange(status.value)}
-          updatingStatus={updatingStatus}
+          onStatusChange={() => onStatusChange(project.id, status.value)}
+          updatingStatus={isUpdating}
           size="sm"
         />
       ))}
