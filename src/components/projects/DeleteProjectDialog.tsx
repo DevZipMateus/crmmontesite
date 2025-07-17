@@ -11,7 +11,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { deleteProject } from "@/server/project-actions";
 import { useToast } from "@/hooks/use-toast";
 
@@ -50,6 +50,11 @@ export default function DeleteProjectDialog({
       }
     } catch (error) {
       console.error("Erro ao excluir projeto:", error);
+      toast({
+        title: "Erro ao excluir projeto",
+        description: "Ocorreu um erro ao tentar excluir o projeto.",
+        variant: "destructive",
+      });
     } finally {
       setIsDeleting(false);
       setOpen(false);
@@ -63,10 +68,10 @@ export default function DeleteProjectDialog({
           variant="outline"
           size={size}
           onClick={() => setOpen(true)}
-          className="text-red-500 hover:text-red-700 hover:bg-red-100"
+          className="text-red-500 hover:text-red-700 hover:bg-red-50"
           title="Excluir projeto"
         >
-          <Trash className={`${size === "sm" ? "h-4 w-4" : "h-5 w-5"}`} />
+          <Trash2 className={`${size === "sm" ? "h-4 w-4" : "h-5 w-5"}`} />
         </Button>
       ) : (
         <Button
@@ -75,7 +80,7 @@ export default function DeleteProjectDialog({
           onClick={() => setOpen(true)}
           className="flex items-center gap-2"
         >
-          <Trash className={`${size === "sm" ? "h-4 w-4" : "h-5 w-5"}`} />
+          <Trash2 className={`${size === "sm" ? "h-4 w-4" : "h-5 w-5"}`} />
           Excluir
         </Button>
       )}

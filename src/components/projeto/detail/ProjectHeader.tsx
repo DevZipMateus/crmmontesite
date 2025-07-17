@@ -88,6 +88,15 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
             <DropdownMenuItem onClick={() => window.print()}>
               Imprimir
             </DropdownMenuItem>
+            {userType === 'admin' && (
+              <DropdownMenuItem 
+                onClick={() => setIsDialogOpen(true)}
+                className="text-red-600 hover:text-red-700"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Excluir Projeto
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
