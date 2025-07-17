@@ -59,7 +59,7 @@ export default function KanbanColumn({
       aria-label={`Coluna ${statusType.value}`}
     >
       <div className="mb-3">
-        <Card className={`p-2 ${statusType.color.replace('bg-', 'bg-opacity-10 border-l-4 border-')} shadow-sm`}>
+        <Card className={`p-2 ${statusType.color.replace('bg-', 'bg-opacity-10 border-l-4 border-').replace('-500', '-400')} shadow-sm`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className={`rounded-full p-1 ${statusType.color} text-white`} aria-hidden="true">
