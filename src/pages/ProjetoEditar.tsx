@@ -13,7 +13,6 @@ import { getPersonalizationId } from "@/lib/supabase/projectStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
-import { UserDebugInfo } from "@/components/debug/UserDebugInfo";
 import DeleteProjectDialog from "@/components/projects/DeleteProjectDialog";
 
 export default function ProjetoEditar() {
@@ -78,7 +77,6 @@ export default function ProjetoEditar() {
         });
       } else {
         setPersonalizationData(data);
-        console.log("Dados da personalização carregados:", data);
       }
     } catch (err) {
       console.error("Erro ao buscar personalização:", err);
@@ -126,9 +124,6 @@ export default function ProjetoEditar() {
   return (
     <PageLayout title="Editar Projeto">
       <div className="space-y-6">
-        {/* Debug info - only shows in development */}
-        <UserDebugInfo />
-        
         <div className="mb-6">
           <Button 
             variant="ghost" 

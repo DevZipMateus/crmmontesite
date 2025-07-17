@@ -40,20 +40,14 @@ export const UserDebugInfo: React.FC<UserDebugInfoProps> = ({ showInProduction =
   return (
     <Card className="border-yellow-200 bg-yellow-50">
       <CardHeader>
-        <CardTitle className="text-sm text-yellow-800">🐛 Debug - Informações do Usuário</CardTitle>
+        <CardTitle className="text-sm text-yellow-800">🐛 Debug - Status do Usuário</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div>
-            <strong>UserType:</strong> 
-            <Badge variant={userType ? "default" : "secondary"} className="ml-2">
-              {userType || 'null'}
-            </Badge>
-          </div>
-          <div>
-            <strong>IsAdmin:</strong> 
+            <strong>Status:</strong> 
             <Badge variant={isAdmin ? "default" : "secondary"} className="ml-2">
-              {isAdmin.toString()}
+              {isAdmin ? 'Admin' : 'Não logado'}
             </Badge>
           </div>
           <div>

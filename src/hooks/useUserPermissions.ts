@@ -15,10 +15,6 @@ export const useUserPermissions = (): UserPermissions => {
     const getUserType = () => {
       try {
         const storedUserType = localStorage.getItem('userType');
-        console.log('🔍 Debug - UserType from localStorage:', storedUserType);
-        console.log('🔍 Debug - UserType type:', typeof storedUserType);
-        console.log('🔍 Debug - UserType trimmed:', storedUserType?.trim());
-        
         setUserType(storedUserType?.trim() || null);
       } catch (error) {
         console.error('❌ Error accessing localStorage:', error);
@@ -33,7 +29,6 @@ export const useUserPermissions = (): UserPermissions => {
     // Listen for storage changes
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'userType') {
-        console.log('🔄 UserType changed in localStorage:', e.newValue);
         setUserType(e.newValue?.trim() || null);
       }
     };
@@ -43,12 +38,6 @@ export const useUserPermissions = (): UserPermissions => {
   }, []);
 
   const isAdmin = userType === 'admin';
-
-  console.log('👤 UserPermissions Hook Result:', {
-    userType,
-    isAdmin,
-    isLoading
-  });
 
   return {
     userType,

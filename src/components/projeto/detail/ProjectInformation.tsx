@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Project } from "@/types/project";
@@ -7,7 +8,6 @@ import { CheckCircle2, Clock } from "lucide-react";
 import DeleteProjectDialog from "@/components/projects/DeleteProjectDialog";
 import { useNavigate } from "react-router-dom";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
-import { UserDebugInfo } from "@/components/debug/UserDebugInfo";
 
 interface ProjectInformationProps {
   project: Project;
@@ -24,31 +24,20 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
     navigate('/projetos');
   };
 
-  console.log('🔍 ProjectInformation - Admin status:', { isAdmin, isLoading });
-
   return (
     <div className="space-y-4">
-      {/* Debug info - only shows in development */}
-      <UserDebugInfo />
-      
       <Card className="border-gray-100 shadow-sm">
         <CardHeader className="bg-gray-50/50 border-b border-gray-100">
           <div className="flex justify-between items-center">
             <CardTitle>Informações do Projeto</CardTitle>
             {!isLoading && isAdmin && (
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">Admin</Badge>
-                <DeleteProjectDialog 
-                  projectId={project.id}
-                  projectName={project.client_name}
-                  onDelete={handleProjectDeleted}
-                  variant="button"
-                  size="sm"
-                />
-              </div>
-            )}
-            {!isLoading && !isAdmin && (
-              <Badge variant="secondary" className="text-xs">Sem permissões admin</Badge>
+              <DeleteProjectDialog 
+                projectId={project.id}
+                projectName={project.client_name}
+                onDelete={handleProjectDeleted}
+                variant="button"
+                size="sm"
+              />
             )}
           </div>
         </CardHeader>
@@ -65,7 +54,7 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
             <div>
               <p className="text-sm font-medium text-gray-500">Template</p>
               <p className="mt-1">
-                {isLoading ? (
+                {modelLoading ? (
                   <span className="text-gray-400">Carregando...</span>
                 ) : (
                   modelName
