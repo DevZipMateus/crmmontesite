@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useQuery } from "@tanstack/react-query";
 import { getProjectById } from "@/server/project";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Project } from "@/types/project";
 import { ProjectHeader } from "@/components/projeto/detail/ProjectHeader";
@@ -18,12 +18,44 @@ export default function ProjetoDetalhe() {
   const { id } = useParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  console.log("ProjetoDetalhe: Componente renderizado com ID:", id);
+
+  // Verificar se ID existe
+  useEffect(() => {
+    if (!id) {
+      console.error("ProjetoDetalhe: ID não encontrado na URL");
+      navigate('/projetos');
+    }
+  }, [id, navigate]);
+
   // Query to fetch the project data
-  const { data: project, isLoading: projectLoading } = useQuery({
+  const { data: project, isLoading: projectLoading, error: projectError } = useQuery({
     queryKey: ["project", id],
-    queryFn: () => getProjectById(id as string),
+    queryFn: () => {
+      if (!id) {
+        throw new Error("ID do projeto é obrigatório");
+      }
+      return getProjectById(id);
+    },
     enabled: !!id,
+    retry: (failureCount, error) => {
+      // Não tentar novamente se for erro 404 ou projeto não encontrado
+      if (error?.message?.includes("não encontrado") || error?.message?.includes("404")) {
+        return false;
+      }
+      return failureCount < 2;
+    }
   });
+
+  // Se houver erro, navegar de volta para projetos
+  useEffect(() => {
+    if (projectError) {
+      console.error("ProjetoDetalhe: Erro ao carregar projeto, redirecionando...", projectError);
+      setTimeout(() => {
+        navigate('/projetos');
+      }, 3000); // Dar tempo para o usuário ver o erro
+    }
+  }, [projectError, navigate]);
 
   // Query to fetch personalization data
   const { data: personalization, isLoading: personalizationLoading } = useQuery({
@@ -31,23 +63,29 @@ export default function ProjetoDetalhe() {
     queryFn: async () => {
       if (!project) return null;
       
+      console.log("ProjetoDetalhe: Buscando personalização para projeto:", project.client_name);
+      
       // First, try to get personalization using personalization_id
       if (project.personalization_id) {
+        console.log("ProjetoDetalhe: Tentando buscar por personalization_id:", project.personalization_id);
+        
         const { data, error } = await supabase
           .from('site_personalizacoes')
           .select('*')
           .eq('id', project.personalization_id)
-          .single();
+          .maybeSingle();
         
         if (!error && data) {
-          console.log("Personalization found using personalization_id:", data);
+          console.log("ProjetoDetalhe: Personalização encontrada via personalization_id:", data);
           return data;
+        } else if (error) {
+          console.error("ProjetoDetalhe: Erro ao buscar personalização por ID:", error);
         }
       }
       
       // For partner projects, try to find personalization by project data
       if (project.partner_hash && project.observacoes_cliente) {
-        console.log("Creating virtual personalization for partner project");
+        console.log("ProjetoDetalhe: Criando personalização virtual para projeto de parceiro");
         
         // Extract structured data from observacoes_cliente
         const observacoes = project.observacoes_cliente || "";
@@ -102,24 +140,26 @@ export default function ProjetoDetalhe() {
       
       // Backward compatibility: try using blaster_link if personalization_id is not available
       if (project.blaster_link && project.blaster_link.startsWith('personalization:')) {
+        console.log("ProjetoDetalhe: Tentando buscar por blaster_link");
+        
         const personalizationId = project.blaster_link.replace('personalization:', '');
         
         const { data, error } = await supabase
           .from('site_personalizacoes')
           .select('*')
           .eq('id', personalizationId)
-          .single();
+          .maybeSingle();
         
         if (error) {
-          console.error("Erro ao buscar personalização via blaster_link:", error);
+          console.error("ProjetoDetalhe: Erro ao buscar personalização via blaster_link:", error);
           return null;
         }
         
-        console.log("Personalization found using blaster_link:", data);
+        console.log("ProjetoDetalhe: Personalização encontrada via blaster_link:", data);
         return data;
       }
       
-      console.log("No personalization found for project");
+      console.log("ProjetoDetalhe: Nenhuma personalização encontrada para o projeto");
       return null;
     },
     enabled: !!project,
@@ -129,13 +169,22 @@ export default function ProjetoDetalhe() {
   const { data: customizations, isLoading: customizationsLoading } = useQuery({
     queryKey: ["customizations", id],
     queryFn: async () => {
+      if (!id) return [];
+      
+      console.log("ProjetoDetalhe: Buscando customizações para projeto:", id);
+      
       const { data, error } = await supabase
         .from('project_customizations')
         .select('*')
         .eq('project_id', id)
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error("ProjetoDetalhe: Erro ao buscar customizações:", error);
+        throw error;
+      }
+      
+      console.log("ProjetoDetalhe: Customizações encontradas:", data?.length || 0);
       return data;
     },
     enabled: !!id,
@@ -147,10 +196,13 @@ export default function ProjetoDetalhe() {
   };
 
   const handleProjectDeleted = () => {
+    console.log("ProjetoDetalhe: Projeto deletado, redirecionando para /projetos");
     navigate('/projetos');
   };
 
+  // Loading state
   if (projectLoading) {
+    console.log("ProjetoDetalhe: Carregando projeto...");
     return (
       <PageLayout title="Carregando projeto...">
         <div className="flex justify-center items-center py-20">
@@ -159,6 +211,28 @@ export default function ProjetoDetalhe() {
       </PageLayout>
     );
   }
+
+  // Error state
+  if (projectError || !project) {
+    console.log("ProjetoDetalhe: Estado de erro ou projeto não encontrado");
+    return (
+      <PageLayout title="Erro ao carregar projeto">
+        <div className="flex flex-col justify-center items-center py-20 text-center">
+          <div className="text-destructive text-lg mb-4">
+            ⚠️ Projeto não encontrado
+          </div>
+          <p className="text-muted-foreground mb-4">
+            O projeto que você está tentando acessar não existe ou foi removido.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Redirecionando em alguns segundos...
+          </p>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  console.log("ProjetoDetalhe: Renderizando projeto:", project.client_name);
 
   return (
     <PageLayout 

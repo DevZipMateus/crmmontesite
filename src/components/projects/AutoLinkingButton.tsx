@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Link2, Loader2 } from "lucide-react";
+import { Link2, Loader2, CheckCircle } from "lucide-react";
 import { useLeadProjectLinking } from "@/hooks/useLeadProjectLinking";
 
 interface AutoLinkingButtonProps {
@@ -12,9 +12,19 @@ export const AutoLinkingButton: React.FC<AutoLinkingButtonProps> = ({ onLinkingC
   const { runAutoLinking, isLinking } = useLeadProjectLinking();
 
   const handleAutoLink = async () => {
-    const result = await runAutoLinking();
-    if (onLinkingComplete && result.linked > 0) {
-      onLinkingComplete();
+    console.log("AutoLinkingButton: Iniciando processo de vinculação automática");
+    
+    try {
+      const result = await runAutoLinking();
+      
+      console.log("AutoLinkingButton: Resultado da vinculação:", result);
+      
+      if (onLinkingComplete && result.linked > 0) {
+        console.log("AutoLinkingButton: Chamando callback onLinkingComplete");
+        onLinkingComplete();
+      }
+    } catch (error) {
+      console.error("AutoLinkingButton: Erro no processo de vinculação:", error);
     }
   };
 
@@ -26,11 +36,16 @@ export const AutoLinkingButton: React.FC<AutoLinkingButtonProps> = ({ onLinkingC
       className="flex items-center gap-2"
     >
       {isLinking ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
+        <>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Vinculando...
+        </>
       ) : (
-        <Link2 className="h-4 w-4" />
+        <>
+          <Link2 className="h-4 w-4" />
+          Vincular Leads
+        </>
       )}
-      {isLinking ? "Vinculando..." : "Vincular Leads"}
     </Button>
   );
 };
