@@ -93,7 +93,8 @@ export default function Projetos() {
         <KanbanBoard 
           projects={projects} 
           setProjects={setProjects} 
-          onProjectDeleted={handleProjectDeleted} 
+          onProjectDeleted={handleProjectDeleted}
+          searchQuery={searchQuery}
         />
       ) : (
         <ProjectListView 

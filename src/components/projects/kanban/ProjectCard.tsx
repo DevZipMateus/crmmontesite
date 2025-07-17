@@ -12,6 +12,8 @@ import { PartnerIndicator } from "./ProjectCardComponents/PartnerIndicator";
 import { CustomizationDeadlineIndicator } from "./ProjectCardComponents/CustomizationDeadlineIndicator";
 import { ChatButton } from "./ProjectCardComponents/ChatButton";
 import { ClientTypeBadge } from "@/components/projects/ClientTypeBadge";
+import { Badge } from "@/components/ui/badge";
+import { Archive } from "lucide-react";
 import { isPartnerProject } from "@/server/webhook-service";
 import { useNavigate } from "react-router-dom";
 import { Phone } from "lucide-react";
@@ -60,6 +62,16 @@ export default function ProjectCard({
       <ClientTypeBadge project={project} variant="banner" />
       
       <div className="p-3">
+        {/* Indicador de projeto arquivado */}
+        {project.isArchived && (
+          <div className="mb-2">
+            <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600">
+              <Archive className="h-3 w-3 mr-1" />
+              Arquivado
+            </Badge>
+          </div>
+        )}
+        
         {/* Indicador de projeto de parceiro */}
         {isPartnerProject(project) && project.partner_hash && (
           <div className="mb-2">

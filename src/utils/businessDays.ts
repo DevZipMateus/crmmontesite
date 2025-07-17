@@ -55,3 +55,26 @@ export function getDeadlineStatus(deadline: string | null, isReady: boolean) {
     daysRemaining
   };
 }
+
+export function shouldArchiveProject(project: any): boolean {
+  // Only archive projects with "Site pronto" status
+  if (project.status !== "Site pronto") {
+    return false;
+  }
+  
+  // If already requires paid customization, it's archived
+  if (project.requires_paid_customization) {
+    return true;
+  }
+  
+  // If no customization deadline set, don't archive
+  if (!project.customization_deadline) {
+    return false;
+  }
+  
+  // Check if deadline has passed
+  const now = new Date();
+  const deadlineDate = new Date(project.customization_deadline);
+  
+  return now > deadlineDate;
+}

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { getSupabaseClient } from "@/lib/supabase";
 import { Project } from "@/types/project";
+import { shouldArchiveProject } from "@/utils/businessDays";
 
 interface ProjectFilters {
   statusFilter: string | null;
@@ -89,6 +90,12 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
             project.domain?.toLowerCase().includes(lowercaseQuery)
           );
         }
+        
+        // Adicionar flag de arquivamento aos projetos
+        filteredProjects = filteredProjects.map(project => ({
+          ...project,
+          isArchived: shouldArchiveProject(project)
+        }));
         
         setProjects(filteredProjects);
       } catch (error) {

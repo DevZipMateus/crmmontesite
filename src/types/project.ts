@@ -14,6 +14,7 @@ export interface Project {
   personalization_id?: string;
   provider_credentials?: string;
   hasPendingCustomizations?: boolean;
+  isArchived?: boolean;
   
   // Campos para webhook/parceiros
   partner_hash?: string;

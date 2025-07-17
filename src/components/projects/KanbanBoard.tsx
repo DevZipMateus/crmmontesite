@@ -14,9 +14,10 @@ interface KanbanBoardProps {
   projects: Project[];
   setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
   onProjectDeleted?: () => void;
+  searchQuery?: string;
 }
 
-export default function KanbanBoard({ projects, setProjects, onProjectDeleted }: KanbanBoardProps) {
+export default function KanbanBoard({ projects, setProjects, onProjectDeleted, searchQuery = "" }: KanbanBoardProps) {
   const {
     draggingId,
     updatingStatus,
@@ -52,10 +53,24 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted }:
           customizations.map(c => c.project_id)
         );
 
-        const updatedProjects = [...projects].map(project => ({
+        let updatedProjects = [...projects].map(project => ({
           ...project,
           hasPendingCustomizations: projectsWithPendingCustomizations.has(project.id)
-        })).sort((a, b) => {
+        }));
+
+        // Filtrar projetos arquivados apenas se não houver busca ativa
+        const hasActiveSearch = searchQuery.trim().length > 0;
+        if (!hasActiveSearch) {
+          updatedProjects = updatedProjects.filter(project => {
+            // Para "Site pronto", filtrar arquivados
+            if (project.status === "Site pronto" && project.isArchived) {
+              return false;
+            }
+            return true;
+          });
+        }
+
+        updatedProjects = updatedProjects.sort((a, b) => {
           if (a.hasPendingCustomizations && !b.hasPendingCustomizations) return -1;
           if (!a.hasPendingCustomizations && b.hasPendingCustomizations) return 1;
           
@@ -69,7 +84,7 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted }:
     };
 
     checkCustomizations();
-  }, [projects]);
+  }, [projects, searchQuery]);
   
   const displayProjects = projectsWithCustomizationStatus.length > 0 
     ? projectsWithCustomizationStatus 
