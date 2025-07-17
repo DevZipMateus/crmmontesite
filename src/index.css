@@ -93,32 +93,47 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* Full HD optimizations */
+  @media (min-width: 1920px) {
+    body {
+      font-size: 17px;
+    }
+    
+    .container {
+      max-width: 1920px;
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
   }
 }
 
 @layer components {
   .kanban-column {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow-subtle border border-border/40 p-4 min-h-[600px] h-full;
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-subtle border border-border/40 p-6 min-h-[700px] h-full;
   }
 
   .kanban-card {
-    @apply bg-white dark:bg-gray-800 rounded-xl shadow-subtle border border-border/40 mb-3 p-4 cursor-move hover:shadow-apple transition-shadow;
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-subtle border border-border/40 mb-4 p-5 cursor-move hover:shadow-apple transition-shadow;
   }
 
   .kanban-column-header {
-    @apply flex justify-between items-center mb-4 pb-2 border-b border-border;
+    @apply flex justify-between items-center mb-6 pb-3 border-b border-border;
   }
 
   .form-card {
-    @apply bg-white dark:bg-gray-800 rounded-xl shadow-subtle border border-border/40 p-6;
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-subtle border border-border/40 p-8;
   }
 
   .form-section {
-    @apply pb-6 mb-6 border-b border-border;
+    @apply pb-8 mb-8 border-b border-border;
   }
 
   .form-section-title {
-    @apply text-lg font-medium text-gray-800 dark:text-gray-200 mb-4;
+    @apply text-xl font-medium text-gray-800 dark:text-gray-200 mb-6;
   }
 
   .apple-gradient {
@@ -137,6 +152,25 @@
     100% {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  /* Full HD specific styles */
+  @media (min-width: 1920px) {
+    .kanban-column {
+      @apply p-8 min-h-[800px];
+    }
+    
+    .kanban-card {
+      @apply p-6 mb-5;
+    }
+    
+    .form-card {
+      @apply p-10;
+    }
+    
+    .form-section {
+      @apply pb-10 mb-10;
     }
   }
 }

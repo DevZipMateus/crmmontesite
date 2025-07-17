@@ -11,7 +11,7 @@ export function InfoCardsSection({
   projects
 }: InfoCardsSectionProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-8">
+    <div className="grid grid-cols-1 gap-8 mb-10 fhd:mb-12">
       <RecentProjectsCard projects={projects} />
     </div>
   );

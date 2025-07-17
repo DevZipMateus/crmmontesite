@@ -16,21 +16,21 @@ const DashboardHeader: React.FC = () => {
   };
 
   return <header className="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-10 fixed w-full">
-      <div className="container max-w-7xl mx-auto py-0">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
+      <div className="container max-w-[1920px] mx-auto py-0 px-8">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
             <Logo size={isMobile ? "md" : "xl"} />
-            {!isMobile && <p className="text-gray-500 mt-1 hidden md:block">Gerencie e personalize sites de forma eficiente</p>}
+            {!isMobile && <p className="text-gray-500 mt-1 text-base">Gerencie e personalize sites de forma eficiente</p>}
           </div>
-          <div className="flex items-center gap-2">
-            <Button className="bg-primary hover:bg-primary/90 shadow-sm text-xs md:text-sm whitespace-nowrap" onClick={() => navigate("/projetos")}>
-              <LayoutDashboard className="mr-1 md:mr-2 h-3.5 w-3.5 md:h-4 md:w-4" />
+          <div className="flex items-center gap-4">
+            <Button className="bg-primary hover:bg-primary/90 shadow-sm text-sm px-6 py-2 whitespace-nowrap" onClick={() => navigate("/projetos")}>
+              <LayoutDashboard className="mr-2 h-4 w-4" />
               {isMobile ? "Dashboard" : "Ver Projetos"}
             </Button>
             <Button 
               onClick={handleLogout} 
               variant="outline" 
-              className="flex items-center gap-2 text-xs md:text-sm"
+              className="flex items-center gap-2 text-sm px-6 py-2"
             >
               <LogOut className="h-4 w-4" />
               Sair

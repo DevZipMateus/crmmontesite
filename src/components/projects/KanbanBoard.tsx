@@ -111,18 +111,18 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted, s
     
     return (
       <div className="relative">
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-center mb-4">
           <Button 
             variant="outline" 
             size="sm" 
             onClick={handlePrevColumn}
             disabled={activeColumnIndex === 0}
-            className="h-8 px-2"
+            className="h-10 px-4"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-5 w-5" />
           </Button>
           
-          <span className="text-sm font-medium">
+          <span className="text-base font-medium">
             {currentStatusType.value} ({activeColumnIndex + 1}/{PROJECT_STATUS_TYPES.length})
           </span>
           
@@ -131,9 +131,9 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted, s
             size="sm" 
             onClick={handleNextColumn}
             disabled={activeColumnIndex === PROJECT_STATUS_TYPES.length - 1}
-            className="h-8 px-2"
+            className="h-10 px-4"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
         
@@ -156,7 +156,7 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted, s
 
   return (
     <ScrollArea className="w-full">
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 min-w-[1000px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 min-w-[1600px] fhd:min-w-[1800px]">
         {PROJECT_STATUS_TYPES.map((statusType) => (
           <KanbanColumn
             key={statusType.value}
