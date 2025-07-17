@@ -1,9 +1,11 @@
+
 import { Eye, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import StatusBadge from "./list/StatusBadge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
+import { ClientTypeBadge } from "@/components/projects/ClientTypeBadge";
 import { Project } from "@/types/project";
 
 interface SalesProjectTableProps {
@@ -62,6 +64,7 @@ export default function SalesProjectTable({
             <TableHeader>
               <TableRow>
                 <TableHead>Nome do cliente</TableHead>
+                <TableHead>Tipo de cliente</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Domínio</TableHead>
@@ -74,6 +77,9 @@ export default function SalesProjectTable({
               {projects.map((project) => (
                 <TableRow key={project.id} className="hover:bg-muted/50">
                   <TableCell className="font-medium">{project.client_name}</TableCell>
+                  <TableCell>
+                    <ClientTypeBadge project={project} />
+                  </TableCell>
                   <TableCell>
                     {project.email_complementar || 
                      project.site_personalizacoes?.email || 

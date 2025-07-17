@@ -7,6 +7,7 @@ import { Project } from "@/types/project";
 import { formatDate } from "@/utils/formatters";
 import { generateSiteCommand } from "./SiteCommandGenerator";
 import { generateEgestorCommand } from "./EGestorCommandGenerator";
+import { ClientTypeBadge } from "@/components/projects/ClientTypeBadge";
 
 interface ProjectTableProps {
   projects: Project[];
@@ -31,9 +32,9 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
         <TableHeader>
           <TableRow>
             <TableHead>Nome do cliente</TableHead>
+            <TableHead>Tipo de cliente</TableHead>
             <TableHead>Modelo escolhido</TableHead>
             <TableHead>Responsável</TableHead>
-            <TableHead>Tipo de cliente</TableHead>
             <TableHead>Data de recebimento</TableHead>
             <TableHead>Ações</TableHead>
           </TableRow>
@@ -42,9 +43,11 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
           {projects.map((project) => (
             <TableRow key={project.id} className="hover:bg-muted/50">
               <TableCell className="font-medium">{project.client_name}</TableCell>
+              <TableCell>
+                <ClientTypeBadge project={project} />
+              </TableCell>
               <TableCell>{project.template || "—"}</TableCell>
               <TableCell>{project.responsible_name || "—"}</TableCell>
-              <TableCell>{project.client_type || "—"}</TableCell>
               <TableCell>{formatDate(project.created_at)}</TableCell>
               <TableCell className="space-y-2">
                 <Button
