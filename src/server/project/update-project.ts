@@ -37,11 +37,13 @@ export async function updateProject(id: string, values: Partial<Project>) {
     
     console.log("Final update data:", updateData);
     
-    // Use the safe update function to avoid trigger issues
-    const { data, error } = await supabase.rpc('update_project_safe', {
-      project_id: id,
-      update_data: updateData
-    });
+    // Use direct update to avoid RPC type issues
+    const { data, error } = await supabase
+      .from('projects')
+      .update(updateData)
+      .eq('id', id)
+      .select('*')
+      .single();
     
     if (error) {
       console.error("Erro ao atualizar projeto:", error);
