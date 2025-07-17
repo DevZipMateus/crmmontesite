@@ -1,4 +1,3 @@
-
 import React from "react";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -59,7 +58,6 @@ export const SiteDetailsSection = ({ form }: SiteDetailsSectionProps) => {
                 <SelectItem value="Recebido">Recebido</SelectItem>
                 <SelectItem value="Criando site">Criando site</SelectItem>
                 <SelectItem value="Configurando Domínio">Configurando Domínio</SelectItem>
-                <SelectItem value="Aguardando DNS">Aguardando DNS</SelectItem>
                 <SelectItem value="Site pronto">Site pronto</SelectItem>
                 <SelectItem value="Em Customização">Em Customização</SelectItem>
               </SelectContent>

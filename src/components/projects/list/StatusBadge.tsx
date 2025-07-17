@@ -17,8 +17,6 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
         return 'bg-purple-100 text-purple-800 border-purple-300';
       case 'Configurando Domínio':
         return 'bg-amber-100 text-amber-800 border-amber-300';
-      case 'Aguardando DNS':
-        return 'bg-orange-100 text-orange-800 border-orange-300';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-300';
     }

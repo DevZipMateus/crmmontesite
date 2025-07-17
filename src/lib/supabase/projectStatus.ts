@@ -5,7 +5,6 @@ export const PROJECT_STATUS_TYPES = [
   { value: "Recebido", icon: "Inbox", color: "bg-purple-500" },
   { value: "Criando site", icon: "Code", color: "bg-blue-500" },
   { value: "Configurando Domínio", icon: "Globe", color: "bg-amber-500" },
-  { value: "Aguardando DNS", icon: "Clock", color: "bg-orange-500" },
   { value: "Site pronto", icon: "CheckCircle2", color: "bg-green-500" }
 ];
 

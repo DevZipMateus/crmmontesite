@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Code, Clock, Globe, Inbox } from "lucide-react";
+import { CheckCircle2, Code, Globe, Inbox } from "lucide-react";
 
 interface StatusButtonProps {
   status: { value: string; color: string };
@@ -18,7 +18,6 @@ export const StatusButton = ({
   const StatusIcon = status.value === "Recebido" ? Inbox : 
                     status.value === "Criando site" ? Code : 
                     status.value === "Configurando Domínio" ? Globe :
-                    status.value === "Aguardando DNS" ? Clock :
                     CheckCircle2;
 
   // Truncate text more aggressively for better mobile display

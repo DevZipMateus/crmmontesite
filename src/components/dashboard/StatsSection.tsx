@@ -61,11 +61,11 @@ const StatsSection: React.FC = () => {
           .select('*', { count: 'exact', head: true })
           .in('status', ['Recebido', 'Criando site']);
         
-        // Get published sites count (contando os status "Configurando Domínio" e "Aguardando DNS")
+        // Get published sites count (apenas "Configurando Domínio")
         const { count: publishedCount } = await supabase
           .from('projects')
           .select('*', { count: 'exact', head: true })
-          .in('status', ['Configurando Domínio', 'Aguardando DNS']);
+          .eq('status', 'Configurando Domínio');
           
         // Get sites ready count
         const { count: readyCount } = await supabase
