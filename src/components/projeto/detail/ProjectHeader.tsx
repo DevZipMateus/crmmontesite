@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 
 interface ProjectHeaderProps {
   projectId: string;
@@ -29,7 +30,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
   personalizationId
 }) => {
   const navigate = useNavigate();
-  const userType = localStorage.getItem('userType');
+  const { isAdmin, isSales, isLoading } = useUserPermissions();
   
   return (
     <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
@@ -38,7 +39,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
           <Button
             variant="outline"
             size="icon"
-            onClick={() => navigate(userType === 'sales' ? '/painel-vendas' : '/projetos')}
+            onClick={() => navigate(isSales ? '/painel-vendas' : '/projetos')}
           >
             <ChevronDownIcon className="h-4 w-4 rotate-90" />
           </Button>
@@ -57,7 +58,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
           </Button>
         )}
         
-        {userType === 'admin' && (
+        {!isLoading && isAdmin && (
           <Button 
             variant="outline"
             className="flex items-center gap-2"
@@ -68,7 +69,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
           </Button>
         )}
         
-        {userType === 'admin' && (
+        {!isLoading && isAdmin && (
           <DeleteProjectDialog 
             projectId={projectId}
             projectName={projectName}
@@ -88,7 +89,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
             <DropdownMenuItem onClick={() => window.print()}>
               Imprimir
             </DropdownMenuItem>
-            {userType === 'admin' && (
+            {!isLoading && isAdmin && (
               <DropdownMenuItem 
                 onClick={() => setIsDialogOpen(true)}
                 className="text-red-600 hover:text-red-700"

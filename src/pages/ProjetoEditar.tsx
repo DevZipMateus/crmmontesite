@@ -12,10 +12,14 @@ import { Project } from "@/types/project";
 import { getPersonalizationId } from "@/lib/supabase/projectStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
+import { UserDebugInfo } from "@/components/debug/UserDebugInfo";
+import DeleteProjectDialog from "@/components/projects/DeleteProjectDialog";
 
 export default function ProjetoEditar() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { isAdmin, isLoading: permissionsLoading } = useUserPermissions();
   const [personalizationId, setPersonalizationId] = useState<string | null>(null);
   const [personalizationData, setPersonalizationData] = useState<any>(null);
 
@@ -87,6 +91,10 @@ export default function ProjetoEditar() {
     navigate(`/personalizacao/${personalizationId}`);
   };
 
+  const handleProjectDeleted = () => {
+    navigate('/projetos');
+  };
+
   if (isLoading) {
     return (
       <PageLayout title="Editar Projeto">
@@ -117,71 +125,87 @@ export default function ProjetoEditar() {
 
   return (
     <PageLayout title="Editar Projeto">
-      <div className="mb-6">
-        <Button 
-          variant="ghost" 
-          className="flex items-center gap-2 text-gray-500"
-          onClick={() => navigate(`/projeto/${id}`)}
-        >
-          <ArrowLeft className="h-4 w-4" /> Voltar para Detalhes do Projeto
-        </Button>
-      </div>
-      
       <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Informações do Projeto</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {project && (
-              <ProjectFormEdit 
-                initialValues={project as Project}
-                submitButtonText="Atualizar Projeto"
-                mode="edit"
-              />
-            )}
-          </CardContent>
-        </Card>
-
-        {personalizationId && (
+        {/* Debug info - only shows in development */}
+        <UserDebugInfo />
+        
+        <div className="mb-6">
+          <Button 
+            variant="ghost" 
+            className="flex items-center gap-2 text-gray-500"
+            onClick={() => navigate(`/projeto/${id}`)}
+          >
+            <ArrowLeft className="h-4 w-4" /> Voltar para Detalhes do Projeto
+          </Button>
+        </div>
+        
+        <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Personalização</CardTitle>
+              <div className="flex justify-between items-center">
+                <CardTitle>Informações do Projeto</CardTitle>
+                {!permissionsLoading && isAdmin && project && (
+                  <DeleteProjectDialog 
+                    projectId={project.id}
+                    projectName={project.client_name}
+                    onDelete={handleProjectDeleted}
+                    variant="button"
+                    size="default"
+                  />
+                )}
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="bg-green-50 border border-green-200 rounded-md p-4">
-                {personalizationData ? (
-                  <div className="space-y-2">
-                    <p className="text-sm text-green-800">
-                      Personalização encontrada para este projeto
-                    </p>
-                    <p className="text-sm text-gray-700">
-                      <strong>Empresa:</strong> {personalizationData.officenome}
-                    </p>
-                    <p className="text-sm text-gray-700">
-                      <strong>Responsável:</strong> {personalizationData.responsavelnome}
-                    </p>
-                    <p className="text-sm text-gray-700">
-                      <strong>Email:</strong> {personalizationData.email}
-                    </p>
-                  </div>
-                ) : (
-                  <p className="text-sm text-green-800">
-                    Personalização encontrada para este projeto (ID: {personalizationId})
-                  </p>
-                )}
-                
-                <Button 
-                  variant="outline" 
-                  className="mt-3"
-                  onClick={handleViewPersonalization}
-                >
-                  Ver Personalização Completa
-                </Button>
-              </div>
+              {project && (
+                <ProjectFormEdit 
+                  initialValues={project as Project}
+                  submitButtonText="Atualizar Projeto"
+                  mode="edit"
+                />
+              )}
             </CardContent>
           </Card>
-        )}
+
+          {personalizationId && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Personalização</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                  {personalizationData ? (
+                    <div className="space-y-2">
+                      <p className="text-sm text-green-800">
+                        Personalização encontrada para este projeto
+                      </p>
+                      <p className="text-sm text-gray-700">
+                        <strong>Empresa:</strong> {personalizationData.officenome}
+                      </p>
+                      <p className="text-sm text-gray-700">
+                        <strong>Responsável:</strong> {personalizationData.responsavelnome}
+                      </p>
+                      <p className="text-sm text-gray-700">
+                        <strong>Email:</strong> {personalizationData.email}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-green-800">
+                      Personalização encontrada para este projeto (ID: {personalizationId})
+                    </p>
+                  )}
+                  
+                  <Button 
+                    variant="outline" 
+                    className="mt-3"
+                    onClick={handleViewPersonalization}
+                  >
+                    Ver Personalização Completa
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </PageLayout>
   );
