@@ -67,7 +67,7 @@ export default function ProjectCard({
           <div className="mb-2">
             <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600">
               <Archive className="h-3 w-3 mr-1" />
-              Arquivado
+              {project.manually_archived ? "Arquivado manualmente" : "Arquivado"}
             </Badge>
           </div>
         )}
@@ -147,6 +147,7 @@ export default function ProjectCard({
           <ProjectCardActions 
             projectId={project.id}
             projectName={project.client_name}
+            isArchived={project.isArchived}
             onViewEdit={handleViewEdit}
             onProjectDeleted={onProjectDeleted}
           />

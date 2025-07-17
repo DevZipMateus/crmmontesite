@@ -341,6 +341,7 @@ export type Database = {
           email_complementar: string | null
           formulario_preenchido: boolean | null
           id: string
+          manually_archived: boolean | null
           modelo_escolhido: string | null
           observacoes_cliente: string | null
           partner_hash: string | null
@@ -369,6 +370,7 @@ export type Database = {
           email_complementar?: string | null
           formulario_preenchido?: boolean | null
           id?: string
+          manually_archived?: boolean | null
           modelo_escolhido?: string | null
           observacoes_cliente?: string | null
           partner_hash?: string | null
@@ -397,6 +399,7 @@ export type Database = {
           email_complementar?: string | null
           formulario_preenchido?: boolean | null
           id?: string
+          manually_archived?: boolean | null
           modelo_escolhido?: string | null
           observacoes_cliente?: string | null
           partner_hash?: string | null

@@ -57,6 +57,11 @@ export function getDeadlineStatus(deadline: string | null, isReady: boolean) {
 }
 
 export function shouldArchiveProject(project: any): boolean {
+  // Se foi arquivado manualmente, está arquivado
+  if (project.manually_archived) {
+    return true;
+  }
+
   // Only archive projects with "Site pronto" status
   if (project.status !== "Site pronto") {
     return false;
@@ -67,7 +72,7 @@ export function shouldArchiveProject(project: any): boolean {
     return true;
   }
   
-  // If no customization deadline set, don't archive
+  // If no customization deadline set, don't archive automatically
   if (!project.customization_deadline) {
     return false;
   }
