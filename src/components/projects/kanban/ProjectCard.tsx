@@ -13,6 +13,8 @@ import {
   CustomizationDeadlineIndicator
 } from "./ProjectCardComponents";
 import { LeadLinkIndicator } from "../LeadLinkIndicator";
+import { ClientTypeBadge } from "../ClientTypeBadge";
+import { getClientTypeInfo } from "@/utils/clientTypeUtils";
 import { useNavigate } from "react-router-dom";
 
 interface ProjectCardProps {
@@ -34,6 +36,7 @@ export default function ProjectCard({
 }: ProjectCardProps) {
   const isUpdating = updatingStatus === project.id;
   const navigate = useNavigate();
+  const clientTypeInfo = getClientTypeInfo(project);
 
   const handleViewEdit = (projectId: string, action: 'view' | 'edit') => {
     if (action === 'view') {
@@ -45,11 +48,16 @@ export default function ProjectCard({
 
   return (
     <Card
-      className="p-4 cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow border-l-4 border-l-primary/20"
+      className={`p-4 cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow border-l-4 ${clientTypeInfo.borderColor} ${clientTypeInfo.cardBgColor}`}
       draggable
       onDragStart={() => onDragStart(project.id)}
     >
       <div className="space-y-3">
+        {/* Badge do tipo de cliente */}
+        <div className="flex justify-end">
+          <ClientTypeBadge project={project} variant="badge" />
+        </div>
+        
         <ProjectCardHeader 
           clientName={project.client_name}
           template={project.template || ''}
