@@ -30,7 +30,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
   personalizationId
 }) => {
   const navigate = useNavigate();
-  const { isAdmin, isSales, isLoading } = useUserPermissions();
+  const { isAdmin, isLoading } = useUserPermissions();
   
   return (
     <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
@@ -39,7 +39,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
           <Button
             variant="outline"
             size="icon"
-            onClick={() => navigate(isSales ? '/painel-vendas' : '/projetos')}
+            onClick={() => navigate('/projetos')}
           >
             <ChevronDownIcon className="h-4 w-4 rotate-90" />
           </Button>
