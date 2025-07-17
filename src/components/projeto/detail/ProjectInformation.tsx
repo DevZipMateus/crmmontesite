@@ -5,19 +5,39 @@ import { Project } from "@/types/project";
 import { useModelDetails } from "@/utils/modelUtils";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Clock } from "lucide-react";
+import DeleteProjectDialog from "@/components/projects/DeleteProjectDialog";
+import { useNavigate } from "react-router-dom";
 
 interface ProjectInformationProps {
   project: Project;
 }
 
 export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project }) => {
+  const navigate = useNavigate();
+  const userType = localStorage.getItem('userType');
+  
   // Use the new hook to get the model name
   const { modelName, isLoading } = useModelDetails(project.template);
+
+  const handleProjectDeleted = () => {
+    navigate('/projetos');
+  };
 
   return (
     <Card className="border-gray-100 shadow-sm">
       <CardHeader className="bg-gray-50/50 border-b border-gray-100">
-        <CardTitle>Informações do Projeto</CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle>Informações do Projeto</CardTitle>
+          {userType === 'admin' && (
+            <DeleteProjectDialog 
+              projectId={project.id}
+              projectName={project.client_name}
+              onDelete={handleProjectDeleted}
+              variant="button"
+              size="sm"
+            />
+          )}
+        </div>
       </CardHeader>
       <CardContent className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
