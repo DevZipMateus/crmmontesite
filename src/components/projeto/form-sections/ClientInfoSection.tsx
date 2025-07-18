@@ -89,6 +89,7 @@ export const ClientInfoSection = ({ form }: ClientInfoSectionProps) => {
                 <SelectItem value="parceiro">Parceiro</SelectItem>
                 <SelectItem value="cliente_final">Cliente Final</SelectItem>
                 <SelectItem value="cliente_de_parceiro">Cliente de Parceiro</SelectItem>
+                <SelectItem value="outbound">Outbound</SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />
