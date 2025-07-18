@@ -37,7 +37,19 @@ export function getClientTypeInfo(project: {
     };
   }
 
-  // Se project_source é 'outbound', é outbound
+  // Se client_type é 'outbound', é outbound (prioridade sobre project_source)
+  if (project.client_type?.toLowerCase() === 'outbound') {
+    return {
+      type: 'outbound',
+      label: 'Outbound',
+      color: 'text-purple-700',
+      bgColor: 'bg-purple-100',
+      borderColor: 'border-purple-500',
+      cardBgColor: 'bg-purple-50'
+    };
+  }
+
+  // Se project_source é 'outbound', é outbound (fallback para compatibilidade)
   if (project.project_source?.toLowerCase() === 'outbound') {
     return {
       type: 'outbound',
