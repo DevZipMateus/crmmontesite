@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ChevronDownIcon, Edit, ExternalLink, MoreHorizontal, Trash2 } from "lucide-react";
+import { ChevronLeft, Edit, ExternalLink, MoreHorizontal } from "lucide-react";
 import DeleteProjectDialog from "@/components/projects/DeleteProjectDialog";
 import {
   DropdownMenu,
@@ -35,15 +35,17 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
   return (
     <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
       <div className="flex items-center gap-4">
-        <div className="md:hidden">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => navigate('/projetos')}
-          >
-            <ChevronDownIcon className="h-4 w-4 rotate-90" />
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => navigate('/projetos')}
+          className="flex items-center gap-2"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <span className="hidden md:inline text-sm text-muted-foreground">
+          Voltar para Projetos
+        </span>
       </div>
       
       <div className="flex flex-wrap items-center gap-3">
@@ -89,15 +91,6 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
             <DropdownMenuItem onClick={() => window.print()}>
               Imprimir
             </DropdownMenuItem>
-            {!isLoading && isAdmin && (
-              <DropdownMenuItem 
-                onClick={() => setIsDialogOpen(true)}
-                className="text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Excluir Projeto
-              </DropdownMenuItem>
-            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
