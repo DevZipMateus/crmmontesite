@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,7 +41,7 @@ export default function ProjectCard({
     if (action === 'view') {
       navigate(`/projeto/${projectId}`);
     } else {
-      navigate(`/projeto/editar/${projectId}`);
+      navigate(`/projeto/${projectId}/editar`);
     }
   };
 
