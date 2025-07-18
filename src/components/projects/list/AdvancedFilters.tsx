@@ -56,24 +56,24 @@ export default function AdvancedFilters({
   const [openToDate, setOpenToDate] = useState(false);
 
   return (
-    <Card className="mb-6">
-      <CardContent className="pt-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Filter className="h-5 w-5 text-muted-foreground" />
-          <div className="text-sm font-medium">Filtros</div>
+    <Card className="mb-4 lg:mb-6">
+      <CardContent className="pt-4 lg:pt-6">
+        <div className="flex items-center gap-2 mb-3 lg:mb-4">
+          <Filter className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground" />
+          <div className="text-sm lg:text-base font-medium">Filtros</div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 lg:gap-4">
           {/* Status Filter */}
           <div className="space-y-2">
-            <label htmlFor="status-filter" className="text-sm font-medium text-gray-700">
+            <label htmlFor="status-filter" className="text-xs lg:text-sm font-medium text-gray-700">
               Status
             </label>
             <Select
               value={statusFilter || "all"}
               onValueChange={(value) => setStatusFilter(value === "all" ? null : value)}
             >
-              <SelectTrigger id="status-filter" className="w-full" aria-label="Filtrar por status">
+              <SelectTrigger id="status-filter" className="w-full h-9 lg:h-10 text-sm" aria-label="Filtrar por status">
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent>
@@ -87,7 +87,7 @@ export default function AdvancedFilters({
           
           {/* Responsible Filter */}
           <div className="space-y-2">
-            <label htmlFor="responsible-filter" className="text-sm font-medium text-gray-700">
+            <label htmlFor="responsible-filter" className="text-xs lg:text-sm font-medium text-gray-700">
               Responsável
             </label>
             <Input 
@@ -96,12 +96,13 @@ export default function AdvancedFilters({
               value={responsibleFilter}
               onChange={(e) => setResponsibleFilter(e.target.value)}
               aria-label="Filtrar por responsável"
+              className="h-9 lg:h-10 text-sm"
             />
           </div>
           
           {/* Domain Filter */}
           <div className="space-y-2">
-            <label htmlFor="domain-filter" className="text-sm font-medium text-gray-700">
+            <label htmlFor="domain-filter" className="text-xs lg:text-sm font-medium text-gray-700">
               Domínio
             </label>
             <Input 
@@ -110,12 +111,13 @@ export default function AdvancedFilters({
               value={domainFilter}
               onChange={(e) => setDomainFilter(e.target.value)}
               aria-label="Filtrar por domínio"
+              className="h-9 lg:h-10 text-sm"
             />
           </div>
           
           {/* Date From Filter */}
           <div className="space-y-2">
-            <label htmlFor="date-from" className="text-sm font-medium text-gray-700">
+            <label htmlFor="date-from" className="text-xs lg:text-sm font-medium text-gray-700">
               Data (de)
             </label>
             <Popover open={openFromDate} onOpenChange={setOpenFromDate}>
@@ -123,13 +125,13 @@ export default function AdvancedFilters({
                 <Button
                   id="date-from"
                   variant="outline"
-                  className="w-full justify-start text-left font-normal"
+                  className="w-full justify-start text-left font-normal h-9 lg:h-10 text-sm"
                   aria-label="Filtrar pela data inicial"
                 >
                   {dateFromFilter ? (
                     format(dateFromFilter, "dd/MM/yyyy")
                   ) : (
-                    <span className="text-muted-foreground">Selecione uma data</span>
+                    <span className="text-muted-foreground">Selecione</span>
                   )}
                 </Button>
               </PopoverTrigger>
@@ -150,7 +152,7 @@ export default function AdvancedFilters({
           
           {/* Date To Filter */}
           <div className="space-y-2">
-            <label htmlFor="date-to" className="text-sm font-medium text-gray-700">
+            <label htmlFor="date-to" className="text-xs lg:text-sm font-medium text-gray-700">
               Data (até)
             </label>
             <Popover open={openToDate} onOpenChange={setOpenToDate}>
@@ -158,13 +160,13 @@ export default function AdvancedFilters({
                 <Button
                   id="date-to"
                   variant="outline"
-                  className="w-full justify-start text-left font-normal"
+                  className="w-full justify-start text-left font-normal h-9 lg:h-10 text-sm"
                   aria-label="Filtrar pela data final"
                 >
                   {dateToFilter ? (
                     format(dateToFilter, "dd/MM/yyyy")
                   ) : (
-                    <span className="text-muted-foreground">Selecione uma data</span>
+                    <span className="text-muted-foreground">Selecione</span>
                   )}
                 </Button>
               </PopoverTrigger>
@@ -184,11 +186,11 @@ export default function AdvancedFilters({
           </div>
         </div>
         
-        <div className="flex justify-end mt-4">
+        <div className="flex justify-end mt-3 lg:mt-4">
           <Button 
             variant="outline" 
             onClick={onResetFilters}
-            className="text-sm"
+            className="text-xs lg:text-sm h-8 lg:h-9 px-3 lg:px-4"
             aria-label="Limpar todos os filtros"
           >
             Limpar filtros

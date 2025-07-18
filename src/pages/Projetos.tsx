@@ -71,47 +71,55 @@ export default function Projetos() {
   };
 
   return (
-    <PageLayout 
-      title="Projetos"
-      actions={
-        <>
-          <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
-          <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-          <Button 
-            onClick={handleNewProject} 
-            className="bg-primary shadow-sm flex items-center gap-2"
-            aria-label="Criar novo site"
-          >
-            <Plus className="h-4 w-4" /> Novo site
-          </Button>
-        </>
-      }
-    >
-      <div className="mb-6">
-        <SearchInput 
-          value={searchQuery} 
-          onChange={setSearchQuery} 
-          placeholder="Buscar por nome do cliente, modelo ou responsável..."
-          className="rounded-xl shadow-sm"
-        />
-      </div>
+    <div className="min-h-screen bg-background">
+      <PageLayout 
+        title="Projetos"
+        actions={
+          <div className="flex flex-wrap items-center gap-2 lg:gap-3">
+            <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
+            <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+            <Button 
+              onClick={handleNewProject} 
+              className="bg-primary shadow-sm flex items-center gap-2 px-3 lg:px-4 text-sm lg:text-base"
+              aria-label="Criar novo site"
+            >
+              <Plus className="h-4 w-4" /> 
+              <span className="hidden sm:inline">Novo site</span>
+              <span className="sm:hidden">Novo</span>
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4 lg:space-y-6 px-1 sm:px-0">
+          <div className="w-full">
+            <SearchInput 
+              value={searchQuery} 
+              onChange={setSearchQuery} 
+              placeholder="Buscar por nome do cliente, modelo ou responsável..."
+              className="rounded-xl shadow-sm w-full"
+            />
+          </div>
 
-      {viewMode === "kanban" ? (
-        <KanbanBoard 
-          projects={projects} 
-          setProjects={setProjects} 
-          onProjectDeleted={handleProjectDeleted}
-          searchQuery={searchQuery}
-        />
-      ) : (
-        <ProjectListView 
-          projects={projects}
-          loading={loading}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          onProjectDeleted={handleProjectDeleted}
-        />
-      )}
-    </PageLayout>
+          <div className="overflow-hidden">
+            {viewMode === "kanban" ? (
+              <KanbanBoard 
+                projects={projects} 
+                setProjects={setProjects} 
+                onProjectDeleted={handleProjectDeleted}
+                searchQuery={searchQuery}
+              />
+            ) : (
+              <ProjectListView 
+                projects={projects}
+                loading={loading}
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
+                onProjectDeleted={handleProjectDeleted}
+              />
+            )}
+          </div>
+        </div>
+      </PageLayout>
+    </div>
   );
 }

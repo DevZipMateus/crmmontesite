@@ -110,19 +110,19 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted, s
     const currentStatusType = PROJECT_STATUS_TYPES[activeColumnIndex];
     
     return (
-      <div className="relative">
+      <div className="relative w-full">
         <div className="flex justify-between items-center mb-3 sm:mb-4 px-2">
           <Button 
             variant="outline" 
             size="sm" 
             onClick={handlePrevColumn}
             disabled={activeColumnIndex === 0}
-            className="h-8 sm:h-10 px-2 sm:px-4"
+            className="h-8 sm:h-10 px-2 sm:px-4 flex-shrink-0"
           >
             <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
           
-          <span className="text-sm sm:text-base lg:text-lg font-medium text-center px-2">
+          <span className="text-sm sm:text-base lg:text-lg font-medium text-center px-2 truncate">
             {currentStatusType.value} ({activeColumnIndex + 1}/{PROJECT_STATUS_TYPES.length})
           </span>
           
@@ -131,36 +131,16 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted, s
             size="sm" 
             onClick={handleNextColumn}
             disabled={activeColumnIndex === PROJECT_STATUS_TYPES.length - 1}
-            className="h-8 sm:h-10 px-2 sm:px-4"
+            className="h-8 sm:h-10 px-2 sm:px-4 flex-shrink-0"
           >
             <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         </div>
         
-        <KanbanColumn
-          key={currentStatusType.value}
-          statusType={currentStatusType}
-          projects={displayProjects}
-          draggingId={draggingId}
-          updatingStatus={updatingStatus}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onDragStart={handleDragStart}
-          onStatusChange={handleStatusChange}
-          statusOptions={PROJECT_STATUS_TYPES}
-          onProjectDeleted={handleProjectDeleted}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <ScrollArea className="w-full">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 min-w-[320px] sm:min-w-[640px] lg:min-w-[1200px] xl:min-w-[1600px] fhd:min-w-[1800px]">
-        {PROJECT_STATUS_TYPES.map((statusType) => (
+        <div className="w-full px-1">
           <KanbanColumn
-            key={statusType.value}
-            statusType={statusType}
+            key={currentStatusType.value}
+            statusType={currentStatusType}
             projects={displayProjects}
             draggingId={draggingId}
             updatingStatus={updatingStatus}
@@ -171,8 +151,33 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted, s
             statusOptions={PROJECT_STATUS_TYPES}
             onProjectDeleted={handleProjectDeleted}
           />
-        ))}
+        </div>
       </div>
-    </ScrollArea>
+    );
+  }
+
+  return (
+    <div className="w-full overflow-hidden">
+      <ScrollArea className="w-full h-[calc(100vh-280px)] lg:h-[calc(100vh-240px)]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 p-1 min-w-fit">
+          {PROJECT_STATUS_TYPES.map((statusType) => (
+            <div key={statusType.value} className="min-w-[280px] lg:min-w-[320px] xl:min-w-[350px]">
+              <KanbanColumn
+                statusType={statusType}
+                projects={displayProjects}
+                draggingId={draggingId}
+                updatingStatus={updatingStatus}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                onDragStart={handleDragStart}
+                onStatusChange={handleStatusChange}
+                statusOptions={PROJECT_STATUS_TYPES}
+                onProjectDeleted={handleProjectDeleted}
+              />
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
+    </div>
   );
 }
