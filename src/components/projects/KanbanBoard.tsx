@@ -157,11 +157,11 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted, s
   }
 
   return (
-    <div className="w-full overflow-hidden">
+    <div className="w-full">
       <ScrollArea className="w-full h-[calc(100vh-280px)] lg:h-[calc(100vh-240px)]">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 p-1 min-w-fit">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 p-1">
           {PROJECT_STATUS_TYPES.map((statusType) => (
-            <div key={statusType.value} className="min-w-[280px] lg:min-w-[320px] xl:min-w-[350px]">
+            <div key={statusType.value} className="min-w-[240px] md:min-w-[260px] lg:min-w-[280px] xl:min-w-[300px] 2xl:min-w-[320px]">
               <KanbanColumn
                 statusType={statusType}
                 projects={displayProjects}

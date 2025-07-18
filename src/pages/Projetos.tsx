@@ -90,7 +90,7 @@ export default function Projetos() {
           </div>
         }
       >
-        <div className="space-y-4 lg:space-y-6 px-1 sm:px-0">
+        <div className="space-y-3 md:space-y-4 lg:space-y-6">
           <div className="w-full">
             <SearchInput 
               value={searchQuery} 
@@ -100,7 +100,7 @@ export default function Projetos() {
             />
           </div>
 
-          <div className="overflow-hidden">
+          <div className="w-full overflow-hidden">
             {viewMode === "kanban" ? (
               <KanbanBoard 
                 projects={projects} 

@@ -28,9 +28,9 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="bg-white/80 backdrop-blur-md border-b border-border/40 shadow-sm sticky top-0 z-10">
-        <div className="container py-2 sm:py-3 lg:py-4 max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
-          <div className="flex items-center justify-between gap-2 sm:gap-4 lg:gap-6">
-            <div className="flex items-center gap-2 sm:gap-4 lg:gap-6 min-w-0 flex-1">
+        <div className="container py-2 sm:py-3 lg:py-4 max-w-[1920px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16">
+          <div className="flex items-center justify-between gap-2 sm:gap-3 md:gap-4 lg:gap-6">
+            <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 min-w-0 flex-1">
               <Logo size={isMobile ? "sm" : "md"} />
               <div className="h-4 sm:h-6 w-px bg-border mx-1 sm:mx-2 hidden sm:block" />
               <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-medium truncate">
@@ -55,13 +55,13 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
       </header>
       
       <main className={cn("flex-1 py-4 sm:py-6 lg:py-8", contentClass)}>
-        <div className="container max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
+        <div className="container max-w-[1920px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16">
           {children}
         </div>
       </main>
       
       <footer className="bg-white border-t border-border/40 py-4 sm:py-6 text-center text-xs sm:text-sm text-muted-foreground">
-        <div className="container mx-auto max-w-[1920px] px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
+        <div className="container mx-auto max-w-[1920px] px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16">
           MonteSite CRM © {new Date().getFullYear()} - Gerenciamento de projetos
         </div>
       </footer>
