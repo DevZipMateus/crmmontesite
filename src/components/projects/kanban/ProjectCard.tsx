@@ -47,12 +47,11 @@ export default function ProjectCard({
   };
 
   return (
-    <Card
-      className={`p-4 cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow border-l-4 ${clientTypeInfo.borderColor} ${clientTypeInfo.cardBgColor}`}
+    <Card className={`p-3 sm:p-4 lg:p-5 cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow border-l-4 ${clientTypeInfo.borderColor} ${clientTypeInfo.cardBgColor}`}
       draggable
       onDragStart={() => onDragStart(project.id)}
     >
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {/* Badge do tipo de cliente */}
         <div className="flex justify-end">
           <ClientTypeBadge project={project} variant="badge" />
@@ -67,7 +66,7 @@ export default function ProjectCard({
         
         {/* Indicador de Lead Vinculado */}
         {project.lead_id && (
-          <div className="pt-2">
+          <div className="pt-1 sm:pt-2">
             <LeadLinkIndicator project={project} />
           </div>
         )}

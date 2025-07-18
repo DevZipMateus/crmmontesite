@@ -41,17 +41,21 @@ export default function ProducaoSites() {
       ) : projects.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="bg-white shadow-sm rounded-lg border border-gray-200">
-          <div className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Projetos Recebidos para Produção</h2>
-            <ProjectTable 
-              projects={projects} 
-              onSelectProject={setSelectedProjectId}
-              onGenerateCommand={setGeneratedText}
-              selectedProjectId={selectedProjectId}
-              isGenerating={isGenerating}
-              setIsGenerating={setIsGenerating}
-            />
+        <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+          <div className="p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Projetos Recebidos para Produção</h2>
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <div className="min-w-[600px] px-4 sm:px-0">
+                <ProjectTable 
+                  projects={projects} 
+                  onSelectProject={setSelectedProjectId}
+                  onGenerateCommand={setGeneratedText}
+                  selectedProjectId={selectedProjectId}
+                  isGenerating={isGenerating}
+                  setIsGenerating={setIsGenerating}
+                />
+              </div>
+            </div>
           </div>
 
           <CommandDisplay 

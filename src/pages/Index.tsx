@@ -18,7 +18,6 @@ const Index: React.FC = () => {
     
     const initApp = async () => {
       console.log('[Index] Initializing app on Index page...');
-      // Clean up any existing channels to avoid duplication
       cleanupRealtimeSubscriptions();
     };
     
@@ -38,15 +37,13 @@ const Index: React.FC = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <DashboardHeader />
 
-      <main className="flex-1 container max-w-7xl mx-auto px-4 sm:px-6 py-6 mt-16 pb-16">
-        <MainMenuSection />
-        <StatsSection />
-        
-        <AnalyticsSection projects={projects} />
-        
-        <InfoCardsSection 
-          projects={projects}
-        />
+      <main className="flex-1 container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-4 sm:py-6 lg:py-8 mt-12 sm:mt-16 lg:mt-20 pb-12 sm:pb-16 lg:pb-20">
+        <div className="space-y-6 sm:space-y-8 lg:space-y-12">
+          <MainMenuSection />
+          <StatsSection />
+          <AnalyticsSection projects={projects} />
+          <InfoCardsSection projects={projects} />
+        </div>
       </main>
 
       <DashboardFooter />

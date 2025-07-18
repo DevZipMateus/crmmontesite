@@ -36,7 +36,7 @@ export default function ProjectListView({
   };
 
   return (
-    <>
+    <div className="space-y-4 sm:space-y-6">
       <AdvancedFilters
         statusFilter={statusFilter}
         setStatusFilter={setStatusFilter}
@@ -51,17 +51,19 @@ export default function ProjectListView({
         onResetFilters={resetAllFilters}
       />
       
-      <Card>
+      <Card className="overflow-hidden">
         <CardContent className="p-0">
-          <ProjectTable 
-            projects={projects}
-            loading={loading}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            onProjectDeleted={onProjectDeleted}
-          />
+          <div className="overflow-x-auto">
+            <ProjectTable 
+              projects={projects}
+              loading={loading}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              onProjectDeleted={onProjectDeleted}
+            />
+          </div>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 }
