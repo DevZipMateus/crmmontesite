@@ -80,9 +80,22 @@ export const useFormSubmission = (props: SubmissionProps) => {
     console.log("Dados do formulário:", data);
 
     try {
-      // Validate required fields - agora incluindo CNPJ/CPF e sobre_empresa
+      // Validate required fields - VALIDAÇÃO REFORÇADA incluindo CNPJ/CPF obrigatório
       if (!data.nome_empresa || !data.telefone || !data.email || !data.cnpj_cpf || !data.sobre_empresa) {
-        throw new Error("Por favor, preencha todos os campos obrigatórios");
+        const missingFields = [];
+        if (!data.nome_empresa) missingFields.push("Nome da empresa");
+        if (!data.telefone) missingFields.push("Telefone");
+        if (!data.email) missingFields.push("Email");
+        if (!data.cnpj_cpf) missingFields.push("CNPJ ou CPF");
+        if (!data.sobre_empresa) missingFields.push("Sobre a empresa");
+        
+        throw new Error(`Por favor, preencha todos os campos obrigatórios: ${missingFields.join(", ")}`);
+      }
+
+      // Validação adicional do CNPJ/CPF
+      const cleanCnpjCpf = data.cnpj_cpf.replace(/\D/g, '');
+      if (cleanCnpjCpf.length !== 11 && cleanCnpjCpf.length !== 14) {
+        throw new Error("CNPJ deve ter 14 dígitos ou CPF deve ter 11 dígitos");
       }
 
       let formProcessedSuccessfully = false;

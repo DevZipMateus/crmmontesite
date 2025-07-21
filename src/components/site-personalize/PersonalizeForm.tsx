@@ -19,7 +19,11 @@ const formSchema = z.object({
   email: z.string().email("Email inválido"),
   telefone: z.string().min(10, "Telefone é obrigatório"),
   cnpj_cpf: z.string()
-    .min(11, "CNPJ ou CPF é obrigatório")
+    .min(1, "CNPJ ou CPF é obrigatório")
+    .refine((value) => {
+      const cleanValue = value.replace(/\D/g, '');
+      return cleanValue.length >= 11;
+    }, "Digite pelo menos 11 dígitos")
     .refine((value) => validateCnpjCpf(value), "Digite um CNPJ (14 dígitos) ou CPF (11 dígitos) válido"),
   sobre_empresa: z.string().min(10, "Sobre a empresa é obrigatório (mínimo 10 caracteres)"),
   slogan: z.string().optional(),
