@@ -12,12 +12,16 @@ import { useFileUploadHandlers } from "./FileUploadHandlers";
 import { useFormSubmission } from "./useFormSubmission";
 import type { FormValues } from "./PersonalizeBasicForm";
 import { CheckCircle } from "lucide-react";
+import { validateCnpjCpf } from "@/utils/documentFormatter";
 
 const formSchema = z.object({
   nome_empresa: z.string().min(2, "Nome da empresa é obrigatório"),
   email: z.string().email("Email inválido"),
   telefone: z.string().min(10, "Telefone é obrigatório"),
-  sobre_empresa: z.string().optional(),
+  cnpj_cpf: z.string()
+    .min(11, "CNPJ ou CPF é obrigatório")
+    .refine((value) => validateCnpjCpf(value), "Digite um CNPJ (14 dígitos) ou CPF (11 dígitos) válido"),
+  sobre_empresa: z.string().min(10, "Sobre a empresa é obrigatório (mínimo 10 caracteres)"),
   slogan: z.string().optional(),
   servicos: z.string().optional(),
   endereco: z.string().optional(),
@@ -71,6 +75,7 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
       nome_empresa: "",
       email: "",
       telefone: "",
+      cnpj_cpf: "",
       sobre_empresa: "",
       slogan: "",
       servicos: "",

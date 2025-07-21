@@ -5,12 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import LogoUploader from "./LogoUploader";
 import { UseFormReturn } from "react-hook-form";
+import { formatCnpjCpf, getCnpjCpfPlaceholder } from "@/utils/documentFormatter";
 
 export interface FormValues {
   nome_empresa: string;
   email: string;
   telefone: string;
-  sobre_empresa?: string;
+  cnpj_cpf: string;
+  sobre_empresa: string;
   slogan?: string;
   servicos?: string;
   endereco?: string;
@@ -97,6 +99,29 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
         )}
       />
 
+      {/* CNPJ/CPF */}
+      <FormField
+        control={form.control}
+        name="cnpj_cpf"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>CNPJ ou CPF *</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder={getCnpjCpfPlaceholder(field.value || "")}
+                {...field}
+                onChange={(e) => {
+                  const formattedValue = formatCnpjCpf(e.target.value);
+                  field.onChange(formattedValue);
+                }}
+                maxLength={18} // XX.XXX.XXX/XXXX-XX
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       {/* Endereço */}
       <FormField
         control={form.control}
@@ -139,10 +164,10 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
         name="sobre_empresa"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Sobre a Empresa</FormLabel>
+            <FormLabel>Sobre a Empresa *</FormLabel>
             <FormControl>
               <Textarea 
-                placeholder="Conte um pouco sobre sua empresa, história, missão, valores..."
+                placeholder="Conte um pouco sobre sua empresa, história, missão, valores... (obrigatório)"
                 className="min-h-[100px]"
                 {...field}
               />

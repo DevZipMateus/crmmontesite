@@ -80,8 +80,8 @@ export const useFormSubmission = (props: SubmissionProps) => {
     console.log("Dados do formulário:", data);
 
     try {
-      // Validate required fields
-      if (!data.nome_empresa || !data.telefone || !data.email) {
+      // Validate required fields - agora incluindo CNPJ/CPF e sobre_empresa
+      if (!data.nome_empresa || !data.telefone || !data.email || !data.cnpj_cpf || !data.sobre_empresa) {
         throw new Error("Por favor, preencha todos os campos obrigatórios");
       }
 

@@ -57,7 +57,9 @@ export const createProject = async (formData: any, personalizationId: string, to
         template: formData.modelo,
         status: "Recebido",
         client_type: "cliente_final",
-        personalization_id: personalizationId
+        personalization_id: personalizationId,
+        cnpj: formData.cnpj_cpf || null,
+        telefone: formData.telefone || null
       })
       .select();
 

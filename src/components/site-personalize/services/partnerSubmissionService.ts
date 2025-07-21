@@ -94,11 +94,13 @@ export const submitPartnerClient = async (
     throw new Error(`Erro ao processar formulário: ${error.message}`);
   }
 
-  // Atualizar projeto com personalization_id
+  // Atualizar projeto com personalization_id, CNPJ e telefone
   const { error: updateError } = await supabase
     .from('projects')
     .update({ 
       personalization_id: personalizationResult.id,
+      cnpj: data.cnpj_cpf || null,
+      telefone: data.telefone || null,
       updated_at: new Date().toISOString()
     })
     .eq('id', project.id);
