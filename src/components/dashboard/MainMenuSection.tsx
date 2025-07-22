@@ -8,7 +8,8 @@ import {
   Link as LinkIcon,
   Settings,
   Users,
-  ContactRound
+  ContactRound,
+  Globe
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -76,6 +77,13 @@ const MainMenuSection: React.FC = () => {
           label="Modelos & URLs"
           href="/custom-urls"
           description="Gerenciar modelos e URLs para formulários"
+        />
+        
+        <MenuItem 
+          icon={<Globe size={24} />}
+          label="DNS Hostinger"
+          href="/hostinger-dns"
+          description="Gerenciar registros DNS da Hostinger"
         />
         
         <MenuItem 

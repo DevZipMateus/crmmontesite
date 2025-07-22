@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -26,6 +25,7 @@ import LandingPagesVendedores from "./pages/LandingPagesVendedores";
 import VendedorLandingForm from "./pages/VendedorLandingForm";
 import Leads from "./pages/Leads";
 import PainelVendas from "./pages/PainelVendas";
+import HostingerDNS from "./pages/HostingerDNS";
 
 const queryClient = new QueryClient();
 
@@ -91,6 +91,13 @@ const App = () => {
             <Route path="/painel-vendas" element={
               <AuthGuard>
                 <PainelVendas />
+              </AuthGuard>
+            } />
+            
+            {/* DNS Hostinger - Nova rota */}
+            <Route path="/hostinger-dns" element={
+              <AuthGuard>
+                <HostingerDNS />
               </AuthGuard>
             } />
             
