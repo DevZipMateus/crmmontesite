@@ -1,20 +1,23 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Globe, Settings, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
+import { Globe, Settings, AlertTriangle, CheckCircle, RefreshCw, Info, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
 import TokenValidator from '@/components/hostinger/TokenValidator';
 import DomainDebugger from '@/components/hostinger/DomainDebugger';
 import { hostingerDNSService } from '@/services/hostingerDNSService';
+import ApiStatusCard from '@/components/hostinger/ApiStatusCard';
+import AlternativesCard from '@/components/hostinger/AlternativesCard';
 
 interface LogEntry {
   domain: string;
@@ -57,16 +60,6 @@ const HostingerDNS: React.FC = () => {
         variant: "destructive",
         title: "Erro",
         description: "Token API é obrigatório"
-      });
-      return false;
-    }
-
-    if (!tokenValidation?.valid) {
-      addLog('', 'error', 'Token API não foi validado ou é inválido');
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Valide seu token API antes de continuar"
       });
       return false;
     }
@@ -121,108 +114,30 @@ const HostingerDNS: React.FC = () => {
     if (!validateInputs(true)) return;
 
     setIsLoading(true);
-    const domainList = domains.split('\n').filter(d => d.trim());
-    let successCount = 0;
-
-    for (const domain of domainList) {
-      try {
-        const success = await hostingerDNSService.updateARecords(
-          domain.trim(), 
-          newIP.trim(), 
-          apiToken.trim()
-        );
-
-        if (success) {
-          addLog(domain.trim(), 'success', `DNS atualizado para IP ${newIP}`);
-          successCount++;
-        } else {
-          addLog(domain.trim(), 'error', 'Falha ao atualizar registros DNS');
-        }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-        addLog(domain.trim(), 'error', errorMessage);
-      }
-    }
-
-    setIsLoading(false);
+    addLog('', 'error', 'API Hostinger DNS não disponível publicamente. Veja a guia "API Status" para mais informações.');
     
-    if (successCount > 0) {
-      toast({
-        title: "Sucesso",
-        description: `${successCount} domínio(s) atualizado(s) com sucesso`
-      });
-    }
+    toast({
+      variant: "destructive",
+      title: "API Indisponível",
+      description: "A API de DNS da Hostinger não está disponível publicamente. Veja alternativas na guia 'API Status'."
+    });
+    
+    setIsLoading(false);
   };
 
   const handleListDNS = async () => {
     if (!validateInputs(false)) return;
 
     setIsLoading(true);
-    const domainList = domains.split('\n').filter(d => d.trim());
-    const records: { domain: string; records: DNSRecord[] }[] = [];
-
-    for (const domain of domainList) {
-      try {
-        const domainRecords = await hostingerDNSService.listDNSRecords(
-          domain.trim(), 
-          apiToken.trim()
-        );
-
-        records.push({ domain: domain.trim(), records: domainRecords });
-        addLog(domain.trim(), 'success', `${domainRecords.length} registros DNS encontrados`);
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-        addLog(domain.trim(), 'error', errorMessage);
-        records.push({ domain: domain.trim(), records: [] });
-      }
-    }
-
-    setDnsRecords(records);
-    setIsLoading(false);
-
+    addLog('', 'error', 'API Hostinger DNS não disponível publicamente. Veja a guia "API Status" para mais informações.');
+    
     toast({
-      title: "Listagem concluída",
-      description: `Registros DNS listados para ${domainList.length} domínio(s)`
+      variant: "destructive",
+      title: "API Indisponível",
+      description: "A API de DNS da Hostinger não está disponível publicamente. Veja alternativas na guia 'API Status'."
     });
-  };
-
-  const refreshDNS = async (domain: string) => {
-    if (!apiToken.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Token API é obrigatório"
-      });
-      return;
-    }
-
-    try {
-      const domainRecords = await hostingerDNSService.listDNSRecords(domain, apiToken.trim());
-      
-      setDnsRecords(prev => 
-        prev.map(record => 
-          record.domain === domain 
-            ? { ...record, records: domainRecords }
-            : record
-        )
-      );
-
-      addLog(domain, 'success', `Registros DNS atualizados - ${domainRecords.length} registros encontrados`);
-      
-      toast({
-        title: "Atualizado",
-        description: `Registros DNS atualizados para ${domain}`
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      addLog(domain, 'error', errorMessage);
-      
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: `Falha ao atualizar registros de ${domain}`
-      });
-    }
+    
+    setIsLoading(false);
   };
 
   return (
@@ -240,13 +155,23 @@ const HostingerDNS: React.FC = () => {
           </div>
 
           <Tabs defaultValue="management" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="management">Gerenciamento</TabsTrigger>
-              <TabsTrigger value="validation">Validação</TabsTrigger>
+              <TabsTrigger value="apiStatus">API Status</TabsTrigger>
+              <TabsTrigger value="alternatives">Alternativas</TabsTrigger>
               <TabsTrigger value="debug">Debug</TabsTrigger>
             </TabsList>
 
             <TabsContent value="management" className="space-y-6">
+              <Alert variant="destructive" className="mb-6">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>API Indisponível</AlertTitle>
+                <AlertDescription>
+                  Nossa investigação indica que a API de DNS da Hostinger não está disponível publicamente.
+                  Por favor, verifique a guia "API Status" para mais informações e alternativas.
+                </AlertDescription>
+              </Alert>
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
@@ -268,13 +193,6 @@ const HostingerDNS: React.FC = () => {
                         value={apiToken}
                         onChange={(e) => setApiToken(e.target.value)}
                       />
-                      {tokenValidation && (
-                        <div className="mt-2">
-                          <Badge variant={tokenValidation.valid ? "default" : "destructive"}>
-                            {tokenValidation.valid ? 'Token Válido' : 'Token Inválido'}
-                          </Badge>
-                        </div>
-                      )}
                     </div>
 
                     <div>
@@ -301,14 +219,14 @@ const HostingerDNS: React.FC = () => {
                     <div className="flex gap-2">
                       <Button 
                         onClick={handleListDNS} 
-                        disabled={isLoading || !tokenValidation?.valid}
+                        disabled={isLoading}
                         variant="outline"
                       >
                         {isLoading ? 'Carregando...' : 'Listar DNS'}
                       </Button>
                       <Button 
                         onClick={handleUpdateDNS} 
-                        disabled={isLoading || !tokenValidation?.valid}
+                        disabled={isLoading}
                       >
                         {isLoading ? 'Atualizando...' : 'Atualizar DNS'}
                       </Button>
@@ -353,91 +271,26 @@ const HostingerDNS: React.FC = () => {
                   </CardContent>
                 </Card>
               </div>
-
-              {dnsRecords.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Registros DNS</CardTitle>
-                    <CardDescription>
-                      Registros DNS encontrados nos domínios
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-6">
-                      {dnsRecords.map((domainRecord, index) => (
-                        <div key={index}>
-                          <div className="flex items-center justify-between mb-3">
-                            <h3 className="font-semibold text-lg">{domainRecord.domain}</h3>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => refreshDNS(domainRecord.domain)}
-                              disabled={isLoading}
-                            >
-                              <RefreshCw className="h-4 w-4 mr-2" />
-                              Atualizar
-                            </Button>
-                          </div>
-                          {domainRecord.records.length > 0 ? (
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead>Tipo</TableHead>
-                                  <TableHead>Nome</TableHead>
-                                  <TableHead>Conteúdo</TableHead>
-                                  <TableHead>TTL</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {domainRecord.records.map((record) => (
-                                  <TableRow key={record.id}>
-                                    <TableCell>
-                                      <Badge variant="outline">{record.type}</Badge>
-                                    </TableCell>
-                                    <TableCell>{record.name}</TableCell>
-                                    <TableCell>{record.content}</TableCell>
-                                    <TableCell>{record.ttl}s</TableCell>
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                          ) : (
-                            <Alert>
-                              <AlertTriangle className="h-4 w-4" />
-                              <AlertDescription>
-                                Nenhum registro DNS encontrado para este domínio.
-                              </AlertDescription>
-                            </Alert>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
             </TabsContent>
 
-            <TabsContent value="validation" className="space-y-6">
-              <TokenValidator 
-                apiToken={apiToken} 
-                onValidationResult={setTokenValidation}
-              />
+            <TabsContent value="apiStatus">
+              <ApiStatusCard />
+            </TabsContent>
+
+            <TabsContent value="alternatives">
+              <AlternativesCard />
             </TabsContent>
 
             <TabsContent value="debug" className="space-y-6">
-              <DomainDebugger apiToken={apiToken} />
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertDescription>
+                  As ferramentas de debug são limitadas devido à indisponibilidade da API pública.
+                  Recomendamos utilizar o painel de controle da Hostinger diretamente.
+                </AlertDescription>
+              </Alert>
               
-              {tokenValidation && !tokenValidation.valid && (
-                <Alert>
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>
-                    <div className="space-y-2">
-                      <p className="font-medium">Token inválido detectado</p>
-                      <p>Para usar as ferramentas de debug, primeiro valide seu token na aba "Validação".</p>
-                    </div>
-                  </AlertDescription>
-                </Alert>
-              )}
+              <DomainDebugger apiToken={apiToken} />
             </TabsContent>
           </Tabs>
         </div>

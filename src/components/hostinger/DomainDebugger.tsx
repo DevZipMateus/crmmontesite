@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Search, AlertTriangle, CheckCircle, Loader2, Info, List } from 'lucide-react';
+import { Search, AlertTriangle, CheckCircle, Loader2, Info, ExternalLink } from 'lucide-react';
 import { hostingerDNSService } from '@/services/hostingerDNSService';
 
 interface DomainDebuggerProps {
@@ -16,13 +16,11 @@ interface DomainDebuggerProps {
 const DomainDebugger: React.FC<DomainDebuggerProps> = ({ apiToken }) => {
   const [testDomain, setTestDomain] = useState('');
   const [isDebugging, setIsDebugging] = useState(false);
-  const [isListingDomains, setIsListingDomains] = useState(false);
   const [debugResult, setDebugResult] = useState<{
     success: boolean;
     message: string;
     details?: any;
   } | null>(null);
-  const [availableDomains, setAvailableDomains] = useState<Array<{domain: string; status: string}>>([]);
 
   const handleDebugDomain = async () => {
     if (!testDomain.trim()) {
@@ -33,82 +31,23 @@ const DomainDebugger: React.FC<DomainDebuggerProps> = ({ apiToken }) => {
       return;
     }
 
-    if (!apiToken.trim()) {
+    if (!hostingerDNSService.validateDomain(testDomain.trim())) {
       setDebugResult({
         success: false,
-        message: 'Token API é obrigatório para o teste'
+        message: 'Formato de domínio inválido'
       });
       return;
     }
 
     setIsDebugging(true);
-    try {
-      const records = await hostingerDNSService.listDNSRecords(testDomain.trim(), apiToken.trim());
-      setDebugResult({
-        success: true,
-        message: `✅ Sucesso! Encontrados ${records.length} registros DNS para ${testDomain}`,
-        details: records
-      });
-    } catch (error) {
+    
+    setTimeout(() => {
       setDebugResult({
         success: false,
-        message: error instanceof Error ? error.message : 'Erro desconhecido',
-        details: error
+        message: 'API de DNS da Hostinger não está disponível publicamente. Recomendamos gerenciar seus registros DNS manualmente através do painel da Hostinger (hPanel).'
       });
-    } finally {
       setIsDebugging(false);
-    }
-  };
-
-  const handleListDomains = async () => {
-    if (!apiToken.trim()) {
-      setDebugResult({
-        success: false,
-        message: 'Token API é obrigatório para listar domínios'
-      });
-      return;
-    }
-
-    setIsListingDomains(true);
-    try {
-      const domains = await hostingerDNSService.listAvailableDomains(apiToken.trim());
-      setAvailableDomains(domains);
-      setDebugResult({
-        success: true,
-        message: `✅ Encontrados ${domains.length} domínios na sua conta Hostinger`,
-        details: domains
-      });
-    } catch (error) {
-      setDebugResult({
-        success: false,
-        message: error instanceof Error ? error.message : 'Erro desconhecido ao listar domínios'
-      });
-    } finally {
-      setIsListingDomains(false);
-    }
-  };
-
-  const getSpecificHelp = (message: string) => {
-    if (message.includes('PROBLEMA DE PROPRIEDADE DO DOMÍNIO')) {
-      return (
-        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-start gap-2">
-            <Info className="h-5 w-5 text-blue-500 mt-0.5" />
-            <div>
-              <h4 className="font-medium text-blue-900 mb-2">Passos Específicos para Resolver:</h4>
-              <ol className="list-decimal list-inside space-y-1 text-sm text-blue-800">
-                <li>Acesse o painel da Hostinger e verifique a lista de domínios</li>
-                <li>Confirme se o domínio <code className="bg-blue-100 px-1 rounded">{testDomain}</code> aparece lá</li>
-                <li>Se não aparecer, verifique se está em outra conta Hostinger</li>
-                <li>Gere um novo token API na conta que possui o domínio</li>
-                <li>Teste novamente com o novo token</li>
-              </ol>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return null;
+    }, 1000);
   };
 
   return (
@@ -119,100 +58,127 @@ const DomainDebugger: React.FC<DomainDebuggerProps> = ({ apiToken }) => {
           Debug de Domínio
         </CardTitle>
         <CardDescription>
-          Teste a conectividade e permissões para um domínio específico ou liste todos os domínios disponíveis
+          Ferramentas para teste e verificação de domínios
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex gap-2">
-          <Button 
-            onClick={handleListDomains} 
-            disabled={isListingDomains || !apiToken.trim()}
-            variant="outline"
-            className="flex-1"
-          >
-            {isListingDomains ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Listando...
-              </>
-            ) : (
-              <>
-                <List className="h-4 w-4 mr-2" />
-                Listar Domínios Disponíveis
-              </>
-            )}
-          </Button>
-        </div>
-
-        {availableDomains.length > 0 && (
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 className="font-medium text-blue-900 mb-2">Domínios Disponíveis na Sua Conta:</h4>
-            <div className="space-y-2">
-              {availableDomains.map((domain, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
-                  <span className="font-mono text-sm">{domain.domain}</span>
-                  <Badge variant={domain.status === 'active' ? 'default' : 'secondary'}>
-                    {domain.status}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        <Alert className="mb-4">
+          <Info className="h-4 w-4" />
+          <AlertTitle>Gerenciamento DNS Manual</AlertTitle>
+          <AlertDescription>
+            Como a API de DNS da Hostinger não está disponível publicamente, você precisará gerenciar seus
+            registros DNS manualmente através do painel de controle da Hostinger (hPanel).
+          </AlertDescription>
+        </Alert>
 
         <div>
-          <Label htmlFor="testDomain">Domínio para Teste Específico</Label>
-          <Input
-            id="testDomain"
-            placeholder="exemplo.com"
-            value={testDomain}
-            onChange={(e) => setTestDomain(e.target.value)}
-          />
+          <Label htmlFor="testDomain">Domínio para Teste</Label>
+          <div className="flex mt-1.5 gap-2">
+            <Input
+              id="testDomain"
+              placeholder="exemplo.com"
+              value={testDomain}
+              onChange={(e) => setTestDomain(e.target.value)}
+              className="flex-1"
+            />
+            <Button 
+              onClick={handleDebugDomain} 
+              disabled={isDebugging || !testDomain.trim()}
+            >
+              {isDebugging ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Testando...
+                </>
+              ) : (
+                <>
+                  <Search className="h-4 w-4 mr-2" />
+                  Testar
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
-        <Button 
-          onClick={handleDebugDomain} 
-          disabled={isDebugging || !testDomain.trim() || !apiToken.trim()}
-          className="w-full"
-        >
-          {isDebugging ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Testando...
-            </>
-          ) : (
-            <>
-              <Search className="h-4 w-4 mr-2" />
-              Testar Domínio Específico
-            </>
-          )}
-        </Button>
-
         {debugResult && (
-          <div className="space-y-3">
-            <Alert className={debugResult.success ? 'border-green-200' : 'border-red-200'}>
-              <div className="flex items-start gap-2">
-                {debugResult.success ? (
-                  <CheckCircle className="h-4 w-4 text-green-500 mt-1" />
-                ) : (
-                  <AlertTriangle className="h-4 w-4 text-red-500 mt-1" />
-                )}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant={debugResult.success ? "default" : "destructive"}>
-                      {debugResult.success ? 'Sucesso' : 'Erro'}
-                    </Badge>
-                  </div>
-                  <AlertDescription className="whitespace-pre-line">
-                    {debugResult.message}
-                  </AlertDescription>
-                </div>
+          <Alert className={debugResult.success ? 'border-green-200' : 'border-amber-200'}>
+            <div className="flex items-start gap-2">
+              {debugResult.success ? (
+                <CheckCircle className="h-4 w-4 text-green-500 mt-1" />
+              ) : (
+                <Info className="h-4 w-4 text-amber-500 mt-1" />
+              )}
+              <div className="flex-1">
+                <AlertDescription className="whitespace-pre-line">
+                  {debugResult.message}
+                </AlertDescription>
               </div>
-            </Alert>
-            
-            {!debugResult.success && getSpecificHelp(debugResult.message)}
-          </div>
+            </div>
+          </Alert>
         )}
+
+        <div className="mt-6 space-y-4">
+          <h3 className="text-lg font-medium">Guia de Gerenciamento Manual</h3>
+          
+          <div className="space-y-3">
+            <div className="bg-gray-50 p-3 rounded border">
+              <h4 className="font-medium text-sm">1. Acesse o hPanel da Hostinger</h4>
+              <p className="text-sm text-gray-600 mt-1">
+                Faça login na sua conta Hostinger e acesse o painel de controle (hPanel).
+              </p>
+              <div className="mt-2">
+                <a 
+                  href="https://hpanel.hostinger.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-sm"
+                >
+                  Acessar hPanel <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded border">
+              <h4 className="font-medium text-sm">2. Navegue até as Configurações DNS</h4>
+              <p className="text-sm text-gray-600 mt-1">
+                Selecione seu domínio e clique em "DNS / Nameservers" ou "Zona DNS" no menu.
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded border">
+              <h4 className="font-medium text-sm">3. Gerencie os Registros DNS</h4>
+              <p className="text-sm text-gray-600 mt-1">
+                Aqui você pode adicionar, editar ou remover registros DNS como A, CNAME, MX, etc.
+                Para atualizar um IP, localize os registros tipo A e edite o valor para o novo IP.
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded border">
+              <h4 className="font-medium text-sm">4. Verificação de Propagação</h4>
+              <p className="text-sm text-gray-600 mt-1">
+                Após fazer alterações nos registros DNS, verifique a propagação usando ferramentas como:
+              </p>
+              <div className="mt-2 space-y-1">
+                <a 
+                  href="https://dnschecker.org/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-sm"
+                >
+                  DNSChecker.org <ExternalLink className="h-3 w-3" />
+                </a>
+                <a 
+                  href="https://www.whatsmydns.net/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-sm"
+                >
+                  WhatsMyDNS.net <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
