@@ -176,14 +176,24 @@ class HostingerDNSService {
       // Provide more specific error messages
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       
-      if (errorMessage.includes('não pertence à sua conta')) {
-        throw new Error(`O domínio "${domain}" não foi encontrado na sua conta Hostinger. Verifique se:
-• O domínio está correto
-• O domínio foi adicionado à sua conta Hostinger
-• Você tem permissão para gerenciar este domínio
-• O domínio está ativo e configurado
+      if (errorMessage.includes('não pertence à sua conta') || errorMessage.includes('4002')) {
+        throw new Error(`❌ PROBLEMA DE PROPRIEDADE DO DOMÍNIO
 
-Dica: Use a ferramenta de debug para testar a conectividade.`);
+O domínio "${domain}" não foi encontrado na conta Hostinger associada ao seu token API.
+
+🔍 POSSÍVEIS CAUSAS:
+• O domínio está em uma conta Hostinger diferente
+• O domínio foi transferido recentemente entre contas
+• O token API foi gerado em uma conta diferente da que possui o domínio
+• O domínio ainda não foi adicionado à sua conta Hostinger
+
+✅ COMO RESOLVER:
+1. Verifique se você está logado na conta Hostinger CORRETA
+2. Confirme se o domínio aparece na lista de domínios do seu painel Hostinger
+3. Se o domínio está em outra conta, gere um novo token API na conta correta
+4. Se você tem múltiplas contas Hostinger, certifique-se de usar o token da conta que possui este domínio
+
+💡 DICA: Use a ferramenta de debug para testar com outro domínio da sua conta e confirmar se o problema é específico deste domínio.`);
       } else if (errorMessage.includes('Token API inválido')) {
         throw new Error('Token API inválido. Verifique se o token foi copiado corretamente e não expirou.');
       } else if (errorMessage.includes('rate limit')) {

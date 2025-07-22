@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Search, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
+import { Search, AlertTriangle, CheckCircle, Loader2, Info } from 'lucide-react';
 import { hostingerDNSService } from '@/services/hostingerDNSService';
 
 interface DomainDebuggerProps {
@@ -44,7 +44,7 @@ const DomainDebugger: React.FC<DomainDebuggerProps> = ({ apiToken }) => {
       const records = await hostingerDNSService.listDNSRecords(testDomain.trim(), apiToken.trim());
       setDebugResult({
         success: true,
-        message: `Sucesso! Encontrados ${records.length} registros DNS para ${testDomain}`,
+        message: `✅ Sucesso! Encontrados ${records.length} registros DNS para ${testDomain}`,
         details: records
       });
     } catch (error) {
@@ -58,33 +58,27 @@ const DomainDebugger: React.FC<DomainDebuggerProps> = ({ apiToken }) => {
     }
   };
 
-  const getErrorSuggestions = (message: string) => {
-    if (message.includes('não pertence à sua conta') || message.includes('4002')) {
-      return [
-        'Verifique se o domínio está na sua conta Hostinger',
-        'Confirme se você tem permissões de administrador',
-        'Verifique se o domínio está ativo e configurado',
-        'Teste com outro domínio da sua conta'
-      ];
-    } else if (message.includes('Token API inválido') || message.includes('authentication')) {
-      return [
-        'Gere um novo token API no painel da Hostinger',
-        'Verifique se copiou o token completo',
-        'Confirme se o token não expirou',
-        'Verifique se você tem as permissões necessárias'
-      ];
-    } else if (message.includes('rate limit')) {
-      return [
-        'Aguarde alguns minutos antes de tentar novamente',
-        'Reduza a frequência das requisições',
-        'Verifique se não há outras aplicações usando a API'
-      ];
+  const getSpecificHelp = (message: string) => {
+    if (message.includes('PROBLEMA DE PROPRIEDADE DO DOMÍNIO')) {
+      return (
+        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start gap-2">
+            <Info className="h-5 w-5 text-blue-500 mt-0.5" />
+            <div>
+              <h4 className="font-medium text-blue-900 mb-2">Passos Específicos para Resolver:</h4>
+              <ol className="list-decimal list-inside space-y-1 text-sm text-blue-800">
+                <li>Acesse o painel da Hostinger e verifique a lista de domínios</li>
+                <li>Confirme se o domínio <code className="bg-blue-100 px-1 rounded">{testDomain}</code> aparece lá</li>
+                <li>Se não aparecer, verifique se está em outra conta Hostinger</li>
+                <li>Gere um novo token API na conta que possui o domínio</li>
+                <li>Teste novamente com o novo token</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      );
     }
-    return [
-      'Verifique sua conexão com a internet',
-      'Tente novamente em alguns minutos',
-      'Verifique se a API da Hostinger está funcionando'
-    ];
+    return null;
   };
 
   return (
@@ -128,35 +122,29 @@ const DomainDebugger: React.FC<DomainDebuggerProps> = ({ apiToken }) => {
         </Button>
 
         {debugResult && (
-          <Alert className={debugResult.success ? 'border-green-200' : 'border-red-200'}>
-            <div className="flex items-start gap-2">
-              {debugResult.success ? (
-                <CheckCircle className="h-4 w-4 text-green-500 mt-1" />
-              ) : (
-                <AlertTriangle className="h-4 w-4 text-red-500 mt-1" />
-              )}
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge variant={debugResult.success ? "default" : "destructive"}>
-                    {debugResult.success ? 'Sucesso' : 'Erro'}
-                  </Badge>
-                </div>
-                <AlertDescription>
-                  {debugResult.message}
-                </AlertDescription>
-                {!debugResult.success && (
-                  <div className="mt-3 text-sm">
-                    <p className="font-medium mb-1">Sugestões para resolver:</p>
-                    <ul className="list-disc list-inside space-y-1 text-gray-600">
-                      {getErrorSuggestions(debugResult.message).map((suggestion, index) => (
-                        <li key={index}>{suggestion}</li>
-                      ))}
-                    </ul>
-                  </div>
+          <div className="space-y-3">
+            <Alert className={debugResult.success ? 'border-green-200' : 'border-red-200'}>
+              <div className="flex items-start gap-2">
+                {debugResult.success ? (
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-1" />
+                ) : (
+                  <AlertTriangle className="h-4 w-4 text-red-500 mt-1" />
                 )}
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant={debugResult.success ? "default" : "destructive"}>
+                      {debugResult.success ? 'Sucesso' : 'Erro'}
+                    </Badge>
+                  </div>
+                  <AlertDescription className="whitespace-pre-line">
+                    {debugResult.message}
+                  </AlertDescription>
+                </div>
               </div>
-            </div>
-          </Alert>
+            </Alert>
+            
+            {!debugResult.success && getSpecificHelp(debugResult.message)}
+          </div>
         )}
       </CardContent>
     </Card>
