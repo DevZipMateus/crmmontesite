@@ -35,13 +35,15 @@ class HostingerDNSService {
     method?: string;
     body?: any;
     apiToken: string;
+    validateTokenOnly?: boolean;
   }) {
     const { data, error } = await supabase.functions.invoke('hostinger-dns-proxy', {
       body: {
         domain,
         method: options.method || 'GET',
         body: options.body,
-        apiToken: options.apiToken
+        apiToken: options.apiToken,
+        validateTokenOnly: options.validateTokenOnly || false
       }
     });
 
@@ -101,20 +103,31 @@ class HostingerDNSService {
 
   async validateToken(apiToken: string): Promise<{ valid: boolean; message: string }> {
     try {
-      // Test with a simple domain to validate the token
-      await this.makeProxyRequest('test.com', {
+      console.log('Validating token...');
+      
+      const result = await this.makeProxyRequest('', {
         method: 'GET',
-        apiToken
+        apiToken,
+        validateTokenOnly: true
       });
-      return { valid: true, message: 'Token válido' };
+
+      console.log('Token validation result:', result);
+      
+      if (result.valid) {
+        return { valid: true, message: result.message || 'Token válido' };
+      } else {
+        return { valid: false, message: result.message || 'Token inválido' };
+      }
     } catch (error) {
       console.error('Token validation failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       
       if (errorMessage.includes('Token API inválido') || errorMessage.includes('authentication')) {
         return { valid: false, message: 'Token API inválido ou expirado' };
-      } else if (errorMessage.includes('não pertence à sua conta')) {
-        return { valid: true, message: 'Token válido (domínio de teste não encontrado, mas token é válido)' };
+      } else if (errorMessage.includes('sem permissões adequadas')) {
+        return { valid: false, message: 'Token sem permissões para acessar a API DNS' };
+      } else if (errorMessage.includes('conectividade')) {
+        return { valid: false, message: 'Erro de conectividade com a API Hostinger' };
       } else {
         return { valid: false, message: `Erro ao validar token: ${errorMessage}` };
       }

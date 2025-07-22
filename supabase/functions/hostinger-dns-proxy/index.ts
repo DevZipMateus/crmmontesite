@@ -13,11 +13,100 @@ serve(async (req) => {
   }
 
   try {
-    const { domain, method, body, apiToken } = await req.json()
+    const { domain, method, body, apiToken, validateTokenOnly } = await req.json()
 
     if (!apiToken) {
       return new Response(
         JSON.stringify({ error: 'Token API é obrigatório' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    // Special endpoint for token validation only
+    if (validateTokenOnly) {
+      try {
+        // Test token by making a simple request to the API root
+        const testResponse = await fetch('https://developers.hostinger.com/api/dns/v1', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${apiToken}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        console.log(`Token validation response status: ${testResponse.status}`)
+        
+        if (testResponse.status === 401) {
+          return new Response(
+            JSON.stringify({ 
+              error: 'Token API inválido ou expirado',
+              details: 'O token fornecido não tem autorização válida'
+            }),
+            { 
+              status: 401, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          )
+        }
+
+        if (testResponse.status === 403) {
+          return new Response(
+            JSON.stringify({ 
+              error: 'Token sem permissões adequadas',
+              details: 'O token não tem permissões para acessar a API DNS'
+            }),
+            { 
+              status: 403, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          )
+        }
+
+        if (testResponse.ok || testResponse.status === 404) {
+          // 404 is OK for validation - means API is accessible but endpoint doesn't exist
+          // 200 means token is valid and API is accessible
+          return new Response(
+            JSON.stringify({ valid: true, message: 'Token válido e autorizado' }),
+            { 
+              status: 200, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          )
+        }
+
+        return new Response(
+          JSON.stringify({ 
+            error: 'Erro inesperado na validação do token',
+            details: `Status: ${testResponse.status}`
+          }),
+          { 
+            status: testResponse.status, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+
+      } catch (error) {
+        console.error('Token validation error:', error)
+        return new Response(
+          JSON.stringify({ 
+            error: 'Erro de conectividade ao validar token',
+            details: error.message
+          }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
+    }
+
+    // Regular domain operations
+    if (!domain) {
+      return new Response(
+        JSON.stringify({ error: 'Domínio é obrigatório para operações DNS' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
