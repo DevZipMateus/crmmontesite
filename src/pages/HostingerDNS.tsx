@@ -8,9 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Globe, Settings, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Globe, Settings, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
+import { hostingerDNSService } from '@/services/hostingerDNSService';
 
 interface LogEntry {
   domain: string;
@@ -34,6 +36,7 @@ const HostingerDNS: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [dnsRecords, setDnsRecords] = useState<{ domain: string; records: DNSRecord[] }[]>([]);
+  const { toast } = useToast();
 
   const addLog = (domain: string, status: 'success' | 'error', message: string) => {
     setLogs(prev => [...prev, {
@@ -44,33 +47,102 @@ const HostingerDNS: React.FC = () => {
     }]);
   };
 
-  const handleUpdateDNS = async () => {
-    if (!apiToken || !domains || !newIP) {
-      addLog('', 'error', 'Todos os campos são obrigatórios');
-      return;
+  const validateInputs = (requireIP = false) => {
+    if (!apiToken.trim()) {
+      addLog('', 'error', 'Token API é obrigatório');
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Token API é obrigatório"
+      });
+      return false;
     }
+
+    if (!domains.trim()) {
+      addLog('', 'error', 'Pelo menos um domínio é obrigatório');
+      toast({
+        variant: "destructive",
+        title: "Erro", 
+        description: "Pelo menos um domínio é obrigatório"
+      });
+      return false;
+    }
+
+    if (requireIP && !newIP.trim()) {
+      addLog('', 'error', 'Novo IP é obrigatório para atualização');
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Novo IP é obrigatório para atualização"
+      });
+      return false;
+    }
+
+    const domainList = domains.split('\n').filter(d => d.trim());
+    for (const domain of domainList) {
+      if (!hostingerDNSService.validateDomain(domain.trim())) {
+        addLog(domain.trim(), 'error', 'Formato de domínio inválido');
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: `Formato de domínio inválido: ${domain.trim()}`
+        });
+        return false;
+      }
+    }
+
+    if (requireIP && !hostingerDNSService.validateIP(newIP.trim())) {
+      addLog('', 'error', 'Formato de IP inválido');
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Formato de IP inválido"
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleUpdateDNS = async () => {
+    if (!validateInputs(true)) return;
 
     setIsLoading(true);
     const domainList = domains.split('\n').filter(d => d.trim());
+    let successCount = 0;
 
     for (const domain of domainList) {
       try {
-        // Simulação da atualização DNS - aqui seria a chamada real para a API da Hostinger
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        addLog(domain.trim(), 'success', `DNS atualizado para IP ${newIP}`);
+        const success = await hostingerDNSService.updateARecords(
+          domain.trim(), 
+          newIP.trim(), 
+          apiToken.trim()
+        );
+
+        if (success) {
+          addLog(domain.trim(), 'success', `DNS atualizado para IP ${newIP}`);
+          successCount++;
+        } else {
+          addLog(domain.trim(), 'error', 'Falha ao atualizar registros DNS');
+        }
       } catch (error) {
-        addLog(domain.trim(), 'error', `Erro ao atualizar DNS: ${error}`);
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+        addLog(domain.trim(), 'error', errorMessage);
       }
     }
 
     setIsLoading(false);
+    
+    if (successCount > 0) {
+      toast({
+        title: "Sucesso",
+        description: `${successCount} domínio(s) atualizado(s) com sucesso`
+      });
+    }
   };
 
   const handleListDNS = async () => {
-    if (!apiToken || !domains) {
-      addLog('', 'error', 'Token API e domínios são obrigatórios');
-      return;
-    }
+    if (!validateInputs(false)) return;
 
     setIsLoading(true);
     const domainList = domains.split('\n').filter(d => d.trim());
@@ -78,21 +150,66 @@ const HostingerDNS: React.FC = () => {
 
     for (const domain of domainList) {
       try {
-        // Simulação da listagem DNS - aqui seria a chamada real para a API da Hostinger
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const mockRecords: DNSRecord[] = [
-          { id: '1', type: 'A', name: '@', content: '192.168.1.1', ttl: 3600 },
-          { id: '2', type: 'CNAME', name: 'www', content: domain.trim(), ttl: 3600 }
-        ];
-        records.push({ domain: domain.trim(), records: mockRecords });
-        addLog(domain.trim(), 'success', `Registros DNS listados com sucesso`);
+        const domainRecords = await hostingerDNSService.listDNSRecords(
+          domain.trim(), 
+          apiToken.trim()
+        );
+
+        records.push({ domain: domain.trim(), records: domainRecords });
+        addLog(domain.trim(), 'success', `${domainRecords.length} registros DNS encontrados`);
       } catch (error) {
-        addLog(domain.trim(), 'error', `Erro ao listar DNS: ${error}`);
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+        addLog(domain.trim(), 'error', errorMessage);
+        records.push({ domain: domain.trim(), records: [] });
       }
     }
 
     setDnsRecords(records);
     setIsLoading(false);
+
+    toast({
+      title: "Listagem concluída",
+      description: `Registros DNS listados para ${domainList.length} domínio(s)`
+    });
+  };
+
+  const refreshDNS = async (domain: string) => {
+    if (!apiToken.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Token API é obrigatório"
+      });
+      return;
+    }
+
+    try {
+      const domainRecords = await hostingerDNSService.listDNSRecords(domain, apiToken.trim());
+      
+      setDnsRecords(prev => 
+        prev.map(record => 
+          record.domain === domain 
+            ? { ...record, records: domainRecords }
+            : record
+        )
+      );
+
+      addLog(domain, 'success', `Registros DNS atualizados - ${domainRecords.length} registros encontrados`);
+      
+      toast({
+        title: "Atualizado",
+        description: `Registros DNS atualizados para ${domain}`
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      addLog(domain, 'error', errorMessage);
+      
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: `Falha ao atualizar registros de ${domain}`
+      });
+    }
   };
 
   return (
@@ -159,13 +276,13 @@ const HostingerDNS: React.FC = () => {
                     disabled={isLoading}
                     variant="outline"
                   >
-                    Listar DNS
+                    {isLoading ? 'Carregando...' : 'Listar DNS'}
                   </Button>
                   <Button 
                     onClick={handleUpdateDNS} 
                     disabled={isLoading}
                   >
-                    Atualizar DNS
+                    {isLoading ? 'Atualizando...' : 'Atualizar DNS'}
                   </Button>
                 </div>
               </CardContent>
@@ -183,7 +300,7 @@ const HostingerDNS: React.FC = () => {
                   {logs.length === 0 ? (
                     <p className="text-gray-500 text-sm">Nenhuma operação realizada ainda</p>
                   ) : (
-                    logs.map((log, index) => (
+                    logs.slice().reverse().map((log, index) => (
                       <Alert key={index} className={log.status === 'error' ? 'border-red-200' : 'border-green-200'}>
                         <div className="flex items-start gap-2">
                           {log.status === 'error' ? (
@@ -221,29 +338,49 @@ const HostingerDNS: React.FC = () => {
                 <div className="space-y-6">
                   {dnsRecords.map((domainRecord, index) => (
                     <div key={index}>
-                      <h3 className="font-semibold text-lg mb-3">{domainRecord.domain}</h3>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Tipo</TableHead>
-                            <TableHead>Nome</TableHead>
-                            <TableHead>Conteúdo</TableHead>
-                            <TableHead>TTL</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {domainRecord.records.map((record) => (
-                            <TableRow key={record.id}>
-                              <TableCell>
-                                <Badge variant="outline">{record.type}</Badge>
-                              </TableCell>
-                              <TableCell>{record.name}</TableCell>
-                              <TableCell>{record.content}</TableCell>
-                              <TableCell>{record.ttl}s</TableCell>
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-semibold text-lg">{domainRecord.domain}</h3>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => refreshDNS(domainRecord.domain)}
+                          disabled={isLoading}
+                        >
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Atualizar
+                        </Button>
+                      </div>
+                      {domainRecord.records.length > 0 ? (
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Tipo</TableHead>
+                              <TableHead>Nome</TableHead>
+                              <TableHead>Conteúdo</TableHead>
+                              <TableHead>TTL</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                          </TableHeader>
+                          <TableBody>
+                            {domainRecord.records.map((record) => (
+                              <TableRow key={record.id}>
+                                <TableCell>
+                                  <Badge variant="outline">{record.type}</Badge>
+                                </TableCell>
+                                <TableCell>{record.name}</TableCell>
+                                <TableCell>{record.content}</TableCell>
+                                <TableCell>{record.ttl}s</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      ) : (
+                        <Alert>
+                          <AlertTriangle className="h-4 w-4" />
+                          <AlertDescription>
+                            Nenhum registro DNS encontrado para este domínio.
+                          </AlertDescription>
+                        </Alert>
+                      )}
                     </div>
                   ))}
                 </div>
