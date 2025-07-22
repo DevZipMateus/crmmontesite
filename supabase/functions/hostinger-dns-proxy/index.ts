@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { domain, method, body, apiToken, validateTokenOnly } = await req.json()
+    const { domain, method, body, apiToken, validateTokenOnly, listDomains } = await req.json()
 
     if (!apiToken) {
       return new Response(
@@ -28,8 +28,8 @@ serve(async (req) => {
     // Special endpoint for token validation only
     if (validateTokenOnly) {
       try {
-        // Test token by making a simple request to the API root
-        const testResponse = await fetch('https://developers.hostinger.com/api/dns/v1', {
+        // Test token by making a simple request to list domains endpoint
+        const testResponse = await fetch('https://api.hostinger.com/v3/dns/zones', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${apiToken}`,
@@ -65,9 +65,7 @@ serve(async (req) => {
           )
         }
 
-        if (testResponse.ok || testResponse.status === 404) {
-          // 404 is OK for validation - means API is accessible but endpoint doesn't exist
-          // 200 means token is valid and API is accessible
+        if (testResponse.ok) {
           return new Response(
             JSON.stringify({ valid: true, message: 'Token válido e autorizado' }),
             { 
@@ -103,6 +101,58 @@ serve(async (req) => {
       }
     }
 
+    // List all domains available
+    if (listDomains) {
+      try {
+        const response = await fetch('https://api.hostinger.com/v3/dns/zones', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${apiToken}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        console.log(`List domains response status: ${response.status}`)
+        
+        const data = await response.json()
+        console.log('List domains response:', data)
+
+        if (!response.ok) {
+          return new Response(
+            JSON.stringify({ 
+              error: `Erro ao listar domínios: ${response.status}`,
+              details: data
+            }),
+            { 
+              status: response.status, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          )
+        }
+
+        return new Response(
+          JSON.stringify(data),
+          { 
+            status: 200, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+
+      } catch (error) {
+        console.error('List domains error:', error)
+        return new Response(
+          JSON.stringify({ 
+            error: 'Erro ao listar domínios',
+            details: error.message
+          }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
+    }
+
     // Regular domain operations
     if (!domain) {
       return new Response(
@@ -114,16 +164,9 @@ serve(async (req) => {
       )
     }
 
-    // Use the correct Hostinger API base URL
-    let url = `https://developers.hostinger.com/api/dns/v1/zones/${domain}`
+    // Use the correct Hostinger API base URL - updated to v3
+    let url = `https://api.hostinger.com/v3/dns/zones/${domain}/records`
     
-    // Add specific endpoints for different operations
-    if (method === 'POST' && body?.validate) {
-      url += '/validate'
-    } else if (method === 'POST' && body?.reset) {
-      url += '/reset'
-    }
-
     const requestOptions: RequestInit = {
       method: method || 'GET',
       headers: {
@@ -191,8 +234,8 @@ serve(async (req) => {
       let errorMessage = `Erro da API Hostinger: ${response.status} - ${response.statusText}`
       
       if (data.message) {
-        if (data.message.includes('[DNS:4002]')) {
-          errorMessage = 'O domínio não pertence à sua conta Hostinger ou não existe'
+        if (data.message.includes('not found') || data.message.includes('does not exist')) {
+          errorMessage = 'O domínio não foi encontrado na sua conta Hostinger'
         } else if (data.message.includes('authentication') || data.message.includes('token')) {
           errorMessage = 'Token API inválido ou expirado'
         } else if (data.message.includes('rate limit')) {

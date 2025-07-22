@@ -8,6 +8,11 @@ interface DNSRecord {
   ttl: number;
 }
 
+interface HostingerDomain {
+  domain: string;
+  status: string;
+}
+
 interface HostingerZoneRecord {
   name: string;
   records: Array<{
@@ -36,6 +41,7 @@ class HostingerDNSService {
     body?: any;
     apiToken: string;
     validateTokenOnly?: boolean;
+    listDomains?: boolean;
   }) {
     const { data, error } = await supabase.functions.invoke('hostinger-dns-proxy', {
       body: {
@@ -43,7 +49,8 @@ class HostingerDNSService {
         method: options.method || 'GET',
         body: options.body,
         apiToken: options.apiToken,
-        validateTokenOnly: options.validateTokenOnly || false
+        validateTokenOnly: options.validateTokenOnly || false,
+        listDomains: options.listDomains || false
       }
     });
 
@@ -134,6 +141,40 @@ class HostingerDNSService {
     }
   }
 
+  async listAvailableDomains(apiToken: string): Promise<HostingerDomain[]> {
+    try {
+      console.log('Listing available domains...');
+      
+      const result = await this.makeProxyRequest('', {
+        method: 'GET',
+        apiToken,
+        listDomains: true
+      });
+
+      console.log('Available domains result:', result);
+      
+      // The API might return different structures, handle them gracefully
+      if (Array.isArray(result)) {
+        return result.map(domain => ({
+          domain: typeof domain === 'string' ? domain : domain.domain || domain.name,
+          status: typeof domain === 'object' ? domain.status || 'active' : 'active'
+        }));
+      }
+      
+      if (result.data && Array.isArray(result.data)) {
+        return result.data.map(domain => ({
+          domain: domain.domain || domain.name,
+          status: domain.status || 'active'
+        }));
+      }
+
+      return [];
+    } catch (error) {
+      console.error('Error listing domains:', error);
+      throw new Error(`Erro ao listar domínios: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+    }
+  }
+
   async testDomainAccess(domain: string, apiToken: string): Promise<{ accessible: boolean; message: string; recordCount?: number }> {
     try {
       const records = await this.listDNSRecords(domain, apiToken);
@@ -164,7 +205,19 @@ class HostingerDNSService {
 
       console.log('DNS records response:', response);
       
-      // Convert Hostinger format to frontend format
+      // Handle different response formats from Hostinger API v3
+      if (response.data && Array.isArray(response.data)) {
+        // Convert v3 format to frontend format
+        return response.data.map((record, index) => ({
+          id: record.id || `${record.type}-${record.name}-${index}`,
+          type: record.type,
+          name: record.name,
+          content: record.content || record.value,
+          ttl: record.ttl || 3600
+        }));
+      }
+      
+      // Fallback for other formats
       if (Array.isArray(response)) {
         return this.convertHostingerRecordsToFrontend(response);
       }
@@ -176,24 +229,24 @@ class HostingerDNSService {
       // Provide more specific error messages
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       
-      if (errorMessage.includes('não pertence à sua conta') || errorMessage.includes('4002')) {
-        throw new Error(`❌ PROBLEMA DE PROPRIEDADE DO DOMÍNIO
+      if (errorMessage.includes('não foi encontrado') || errorMessage.includes('not found')) {
+        throw new Error(`❌ DOMÍNIO NÃO ENCONTRADO
 
-O domínio "${domain}" não foi encontrado na conta Hostinger associada ao seu token API.
+O domínio "${domain}" não foi encontrado na sua conta Hostinger DNS.
 
 🔍 POSSÍVEIS CAUSAS:
+• O domínio não está adicionado à sua conta Hostinger
 • O domínio está em uma conta Hostinger diferente
-• O domínio foi transferido recentemente entre contas
-• O token API foi gerado em uma conta diferente da que possui o domínio
-• O domínio ainda não foi adicionado à sua conta Hostinger
+• O token API foi gerado em uma conta diferente
+• O domínio foi removido ou transferido recentemente
 
 ✅ COMO RESOLVER:
 1. Verifique se você está logado na conta Hostinger CORRETA
-2. Confirme se o domínio aparece na lista de domínios do seu painel Hostinger
+2. Acesse o painel DNS da Hostinger e confirme se o domínio aparece na lista
 3. Se o domínio está em outra conta, gere um novo token API na conta correta
-4. Se você tem múltiplas contas Hostinger, certifique-se de usar o token da conta que possui este domínio
+4. Use a funcionalidade "Listar Domínios" para ver quais domínios estão disponíveis
 
-💡 DICA: Use a ferramenta de debug para testar com outro domínio da sua conta e confirmar se o problema é específico deste domínio.`);
+💡 DICA: Clique em "Listar Domínios Disponíveis" na aba Debug para ver todos os domínios da sua conta.`);
       } else if (errorMessage.includes('Token API inválido')) {
         throw new Error('Token API inválido. Verifique se o token foi copiado corretamente e não expirou.');
       } else if (errorMessage.includes('rate limit')) {

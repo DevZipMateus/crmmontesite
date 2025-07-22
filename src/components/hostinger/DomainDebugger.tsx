@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Search, AlertTriangle, CheckCircle, Loader2, Info } from 'lucide-react';
+import { Search, AlertTriangle, CheckCircle, Loader2, Info, List } from 'lucide-react';
 import { hostingerDNSService } from '@/services/hostingerDNSService';
 
 interface DomainDebuggerProps {
@@ -16,11 +16,13 @@ interface DomainDebuggerProps {
 const DomainDebugger: React.FC<DomainDebuggerProps> = ({ apiToken }) => {
   const [testDomain, setTestDomain] = useState('');
   const [isDebugging, setIsDebugging] = useState(false);
+  const [isListingDomains, setIsListingDomains] = useState(false);
   const [debugResult, setDebugResult] = useState<{
     success: boolean;
     message: string;
     details?: any;
   } | null>(null);
+  const [availableDomains, setAvailableDomains] = useState<Array<{domain: string; status: string}>>([]);
 
   const handleDebugDomain = async () => {
     if (!testDomain.trim()) {
@@ -58,6 +60,34 @@ const DomainDebugger: React.FC<DomainDebuggerProps> = ({ apiToken }) => {
     }
   };
 
+  const handleListDomains = async () => {
+    if (!apiToken.trim()) {
+      setDebugResult({
+        success: false,
+        message: 'Token API é obrigatório para listar domínios'
+      });
+      return;
+    }
+
+    setIsListingDomains(true);
+    try {
+      const domains = await hostingerDNSService.listAvailableDomains(apiToken.trim());
+      setAvailableDomains(domains);
+      setDebugResult({
+        success: true,
+        message: `✅ Encontrados ${domains.length} domínios na sua conta Hostinger`,
+        details: domains
+      });
+    } catch (error) {
+      setDebugResult({
+        success: false,
+        message: error instanceof Error ? error.message : 'Erro desconhecido ao listar domínios'
+      });
+    } finally {
+      setIsListingDomains(false);
+    }
+  };
+
   const getSpecificHelp = (message: string) => {
     if (message.includes('PROBLEMA DE PROPRIEDADE DO DOMÍNIO')) {
       return (
@@ -89,12 +119,49 @@ const DomainDebugger: React.FC<DomainDebuggerProps> = ({ apiToken }) => {
           Debug de Domínio
         </CardTitle>
         <CardDescription>
-          Teste a conectividade e permissões para um domínio específico
+          Teste a conectividade e permissões para um domínio específico ou liste todos os domínios disponíveis
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleListDomains} 
+            disabled={isListingDomains || !apiToken.trim()}
+            variant="outline"
+            className="flex-1"
+          >
+            {isListingDomains ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Listando...
+              </>
+            ) : (
+              <>
+                <List className="h-4 w-4 mr-2" />
+                Listar Domínios Disponíveis
+              </>
+            )}
+          </Button>
+        </div>
+
+        {availableDomains.length > 0 && (
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h4 className="font-medium text-blue-900 mb-2">Domínios Disponíveis na Sua Conta:</h4>
+            <div className="space-y-2">
+              {availableDomains.map((domain, index) => (
+                <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
+                  <span className="font-mono text-sm">{domain.domain}</span>
+                  <Badge variant={domain.status === 'active' ? 'default' : 'secondary'}>
+                    {domain.status}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div>
-          <Label htmlFor="testDomain">Domínio para Teste</Label>
+          <Label htmlFor="testDomain">Domínio para Teste Específico</Label>
           <Input
             id="testDomain"
             placeholder="exemplo.com"
@@ -116,7 +183,7 @@ const DomainDebugger: React.FC<DomainDebuggerProps> = ({ apiToken }) => {
           ) : (
             <>
               <Search className="h-4 w-4 mr-2" />
-              Testar Domínio
+              Testar Domínio Específico
             </>
           )}
         </Button>
