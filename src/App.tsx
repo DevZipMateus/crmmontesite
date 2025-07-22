@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -25,7 +24,6 @@ import CriarProjetos from "./pages/CriarProjetos";
 import LandingPagesVendedores from "./pages/LandingPagesVendedores";
 import VendedorLandingForm from "./pages/VendedorLandingForm";
 import Leads from "./pages/Leads";
-import PainelVendas from "./pages/PainelVendas";
 
 const queryClient = new QueryClient();
 
@@ -84,13 +82,6 @@ const App = () => {
             <Route path="/leads" element={
               <AuthGuard>
                 <Leads />
-              </AuthGuard>
-            } />
-            
-            {/* Painel de Vendas */}
-            <Route path="/painel-vendas" element={
-              <AuthGuard>
-                <PainelVendas />
               </AuthGuard>
             } />
             
