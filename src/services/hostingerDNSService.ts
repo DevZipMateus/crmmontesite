@@ -1,4 +1,6 @@
 
+import { supabase } from '@/integrations/supabase/client';
+
 interface DNSRecord {
   id: string;
   type: string;
@@ -19,33 +21,45 @@ interface HostingerUpdateResponse {
 }
 
 class HostingerDNSService {
-  private baseUrl = 'https://api.hostinger.com/v1';
-
-  private async makeRequest(endpoint: string, options: RequestInit = {}) {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+  private async makeProxyRequest(domain: string, options: {
+    method?: string;
+    recordId?: string;
+    body?: any;
+    apiToken: string;
+  }) {
+    const { data, error } = await supabase.functions.invoke('hostinger-dns-proxy', {
+      body: {
+        domain,
+        recordId: options.recordId,
+        method: options.method || 'GET',
+        body: options.body,
+        apiToken: options.apiToken
+      }
     });
 
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+    if (error) {
+      console.error('Supabase function error:', error);
+      throw new Error(`Erro na comunicação com o servidor: ${error.message}`);
     }
 
-    return response.json();
+    if (data.error) {
+      console.error('Hostinger API error:', data);
+      throw new Error(data.error);
+    }
+
+    return data;
   }
 
   async listDNSRecords(domain: string, apiToken: string): Promise<DNSRecord[]> {
     try {
-      const response = await this.makeRequest(`/domains/${domain}/dns`, {
+      console.log(`Listing DNS records for domain: ${domain}`);
+      
+      const response = await this.makeProxyRequest(domain, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${apiToken}`,
-        },
+        apiToken
       });
 
+      console.log('DNS records response:', response);
       return response.data || [];
     } catch (error) {
       console.error('Error listing DNS records:', error);
@@ -60,14 +74,16 @@ class HostingerDNSService {
     apiToken: string
   ): Promise<boolean> {
     try {
-      const response = await this.makeRequest(`/domains/${domain}/dns/${recordId}`, {
+      console.log(`Updating DNS record ${recordId} for domain: ${domain}`, recordData);
+      
+      const response = await this.makeProxyRequest(domain, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${apiToken}`,
-        },
-        body: JSON.stringify(recordData),
+        recordId,
+        body: recordData,
+        apiToken
       });
 
+      console.log('Update DNS record response:', response);
       return response.success;
     } catch (error) {
       console.error('Error updating DNS record:', error);
@@ -77,19 +93,20 @@ class HostingerDNSService {
 
   async createARecord(domain: string, name: string, ip: string, ttl: number, apiToken: string): Promise<boolean> {
     try {
-      const response = await this.makeRequest(`/domains/${domain}/dns`, {
+      console.log(`Creating A record for domain: ${domain}`, { name, ip, ttl });
+      
+      const response = await this.makeProxyRequest(domain, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiToken}`,
-        },
-        body: JSON.stringify({
+        body: {
           type: 'A',
           name,
           content: ip,
           ttl,
-        }),
+        },
+        apiToken
       });
 
+      console.log('Create A record response:', response);
       return response.success;
     } catch (error) {
       console.error('Error creating A record:', error);
@@ -99,11 +116,14 @@ class HostingerDNSService {
 
   async updateARecords(domain: string, newIP: string, apiToken: string): Promise<boolean> {
     try {
+      console.log(`Updating A records for domain: ${domain} to IP: ${newIP}`);
+      
       // First, get all DNS records
       const records = await this.listDNSRecords(domain, apiToken);
       
       // Find A records to update
       const aRecords = records.filter(record => record.type === 'A');
+      console.log(`Found ${aRecords.length} A records to update:`, aRecords);
       
       // Update each A record
       const updatePromises = aRecords.map(record =>
@@ -111,7 +131,10 @@ class HostingerDNSService {
       );
 
       const results = await Promise.all(updatePromises);
-      return results.every(result => result === true);
+      const success = results.every(result => result === true);
+      
+      console.log(`Update A records results:`, results, `Overall success: ${success}`);
+      return success;
     } catch (error) {
       console.error('Error updating A records:', error);
       throw new Error(`Erro ao atualizar registros A: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
