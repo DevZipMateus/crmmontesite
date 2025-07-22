@@ -114,13 +114,39 @@ const HostingerDNS: React.FC = () => {
     if (!validateInputs(true)) return;
 
     setIsLoading(true);
-    addLog('', 'error', 'API Hostinger DNS não disponível publicamente. Veja a guia "API Status" para mais informações.');
-    
-    toast({
-      variant: "destructive",
-      title: "API Indisponível",
-      description: "A API de DNS da Hostinger não está disponível publicamente. Veja alternativas na guia 'API Status'."
-    });
+    const domainList = domains.split('\n').filter(d => d.trim());
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const domain of domainList) {
+      try {
+        const result = await hostingerDNSService.updateARecords(domain.trim(), newIP.trim(), apiToken);
+        
+        if (result) {
+          addLog(domain.trim(), 'success', `Registros A atualizados com sucesso para o IP ${newIP}`);
+          successCount++;
+        } else {
+          addLog(domain.trim(), 'error', 'Falha ao atualizar registros A');
+          errorCount++;
+        }
+      } catch (error) {
+        addLog(domain.trim(), 'error', `Erro: ${error instanceof Error ? error.message : String(error)}`);
+        errorCount++;
+      }
+    }
+
+    if (successCount > 0) {
+      toast({
+        title: "Atualização concluída",
+        description: `${successCount} domínio(s) atualizado(s) com sucesso${errorCount > 0 ? `, ${errorCount} com erro(s)` : ''}`
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Falha na atualização",
+        description: "Nenhum domínio foi atualizado. Verifique os logs para mais detalhes."
+      });
+    }
     
     setIsLoading(false);
   };
@@ -129,15 +155,59 @@ const HostingerDNS: React.FC = () => {
     if (!validateInputs(false)) return;
 
     setIsLoading(true);
-    addLog('', 'error', 'API Hostinger DNS não disponível publicamente. Veja a guia "API Status" para mais informações.');
-    
-    toast({
-      variant: "destructive",
-      title: "API Indisponível",
-      description: "A API de DNS da Hostinger não está disponível publicamente. Veja alternativas na guia 'API Status'."
-    });
+    setDnsRecords([]);
+    const domainList = domains.split('\n').filter(d => d.trim());
+    let successCount = 0;
+    let recordCount = 0;
+
+    for (const domain of domainList) {
+      try {
+        const records = await hostingerDNSService.listDNSRecords(domain.trim(), apiToken);
+        
+        if (records.length > 0) {
+          setDnsRecords(prev => [...prev, { domain: domain.trim(), records }]);
+          addLog(domain.trim(), 'success', `${records.length} registro(s) DNS encontrado(s)`);
+          successCount++;
+          recordCount += records.length;
+        } else {
+          addLog(domain.trim(), 'error', 'Nenhum registro DNS encontrado');
+        }
+      } catch (error) {
+        addLog(domain.trim(), 'error', `Erro: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+
+    if (successCount > 0) {
+      toast({
+        title: "Registros DNS carregados",
+        description: `${recordCount} registro(s) encontrado(s) em ${successCount} domínio(s)`
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Falha ao listar registros",
+        description: "Nenhum registro DNS foi encontrado. Verifique os logs para mais detalhes."
+      });
+    }
     
     setIsLoading(false);
+  };
+
+  const handleTokenValidationResult = (result: { valid: boolean; message: string }) => {
+    setTokenValidation(result);
+    
+    if (result.valid) {
+      toast({
+        title: "Token validado",
+        description: "Seu token API foi validado com sucesso"
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Problema com o token",
+        description: result.message
+      });
+    }
   };
 
   return (
@@ -163,12 +233,13 @@ const HostingerDNS: React.FC = () => {
             </TabsList>
 
             <TabsContent value="management" className="space-y-6">
-              <Alert variant="destructive" className="mb-6">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>API Indisponível</AlertTitle>
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>Acesso à API Hostinger</AlertTitle>
                 <AlertDescription>
-                  Nossa investigação indica que a API de DNS da Hostinger não está disponível publicamente.
-                  Por favor, verifique a guia "API Status" para mais informações e alternativas.
+                  A API DNS da Hostinger requer um token de API com permissões específicas. 
+                  Caso encontre dificuldades, verifique a guia "API Status" para mais informações 
+                  ou utilize o painel de controle da Hostinger (hPanel) para gerenciamento manual.
                 </AlertDescription>
               </Alert>
 
@@ -271,6 +342,48 @@ const HostingerDNS: React.FC = () => {
                   </CardContent>
                 </Card>
               </div>
+
+              {dnsRecords.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Registros DNS</CardTitle>
+                    <CardDescription>
+                      Registros DNS encontrados nos domínios consultados
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="max-h-96 overflow-y-auto">
+                      {dnsRecords.map((domainRecord, domainIndex) => (
+                        <div key={domainIndex} className="mb-6">
+                          <h3 className="text-lg font-medium mb-2">{domainRecord.domain}</h3>
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Tipo</TableHead>
+                                <TableHead>Nome</TableHead>
+                                <TableHead>Conteúdo</TableHead>
+                                <TableHead>TTL</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {domainRecord.records.map((record, recordIndex) => (
+                                <TableRow key={recordIndex}>
+                                  <TableCell>
+                                    <Badge variant="outline">{record.type}</Badge>
+                                  </TableCell>
+                                  <TableCell>{record.name}</TableCell>
+                                  <TableCell className="font-mono text-sm">{record.content}</TableCell>
+                                  <TableCell>{record.ttl}</TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="apiStatus">
@@ -285,10 +398,16 @@ const HostingerDNS: React.FC = () => {
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertDescription>
-                  As ferramentas de debug são limitadas devido à indisponibilidade da API pública.
-                  Recomendamos utilizar o painel de controle da Hostinger diretamente.
+                  Use estas ferramentas para testar e depurar o acesso à API de DNS da Hostinger.
+                  Caso encontre dificuldades com a API, você ainda pode gerenciar seus registros DNS 
+                  manualmente através do painel de controle da Hostinger.
                 </AlertDescription>
               </Alert>
+              
+              <TokenValidator 
+                apiToken={apiToken} 
+                onValidationResult={handleTokenValidationResult} 
+              />
               
               <DomainDebugger apiToken={apiToken} />
             </TabsContent>

@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Check, Cloud, Globe, Shield, Zap } from 'lucide-react';
+import { ExternalLink, Check, Cloud, Globe, Shield, Zap, Info } from 'lucide-react';
 
 interface ProviderCardProps {
   name: string;
