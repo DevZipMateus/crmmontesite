@@ -9,28 +9,37 @@ interface DNSRecord {
   ttl: number;
 }
 
-interface HostingerDNSResponse {
-  success: boolean;
-  data: DNSRecord[];
-  message?: string;
+interface HostingerZoneRecord {
+  name: string;
+  records: Array<{
+    content: string;
+    is_disabled?: boolean;
+  }>;
+  ttl: number;
+  type: string;
 }
 
-interface HostingerUpdateResponse {
-  success: boolean;
-  message: string;
+interface HostingerZoneUpdatePayload {
+  overwrite: boolean;
+  zone: Array<{
+    name: string;
+    records: Array<{
+      content: string;
+    }>;
+    ttl: number;
+    type: string;
+  }>;
 }
 
 class HostingerDNSService {
   private async makeProxyRequest(domain: string, options: {
     method?: string;
-    recordId?: string;
     body?: any;
     apiToken: string;
   }) {
     const { data, error } = await supabase.functions.invoke('hostinger-dns-proxy', {
       body: {
         domain,
-        recordId: options.recordId,
         method: options.method || 'GET',
         body: options.body,
         apiToken: options.apiToken
@@ -50,6 +59,61 @@ class HostingerDNSService {
     return data;
   }
 
+  private convertHostingerRecordsToFrontend(hostingerRecords: HostingerZoneRecord[]): DNSRecord[] {
+    const frontendRecords: DNSRecord[] = [];
+    
+    hostingerRecords.forEach((zoneRecord) => {
+      zoneRecord.records.forEach((record, index) => {
+        if (!record.is_disabled) {
+          frontendRecords.push({
+            id: `${zoneRecord.type}-${zoneRecord.name}-${index}`, // Generate unique ID
+            type: zoneRecord.type,
+            name: zoneRecord.name,
+            content: record.content,
+            ttl: zoneRecord.ttl
+          });
+        }
+      });
+    });
+
+    return frontendRecords;
+  }
+
+  private convertFrontendRecordsToHostinger(records: DNSRecord[]): HostingerZoneRecord[] {
+    const recordMap = new Map<string, HostingerZoneRecord>();
+
+    records.forEach((record) => {
+      const key = `${record.type}-${record.name}-${record.ttl}`;
+      
+      if (recordMap.has(key)) {
+        recordMap.get(key)!.records.push({ content: record.content });
+      } else {
+        recordMap.set(key, {
+          name: record.name,
+          type: record.type,
+          ttl: record.ttl,
+          records: [{ content: record.content }]
+        });
+      }
+    });
+
+    return Array.from(recordMap.values());
+  }
+
+  async validateToken(apiToken: string): Promise<boolean> {
+    try {
+      // Test with a simple domain to validate the token
+      await this.makeProxyRequest('test.com', {
+        method: 'GET',
+        apiToken
+      });
+      return true;
+    } catch (error) {
+      console.error('Token validation failed:', error);
+      return false;
+    }
+  }
+
   async listDNSRecords(domain: string, apiToken: string): Promise<DNSRecord[]> {
     try {
       console.log(`Listing DNS records for domain: ${domain}`);
@@ -60,7 +124,13 @@ class HostingerDNSService {
       });
 
       console.log('DNS records response:', response);
-      return response.data || [];
+      
+      // Convert Hostinger format to frontend format
+      if (Array.isArray(response)) {
+        return this.convertHostingerRecordsToFrontend(response);
+      }
+      
+      return [];
     } catch (error) {
       console.error('Error listing DNS records:', error);
       throw new Error(`Erro ao listar registros DNS: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
@@ -76,15 +146,30 @@ class HostingerDNSService {
     try {
       console.log(`Updating DNS record ${recordId} for domain: ${domain}`, recordData);
       
+      // First get all current records
+      const currentRecords = await this.listDNSRecords(domain, apiToken);
+      
+      // Update the specific record
+      const updatedRecords = currentRecords.map(record => 
+        record.id === recordId ? { ...record, ...recordData } : record
+      );
+      
+      // Convert to Hostinger format and update
+      const hostingerRecords = this.convertFrontendRecordsToHostinger(updatedRecords);
+      
+      const updatePayload: HostingerZoneUpdatePayload = {
+        overwrite: true,
+        zone: hostingerRecords
+      };
+
       const response = await this.makeProxyRequest(domain, {
         method: 'PUT',
-        recordId,
-        body: recordData,
+        body: updatePayload,
         apiToken
       });
 
       console.log('Update DNS record response:', response);
-      return response.success;
+      return response.message === 'Request accepted';
     } catch (error) {
       console.error('Error updating DNS record:', error);
       throw new Error(`Erro ao atualizar registro DNS: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
@@ -95,19 +180,34 @@ class HostingerDNSService {
     try {
       console.log(`Creating A record for domain: ${domain}`, { name, ip, ttl });
       
+      // Get current records first
+      const currentRecords = await this.listDNSRecords(domain, apiToken);
+      
+      // Add new A record
+      const newRecord: DNSRecord = {
+        id: `A-${name}-${Date.now()}`, // Temporary ID
+        type: 'A',
+        name,
+        content: ip,
+        ttl
+      };
+      
+      const allRecords = [...currentRecords, newRecord];
+      const hostingerRecords = this.convertFrontendRecordsToHostinger(allRecords);
+      
+      const updatePayload: HostingerZoneUpdatePayload = {
+        overwrite: false, // Don't overwrite, just add
+        zone: hostingerRecords
+      };
+
       const response = await this.makeProxyRequest(domain, {
-        method: 'POST',
-        body: {
-          type: 'A',
-          name,
-          content: ip,
-          ttl,
-        },
+        method: 'PUT',
+        body: updatePayload,
         apiToken
       });
 
       console.log('Create A record response:', response);
-      return response.success;
+      return response.message === 'Request accepted';
     } catch (error) {
       console.error('Error creating A record:', error);
       throw new Error(`Erro ao criar registro A: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
@@ -125,16 +225,31 @@ class HostingerDNSService {
       const aRecords = records.filter(record => record.type === 'A');
       console.log(`Found ${aRecords.length} A records to update:`, aRecords);
       
-      // Update each A record
-      const updatePromises = aRecords.map(record =>
-        this.updateDNSRecord(domain, record.id, { content: newIP }, apiToken)
-      );
-
-      const results = await Promise.all(updatePromises);
-      const success = results.every(result => result === true);
+      if (aRecords.length === 0) {
+        throw new Error('Nenhum registro A encontrado para atualizar');
+      }
       
-      console.log(`Update A records results:`, results, `Overall success: ${success}`);
-      return success;
+      // Update A records with new IP
+      const updatedRecords = records.map(record => 
+        record.type === 'A' ? { ...record, content: newIP } : record
+      );
+      
+      // Convert to Hostinger format
+      const hostingerRecords = this.convertFrontendRecordsToHostinger(updatedRecords);
+      
+      const updatePayload: HostingerZoneUpdatePayload = {
+        overwrite: true,
+        zone: hostingerRecords
+      };
+
+      const response = await this.makeProxyRequest(domain, {
+        method: 'PUT',
+        body: updatePayload,
+        apiToken
+      });
+
+      console.log('Update A records response:', response);
+      return response.message === 'Request accepted';
     } catch (error) {
       console.error('Error updating A records:', error);
       throw new Error(`Erro ao atualizar registros A: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
@@ -149,6 +264,11 @@ class HostingerDNSService {
   validateIP(ip: string): boolean {
     const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
     return ipRegex.test(ip.trim());
+  }
+
+  validateApiToken(token: string): boolean {
+    // Basic token format validation
+    return token.trim().length > 0 && !token.includes(' ');
   }
 }
 

@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { domain, recordId, method, body, apiToken } = await req.json()
+    const { domain, method, body, apiToken } = await req.json()
 
     if (!apiToken) {
       return new Response(
@@ -25,9 +25,14 @@ serve(async (req) => {
       )
     }
 
-    let url = `https://api.hostinger.com/v1/domains/${domain}/dns`
-    if (recordId) {
-      url += `/${recordId}`
+    // Use the correct Hostinger API base URL
+    let url = `https://developers.hostinger.com/api/dns/v1/zones/${domain}`
+    
+    // Add specific endpoints for different operations
+    if (method === 'POST' && body?.validate) {
+      url += '/validate'
+    } else if (method === 'POST' && body?.reset) {
+      url += '/reset'
     }
 
     const requestOptions: RequestInit = {
@@ -43,11 +48,54 @@ serve(async (req) => {
     }
 
     console.log(`Making request to Hostinger API: ${method} ${url}`)
+    console.log('Request headers:', requestOptions.headers)
+    if (requestOptions.body) {
+      console.log('Request body:', requestOptions.body)
+    }
 
     const response = await fetch(url, requestOptions)
-    const data = await response.json()
+    
+    console.log(`Hostinger API response status: ${response.status}`)
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()))
 
-    console.log(`Hostinger API response:`, { status: response.status, data })
+    // Check if response is HTML (error page) instead of JSON
+    const contentType = response.headers.get('content-type') || ''
+    if (contentType.includes('text/html')) {
+      const htmlContent = await response.text()
+      console.error('Received HTML response instead of JSON:', htmlContent.substring(0, 500))
+      
+      return new Response(
+        JSON.stringify({ 
+          error: `API retornou HTML em vez de JSON. Status: ${response.status}`,
+          details: `Content-Type: ${contentType}. Verifique se o token e domínio estão corretos.`
+        }),
+        { 
+          status: response.status, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    let data
+    try {
+      data = await response.json()
+    } catch (parseError) {
+      const textContent = await response.text()
+      console.error('Failed to parse JSON response:', textContent)
+      
+      return new Response(
+        JSON.stringify({ 
+          error: `Resposta da API não é JSON válido`,
+          details: `Status: ${response.status}, Content: ${textContent.substring(0, 200)}`
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    console.log(`Hostinger API response data:`, data)
 
     if (!response.ok) {
       return new Response(
