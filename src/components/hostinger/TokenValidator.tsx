@@ -87,7 +87,10 @@ const TokenValidator: React.FC<TokenValidatorProps> = ({ apiToken, onValidationR
               )}
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge variant={validationResult.valid ? "success" : "outline"}>
+                  <Badge 
+                    variant={validationResult.valid ? "default" : "outline"}
+                    className={validationResult.valid ? "bg-green-100 text-green-800 border-green-200" : ""}
+                  >
                     {validationResult.valid ? 'Válido' : 'Problema Detectado'}
                   </Badge>
                 </div>
@@ -117,8 +120,7 @@ const TokenValidator: React.FC<TokenValidatorProps> = ({ apiToken, onValidationR
               <h4 className="font-medium text-blue-800 mb-1">Sobre a API de DNS da Hostinger</h4>
               <p className="text-sm text-blue-700">
                 A API de DNS da Hostinger permite gerenciar registros DNS programaticamente. 
-                Para usar esta API, é necessário um token com permissões adequadas, que pode 
-                estar disponível apenas para contas empresariais ou planos específicos.
+                Para usar esta API, é necessário um token com permissões adequadas.
               </p>
               <div className="mt-2 flex gap-3">
                 <a 
