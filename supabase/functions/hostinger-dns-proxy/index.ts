@@ -29,7 +29,7 @@ serve(async (req) => {
     if (validateTokenOnly) {
       try {
         // Test token by making a simple request to list domains endpoint
-        const testResponse = await fetch('https://api.hostinger.com/v3/dns/zones', {
+        const testResponse = await fetch('https://api.hostinger.com/dns/v1/zones', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${apiToken}`,
@@ -104,7 +104,7 @@ serve(async (req) => {
     // List all domains available
     if (listDomains) {
       try {
-        const response = await fetch('https://api.hostinger.com/v3/dns/zones', {
+        const response = await fetch('https://api.hostinger.com/dns/v1/zones', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${apiToken}`,
@@ -164,8 +164,8 @@ serve(async (req) => {
       )
     }
 
-    // Use the correct Hostinger API base URL - updated to v3
-    let url = `https://api.hostinger.com/v3/dns/zones/${domain}/records`
+    // Use the correct Hostinger API URL that you tested
+    let url = `https://api.hostinger.com/dns/v1/zones/${domain}/records`
     
     const requestOptions: RequestInit = {
       method: method || 'GET',

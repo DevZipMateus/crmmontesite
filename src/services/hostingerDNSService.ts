@@ -67,47 +67,6 @@ class HostingerDNSService {
     return data;
   }
 
-  private convertHostingerRecordsToFrontend(hostingerRecords: HostingerZoneRecord[]): DNSRecord[] {
-    const frontendRecords: DNSRecord[] = [];
-    
-    hostingerRecords.forEach((zoneRecord) => {
-      zoneRecord.records.forEach((record, index) => {
-        if (!record.is_disabled) {
-          frontendRecords.push({
-            id: `${zoneRecord.type}-${zoneRecord.name}-${index}`, // Generate unique ID
-            type: zoneRecord.type,
-            name: zoneRecord.name,
-            content: record.content,
-            ttl: zoneRecord.ttl
-          });
-        }
-      });
-    });
-
-    return frontendRecords;
-  }
-
-  private convertFrontendRecordsToHostinger(records: DNSRecord[]): HostingerZoneRecord[] {
-    const recordMap = new Map<string, HostingerZoneRecord>();
-
-    records.forEach((record) => {
-      const key = `${record.type}-${record.name}-${record.ttl}`;
-      
-      if (recordMap.has(key)) {
-        recordMap.get(key)!.records.push({ content: record.content });
-      } else {
-        recordMap.set(key, {
-          name: record.name,
-          type: record.type,
-          ttl: record.ttl,
-          records: [{ content: record.content }]
-        });
-      }
-    });
-
-    return Array.from(recordMap.values());
-  }
-
   async validateToken(apiToken: string): Promise<{ valid: boolean; message: string }> {
     try {
       console.log('Validating token...');
@@ -153,7 +112,7 @@ class HostingerDNSService {
 
       console.log('Available domains result:', result);
       
-      // The API might return different structures, handle them gracefully
+      // Handle the response from the correct Hostinger API endpoint
       if (Array.isArray(result)) {
         return result.map(domain => ({
           domain: typeof domain === 'string' ? domain : domain.domain || domain.name,
@@ -205,10 +164,9 @@ class HostingerDNSService {
 
       console.log('DNS records response:', response);
       
-      // Handle different response formats from Hostinger API v3
-      if (response.data && Array.isArray(response.data)) {
-        // Convert v3 format to frontend format
-        return response.data.map((record, index) => ({
+      // Handle the response structure from the Hostinger API you tested
+      if (response.records && Array.isArray(response.records)) {
+        return response.records.map((record, index) => ({
           id: record.id || `${record.type}-${record.name}-${index}`,
           type: record.type,
           name: record.name,
@@ -217,9 +175,15 @@ class HostingerDNSService {
         }));
       }
       
-      // Fallback for other formats
+      // Fallback for other response formats
       if (Array.isArray(response)) {
-        return this.convertHostingerRecordsToFrontend(response);
+        return response.map((record, index) => ({
+          id: record.id || `${record.type}-${record.name}-${index}`,
+          type: record.type,
+          name: record.name,
+          content: record.content || record.value,
+          ttl: record.ttl || 3600
+        }));
       }
       
       return [];
@@ -255,6 +219,47 @@ O domínio "${domain}" não foi encontrado na sua conta Hostinger DNS.
         throw new Error(`Erro ao listar registros DNS: ${errorMessage}`);
       }
     }
+  }
+
+  private convertHostingerRecordsToFrontend(hostingerRecords: HostingerZoneRecord[]): DNSRecord[] {
+    const frontendRecords: DNSRecord[] = [];
+    
+    hostingerRecords.forEach((zoneRecord) => {
+      zoneRecord.records.forEach((record, index) => {
+        if (!record.is_disabled) {
+          frontendRecords.push({
+            id: `${zoneRecord.type}-${zoneRecord.name}-${index}`, // Generate unique ID
+            type: zoneRecord.type,
+            name: zoneRecord.name,
+            content: record.content,
+            ttl: zoneRecord.ttl
+          });
+        }
+      });
+    });
+
+    return frontendRecords;
+  }
+
+  private convertFrontendRecordsToHostinger(records: DNSRecord[]): HostingerZoneRecord[] {
+    const recordMap = new Map<string, HostingerZoneRecord>();
+
+    records.forEach((record) => {
+      const key = `${record.type}-${record.name}-${record.ttl}`;
+      
+      if (recordMap.has(key)) {
+        recordMap.get(key)!.records.push({ content: record.content });
+      } else {
+        recordMap.set(key, {
+          name: record.name,
+          type: record.type,
+          ttl: record.ttl,
+          records: [{ content: record.content }]
+        });
+      }
+    });
+
+    return Array.from(recordMap.values());
   }
 
   async updateDNSRecord(
