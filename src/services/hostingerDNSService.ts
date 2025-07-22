@@ -121,6 +121,25 @@ class HostingerDNSService {
     }
   }
 
+  async testDomainAccess(domain: string, apiToken: string): Promise<{ accessible: boolean; message: string; recordCount?: number }> {
+    try {
+      const records = await this.listDNSRecords(domain, apiToken);
+      return {
+        accessible: true,
+        message: `Domínio acessível com sucesso`,
+        recordCount: records.length
+      };
+    } catch (error) {
+      console.error('Domain access test failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      
+      return {
+        accessible: false,
+        message: errorMessage
+      };
+    }
+  }
+
   async listDNSRecords(domain: string, apiToken: string): Promise<DNSRecord[]> {
     try {
       console.log(`Listing DNS records for domain: ${domain}`);
@@ -146,11 +165,16 @@ class HostingerDNSService {
       
       if (errorMessage.includes('não pertence à sua conta')) {
         throw new Error(`O domínio "${domain}" não foi encontrado na sua conta Hostinger. Verifique se:
-        - O domínio está correto
-        - O domínio foi adicionado à sua conta Hostinger
-        - Você tem permissão para gerenciar este domínio`);
+• O domínio está correto
+• O domínio foi adicionado à sua conta Hostinger
+• Você tem permissão para gerenciar este domínio
+• O domínio está ativo e configurado
+
+Dica: Use a ferramenta de debug para testar a conectividade.`);
       } else if (errorMessage.includes('Token API inválido')) {
         throw new Error('Token API inválido. Verifique se o token foi copiado corretamente e não expirou.');
+      } else if (errorMessage.includes('rate limit')) {
+        throw new Error('Limite de requisições atingido. Aguarde alguns minutos antes de tentar novamente.');
       } else {
         throw new Error(`Erro ao listar registros DNS: ${errorMessage}`);
       }
@@ -289,6 +313,17 @@ class HostingerDNSService {
   validateApiToken(token: string): boolean {
     // Basic token format validation
     return token.trim().length > 0 && !token.includes(' ');
+  }
+
+  getDomainTroubleshootingSteps(domain: string): string[] {
+    return [
+      `Verifique se "${domain}" está na sua conta Hostinger`,
+      'Confirme se você tem permissões de administrador na conta',
+      'Verifique se o domínio está ativo e não suspenso',
+      'Certifique-se de que o DNS está sendo gerenciado pela Hostinger',
+      'Teste com outro domínio da sua conta para confirmar o token',
+      'Se necessário, entre em contato com o suporte da Hostinger'
+    ];
   }
 }
 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,10 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Globe, Settings, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
+import TokenValidator from '@/components/hostinger/TokenValidator';
+import DomainDebugger from '@/components/hostinger/DomainDebugger';
 import { hostingerDNSService } from '@/services/hostingerDNSService';
 
 interface LogEntry {
@@ -36,6 +38,7 @@ const HostingerDNS: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [dnsRecords, setDnsRecords] = useState<{ domain: string; records: DNSRecord[] }[]>([]);
+  const [tokenValidation, setTokenValidation] = useState<{ valid: boolean; message: string } | null>(null);
   const { toast } = useToast();
 
   const addLog = (domain: string, status: 'success' | 'error', message: string) => {
@@ -54,6 +57,16 @@ const HostingerDNS: React.FC = () => {
         variant: "destructive",
         title: "Erro",
         description: "Token API é obrigatório"
+      });
+      return false;
+    }
+
+    if (!tokenValidation?.valid) {
+      addLog('', 'error', 'Token API não foi validado ou é inválido');
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Valide seu token API antes de continuar"
       });
       return false;
     }
@@ -226,167 +239,207 @@ const HostingerDNS: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Configuração
-                </CardTitle>
-                <CardDescription>
-                  Configure sua API Token e domínios para gerenciar
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="apiToken">Token API Hostinger</Label>
-                  <Input
-                    id="apiToken"
-                    type="password"
-                    placeholder="Cole seu token API aqui"
-                    value={apiToken}
-                    onChange={(e) => setApiToken(e.target.value)}
-                  />
-                </div>
+          <Tabs defaultValue="management" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="management">Gerenciamento</TabsTrigger>
+              <TabsTrigger value="validation">Validação</TabsTrigger>
+              <TabsTrigger value="debug">Debug</TabsTrigger>
+            </TabsList>
 
-                <div>
-                  <Label htmlFor="domains">Domínios (um por linha)</Label>
-                  <Textarea
-                    id="domains"
-                    placeholder="exemplo.com&#10;meusite.com.br"
-                    value={domains}
-                    onChange={(e) => setDomains(e.target.value)}
-                    rows={4}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="newIP">Novo IP (para atualização)</Label>
-                  <Input
-                    id="newIP"
-                    placeholder="192.168.1.1"
-                    value={newIP}
-                    onChange={(e) => setNewIP(e.target.value)}
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={handleListDNS} 
-                    disabled={isLoading}
-                    variant="outline"
-                  >
-                    {isLoading ? 'Carregando...' : 'Listar DNS'}
-                  </Button>
-                  <Button 
-                    onClick={handleUpdateDNS} 
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Atualizando...' : 'Atualizar DNS'}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Logs de Operação</CardTitle>
-                <CardDescription>
-                  Histórico das operações realizadas
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 max-h-80 overflow-y-auto">
-                  {logs.length === 0 ? (
-                    <p className="text-gray-500 text-sm">Nenhuma operação realizada ainda</p>
-                  ) : (
-                    logs.slice().reverse().map((log, index) => (
-                      <Alert key={index} className={log.status === 'error' ? 'border-red-200' : 'border-green-200'}>
-                        <div className="flex items-start gap-2">
-                          {log.status === 'error' ? (
-                            <AlertTriangle className="h-4 w-4 text-red-500 mt-1" />
-                          ) : (
-                            <CheckCircle className="h-4 w-4 text-green-500 mt-1" />
-                          )}
-                          <div className="flex-1">
-                            <AlertDescription>
-                              <div className="font-medium">{log.domain || 'Sistema'}</div>
-                              <div className="text-sm">{log.message}</div>
-                              <div className="text-xs text-gray-500">
-                                {log.timestamp.toLocaleTimeString()}
-                              </div>
-                            </AlertDescription>
-                          </div>
+            <TabsContent value="management" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="h-5 w-5" />
+                      Configuração
+                    </CardTitle>
+                    <CardDescription>
+                      Configure sua API Token e domínios para gerenciar
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label htmlFor="apiToken">Token API Hostinger</Label>
+                      <Input
+                        id="apiToken"
+                        type="password"
+                        placeholder="Cole seu token API aqui"
+                        value={apiToken}
+                        onChange={(e) => setApiToken(e.target.value)}
+                      />
+                      {tokenValidation && (
+                        <div className="mt-2">
+                          <Badge variant={tokenValidation.valid ? "default" : "destructive"}>
+                            {tokenValidation.valid ? 'Token Válido' : 'Token Inválido'}
+                          </Badge>
                         </div>
-                      </Alert>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {dnsRecords.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Registros DNS</CardTitle>
-                <CardDescription>
-                  Registros DNS encontrados nos domínios
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {dnsRecords.map((domainRecord, index) => (
-                    <div key={index}>
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-semibold text-lg">{domainRecord.domain}</h3>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => refreshDNS(domainRecord.domain)}
-                          disabled={isLoading}
-                        >
-                          <RefreshCw className="h-4 w-4 mr-2" />
-                          Atualizar
-                        </Button>
-                      </div>
-                      {domainRecord.records.length > 0 ? (
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Tipo</TableHead>
-                              <TableHead>Nome</TableHead>
-                              <TableHead>Conteúdo</TableHead>
-                              <TableHead>TTL</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {domainRecord.records.map((record) => (
-                              <TableRow key={record.id}>
-                                <TableCell>
-                                  <Badge variant="outline">{record.type}</Badge>
-                                </TableCell>
-                                <TableCell>{record.name}</TableCell>
-                                <TableCell>{record.content}</TableCell>
-                                <TableCell>{record.ttl}s</TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      ) : (
-                        <Alert>
-                          <AlertTriangle className="h-4 w-4" />
-                          <AlertDescription>
-                            Nenhum registro DNS encontrado para este domínio.
-                          </AlertDescription>
-                        </Alert>
                       )}
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+
+                    <div>
+                      <Label htmlFor="domains">Domínios (um por linha)</Label>
+                      <Textarea
+                        id="domains"
+                        placeholder="exemplo.com&#10;meusite.com.br"
+                        value={domains}
+                        onChange={(e) => setDomains(e.target.value)}
+                        rows={4}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="newIP">Novo IP (para atualização)</Label>
+                      <Input
+                        id="newIP"
+                        placeholder="192.168.1.1"
+                        value={newIP}
+                        onChange={(e) => setNewIP(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={handleListDNS} 
+                        disabled={isLoading || !tokenValidation?.valid}
+                        variant="outline"
+                      >
+                        {isLoading ? 'Carregando...' : 'Listar DNS'}
+                      </Button>
+                      <Button 
+                        onClick={handleUpdateDNS} 
+                        disabled={isLoading || !tokenValidation?.valid}
+                      >
+                        {isLoading ? 'Atualizando...' : 'Atualizar DNS'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Logs de Operação</CardTitle>
+                    <CardDescription>
+                      Histórico das operações realizadas
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2 max-h-80 overflow-y-auto">
+                      {logs.length === 0 ? (
+                        <p className="text-gray-500 text-sm">Nenhuma operação realizada ainda</p>
+                      ) : (
+                        logs.slice().reverse().map((log, index) => (
+                          <Alert key={index} className={log.status === 'error' ? 'border-red-200' : 'border-green-200'}>
+                            <div className="flex items-start gap-2">
+                              {log.status === 'error' ? (
+                                <AlertTriangle className="h-4 w-4 text-red-500 mt-1" />
+                              ) : (
+                                <CheckCircle className="h-4 w-4 text-green-500 mt-1" />
+                              )}
+                              <div className="flex-1">
+                                <AlertDescription>
+                                  <div className="font-medium">{log.domain || 'Sistema'}</div>
+                                  <div className="text-sm">{log.message}</div>
+                                  <div className="text-xs text-gray-500">
+                                    {log.timestamp.toLocaleTimeString()}
+                                  </div>
+                                </AlertDescription>
+                              </div>
+                            </div>
+                          </Alert>
+                        ))
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {dnsRecords.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Registros DNS</CardTitle>
+                    <CardDescription>
+                      Registros DNS encontrados nos domínios
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      {dnsRecords.map((domainRecord, index) => (
+                        <div key={index}>
+                          <div className="flex items-center justify-between mb-3">
+                            <h3 className="font-semibold text-lg">{domainRecord.domain}</h3>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => refreshDNS(domainRecord.domain)}
+                              disabled={isLoading}
+                            >
+                              <RefreshCw className="h-4 w-4 mr-2" />
+                              Atualizar
+                            </Button>
+                          </div>
+                          {domainRecord.records.length > 0 ? (
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Tipo</TableHead>
+                                  <TableHead>Nome</TableHead>
+                                  <TableHead>Conteúdo</TableHead>
+                                  <TableHead>TTL</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {domainRecord.records.map((record) => (
+                                  <TableRow key={record.id}>
+                                    <TableCell>
+                                      <Badge variant="outline">{record.type}</Badge>
+                                    </TableCell>
+                                    <TableCell>{record.name}</TableCell>
+                                    <TableCell>{record.content}</TableCell>
+                                    <TableCell>{record.ttl}s</TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          ) : (
+                            <Alert>
+                              <AlertTriangle className="h-4 w-4" />
+                              <AlertDescription>
+                                Nenhum registro DNS encontrado para este domínio.
+                              </AlertDescription>
+                            </Alert>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="validation" className="space-y-6">
+              <TokenValidator 
+                apiToken={apiToken} 
+                onValidationResult={setTokenValidation}
+              />
+            </TabsContent>
+
+            <TabsContent value="debug" className="space-y-6">
+              <DomainDebugger apiToken={apiToken} />
+              
+              {tokenValidation && !tokenValidation.valid && (
+                <Alert>
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    <div className="space-y-2">
+                      <p className="font-medium">Token inválido detectado</p>
+                      <p>Para usar as ferramentas de debug, primeiro valide seu token na aba "Validação".</p>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
 
