@@ -8,7 +8,8 @@ import {
   Link as LinkIcon,
   Settings,
   Users,
-  ContactRound
+  ContactRound,
+  Eye
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -86,7 +87,7 @@ const MainMenuSection: React.FC = () => {
         />
         
         <MenuItem 
-          icon={<Users size={24} />}
+          icon={<Eye size={24} />}
           label="Painel de Vendas"
           href="/painel-vendas"
           description="Visualizar projetos (somente leitura)"
