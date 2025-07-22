@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 interface DNSRecord {
@@ -100,17 +99,25 @@ class HostingerDNSService {
     return Array.from(recordMap.values());
   }
 
-  async validateToken(apiToken: string): Promise<boolean> {
+  async validateToken(apiToken: string): Promise<{ valid: boolean; message: string }> {
     try {
       // Test with a simple domain to validate the token
       await this.makeProxyRequest('test.com', {
         method: 'GET',
         apiToken
       });
-      return true;
+      return { valid: true, message: 'Token válido' };
     } catch (error) {
       console.error('Token validation failed:', error);
-      return false;
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      
+      if (errorMessage.includes('Token API inválido') || errorMessage.includes('authentication')) {
+        return { valid: false, message: 'Token API inválido ou expirado' };
+      } else if (errorMessage.includes('não pertence à sua conta')) {
+        return { valid: true, message: 'Token válido (domínio de teste não encontrado, mas token é válido)' };
+      } else {
+        return { valid: false, message: `Erro ao validar token: ${errorMessage}` };
+      }
     }
   }
 
@@ -133,7 +140,20 @@ class HostingerDNSService {
       return [];
     } catch (error) {
       console.error('Error listing DNS records:', error);
-      throw new Error(`Erro ao listar registros DNS: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+      
+      // Provide more specific error messages
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      
+      if (errorMessage.includes('não pertence à sua conta')) {
+        throw new Error(`O domínio "${domain}" não foi encontrado na sua conta Hostinger. Verifique se:
+        - O domínio está correto
+        - O domínio foi adicionado à sua conta Hostinger
+        - Você tem permissão para gerenciar este domínio`);
+      } else if (errorMessage.includes('Token API inválido')) {
+        throw new Error('Token API inválido. Verifique se o token foi copiado corretamente e não expirou.');
+      } else {
+        throw new Error(`Erro ao listar registros DNS: ${errorMessage}`);
+      }
     }
   }
 

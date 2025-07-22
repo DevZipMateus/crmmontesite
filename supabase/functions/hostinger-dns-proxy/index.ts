@@ -17,7 +17,7 @@ serve(async (req) => {
 
     if (!apiToken) {
       return new Response(
-        JSON.stringify({ error: 'API Token é obrigatório' }),
+        JSON.stringify({ error: 'Token API é obrigatório' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -98,9 +98,24 @@ serve(async (req) => {
     console.log(`Hostinger API response data:`, data)
 
     if (!response.ok) {
+      // Handle specific Hostinger API errors
+      let errorMessage = `Erro da API Hostinger: ${response.status} - ${response.statusText}`
+      
+      if (data.message) {
+        if (data.message.includes('[DNS:4002]')) {
+          errorMessage = 'O domínio não pertence à sua conta Hostinger ou não existe'
+        } else if (data.message.includes('authentication') || data.message.includes('token')) {
+          errorMessage = 'Token API inválido ou expirado'
+        } else if (data.message.includes('rate limit')) {
+          errorMessage = 'Limite de requisições atingido. Tente novamente em alguns minutos'
+        } else {
+          errorMessage = `Erro da API: ${data.message}`
+        }
+      }
+      
       return new Response(
         JSON.stringify({ 
-          error: `Erro da API Hostinger: ${response.status} - ${response.statusText}`,
+          error: errorMessage,
           details: data
         }),
         { 
