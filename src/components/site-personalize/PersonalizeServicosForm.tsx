@@ -71,7 +71,7 @@ export const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = (
         name="servicos"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Serviços a Destacar*</FormLabel>
+            <FormLabel>Serviços e Produtos*</FormLabel>
             <FormControl>
               <Textarea
                 placeholder="Liste os principais serviços oferecidos"
