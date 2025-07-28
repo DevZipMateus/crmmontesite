@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Project } from "@/types/project";
@@ -10,13 +10,14 @@ import {
   StatusButtonsGrid,
   PartnerIndicator,
   FormStatusIndicator,
-  CustomizationDeadlineIndicator,
-  AssignedProgrammerIndicator
+  CustomizationDeadlineIndicator
 } from "./ProjectCardComponents";
 import { LeadLinkIndicator } from "../LeadLinkIndicator";
 import { ClientTypeBadge } from "../ClientTypeBadge";
 import { getClientTypeInfo } from "@/utils/clientTypeUtils";
 import { useNavigate } from "react-router-dom";
+import { updateProject } from "@/server/project-actions";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProjectCardProps {
   project: Project;
@@ -25,6 +26,7 @@ interface ProjectCardProps {
   onStatusChange: (projectId: string, newStatus: string) => void;
   updatingStatus: string | null;
   onProjectDeleted?: () => void;
+  onProjectUpdated?: () => void;
 }
 
 export default function ProjectCard({
@@ -34,16 +36,51 @@ export default function ProjectCard({
   onStatusChange,
   updatingStatus,
   onProjectDeleted,
+  onProjectUpdated,
 }: ProjectCardProps) {
   const isUpdating = updatingStatus === project.id;
   const navigate = useNavigate();
   const clientTypeInfo = getClientTypeInfo(project);
+  const { toast } = useToast();
+  const [isUpdatingProgrammer, setIsUpdatingProgrammer] = useState(false);
 
   const handleViewEdit = (projectId: string, action: 'view' | 'edit') => {
     if (action === 'view') {
       navigate(`/projeto/${projectId}`);
     } else {
       navigate(`/projeto/${projectId}/editar`);
+    }
+  };
+
+  const handleAssignedProgrammerChange = async (programmer: string | null) => {
+    setIsUpdatingProgrammer(true);
+    try {
+      const result = await updateProject(project.id, {
+        assigned_programmer: programmer
+      });
+
+      if (result.success) {
+        toast({
+          title: "Programador atualizado",
+          description: `Programador ${programmer ? `atribuído para ${programmer}` : 'removido'} com sucesso.`,
+        });
+        
+        // Refresh the project data
+        if (onProjectUpdated) {
+          onProjectUpdated();
+        }
+      } else {
+        throw new Error(result.message || "Erro ao atualizar programador");
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar programador:", error);
+      toast({
+        title: "Erro ao atualizar programador",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingProgrammer(false);
     }
   };
 
@@ -63,10 +100,9 @@ export default function ProjectCard({
           template={project.template || ''}
           hasPendingCustomizations={project.hasPendingCustomizations || false}
           createdAt={project.created_at}
+          assignedProgrammer={project.assigned_programmer}
+          onAssignedProgrammerChange={handleAssignedProgrammerChange}
         />
-        
-        {/* Indicador de Programador Responsável */}
-        <AssignedProgrammerIndicator assignedProgrammer={project.assigned_programmer} />
         
         {/* Indicador de Lead Vinculado */}
         {project.lead_id && (

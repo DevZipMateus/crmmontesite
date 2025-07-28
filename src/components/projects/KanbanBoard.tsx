@@ -15,10 +15,17 @@ interface KanbanBoardProps {
   projects: Project[];
   setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
   onProjectDeleted?: () => void;
+  onProjectUpdated?: () => void;
   searchQuery?: string;
 }
 
-export default function KanbanBoard({ projects, setProjects, onProjectDeleted, searchQuery = "" }: KanbanBoardProps) {
+export default function KanbanBoard({ 
+  projects, 
+  setProjects, 
+  onProjectDeleted, 
+  onProjectUpdated,
+  searchQuery = "" 
+}: KanbanBoardProps) {
   const {
     domainDialogOpen,
     pendingStatusChange,
@@ -122,6 +129,12 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted, s
     }
   };
 
+  const handleProjectUpdated = () => {
+    if (onProjectUpdated) {
+      onProjectUpdated();
+    }
+  };
+
   const handleUnifiedStatusChange = (projectId: string, newStatus: string) => {
     handleStatusChange(projectId, newStatus);
   };
@@ -170,6 +183,7 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted, s
             onStatusChange={handleUnifiedStatusChange}
             statusOptions={PROJECT_STATUS_TYPES}
             onProjectDeleted={handleProjectDeleted}
+            onProjectUpdated={handleProjectUpdated}
           />
         </div>
 
@@ -201,6 +215,7 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted, s
                 onStatusChange={handleUnifiedStatusChange}
                 statusOptions={PROJECT_STATUS_TYPES}
                 onProjectDeleted={handleProjectDeleted}
+                onProjectUpdated={handleProjectUpdated}
               />
             </div>
           ))}

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Calendar } from "lucide-react";
 import { formatDate } from "@/utils/formatters";
 import { useModelDetails } from "@/utils/modelUtils";
+import { EditableAssignedProgrammer } from "./EditableAssignedProgrammer";
 
 interface ProjectCardHeaderProps {
   clientName: string;
@@ -10,6 +11,8 @@ interface ProjectCardHeaderProps {
   hasPendingCustomizations: boolean;
   isLoading?: boolean;
   createdAt: string;
+  assignedProgrammer?: string;
+  onAssignedProgrammerChange?: (programmer: string | null) => void;
 }
 
 export const ProjectCardHeader = ({ 
@@ -17,7 +20,9 @@ export const ProjectCardHeader = ({
   template, 
   hasPendingCustomizations,
   isLoading = false,
-  createdAt
+  createdAt,
+  assignedProgrammer,
+  onAssignedProgrammerChange
 }: ProjectCardHeaderProps) => {
   const { modelName, isLoading: modelLoading } = useModelDetails(template);
 
@@ -40,6 +45,12 @@ export const ProjectCardHeader = ({
           modelName || "Sem modelo"
         )}
       </div>
+      
+      {/* Editable programmer assignment */}
+      <EditableAssignedProgrammer
+        assignedProgrammer={assignedProgrammer}
+        onAssignedProgrammerChange={onAssignedProgrammerChange}
+      />
       
       <div className="flex items-center gap-1 text-xs text-gray-400">
         <Calendar className="h-3 w-3" />

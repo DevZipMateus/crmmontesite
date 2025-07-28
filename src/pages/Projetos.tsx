@@ -43,6 +43,11 @@ export default function Projetos() {
     fetchProjects();
   };
 
+  const handleProjectUpdated = () => {
+    // Refresh projects after update
+    fetchProjects();
+  };
+
   const handleLinkingComplete = () => {
     // Refresh projects after linking
     fetchProjects();
@@ -106,6 +111,7 @@ export default function Projetos() {
                 projects={projects} 
                 setProjects={setProjects} 
                 onProjectDeleted={handleProjectDeleted}
+                onProjectUpdated={handleProjectUpdated}
                 searchQuery={searchQuery}
               />
             ) : (
