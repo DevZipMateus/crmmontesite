@@ -1,7 +1,8 @@
-
 import { PROJECT_STATUS_TYPES } from "@/lib/supabase/projectStatus";
 import KanbanColumn from "./kanban/KanbanColumn";
 import { useDragAndDrop } from "./kanban/useDragAndDrop";
+import { useStatusChangeWithDomain } from "@/hooks/use-status-change-with-domain";
+import { DomainRequiredDialog } from "./DomainRequiredDialog";
 import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,13 +20,28 @@ interface KanbanBoardProps {
 
 export default function KanbanBoard({ projects, setProjects, onProjectDeleted, searchQuery = "" }: KanbanBoardProps) {
   const {
+    domainDialogOpen,
+    pendingStatusChange,
+    isUpdating,
+    handleStatusChange,
+    handleDomainConfirm,
+    handleDomainCancel
+  } = useStatusChangeWithDomain({ projects, setProjects });
+
+  const {
     draggingId,
     updatingStatus,
     handleDragStart,
     handleDragOver,
     handleDrop,
-    handleStatusChange
-  } = useDragAndDrop(projects, setProjects);
+    handleStatusChange: handleDragStatusChange
+  } = useDragAndDrop({ 
+    projects, 
+    setProjects, 
+    onDomainRequired: (projectId, newStatus, projectName) => {
+      handleStatusChange(projectId, newStatus);
+    }
+  });
   
   const isMobile = useIsMobile();
   const [activeColumnIndex, setActiveColumnIndex] = useState(0);
@@ -106,6 +122,10 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted, s
     }
   };
 
+  const handleUnifiedStatusChange = (projectId: string, newStatus: string) => {
+    handleStatusChange(projectId, newStatus);
+  };
+
   if (isMobile) {
     const currentStatusType = PROJECT_STATUS_TYPES[activeColumnIndex];
     
@@ -143,15 +163,23 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted, s
             statusType={currentStatusType}
             projects={displayProjects}
             draggingId={draggingId}
-            updatingStatus={updatingStatus}
+            updatingStatus={updatingStatus || (isUpdating ? pendingStatusChange?.projectId || null : null)}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             onDragStart={handleDragStart}
-            onStatusChange={handleStatusChange}
+            onStatusChange={handleUnifiedStatusChange}
             statusOptions={PROJECT_STATUS_TYPES}
             onProjectDeleted={handleProjectDeleted}
           />
         </div>
+
+        <DomainRequiredDialog
+          open={domainDialogOpen}
+          onClose={handleDomainCancel}
+          onConfirm={handleDomainConfirm}
+          projectName={pendingStatusChange?.projectName || ""}
+          isLoading={isUpdating}
+        />
       </div>
     );
   }
@@ -166,11 +194,11 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted, s
                 statusType={statusType}
                 projects={displayProjects}
                 draggingId={draggingId}
-                updatingStatus={updatingStatus}
+                updatingStatus={updatingStatus || (isUpdating ? pendingStatusChange?.projectId || null : null)}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
                 onDragStart={handleDragStart}
-                onStatusChange={handleStatusChange}
+                onStatusChange={handleUnifiedStatusChange}
                 statusOptions={PROJECT_STATUS_TYPES}
                 onProjectDeleted={handleProjectDeleted}
               />
@@ -178,6 +206,14 @@ export default function KanbanBoard({ projects, setProjects, onProjectDeleted, s
           ))}
         </div>
       </ScrollArea>
+
+      <DomainRequiredDialog
+        open={domainDialogOpen}
+        onClose={handleDomainCancel}
+        onConfirm={handleDomainConfirm}
+        projectName={pendingStatusChange?.projectName || ""}
+        isLoading={isUpdating}
+      />
     </div>
   );
 }

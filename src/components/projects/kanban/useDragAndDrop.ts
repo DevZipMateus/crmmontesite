@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { updateProjectStatus } from "@/lib/supabase/projectStatus";
+import { updateProject } from "@/server/project/update-project";
 
 interface Project {
   id: string;
@@ -10,9 +11,16 @@ interface Project {
   status: string;
   created_at: string;
   responsible_name?: string;
+  domain?: string;
 }
 
-export function useDragAndDrop(projects: Project[], setProjects: React.Dispatch<React.SetStateAction<Project[]>>) {
+interface UseDragAndDropProps {
+  projects: Project[];
+  setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
+  onDomainRequired?: (projectId: string, newStatus: string, projectName: string) => void;
+}
+
+export function useDragAndDrop({ projects, setProjects, onDomainRequired }: UseDragAndDropProps) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const { toast } = useToast();
@@ -38,6 +46,37 @@ export function useDragAndDrop(projects: Project[], setProjects: React.Dispatch<
       return;
     }
 
+    // Verificar se é mudança para "Site pronto" e se precisa de domínio
+    if (newStatus === "Site pronto" && project && !project.domain?.trim()) {
+      if (onDomainRequired) {
+        onDomainRequired(projectId, newStatus, project.client_name);
+      }
+      setDraggingId(null);
+      return;
+    }
+
+    // Proceder com a mudança de status normalmente
+    await executeStatusChange(projectId, newStatus);
+    setDraggingId(null);
+  };
+
+  const handleStatusChange = async (projectId: string, newStatus: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+
+    // Verificar se é mudança para "Site pronto" e se precisa de domínio
+    if (newStatus === "Site pronto" && !project.domain?.trim()) {
+      if (onDomainRequired) {
+        onDomainRequired(projectId, newStatus, project.client_name);
+      }
+      return;
+    }
+
+    // Proceder com a mudança de status normalmente
+    await executeStatusChange(projectId, newStatus);
+  };
+
+  const executeStatusChange = async (projectId: string, newStatus: string) => {
     setUpdatingStatus(projectId);
     
     try {
@@ -48,41 +87,6 @@ export function useDragAndDrop(projects: Project[], setProjects: React.Dispatch<
         toast({
           title: "Status atualizado",
           description: `Projeto movido para "${newStatus}"`,
-        });
-        
-        setProjects(prevProjects => 
-          prevProjects.map(project => 
-            project.id === projectId ? { ...project, status: newStatus } : project
-          )
-        );
-      } else {
-        console.error('Erro ao atualizar status:', result.error);
-        throw new Error('Failed to update project status');
-      }
-    } catch (error) {
-      console.error('Error updating project status:', error);
-      toast({
-        title: "Erro ao atualizar status",
-        description: "Não foi possível atualizar o status do projeto.",
-        variant: "destructive",
-      });
-    } finally {
-      setDraggingId(null);
-      setUpdatingStatus(null);
-    }
-  };
-
-  const handleStatusChange = async (projectId: string, newStatus: string) => {
-    setUpdatingStatus(projectId);
-    
-    try {
-      console.log(`Alterando status do projeto ${projectId} para ${newStatus}`);
-      const result = await updateProjectStatus(projectId, newStatus);
-      
-      if (result.success) {
-        toast({
-          title: "Status atualizado",
-          description: `Status do projeto alterado para "${newStatus}"`,
         });
         
         setProjects(prevProjects => 
