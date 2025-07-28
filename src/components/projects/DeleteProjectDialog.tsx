@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { deleteProject } from "@/server/project-actions";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DeleteProjectDialogProps {
   projectId: string;
@@ -34,16 +36,36 @@ export default function DeleteProjectDialog({
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
+  // Check for project dependencies when dialog opens
+  const { data: dependencies, isLoading } = useQuery({
+    queryKey: ["project-dependencies", projectId],
+    queryFn: async () => {
+      const [leadsResult, webhooksResult] = await Promise.all([
+        supabase
+          .from('leads')
+          .select('id, empresa')
+          .eq('project_id', projectId),
+        supabase
+          .from('webhook_logs')
+          .select('id')
+          .eq('project_id', projectId)
+      ]);
+
+      return {
+        leads: leadsResult.data || [],
+        webhooks: webhooksResult.data || [],
+        hasErrors: leadsResult.error || webhooksResult.error
+      };
+    },
+    enabled: open,
+  });
+
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
-      const { success } = await deleteProject(projectId);
+      const result = await deleteProject(projectId);
       
-      if (success) {
-        toast({
-          title: "Projeto excluído",
-          description: `O projeto "${projectName}" foi excluído com sucesso.`,
-        });
+      if (result.success) {
         if (onDelete) {
           onDelete();
         }
@@ -90,12 +112,39 @@ export default function DeleteProjectDialog({
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir projeto</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir o projeto "{projectName}"?
-              <br />
-              <br />
-              <strong className="text-red-600">
-                Esta ação não pode ser desfeita e excluirá todas as customizações associadas.
-              </strong>
+              <div className="space-y-3">
+                <p>
+                  Tem certeza que deseja excluir o projeto "{projectName}"?
+                </p>
+                
+                {isLoading && (
+                  <p className="text-sm text-muted-foreground">
+                    Verificando dependências...
+                  </p>
+                )}
+                
+                {dependencies && !isLoading && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-md p-3">
+                    <p className="text-sm font-medium text-amber-800 mb-2">
+                      O que será feito:
+                    </p>
+                    <ul className="text-sm text-amber-700 space-y-1">
+                      {dependencies.leads.length > 0 && (
+                        <li>• {dependencies.leads.length} lead(s) serão desvinculados</li>
+                      )}
+                      {dependencies.webhooks.length > 0 && (
+                        <li>• {dependencies.webhooks.length} log(s) de webhook serão excluídos</li>
+                      )}
+                      <li>• Todas as customizações serão excluídas</li>
+                      <li>• O projeto será permanentemente removido</li>
+                    </ul>
+                  </div>
+                )}
+                
+                <p className="text-sm font-medium text-red-600">
+                  Esta ação não pode ser desfeita.
+                </p>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -105,7 +154,7 @@ export default function DeleteProjectDialog({
                 e.preventDefault();
                 handleDelete();
               }}
-              disabled={isDeleting}
+              disabled={isDeleting || isLoading}
               className="bg-red-600 hover:bg-red-700"
             >
               {isDeleting ? "Excluindo..." : "Excluir projeto"}
