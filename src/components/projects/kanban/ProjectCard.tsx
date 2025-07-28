@@ -10,7 +10,8 @@ import {
   StatusButtonsGrid,
   PartnerIndicator,
   FormStatusIndicator,
-  CustomizationDeadlineIndicator
+  CustomizationDeadlineIndicator,
+  EditableAssignedProgrammer
 } from "./ProjectCardComponents";
 import { LeadLinkIndicator } from "../LeadLinkIndicator";
 import { ClientTypeBadge } from "../ClientTypeBadge";
@@ -90,8 +91,12 @@ export default function ProjectCard({
       onDragStart={() => onDragStart(project.id)}
     >
       <div className="space-y-2 sm:space-y-3">
-        {/* Badge do tipo de cliente */}
-        <div className="flex justify-end">
+        {/* Top row with programmer assignment and client type badge */}
+        <div className="flex justify-between items-start">
+          <EditableAssignedProgrammer
+            assignedProgrammer={project.assigned_programmer}
+            onAssignedProgrammerChange={handleAssignedProgrammerChange}
+          />
           <ClientTypeBadge project={project} variant="badge" />
         </div>
         
@@ -100,8 +105,6 @@ export default function ProjectCard({
           template={project.template || ''}
           hasPendingCustomizations={project.hasPendingCustomizations || false}
           createdAt={project.created_at}
-          assignedProgrammer={project.assigned_programmer}
-          onAssignedProgrammerChange={handleAssignedProgrammerChange}
         />
         
         {/* Indicador de Lead Vinculado */}
