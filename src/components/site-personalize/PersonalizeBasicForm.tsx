@@ -128,7 +128,7 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
         name="endereco"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Endereço</FormLabel>
+            <FormLabel>Endereço *</FormLabel>
             <FormControl>
               <Input 
                 placeholder="Rua, número, bairro, cidade - CEP"
@@ -146,7 +146,7 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
         name="horario_funcionamento"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Horário de Funcionamento</FormLabel>
+            <FormLabel>Horário de Funcionamento *</FormLabel>
             <FormControl>
               <Input 
                 placeholder="Ex: Segunda a Sexta: 8h às 18h, Sábado: 8h às 12h"
