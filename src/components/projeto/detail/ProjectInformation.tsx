@@ -8,6 +8,7 @@ import { CheckCircle2, Clock } from "lucide-react";
 import DeleteProjectDialog from "@/components/projects/DeleteProjectDialog";
 import { useNavigate } from "react-router-dom";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
+import { formatCnpjCpf } from "@/utils/documentFormatter";
 
 interface ProjectInformationProps {
   project: Project;
@@ -72,6 +73,12 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
             <div>
               <p className="text-sm font-medium text-gray-500">Telefone</p>
               <p className="mt-1">{project.telefone || '—'}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">CNPJ/CPF</p>
+              <p className="mt-1">
+                {project.cnpj ? formatCnpjCpf(project.cnpj) : '—'}
+              </p>
             </div>
             
             {/* Seção específica para projetos de parceiros */}
