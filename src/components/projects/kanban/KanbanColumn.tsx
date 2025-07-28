@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,6 +20,7 @@ interface KanbanColumnProps {
   onStatusChange: (projectId: string, newStatus: string) => void;
   statusOptions: Array<{value: string; color: string}>;
   onProjectDeleted?: () => void;
+  onProjectUpdated?: () => void;
 }
 
 export default function KanbanColumn({
@@ -33,7 +33,8 @@ export default function KanbanColumn({
   onDragStart,
   onStatusChange,
   statusOptions,
-  onProjectDeleted
+  onProjectDeleted,
+  onProjectUpdated
 }: KanbanColumnProps) {
   const filteredProjects = projects.filter(
     (project) => project.status === statusType.value
@@ -86,6 +87,7 @@ export default function KanbanColumn({
                 onStatusChange={onStatusChange}
                 updatingStatus={updatingStatus}
                 onProjectDeleted={onProjectDeleted}
+                onProjectUpdated={onProjectUpdated}
               />
             ))}
           </div>
