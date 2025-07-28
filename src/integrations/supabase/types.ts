@@ -347,6 +347,7 @@ export type Database = {
       }
       projects: {
         Row: {
+          assigned_programmer: string | null
           blaster_link: string | null
           client_name: string
           client_type: string | null
@@ -377,6 +378,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          assigned_programmer?: string | null
           blaster_link?: string | null
           client_name: string
           client_type?: string | null
@@ -407,6 +409,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          assigned_programmer?: string | null
           blaster_link?: string | null
           client_name?: string
           client_type?: string | null

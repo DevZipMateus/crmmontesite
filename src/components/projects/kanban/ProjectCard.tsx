@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +10,8 @@ import {
   StatusButtonsGrid,
   PartnerIndicator,
   FormStatusIndicator,
-  CustomizationDeadlineIndicator
+  CustomizationDeadlineIndicator,
+  AssignedProgrammerIndicator
 } from "./ProjectCardComponents";
 import { LeadLinkIndicator } from "../LeadLinkIndicator";
 import { ClientTypeBadge } from "../ClientTypeBadge";
@@ -62,6 +64,9 @@ export default function ProjectCard({
           hasPendingCustomizations={project.hasPendingCustomizations || false}
           createdAt={project.created_at}
         />
+        
+        {/* Indicador de Programador Responsável */}
+        <AssignedProgrammerIndicator assignedProgrammer={project.assigned_programmer} />
         
         {/* Indicador de Lead Vinculado */}
         {project.lead_id && (

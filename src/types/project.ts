@@ -16,6 +16,7 @@ export interface Project {
   hasPendingCustomizations?: boolean;
   isArchived?: boolean;
   manually_archived?: boolean;
+  assigned_programmer?: string;
   
   // Campos para webhook/parceiros
   partner_hash?: string;

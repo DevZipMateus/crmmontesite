@@ -1,8 +1,9 @@
 
 export { ProjectCardHeader } from './ProjectCardHeader';
-export { ProjectCardDomain } from './ProjectCardDomain';
 export { ProjectCardActions } from './ProjectCardActions';
-export { FormStatusIndicator } from './FormStatusIndicator';
-export { PartnerIndicator } from './PartnerIndicator';
-export { CustomizationDeadlineIndicator } from './CustomizationDeadlineIndicator';
+export { ProjectCardDomain } from './ProjectCardDomain';
 export { StatusButtonsGrid } from './StatusButtonsGrid';
+export { PartnerIndicator } from './PartnerIndicator';
+export { FormStatusIndicator } from './FormStatusIndicator';
+export { CustomizationDeadlineIndicator } from './CustomizationDeadlineIndicator';
+export { AssignedProgrammerIndicator } from './AssignedProgrammerIndicator';
