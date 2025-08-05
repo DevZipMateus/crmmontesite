@@ -192,7 +192,7 @@ export function ProjectFormEdit({ initialValues, submitButtonText = "Salvar", mo
               <SelectContent>
                 <SelectItem value="direto">Direto</SelectItem>
                 <SelectItem value="parceiro">Parceiro</SelectItem>
-                <SelectItem value="indicacao">Indicação</SelectItem>
+                <SelectItem value="outbound">Outbound</SelectItem>
               </SelectContent>
             </Select>
           </div>
