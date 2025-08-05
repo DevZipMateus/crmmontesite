@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Filter, X, Plus, ArrowUpDown } from "lucide-react";
+import { Search, Filter, X, Plus, ArrowUpDown, MessageSquare } from "lucide-react";
 import { LeadFilters } from "@/types/lead";
 
 interface LeadFiltersProps {
@@ -50,7 +50,7 @@ const LeadFiltersComponent: React.FC<LeadFiltersProps> = ({
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
         <div className="relative">
           <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <Input
@@ -143,6 +143,24 @@ const LeadFiltersComponent: React.FC<LeadFiltersProps> = ({
             <SelectItem value="15-30">15-30 dias</SelectItem>
             <SelectItem value="30+">Mais de 30 dias</SelectItem>
             <SelectItem value="site-pronto">Site Pronto</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={filters.comObservacao === undefined ? 'all' : filters.comObservacao ? 'com' : 'sem'}
+          onValueChange={(value) => onFiltersChange({ 
+            ...filters, 
+            comObservacao: value === 'all' ? undefined : value === 'com'
+          })}
+        >
+          <SelectTrigger>
+            <MessageSquare size={16} className="mr-2" />
+            <SelectValue placeholder="Observações" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas</SelectItem>
+            <SelectItem value="com">Com observação</SelectItem>
+            <SelectItem value="sem">Sem observação</SelectItem>
           </SelectContent>
         </Select>
 

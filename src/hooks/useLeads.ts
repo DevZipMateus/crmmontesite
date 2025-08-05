@@ -68,6 +68,14 @@ export const useLeads = (filters?: LeadFilters) => {
         });
       }
 
+      // Filtro por observações (feito no frontend)
+      if (filters?.comObservacao !== undefined) {
+        filteredData = filteredData.filter(lead => {
+          const hasObservacao = lead.observacoes && lead.observacoes.trim().length > 0;
+          return filters.comObservacao ? hasObservacao : !hasObservacao;
+        });
+      }
+
       // Aplicar ordenação
       if (filters?.ordenacao) {
         filteredData.sort((a, b) => {

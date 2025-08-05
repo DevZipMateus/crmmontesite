@@ -32,6 +32,7 @@ export interface LeadFilters {
   diasSemResposta?: number;
   faixaDias?: string;
   ordenacao?: 'asc' | 'desc' | 'dias_asc' | 'dias_desc';
+  comObservacao?: boolean;
 }
 
 // Situações padronizadas dos leads
