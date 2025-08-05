@@ -73,6 +73,7 @@ export default function LeadTableView({ leads, onEdit }: LeadTableViewProps) {
             <TableHead>Situação</TableHead>
             <TableHead>Último Contato</TableHead>
             <TableHead>Dias</TableHead>
+            <TableHead>Observações</TableHead>
             <TableHead>Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -110,6 +111,23 @@ export default function LeadTableView({ leads, onEdit }: LeadTableViewProps) {
                   <span className={`font-medium ${getDaysColor(daysSinceContact, lead.situacao)}`}>
                     {lead.situacao.toLowerCase().includes('site pronto') ? '—' : `${daysSinceContact}d`}
                   </span>
+                </TableCell>
+                <TableCell>
+                  <div className="max-w-xs">
+                    {lead.observacoes ? (
+                      <span 
+                        className="text-sm text-gray-600 truncate block" 
+                        title={lead.observacoes}
+                      >
+                        {lead.observacoes.length > 50 
+                          ? `${lead.observacoes.substring(0, 50)}...` 
+                          : lead.observacoes
+                        }
+                      </span>
+                    ) : (
+                      <span className="text-gray-400 text-sm">—</span>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
