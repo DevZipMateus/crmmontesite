@@ -21,7 +21,11 @@ export default function LeadTableView({ leads, onEdit }: LeadTableViewProps) {
     });
   };
 
-  const calculateDaysSinceContact = (dateString: string) => {
+  const calculateDaysSinceContact = (dateString: string, situacao: string) => {
+    // Para leads com "Site Pronto", não contar dias
+    if (situacao.toLowerCase().includes('site pronto')) {
+      return 0;
+    }
     const contactDate = new Date(dateString);
     const today = new Date();
     const diffTime = Math.abs(today.getTime() - contactDate.getTime());
@@ -29,7 +33,10 @@ export default function LeadTableView({ leads, onEdit }: LeadTableViewProps) {
     return diffDays;
   };
 
-  const getDaysColor = (days: number) => {
+  const getDaysColor = (days: number, situacao: string) => {
+    if (situacao.toLowerCase().includes('site pronto')) {
+      return "text-purple-600";
+    }
     if (days <= 3) return "text-green-600";
     if (days <= 7) return "text-yellow-600";
     return "text-red-600";
@@ -71,7 +78,7 @@ export default function LeadTableView({ leads, onEdit }: LeadTableViewProps) {
         </TableHeader>
         <TableBody>
           {leads.map((lead) => {
-            const daysSinceContact = calculateDaysSinceContact(lead.data_ultimo_contato);
+            const daysSinceContact = calculateDaysSinceContact(lead.data_ultimo_contato, lead.situacao);
             
             return (
               <TableRow key={lead.id} className="hover:bg-muted/50">
@@ -100,8 +107,8 @@ export default function LeadTableView({ leads, onEdit }: LeadTableViewProps) {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <span className={`font-medium ${getDaysColor(daysSinceContact)}`}>
-                    {daysSinceContact}d
+                  <span className={`font-medium ${getDaysColor(daysSinceContact, lead.situacao)}`}>
+                    {lead.situacao.toLowerCase().includes('site pronto') ? '—' : `${daysSinceContact}d`}
                   </span>
                 </TableCell>
                 <TableCell>

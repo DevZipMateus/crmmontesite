@@ -30,6 +30,8 @@ export interface LeadFilters {
   vendedor?: string;
   situacao?: string;
   diasSemResposta?: number;
+  faixaDias?: string;
+  ordenacao?: 'asc' | 'desc' | 'dias_asc' | 'dias_desc';
 }
 
 // Situações padronizadas dos leads

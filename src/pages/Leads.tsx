@@ -28,10 +28,12 @@ const Leads: React.FC = () => {
   const { data: leads = [], isLoading, error, refetch } = useLeads(filters);
 
   // Extrair vendedores únicos para os filtros
+  const [vendedoresCustomizados, setVendedoresCustomizados] = useState<string[]>([]);
   const vendedores = useMemo(() => {
-    const uniqueVendedores = [...new Set(leads.map(lead => lead.vendedor).filter(Boolean))];
-    return uniqueVendedores.sort();
-  }, [leads]);
+    const vendedoresDosLeads = [...new Set(leads.map(lead => lead.vendedor).filter(Boolean))];
+    const todosVendedores = [...new Set([...vendedoresDosLeads, ...vendedoresCustomizados])];
+    return todosVendedores.sort();
+  }, [leads, vendedoresCustomizados]);
 
   // Converter situações padronizadas para array de strings
   const situacoes = [...SITUACOES_PADRONIZADAS];
@@ -66,6 +68,12 @@ const Leads: React.FC = () => {
   const handleLinkingComplete = () => {
     // Refresh leads after linking
     refetch();
+  };
+
+  const handleVendedorAdd = (novoVendedor: string) => {
+    if (!vendedoresCustomizados.includes(novoVendedor)) {
+      setVendedoresCustomizados(prev => [...prev, novoVendedor]);
+    }
   };
 
   // Reset page when filters change
@@ -117,6 +125,7 @@ const Leads: React.FC = () => {
           onClearFilters={handleClearFilters}
           vendedores={vendedores}
           situacoes={situacoes}
+          onVendedorAdd={handleVendedorAdd}
         />
 
         {/* Lista de Leads */}

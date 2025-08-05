@@ -18,6 +18,10 @@ const LeadMetrics: React.FC<LeadMetricsProps> = ({ leads }) => {
   ).length;
   
   const leadsAtrasados = leads.filter(lead => {
+    // Não contar leads com "Site Pronto" como atrasados
+    if (lead.situacao.toLowerCase().includes('site pronto')) {
+      return false;
+    }
     const dias = Math.ceil((Date.now() - new Date(lead.data_ultimo_contato).getTime()) / (1000 * 60 * 60 * 24));
     return dias > 7;
   }).length;
@@ -30,11 +34,12 @@ const LeadMetrics: React.FC<LeadMetricsProps> = ({ leads }) => {
 
   const leadsComVendedor = leads.filter(lead => lead.vendedor && lead.vendedor.trim() !== '').length;
   
-  const tempoMedioResposta = leads.length > 0 
-    ? Math.round(leads.reduce((acc, lead) => {
+  const leadsAtivos = leads.filter(lead => !lead.situacao.toLowerCase().includes('site pronto'));
+  const tempoMedioResposta = leadsAtivos.length > 0 
+    ? Math.round(leadsAtivos.reduce((acc, lead) => {
         const dias = Math.ceil((Date.now() - new Date(lead.data_ultimo_contato).getTime()) / (1000 * 60 * 60 * 24));
         return acc + dias;
-      }, 0) / leads.length)
+      }, 0) / leadsAtivos.length)
     : 0;
 
   const metrics = [

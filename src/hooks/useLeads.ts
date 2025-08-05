@@ -42,14 +42,57 @@ export const useLeads = (filters?: LeadFilters) => {
 
       let filteredData = data || [];
 
-      // Filtro por dias sem resposta (feito no frontend devido à complexidade da função SQL)
-      if (filters?.diasSemResposta !== undefined) {
+      // Filtro por faixa de dias (feito no frontend)
+      if (filters?.faixaDias) {
         filteredData = filteredData.filter(lead => {
-          const days = Math.ceil((Date.now() - new Date(lead.data_ultimo_contato).getTime()) / (1000 * 60 * 60 * 24));
-          if (filters.diasSemResposta === 30) {
-            return days > 14;
+          const contactDate = new Date(lead.data_ultimo_contato);
+          const today = new Date();
+          const daysDiff = Math.ceil((today.getTime() - contactDate.getTime()) / (1000 * 60 * 60 * 24));
+          
+          switch (filters.faixaDias) {
+            case '1-3':
+              return daysDiff >= 1 && daysDiff <= 3 && !lead.situacao.toLowerCase().includes('site pronto');
+            case '4-7':
+              return daysDiff >= 4 && daysDiff <= 7 && !lead.situacao.toLowerCase().includes('site pronto');
+            case '8-14':
+              return daysDiff >= 8 && daysDiff <= 14 && !lead.situacao.toLowerCase().includes('site pronto');
+            case '15-30':
+              return daysDiff >= 15 && daysDiff <= 30 && !lead.situacao.toLowerCase().includes('site pronto');
+            case '30+':
+              return daysDiff > 30 && !lead.situacao.toLowerCase().includes('site pronto');
+            case 'site-pronto':
+              return lead.situacao.toLowerCase().includes('site pronto');
+            default:
+              return true;
           }
-          return days <= filters.diasSemResposta;
+        });
+      }
+
+      // Aplicar ordenação
+      if (filters?.ordenacao) {
+        filteredData.sort((a, b) => {
+          const dateA = new Date(a.data_ultimo_contato);
+          const dateB = new Date(b.data_ultimo_contato);
+          const daysA = Math.ceil((new Date().getTime() - dateA.getTime()) / (1000 * 60 * 60 * 24));
+          const daysB = Math.ceil((new Date().getTime() - dateB.getTime()) / (1000 * 60 * 60 * 24));
+          
+          switch (filters.ordenacao) {
+            case 'asc':
+              return dateA.getTime() - dateB.getTime();
+            case 'desc':
+              return dateB.getTime() - dateA.getTime();
+            case 'dias_asc':
+              // Para leads com "Site Pronto", considerar 0 dias
+              const adjustedDaysA = a.situacao.toLowerCase().includes('site pronto') ? 0 : daysA;
+              const adjustedDaysB = b.situacao.toLowerCase().includes('site pronto') ? 0 : daysB;
+              return adjustedDaysA - adjustedDaysB;
+            case 'dias_desc':
+              const adjustedDaysA2 = a.situacao.toLowerCase().includes('site pronto') ? 0 : daysA;
+              const adjustedDaysB2 = b.situacao.toLowerCase().includes('site pronto') ? 0 : daysB;
+              return adjustedDaysB2 - adjustedDaysA2;
+            default:
+              return 0;
+          }
         });
       }
 
