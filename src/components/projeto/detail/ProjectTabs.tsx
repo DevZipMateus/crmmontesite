@@ -140,6 +140,7 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({ project }) => {
           <ClientSubmissionsCard 
             projectId={project.id} 
             clientSubmissionHash={project.client_submission_hash}
+            projectName={project.client_name}
           />
         )}
       </TabsContent>

@@ -19,13 +19,15 @@ import {
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ClientSubmissionsBulkDownloader } from "./ClientSubmissionsBulkDownloader";
 
 interface ClientSubmissionsCardProps {
   projectId: string;
   clientSubmissionHash?: string;
+  projectName?: string;
 }
 
-export function ClientSubmissionsCard({ projectId, clientSubmissionHash }: ClientSubmissionsCardProps) {
+export function ClientSubmissionsCard({ projectId, clientSubmissionHash, projectName = "Projeto" }: ClientSubmissionsCardProps) {
   const [submissions, setSubmissions] = useState<ClientMediaSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
@@ -132,14 +134,21 @@ export function ClientSubmissionsCard({ projectId, clientSubmissionHash }: Clien
             )}
           </div>
         ) : (
-          <div className="space-y-4">
-            {submissions.map((submission) => (
-              <SubmissionCard
-                key={submission.id}
-                submission={submission}
-                onStatusUpdate={updateStatus}
-              />
-            ))}
+          <div className="space-y-6">
+            <ClientSubmissionsBulkDownloader 
+              submissions={submissions}
+              projectName={projectName}
+            />
+            
+            <div className="space-y-4">
+              {submissions.map((submission) => (
+                <SubmissionCard
+                  key={submission.id}
+                  submission={submission}
+                  onStatusUpdate={updateStatus}
+                />
+              ))}
+            </div>
           </div>
         )}
       </CardContent>
