@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { MessageSquare } from "lucide-react";
 import { useUpdateLead } from "@/hooks/useLeads";
 import { Lead, SITUACOES_PADRONIZADAS } from "@/types/lead";
 import LeadSchedulingSection from "./LeadSchedulingSection";
@@ -88,7 +89,20 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Editar Lead - {lead.empresa}</DialogTitle>
+          <div className="flex justify-between items-center">
+            <DialogTitle>Editar Lead - {lead.empresa}</DialogTitle>
+            {formData.link_chat && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(formData.link_chat, '_blank')}
+                className="flex items-center gap-2"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Abrir Chat
+              </Button>
+            )}
+          </div>
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
