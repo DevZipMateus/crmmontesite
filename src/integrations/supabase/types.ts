@@ -82,6 +82,53 @@ export type Database = {
         }
         Relationships: []
       }
+      client_media_submissions: {
+        Row: {
+          client_email: string | null
+          client_name: string
+          created_at: string
+          id: string
+          media_urls: Json
+          message: string | null
+          project_id: string
+          status: string
+          submission_date: string
+          updated_at: string
+        }
+        Insert: {
+          client_email?: string | null
+          client_name: string
+          created_at?: string
+          id?: string
+          media_urls?: Json
+          message?: string | null
+          project_id: string
+          status?: string
+          submission_date?: string
+          updated_at?: string
+        }
+        Update: {
+          client_email?: string | null
+          client_name?: string
+          created_at?: string
+          id?: string
+          media_urls?: Json
+          message?: string | null
+          project_id?: string
+          status?: string
+          submission_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_media_submissions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_agendamentos: {
         Row: {
           completed_at: string | null
@@ -350,6 +397,7 @@ export type Database = {
           assigned_programmer: string | null
           blaster_link: string | null
           client_name: string
+          client_submission_hash: string | null
           client_type: string | null
           cnpj: string | null
           created_at: string | null
@@ -381,6 +429,7 @@ export type Database = {
           assigned_programmer?: string | null
           blaster_link?: string | null
           client_name: string
+          client_submission_hash?: string | null
           client_type?: string | null
           cnpj?: string | null
           created_at?: string | null
@@ -412,6 +461,7 @@ export type Database = {
           assigned_programmer?: string | null
           blaster_link?: string | null
           client_name?: string
+          client_submission_hash?: string | null
           client_type?: string | null
           cnpj?: string | null
           created_at?: string | null

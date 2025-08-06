@@ -17,6 +17,7 @@ import ProducaoSites from "./pages/ProducaoSites";
 import Login from "./pages/Login";
 import AuthGuard from "./components/auth/AuthGuard";
 import PublicPersonalizeForm from "./pages/PublicPersonalizeForm";
+import ClientSubmissionPage from "./pages/ClientSubmissionPage";
 import CustomUrlAdmin from "./pages/CustomUrlAdmin";
 import PersonalizacaoDetalhe from "@/pages/PersonalizacaoDetalhe";
 import WebhookManagement from "./pages/WebhookManagement";
@@ -163,6 +164,9 @@ const App = () => {
             
             {/* Add the new route for personalization details */}
             <Route path="/personalizacao/:id" element={<PersonalizacaoDetalhe />} />
+            
+            {/* Client submission form - public route */}
+            <Route path="/cliente-images/:hash" element={<ClientSubmissionPage />} />
             
             {/* Rota de fallback */}
             <Route path="*" element={<NotFound />} />

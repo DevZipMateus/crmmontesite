@@ -44,4 +44,7 @@ export interface Project {
   
   // Novo campo para vinculação com leads
   lead_id?: string;
+  
+  // Campo para formulário de envio de imagens do cliente
+  client_submission_hash?: string;
 }
