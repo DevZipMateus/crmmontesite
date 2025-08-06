@@ -17,7 +17,6 @@ import ProducaoSites from "./pages/ProducaoSites";
 import Login from "./pages/Login";
 import AuthGuard from "./components/auth/AuthGuard";
 import PublicPersonalizeForm from "./pages/PublicPersonalizeForm";
-import ClientSubmissionPage from "./pages/ClientSubmissionPage";
 import CustomUrlAdmin from "./pages/CustomUrlAdmin";
 import PersonalizacaoDetalhe from "@/pages/PersonalizacaoDetalhe";
 import WebhookManagement from "./pages/WebhookManagement";
@@ -25,6 +24,7 @@ import CriarProjetos from "./pages/CriarProjetos";
 import LandingPagesVendedores from "./pages/LandingPagesVendedores";
 import VendedorLandingForm from "./pages/VendedorLandingForm";
 import Leads from "./pages/Leads";
+import ClientSubmissionPage from "./pages/ClientSubmissionPage";
 import PainelVendas from "./pages/PainelVendas";
 import HostingerDNS from "./pages/HostingerDNS";
 
