@@ -206,8 +206,6 @@ export function ClientSubmissionsBulkDownloader({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Data</TableHead>
                   <TableHead>Descrição</TableHead>
                   <TableHead className="text-right">Valor</TableHead>
                 </TableRow>
@@ -215,10 +213,6 @@ export function ClientSubmissionsBulkDownloader({
               <TableBody>
                 {allImages.map((image, index) => (
                   <TableRow key={index}>
-                    <TableCell className="font-medium">{image.clientName}</TableCell>
-                    <TableCell>
-                      {new Date(image.submissionDate).toLocaleDateString('pt-BR')}
-                    </TableCell>
                     <TableCell>
                       {image.caption || `Imagem ${index + 1}`}
                     </TableCell>
