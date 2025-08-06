@@ -147,16 +147,15 @@ export const LeadLinkIndicator: React.FC<LeadLinkIndicatorProps> = ({ project })
 
             {lead.link_chat && (
               <div>
-                <p className="text-sm font-medium text-gray-500">Chat</p>
-                <a 
-                  href={lead.link_chat} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-blue-600 hover:underline"
+                <p className="text-sm font-medium text-gray-500 mb-2">Chat</p>
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => window.open(lead.link_chat, '_blank')}
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  <MessageSquare className="h-4 w-4 mr-2" />
                   Abrir Chat
-                </a>
+                </Button>
               </div>
             )}
 
