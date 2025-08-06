@@ -8,3 +8,4 @@ export { FormStatusIndicator } from './FormStatusIndicator';
 export { CustomizationDeadlineIndicator } from './CustomizationDeadlineIndicator';
 export { AssignedProgrammerIndicator } from './AssignedProgrammerIndicator';
 export { EditableAssignedProgrammer } from './EditableAssignedProgrammer';
+export { PendingSubmissionsIndicator } from './PendingSubmissionsIndicator';

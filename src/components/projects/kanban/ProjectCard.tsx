@@ -11,7 +11,8 @@ import {
   PartnerIndicator,
   FormStatusIndicator,
   CustomizationDeadlineIndicator,
-  EditableAssignedProgrammer
+  EditableAssignedProgrammer,
+  PendingSubmissionsIndicator
 } from "./ProjectCardComponents";
 import { LeadLinkIndicator } from "../LeadLinkIndicator";
 import { ClientTypeBadge } from "../ClientTypeBadge";
@@ -113,6 +114,9 @@ export default function ProjectCard({
             <LeadLinkIndicator project={project} />
           </div>
         )}
+
+        {/* Indicador de Imagens Pendentes */}
+        <PendingSubmissionsIndicator projectId={project.id} />
         
         {project.partner_hash && (
           <PartnerIndicator partnerHash={project.partner_hash} />
