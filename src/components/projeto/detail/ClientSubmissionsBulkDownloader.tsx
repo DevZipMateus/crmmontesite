@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Image } from "lucide-react";
+import { Download, Image, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import JSZip from "jszip";
 import { ClientMediaSubmission } from "@/types/clientSubmission";
@@ -42,7 +42,21 @@ export function ClientSubmissionsBulkDownloader({
     return null;
   }
 
-  const totalValue = allImages.reduce((sum, img) => sum + (img.price || 0), 0);
+  const copyDescription = async (description: string) => {
+    try {
+      await navigator.clipboard.writeText(description);
+      toast({
+        title: "Copiado!",
+        description: "Descrição copiada para a área de transferência.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao copiar",
+        description: "Não foi possível copiar a descrição.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const downloadAllImages = async () => {
     if (allImages.length === 0) {
@@ -184,7 +198,7 @@ export function ClientSubmissionsBulkDownloader({
       <CardContent>
         <div className="space-y-4">
           {/* Summary */}
-          <div className="grid grid-cols-3 gap-4 p-4 bg-muted rounded-lg">
+          <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
             <div className="text-center">
               <div className="text-2xl font-bold text-primary">{submissions.length}</div>
               <div className="text-sm text-muted-foreground">Envios</div>
@@ -192,12 +206,6 @@ export function ClientSubmissionsBulkDownloader({
             <div className="text-center">
               <div className="text-2xl font-bold text-primary">{allImages.length}</div>
               <div className="text-sm text-muted-foreground">Imagens</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary">
-                {totalValue > 0 ? `R$ ${totalValue.toFixed(2)}` : '--'}
-              </div>
-              <div className="text-sm text-muted-foreground">Valor Total</div>
             </div>
           </div>
 
@@ -208,6 +216,7 @@ export function ClientSubmissionsBulkDownloader({
                 <TableRow>
                   <TableHead>Descrição</TableHead>
                   <TableHead className="text-right">Valor</TableHead>
+                  <TableHead className="w-10"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -218,6 +227,16 @@ export function ClientSubmissionsBulkDownloader({
                     </TableCell>
                     <TableCell className="text-right">
                       {image.price ? `R$ ${image.price.toFixed(2)}` : '--'}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyDescription(image.caption || `Imagem ${index + 1}`)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
