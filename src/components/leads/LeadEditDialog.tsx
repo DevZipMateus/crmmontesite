@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -89,20 +88,7 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex justify-between items-center">
-            <DialogTitle>Editar Lead - {lead.empresa}</DialogTitle>
-            {formData.link_chat && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open(formData.link_chat, '_blank')}
-                className="flex items-center gap-2"
-              >
-                <MessageSquare className="h-4 w-4" />
-                Abrir Chat
-              </Button>
-            )}
-          </div>
+          <DialogTitle>Editar Lead - {lead.empresa}</DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -183,12 +169,26 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
 
               <div className="space-y-2">
                 <Label htmlFor="link_chat">Link do Chat</Label>
-                <Input
-                  id="link_chat"
-                  type="url"
-                  value={formData.link_chat}
-                  onChange={(e) => handleInputChange("link_chat", e.target.value)}
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="link_chat"
+                    type="url"
+                    value={formData.link_chat}
+                    onChange={(e) => handleInputChange("link_chat", e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(formData.link_chat, '_blank')}
+                    disabled={!formData.link_chat}
+                    className="flex items-center gap-2 px-3"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    Abrir Chat
+                  </Button>
+                </div>
               </div>
 
               <div className="space-y-2">
