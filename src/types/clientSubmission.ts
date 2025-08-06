@@ -15,8 +15,10 @@ export interface ClientMediaSubmission {
 }
 
 export interface ClientSubmissionFormData {
-  client_name: string;
-  client_email?: string;
   message?: string;
-  images: File[];
+  images: Array<{
+    file: File;
+    name: string;
+    price?: number;
+  }>;
 }

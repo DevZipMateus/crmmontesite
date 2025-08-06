@@ -13,8 +13,6 @@ import { ClientSubmissionFormData } from "@/types/clientSubmission";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 
 const formSchema = z.object({
-  client_name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  client_email: z.string().email("Email inválido").optional().or(z.literal("")),
   message: z.string().optional(),
 });
 
@@ -29,15 +27,17 @@ export function ClientSubmissionForm({
   projectName, 
   onSubmissionComplete 
 }: ClientSubmissionFormProps) {
-  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [selectedImages, setSelectedImages] = useState<Array<{
+    file: File;
+    name: string;
+    price?: number;
+  }>>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      client_name: "",
-      client_email: "",
       message: "",
     },
   });
@@ -54,11 +54,29 @@ export function ClientSubmissionForm({
       });
     }
 
-    setSelectedImages(prev => [...prev, ...imageFiles]);
+    const newImages = imageFiles.map(file => ({
+      file,
+      name: file.name.split('.')[0], // Remove extension for default name
+      price: undefined,
+    }));
+
+    setSelectedImages(prev => [...prev, ...newImages]);
   };
 
   const removeImage = (index: number) => {
     setSelectedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateImageName = (index: number, name: string) => {
+    setSelectedImages(prev => prev.map((img, i) => 
+      i === index ? { ...img, name } : img
+    ));
+  };
+
+  const updateImagePrice = (index: number, price: number | undefined) => {
+    setSelectedImages(prev => prev.map((img, i) => 
+      i === index ? { ...img, price } : img
+    ));
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -75,8 +93,6 @@ export function ClientSubmissionForm({
 
     try {
       const formData: ClientSubmissionFormData = {
-        client_name: values.client_name,
-        client_email: values.client_email || undefined,
         message: values.message || undefined,
         images: selectedImages,
       };
@@ -112,34 +128,6 @@ export function ClientSubmissionForm({
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="client_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Seu nome completo" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="client_email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email (opcional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="seu@email.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="message"
@@ -184,27 +172,51 @@ export function ClientSubmissionForm({
               </div>
 
               {selectedImages.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {selectedImages.map((file, index) => (
-                    <div key={index} className="relative group">
-                      <div className="aspect-square rounded-lg overflow-hidden bg-muted">
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
+                <div className="space-y-4">
+                  {selectedImages.map((imageData, index) => (
+                    <div key={index} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex gap-4">
+                        <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                          <img
+                            src={URL.createObjectURL(imageData.file)}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 space-y-3">
+                          <div>
+                            <label className="text-sm font-medium">Nome da imagem *</label>
+                            <Input
+                              value={imageData.name}
+                              onChange={(e) => updateImageName(index, e.target.value)}
+                              placeholder="Nome do produto/imagem"
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Preço (opcional)</label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={imageData.price || ""}
+                              onChange={(e) => updateImagePrice(index, e.target.value ? parseFloat(e.target.value) : undefined)}
+                              placeholder="0.00"
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => removeImage(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => removeImage(index)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                      <p className="text-xs text-muted-foreground mt-1 truncate">
-                        {file.name}
+                      <p className="text-xs text-muted-foreground">
+                        Arquivo: {imageData.file.name}
                       </p>
                     </div>
                   ))}

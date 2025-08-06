@@ -25,8 +25,8 @@ export class ClientSubmissionService {
       .from('client_media_submissions')
       .insert({
         project_id: projectId,
-        client_name: formData.client_name,
-        client_email: formData.client_email,
+        client_name: 'Cliente', // Default name since not collected
+        client_email: null,
         message: formData.message,
         media_urls: uploadedImages
       })
@@ -37,24 +37,28 @@ export class ClientSubmissionService {
     return data as ClientMediaSubmission;
   }
 
-  static async uploadImages(projectId: string, images: File[]) {
+  static async uploadImages(projectId: string, images: Array<{ file: File; name: string; price?: number }>) {
     const timestamp = Date.now();
     const uploadedImages: Array<{ url: string; caption?: string }> = [];
 
     for (let i = 0; i < images.length; i++) {
-      const file = images[i];
-      const fileExt = file.name.split('.').pop();
+      const imageData = images[i];
+      const fileExt = imageData.file.name.split('.').pop();
       const fileName = `${projectId}/${timestamp}/${i + 1}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('client-submissions')
-        .upload(fileName, file);
+        .upload(fileName, imageData.file);
 
       if (uploadError) throw uploadError;
 
+      const caption = imageData.price 
+        ? `${imageData.name} - R$ ${imageData.price.toFixed(2)}`
+        : imageData.name;
+
       uploadedImages.push({
         url: fileName,
-        caption: file.name
+        caption
       });
     }
 
