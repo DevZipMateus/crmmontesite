@@ -11,9 +11,24 @@ export async function createProject(values: ProjectFormValues) {
       throw new Error("Nome do cliente é obrigatório");
     }
 
+    // Check for potential duplicates before creating
+    const { data: existingProjects, error: checkError } = await supabase
+      .from('projects')
+      .select('id, client_name, created_at')
+      .eq('client_name', values.client_name.trim())
+      .gte('created_at', new Date(Date.now() - 60000).toISOString()); // Last minute
+
+    if (checkError) {
+      console.warn("Aviso ao verificar projetos existentes:", checkError);
+    }
+
+    if (existingProjects && existingProjects.length > 0) {
+      throw new Error(`Um projeto para "${values.client_name}" foi criado recentemente. Aguarde um momento antes de criar outro.`);
+    }
+
     // Create project data object with client_name as required field
     const projectData = {
-      client_name: values.client_name,  // Required field
+      client_name: values.client_name.trim(),  // Required field, trimmed
       template: values.template || 'Não especificado', // Ensure template is not undefined
       responsible_name: values.responsible_name,
       status: values.status || 'Recebido', // Ensure status is not undefined

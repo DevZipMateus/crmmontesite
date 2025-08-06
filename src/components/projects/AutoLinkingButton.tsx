@@ -12,6 +12,9 @@ export const AutoLinkingButton: React.FC<AutoLinkingButtonProps> = ({ onLinkingC
   const { runAutoLinking, isLinking } = useLeadProjectLinking();
 
   const handleAutoLink = async () => {
+    // Prevent multiple rapid clicks
+    if (isLinking) return;
+    
     console.log("AutoLinkingButton: Iniciando processo de vinculação automática");
     
     try {

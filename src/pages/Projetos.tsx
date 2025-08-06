@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -10,6 +10,7 @@ import SearchInput from "@/components/projects/SearchInput";
 import { AutoLinkingButton } from "@/components/projects/AutoLinkingButton";
 import { useProjects } from "@/hooks/use-projects";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function Projetos() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
@@ -34,9 +35,11 @@ export default function Projetos() {
   
   const { projects, setProjects, loading, fetchProjects } = useProjects(filters);
 
-  const handleNewProject = () => {
+  const handleNewProject = useCallback(() => {
     navigate('/novo-projeto');
-  };
+  }, [navigate]);
+  
+  const debouncedHandleNewProject = useDebounce(handleNewProject, 1000);
 
   const handleProjectDeleted = () => {
     // Refresh projects after deletion
@@ -84,7 +87,7 @@ export default function Projetos() {
             <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
             <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
             <Button 
-              onClick={handleNewProject} 
+              onClick={debouncedHandleNewProject} 
               className="bg-primary shadow-sm flex items-center gap-2 px-3 lg:px-4 text-sm lg:text-base"
               aria-label="Criar novo site"
             >

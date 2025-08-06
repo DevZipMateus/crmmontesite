@@ -149,9 +149,28 @@ export const useCreateLead = () => {
 
   return useMutation({
     mutationFn: async (leadData: Omit<Lead, 'id' | 'created_at' | 'updated_at'>) => {
+      // Check for duplicate company names in the last minute
+      const { data: existingLeads, error: checkError } = await supabase
+        .from('leads')
+        .select('id, empresa, created_at')
+        .eq('empresa', leadData.empresa?.trim())
+        .gte('created_at', new Date(Date.now() - 60000).toISOString());
+
+      if (checkError) {
+        console.warn("Aviso ao verificar leads existentes:", checkError);
+      }
+
+      if (existingLeads && existingLeads.length > 0) {
+        throw new Error(`Um lead para a empresa "${leadData.empresa}" foi criado recentemente. Aguarde um momento antes de criar outro.`);
+      }
+
       const { data, error } = await supabase
         .from('leads')
-        .insert([leadData])
+        .insert([{
+          ...leadData,
+          empresa: leadData.empresa?.trim(),
+          nome_cliente: leadData.nome_cliente?.trim()
+        }])
         .select()
         .single();
 
@@ -169,7 +188,7 @@ export const useCreateLead = () => {
       console.error('Erro ao criar lead:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível criar o lead. Tente novamente.",
+        description: error instanceof Error ? error.message : "Não foi possível criar o lead. Tente novamente.",
         variant: "destructive",
       });
     },
