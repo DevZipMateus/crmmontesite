@@ -13,7 +13,7 @@ import LeadEditDialog from "@/components/leads/LeadEditDialog";
 import LeadCreateDialog from "@/components/leads/LeadCreateDialog";
 import NotificationTestButton from "@/components/NotificationTestButton";
 import { AutoLinkingButton } from "@/components/projects/AutoLinkingButton";
-import { useLeads } from "@/hooks/useLeads";
+import { useLeads, useDeleteLead } from "@/hooks/useLeads";
 import { Lead, LeadFilters as LeadFiltersType, SITUACOES_PADRONIZADAS } from "@/types/lead";
 
 const Leads: React.FC = () => {
@@ -26,6 +26,7 @@ const Leads: React.FC = () => {
   const [pageSize, setPageSize] = useState(50);
 
   const { data: leads = [], isLoading, error, refetch } = useLeads(filters);
+  const { mutate: deleteLead } = useDeleteLead();
 
   // Extrair vendedores únicos para os filtros
   const [vendedoresCustomizados, setVendedoresCustomizados] = useState<string[]>([]);
@@ -63,6 +64,10 @@ const Leads: React.FC = () => {
   const handlePageSizeChange = (newPageSize: number) => {
     setPageSize(newPageSize);
     setCurrentPage(1);
+  };
+
+  const handleDeleteLead = (lead: Lead) => {
+    deleteLead(lead.id);
   };
 
   const handleLinkingComplete = () => {
@@ -150,7 +155,8 @@ const Leads: React.FC = () => {
               {view === 'table' ? (
                 <LeadTableView 
                   leads={paginatedLeads} 
-                  onEdit={handleEditLead} 
+                  onEdit={handleEditLead}
+                  onDelete={handleDeleteLead}
                 />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -159,6 +165,7 @@ const Leads: React.FC = () => {
                       key={lead.id}
                       lead={lead}
                       onEdit={handleEditLead}
+                      onDelete={handleDeleteLead}
                     />
                   ))}
                 </div>

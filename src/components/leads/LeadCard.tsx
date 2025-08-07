@@ -9,8 +9,11 @@ import {
   Calendar, 
   User,
   Building2,
-  Clock
+  Clock,
+  Trash,
+  AlertTriangle
 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Lead } from "@/types/lead";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -18,6 +21,7 @@ import { ptBR } from "date-fns/locale";
 interface LeadCardProps {
   lead: Lead;
   onEdit: (lead: Lead) => void;
+  onDelete: (lead: Lead) => void;
 }
 
 const getStatusColor = (situacao: string) => {
@@ -53,7 +57,7 @@ const getDaysColor = (days: number) => {
   return 'text-red-600';
 };
 
-const LeadCard: React.FC<LeadCardProps> = ({ lead, onEdit }) => {
+const LeadCard: React.FC<LeadCardProps> = ({ lead, onEdit, onDelete }) => {
   const diasSemResposta = getDaysWithoutResponse(lead.data_ultimo_contato);
   const dataFormatada = formatDistanceToNow(new Date(lead.data_ultimo_contato), {
     addSuffix: true,
@@ -135,6 +139,29 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onEdit }) => {
           >
             Editar
           </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <Trash size={14} className="mr-1" />
+                Excluir
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Excluir lead?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta ação não pode ser desfeita. Isso irá remover o lead "{lead.empresa}".
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={() => onDelete(lead)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Confirmar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </CardContent>
     </Card>

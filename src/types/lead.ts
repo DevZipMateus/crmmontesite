@@ -37,6 +37,7 @@ export interface LeadFilters {
 
 // Situações padronizadas dos leads
 export const SITUACOES_PADRONIZADAS = [
+  'Novo cliente',
   'Em Contato',
   'Aguardando Resposta',
   'Preenchendo Formulário',

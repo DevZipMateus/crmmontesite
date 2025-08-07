@@ -3,16 +3,18 @@ import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Calendar, ExternalLink } from "lucide-react";
+import { Edit, Calendar, ExternalLink, Trash } from "lucide-react";
 import { Lead } from "@/types/lead";
 import { ProjectLinkIndicator } from "./ProjectLinkIndicator";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface LeadTableViewProps {
   leads: Lead[];
   onEdit: (lead: Lead) => void;
+  onDelete: (lead: Lead) => void;
 }
 
-export default function LeadTableView({ leads, onEdit }: LeadTableViewProps) {
+export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableViewProps) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR', {
       day: '2-digit',
@@ -154,6 +156,27 @@ export default function LeadTableView({ leads, onEdit }: LeadTableViewProps) {
                         </a>
                       </Button>
                     )}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="sm" title="Excluir lead">
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Excluir lead?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta ação não pode ser desfeita. Isso irá remover o lead "{lead.empresa}".
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => onDelete(lead)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            Confirmar
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </TableCell>
               </TableRow>

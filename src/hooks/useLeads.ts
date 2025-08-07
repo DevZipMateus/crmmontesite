@@ -195,6 +195,37 @@ export const useCreateLead = () => {
   });
 };
 
+export const useDeleteLead = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('leads')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
+      toast({
+        title: 'Lead excluído',
+        description: 'O lead foi removido com sucesso.',
+      });
+    },
+    onError: (error) => {
+      console.error('Erro ao excluir lead:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível excluir o lead. Tente novamente.',
+        variant: 'destructive',
+      });
+    },
+  });
+};
+
 // Hook para obter as situações padronizadas
 export const useSituacoesPadronizadas = () => {
   return SITUACOES_PADRONIZADAS;
