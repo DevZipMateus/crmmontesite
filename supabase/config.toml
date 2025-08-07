@@ -9,3 +9,6 @@ verify_jwt = false
 
 [functions.export-sales-data]
 verify_jwt = false
+
+[functions.create-lead-from-fattura]
+verify_jwt = false
