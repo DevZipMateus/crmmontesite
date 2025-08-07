@@ -109,18 +109,6 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onEdit, onDelete }) => {
           </div>
         </div>
 
-        {lead.email && (
-          <div className="text-sm text-muted-foreground">
-            <strong>E-mail:</strong> {lead.email}
-          </div>
-        )}
-
-        {lead.cnpj && (
-          <div className="text-sm text-muted-foreground">
-            <strong>CNPJ:</strong> {lead.cnpj}
-          </div>
-        )}
-
         {lead.observacoes && (
           <div className="text-sm text-muted-foreground bg-muted/50 p-2 rounded break-words flex-1">
             <strong>Observações:</strong> {lead.observacoes}
