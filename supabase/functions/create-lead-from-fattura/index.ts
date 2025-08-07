@@ -117,6 +117,8 @@ serve(async (req) => {
     const leadData = {
       empresa: data.empresa.trim(),
       nome_cliente: data.nome_cliente.trim(),
+      email: data.email?.trim() || null,
+      cnpj: null, // Can be added later if needed by Fattura
       vendedor: data.vendedor?.trim() || null,
       link_blaster: data.link_blaster?.trim() || null,
       link_chat: null, // Will be set later if needed

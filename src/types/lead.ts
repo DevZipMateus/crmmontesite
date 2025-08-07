@@ -3,6 +3,8 @@ export interface Lead {
   id: string;
   empresa: string;
   nome_cliente: string;
+  email?: string;
+  cnpj?: string;
   link_blaster?: string;
   data_ultimo_contato: string;
   link_chat?: string;

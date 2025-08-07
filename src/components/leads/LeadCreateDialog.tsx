@@ -23,6 +23,8 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
   const [formData, setFormData] = useState({
     empresa: '',
     nome_cliente: '',
+    email: '',
+    cnpj: '',
     vendedor: '',
     situacao: 'Em Contato',
     link_blaster: '',
@@ -47,6 +49,8 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
         setFormData({
           empresa: '',
           nome_cliente: '',
+          email: '',
+          cnpj: '',
           vendedor: '',
           situacao: 'Em Contato',
           link_blaster: '',
@@ -84,6 +88,28 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
                 value={formData.nome_cliente}
                 onChange={(e) => setFormData({ ...formData, nome_cliente: e.target.value })}
                 required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="email@exemplo.com"
+              />
+            </div>
+            <div>
+              <Label htmlFor="cnpj">CNPJ/CPF</Label>
+              <Input
+                id="cnpj"
+                value={formData.cnpj}
+                onChange={(e) => setFormData({ ...formData, cnpj: e.target.value })}
+                placeholder="00.000.000/0000-00"
               />
             </div>
           </div>

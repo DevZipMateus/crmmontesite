@@ -37,6 +37,8 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
   const [formData, setFormData] = useState({
     empresa: "",
     nome_cliente: "",
+    email: "",
+    cnpj: "",
     vendedor: "",
     situacao: "",
     link_blaster: "",
@@ -51,6 +53,8 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
       setFormData({
         empresa: lead.empresa || "",
         nome_cliente: lead.nome_cliente || "",
+        email: lead.email || "",
+        cnpj: lead.cnpj || "",
         vendedor: lead.vendedor || "",
         situacao: lead.situacao || "",
         link_blaster: lead.link_blaster || "",
@@ -113,6 +117,29 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
                     value={formData.nome_cliente}
                     onChange={(e) => handleInputChange("nome_cliente", e.target.value)}
                     required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">E-mail</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    placeholder="email@exemplo.com"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="cnpj">CNPJ/CPF</Label>
+                  <Input
+                    id="cnpj"
+                    value={formData.cnpj}
+                    onChange={(e) => handleInputChange("cnpj", e.target.value)}
+                    placeholder="00.000.000/0000-00"
                   />
                 </div>
               </div>
