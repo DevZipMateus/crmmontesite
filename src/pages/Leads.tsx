@@ -100,20 +100,26 @@ const Leads: React.FC = () => {
 
   return (
     <PageLayout title="Gestão de Leads">
-      <div className="space-y-6">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Gestão de Leads</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold">Gestão de Leads</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">
               Acompanhe o status dos clientes potenciais e gerencie o funil de vendas
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <NotificationTestButton />
-            <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
-            <LeadViewToggle view={view} onViewChange={setView} />
-            <Button onClick={handleCreateLead}>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className="flex gap-2 sm:hidden">
+              <NotificationTestButton />
+              <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
+            </div>
+            <div className="hidden sm:flex items-center gap-3">
+              <NotificationTestButton />
+              <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
+              <LeadViewToggle view={view} onViewChange={setView} />
+            </div>
+            <Button onClick={handleCreateLead} className="w-full sm:w-auto">
               <Plus size={18} className="mr-2" />
               Novo Lead
             </Button>
@@ -153,13 +159,15 @@ const Leads: React.FC = () => {
               </div>
               
               {view === 'table' ? (
-                <LeadTableView 
-                  leads={paginatedLeads} 
-                  onEdit={handleEditLead}
-                  onDelete={handleDeleteLead}
-                />
+                <div className="overflow-x-auto">
+                  <LeadTableView 
+                    leads={paginatedLeads} 
+                    onEdit={handleEditLead}
+                    onDelete={handleDeleteLead}
+                  />
+                </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {paginatedLeads.map((lead) => (
                     <LeadCard
                       key={lead.id}

@@ -64,126 +64,137 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
   };
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Empresa</TableHead>
-            <TableHead>Cliente</TableHead>
-            <TableHead>Projeto Vinculado</TableHead>
-            <TableHead>Vendedor</TableHead>
-            <TableHead>Situação</TableHead>
-            <TableHead>Último Contato</TableHead>
-            <TableHead>Dias</TableHead>
-            <TableHead>Observações</TableHead>
-            <TableHead>Ações</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {leads.map((lead) => {
-            const daysSinceContact = calculateDaysSinceContact(lead.data_ultimo_contato, lead.situacao);
-            
-            return (
-              <TableRow key={lead.id} className="hover:bg-muted/50">
-                <TableCell className="font-medium">{lead.empresa}</TableCell>
-                <TableCell>{lead.nome_cliente}</TableCell>
-                <TableCell>
-                  {lead.project_id ? (
-                    <ProjectLinkIndicator lead={lead} />
-                  ) : (
-                    <span className="text-gray-400 text-sm">—</span>
-                  )}
-                </TableCell>
-                <TableCell>{lead.vendedor || '—'}</TableCell>
-                <TableCell>
-                  <Badge 
-                    variant="outline" 
-                    className={getSituacaoColor(lead.situacao)}
-                  >
-                    {lead.situacao}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1 text-sm">
-                    <Calendar className="h-4 w-4" />
-                    {formatDate(lead.data_ultimo_contato)}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span className={`font-medium ${getDaysColor(daysSinceContact, lead.situacao)}`}>
-                    {lead.situacao.toLowerCase().includes('site pronto') ? '—' : `${daysSinceContact}d`}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <div className="max-w-xs">
-                    {lead.observacoes ? (
-                      <span 
-                        className="text-sm text-gray-600 truncate block" 
-                        title={lead.observacoes}
-                      >
-                        {lead.observacoes.length > 50 
-                          ? `${lead.observacoes.substring(0, 50)}...` 
-                          : lead.observacoes
-                        }
-                      </span>
+    <div className="w-full">
+      <div className="overflow-x-auto border rounded-lg">
+        <Table className="min-w-full">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="min-w-[120px]">Empresa</TableHead>
+              <TableHead className="min-w-[100px]">Cliente</TableHead>
+              <TableHead className="min-w-[80px] hidden sm:table-cell">Projeto</TableHead>
+              <TableHead className="min-w-[100px] hidden md:table-cell">Vendedor</TableHead>
+              <TableHead className="min-w-[100px]">Situação</TableHead>
+              <TableHead className="min-w-[100px] hidden lg:table-cell">Último Contato</TableHead>
+              <TableHead className="min-w-[60px] hidden lg:table-cell">Dias</TableHead>
+              <TableHead className="min-w-[200px] hidden xl:table-cell">Observações</TableHead>
+              <TableHead className="min-w-[120px] sticky right-0 bg-background">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {leads.map((lead) => {
+              const daysSinceContact = calculateDaysSinceContact(lead.data_ultimo_contato, lead.situacao);
+              
+              return (
+                <TableRow key={lead.id} className="hover:bg-muted/50">
+                  <TableCell className="font-medium max-w-[120px] truncate" title={lead.empresa}>
+                    {lead.empresa}
+                  </TableCell>
+                  <TableCell className="max-w-[100px] truncate" title={lead.nome_cliente}>
+                    {lead.nome_cliente}
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    {lead.project_id ? (
+                      <ProjectLinkIndicator lead={lead} />
                     ) : (
                       <span className="text-gray-400 text-sm">—</span>
                     )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onEdit(lead)}
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell max-w-[100px] truncate">
+                    {lead.vendedor || '—'}
+                  </TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant="outline" 
+                      className={`${getSituacaoColor(lead.situacao)} text-xs whitespace-nowrap`}
                     >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    {lead.link_chat && (
+                      {lead.situacao}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    <div className="flex items-center gap-1 text-sm">
+                      <Calendar className="h-4 w-4" />
+                      {formatDate(lead.data_ultimo_contato)}
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    <span className={`font-medium ${getDaysColor(daysSinceContact, lead.situacao)}`}>
+                      {lead.situacao.toLowerCase().includes('site pronto') ? '—' : `${daysSinceContact}d`}
+                    </span>
+                  </TableCell>
+                  <TableCell className="hidden xl:table-cell">
+                    <div className="max-w-[200px]">
+                      {lead.observacoes ? (
+                        <span 
+                          className="text-sm text-gray-600 truncate block" 
+                          title={lead.observacoes}
+                        >
+                          {lead.observacoes.length > 50 
+                            ? `${lead.observacoes.substring(0, 50)}...` 
+                            : lead.observacoes
+                          }
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-sm">—</span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="sticky right-0 bg-background">
+                    <div className="flex items-center gap-1">
                       <Button
                         variant="outline"
                         size="sm"
-                        asChild
+                        onClick={() => onEdit(lead)}
+                        className="text-xs px-2 py-1"
                       >
-                        <a
-                          href={lead.link_chat}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title="Abrir chat"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
+                        <span className="hidden sm:inline">Editar</span>
+                        <span className="sm:hidden">E</span>
                       </Button>
-                    )}
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm" title="Excluir lead">
-                          <Trash className="h-4 w-4" />
+                      {lead.link_chat && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          asChild
+                          className="px-2 py-1"
+                        >
+                          <a
+                            href={lead.link_chat}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Abrir chat"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
                         </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Excluir lead?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Esta ação não pode ser desfeita. Isso irá remover o lead "{lead.empresa}".
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => onDelete(lead)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                            Confirmar
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+                      )}
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="sm" title="Excluir lead" className="px-2 py-1">
+                            <Trash className="h-3 w-3" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Excluir lead?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Esta ação não pode ser desfeita. Isso irá remover o lead "{lead.empresa}".
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => onDelete(lead)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                              Confirmar
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

@@ -35,56 +35,62 @@ const LeadFiltersComponent: React.FC<LeadFiltersProps> = ({
     }
   };
   return (
-    <div className="bg-white p-4 rounded-lg border space-y-4">
-      <div className="flex items-center gap-2 mb-3">
-        <Filter size={18} />
-        <span className="font-medium">Filtros</span>
+    <div className="bg-card border rounded-lg p-3 sm:p-4 space-y-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:justify-between">
+        <div className="flex items-center gap-2">
+          <Filter size={18} />
+          <span className="font-medium">Filtros</span>
+        </div>
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={onClearFilters}
-          className="ml-auto"
+          className="w-full sm:w-auto"
         >
           <X size={14} className="mr-1" />
           Limpar
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
-        <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <Input
-            placeholder="Buscar empresa..."
-            value={filters.empresa || ''}
-            onChange={(e) => onFiltersChange({ ...filters, empresa: e.target.value })}
-            className="pl-9"
-          />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+        <div className="sm:col-span-2 lg:col-span-1">
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              placeholder="Buscar empresa..."
+              value={filters.empresa || ''}
+              onChange={(e) => onFiltersChange({ ...filters, empresa: e.target.value })}
+              className="pl-9"
+            />
+          </div>
         </div>
 
         <div className="flex gap-2">
-          <Select
-            value={filters.vendedor || 'all'}
-            onValueChange={(value) => onFiltersChange({ ...filters, vendedor: value === 'all' ? undefined : value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Todos os vendedores" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os vendedores</SelectItem>
-              {vendedores.map((vendedor) => (
-                <SelectItem key={vendedor} value={vendedor}>
-                  {vendedor}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex-1">
+            <Select
+              value={filters.vendedor || 'all'}
+              onValueChange={(value) => onFiltersChange({ ...filters, vendedor: value === 'all' ? undefined : value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Vendedores" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os vendedores</SelectItem>
+                {vendedores.map((vendedor) => (
+                  <SelectItem key={vendedor} value={vendedor}>
+                    {vendedor}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <Dialog open={showVendedorDialog} onOpenChange={setShowVendedorDialog}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="px-3">
+              <Button variant="outline" size="sm" className="px-3 flex-shrink-0">
                 <Plus size={16} />
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Adicionar Vendedor</DialogTitle>
               </DialogHeader>
@@ -113,7 +119,7 @@ const LeadFiltersComponent: React.FC<LeadFiltersProps> = ({
           onValueChange={(value) => onFiltersChange({ ...filters, situacao: value === 'all' ? undefined : value })}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Todas as situações" />
+            <SelectValue placeholder="Situações" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas as situações</SelectItem>
@@ -154,8 +160,8 @@ const LeadFiltersComponent: React.FC<LeadFiltersProps> = ({
           })}
         >
           <SelectTrigger>
-            <MessageSquare size={16} className="mr-2" />
-            <SelectValue placeholder="Observações" />
+            <MessageSquare size={16} className="mr-2 flex-shrink-0" />
+            <SelectValue placeholder="Obs" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas</SelectItem>
@@ -172,15 +178,15 @@ const LeadFiltersComponent: React.FC<LeadFiltersProps> = ({
           })}
         >
           <SelectTrigger>
-            <ArrowUpDown size={16} className="mr-2" />
-            <SelectValue placeholder="Ordenar por" />
+            <ArrowUpDown size={16} className="mr-2 flex-shrink-0" />
+            <SelectValue placeholder="Ordenar" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="default">Padrão</SelectItem>
-            <SelectItem value="dias_asc">Dias (menor → maior)</SelectItem>
-            <SelectItem value="dias_desc">Dias (maior → menor)</SelectItem>
-            <SelectItem value="asc">Data (mais antigo)</SelectItem>
-            <SelectItem value="desc">Data (mais recente)</SelectItem>
+            <SelectItem value="dias_asc">Dias ↑</SelectItem>
+            <SelectItem value="dias_desc">Dias ↓</SelectItem>
+            <SelectItem value="asc">Data ↑</SelectItem>
+            <SelectItem value="desc">Data ↓</SelectItem>
           </SelectContent>
         </Select>
       </div>
