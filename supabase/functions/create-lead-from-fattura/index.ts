@@ -34,61 +34,14 @@ serve(async (req) => {
     console.log(`Method: ${req.method}`);
     console.log(`URL: ${req.url}`);
 
-    // Extract and validate authentication token
+    // MODO TESTE: Validação de token desabilitada temporariamente
+    console.log('⚠️ MODO TESTE: Token validation disabled for testing purposes');
+    
     const authHeader = req.headers.get('Authorization');
-    let providedToken = '';
-
-    if (authHeader?.startsWith('Bearer ')) {
-      providedToken = authHeader.substring(7);
-    }
-
-    if (!providedToken) {
-      console.log('No token provided in Authorization header');
-      
-      await logAuthAttempt(supabase, {
-        tokenUsed: 'NO_TOKEN',
-        requestIp: req.headers.get('x-forwarded-for') || 'unknown',
-        requestHeaders: Object.fromEntries(req.headers.entries()),
-        success: false,
-        errorMessage: 'No authentication token provided'
-      });
-
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Token de autenticação é obrigatório' 
-        }), 
-        { 
-          status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
-    // Validate token against Fattura token (we'll use a specific environment variable)
-    const validFatturaToken = Deno.env.get('FATTURA_API_TOKEN');
-    if (!validFatturaToken || providedToken !== validFatturaToken) {
-      console.log('Invalid Fattura token provided');
-      
-      await logAuthAttempt(supabase, {
-        tokenUsed: providedToken,
-        requestIp: req.headers.get('x-forwarded-for') || 'unknown',
-        requestHeaders: Object.fromEntries(req.headers.entries()),
-        success: false,
-        errorMessage: 'Token de autenticação inválido'
-      });
-
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Token de autenticação inválido' 
-        }), 
-        { 
-          status: 401, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
+    let providedToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : 'TEST_TOKEN';
+    
+    console.log('Auth header provided:', !!authHeader);
+    console.log('Token for logging:', providedToken.substring(0, 10) + '...');
 
     // Parse request body
     const body = await req.text();
