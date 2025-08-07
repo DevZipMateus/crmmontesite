@@ -180,14 +180,22 @@ export const MediaBulkDownloader: React.FC<MediaBulkDownloaderProps> = ({
           }
 
           // Generate filename - use caption as primary name if available
+          console.log('DEBUG MediaBulkDownloader - Processing media:', media);
+          console.log('DEBUG MediaBulkDownloader - Media type:', typeof media);
+          
           let filename;
           if (typeof media === 'object' && media.caption?.trim()) {
+            console.log('DEBUG MediaBulkDownloader - Original caption:', media.caption);
             // Use caption as primary filename with proper sanitization
             const sanitizedCaption = sanitizeFileName(media.caption);
+            console.log('DEBUG MediaBulkDownloader - Sanitized caption:', sanitizedCaption);
             filename = sanitizedCaption || `midia_${index + 1}`;
+            console.log('DEBUG MediaBulkDownloader - Final filename (with caption):', filename);
           } else {
+            console.log('DEBUG MediaBulkDownloader - No caption available, using fallback');
             // Fallback to default naming
             filename = `midia_${index + 1}`;
+            console.log('DEBUG MediaBulkDownloader - Final filename (fallback):', filename);
           }
 
           filename += extension;
