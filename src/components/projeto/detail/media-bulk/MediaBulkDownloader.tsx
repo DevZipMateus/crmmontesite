@@ -7,6 +7,7 @@ import { Download, CheckSquare, Square, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import JSZip from "jszip";
 import { ImageConversionService, ConversionOptions } from "@/services/imageConversionService";
+import { sanitizeFileName } from "@/lib/sanitize-file";
 
 interface MediaSelectionContextType {
   selectedMedia: Set<number>;
@@ -156,9 +157,6 @@ export const MediaBulkDownloader: React.FC<MediaBulkDownloaderProps> = ({
 
           let blob = await response.blob();
           
-          // Generate filename
-          let filename = `midia_${index + 1}`;
-          
           // Try to get file extension from URL or blob type
           let extension = '';
           if (typeof media === 'object' && media.url) {
@@ -181,15 +179,15 @@ export const MediaBulkDownloader: React.FC<MediaBulkDownloaderProps> = ({
             extension = typeMap[blob.type] || '';
           }
 
-          // Add caption to filename if available
-          if (typeof media === 'object' && media.caption) {
-            const sanitizedCaption = media.caption
-              .replace(/[^a-zA-Z0-9\s-_]/g, '')
-              .substring(0, 30)
-              .trim();
-            if (sanitizedCaption) {
-              filename = `${filename}_${sanitizedCaption}`;
-            }
+          // Generate filename - use caption as primary name if available
+          let filename;
+          if (typeof media === 'object' && media.caption?.trim()) {
+            // Use caption as primary filename with proper sanitization
+            const sanitizedCaption = sanitizeFileName(media.caption);
+            filename = sanitizedCaption || `midia_${index + 1}`;
+          } else {
+            // Fallback to default naming
+            filename = `midia_${index + 1}`;
           }
 
           filename += extension;
