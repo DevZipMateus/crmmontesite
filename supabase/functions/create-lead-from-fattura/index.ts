@@ -12,10 +12,10 @@ interface FatturaLeadPayload {
   vendedor?: string;
   telefone?: string;
   email?: string;
+  cnpj?: string;
   observacoes?: string;
   link_blaster?: string;
   fattura_id?: string;
-  token: string;
 }
 
 serve(async (req) => {
@@ -33,15 +33,6 @@ serve(async (req) => {
     console.log('=== Fattura Lead Creation Request ===');
     console.log(`Method: ${req.method}`);
     console.log(`URL: ${req.url}`);
-
-    // MODO TESTE: Validação de token desabilitada temporariamente
-    console.log('⚠️ MODO TESTE: Token validation disabled for testing purposes');
-    
-    const authHeader = req.headers.get('Authorization');
-    let providedToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : 'TEST_TOKEN';
-    
-    console.log('Auth header provided:', !!authHeader);
-    console.log('Token for logging:', providedToken.substring(0, 10) + '...');
 
     // Parse request body
     const body = await req.text();
@@ -68,13 +59,7 @@ serve(async (req) => {
     if (!data.empresa || !data.nome_cliente) {
       console.log('Missing required fields:', { empresa: data.empresa, nome_cliente: data.nome_cliente });
       
-      await logAuthAttempt(supabase, {
-        tokenUsed: providedToken,
-        requestIp: req.headers.get('x-forwarded-for') || 'unknown',
-        requestHeaders: Object.fromEntries(req.headers.entries()),
-        success: false,
-        errorMessage: 'Campos obrigatórios ausentes: empresa e nome_cliente são necessários'
-      });
+      console.log('Validation failed: Missing required fields');
 
       return new Response(
         JSON.stringify({ 
@@ -118,7 +103,7 @@ serve(async (req) => {
       empresa: data.empresa.trim(),
       nome_cliente: data.nome_cliente.trim(),
       email: data.email?.trim() || null,
-      cnpj: null, // Can be added later if needed by Fattura
+      cnpj: data.cnpj?.trim() || null,
       vendedor: data.vendedor?.trim() || null,
       link_blaster: data.link_blaster?.trim() || null,
       link_chat: null, // Will be set later if needed
@@ -138,13 +123,7 @@ serve(async (req) => {
     if (createError) {
       console.error('Error creating lead:', createError);
       
-      await logAuthAttempt(supabase, {
-        tokenUsed: providedToken,
-        requestIp: req.headers.get('x-forwarded-for') || 'unknown',
-        requestHeaders: Object.fromEntries(req.headers.entries()),
-        success: false,
-        errorMessage: `Erro ao criar lead: ${createError.message}`
-      });
+      console.error('Database error details:', createError);
 
       return new Response(
         JSON.stringify({ 
@@ -158,14 +137,7 @@ serve(async (req) => {
       );
     }
 
-    // Log successful creation
-    await logAuthAttempt(supabase, {
-      tokenUsed: providedToken,
-      requestIp: req.headers.get('x-forwarded-for') || 'unknown',
-      requestHeaders: Object.fromEntries(req.headers.entries()),
-      success: true,
-      errorMessage: `Lead criado com sucesso para empresa: ${data.empresa}`
-    });
+    console.log('Lead created successfully for company:', data.empresa);
 
     console.log('Lead created successfully:', newLead);
 
@@ -204,28 +176,3 @@ serve(async (req) => {
     );
   }
 });
-
-// Helper function to log authentication attempts
-async function logAuthAttempt(supabase: any, data: {
-  tokenUsed: string;
-  requestIp?: string;
-  requestHeaders?: any;
-  success: boolean;
-  errorMessage?: string;
-}) {
-  try {
-    await supabase
-      .from('auth_logs')
-      .insert([{
-        partner_id: null, // For Fattura, we don't have a partner_id
-        token_used: data.tokenUsed,
-        request_ip: data.requestIp,
-        request_headers: data.requestHeaders,
-        success: data.success,
-        error_message: data.errorMessage,
-        created_at: new Date().toISOString()
-      }]);
-  } catch (error) {
-    console.error('Failed to log auth attempt:', error);
-  }
-}
