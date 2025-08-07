@@ -167,7 +167,7 @@ serve(async (req) => {
       vendedor: data.vendedor?.trim() || null,
       link_blaster: data.link_blaster?.trim() || null,
       link_chat: null, // Will be set later if needed
-      situacao: 'Em Contato',
+      situacao: 'Novo cliente',
       data_ultimo_contato: new Date().toISOString(),
       observacoes: data.observacoes?.trim() || `Lead criado automaticamente via Fattura${data.fattura_id ? ` (ID: ${data.fattura_id})` : ''}`,
     };
