@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import JSZip from "jszip";
 import { ImageConversionService, ConversionOptions } from "@/services/imageConversionService";
 import { sanitizeFileName } from "@/lib/sanitize-file";
+import { processFilePath } from "../media-display/processFilePath";
 
 interface MediaSelectionContextType {
   selectedMedia: Set<number>;
@@ -179,24 +180,12 @@ export const MediaBulkDownloader: React.FC<MediaBulkDownloaderProps> = ({
             extension = typeMap[blob.type] || '';
           }
 
-          // Generate filename - use caption as primary name if available
-          console.log('DEBUG MediaBulkDownloader - Processing media:', media);
-          console.log('DEBUG MediaBulkDownloader - Media type:', typeof media);
+          // Generate filename - use the same displayName logic as shown in UI
+          const fileInfo = processFilePath(media, 'midia', index);
+          console.log('DEBUG MediaBulkDownloader - FileInfo:', fileInfo);
           
-          let filename;
-          if (typeof media === 'object' && media.caption?.trim()) {
-            console.log('DEBUG MediaBulkDownloader - Original caption:', media.caption);
-            // Use caption as primary filename with proper sanitization
-            const sanitizedCaption = sanitizeFileName(media.caption);
-            console.log('DEBUG MediaBulkDownloader - Sanitized caption:', sanitizedCaption);
-            filename = sanitizedCaption || `midia_${index + 1}`;
-            console.log('DEBUG MediaBulkDownloader - Final filename (with caption):', filename);
-          } else {
-            console.log('DEBUG MediaBulkDownloader - No caption available, using fallback');
-            // Fallback to default naming
-            filename = `midia_${index + 1}`;
-            console.log('DEBUG MediaBulkDownloader - Final filename (fallback):', filename);
-          }
+          let filename = sanitizeFileName(fileInfo.displayName) || `midia_${index + 1}`;
+          console.log('DEBUG MediaBulkDownloader - Final filename:', filename);
 
           filename += extension;
 
