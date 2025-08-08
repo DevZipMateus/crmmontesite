@@ -1,0 +1,46 @@
+{
+  "info": {
+    "name": "Fattura Leads API",
+    "_postman_id": "b9f9a3a0-8a2d-4f6e-9f5e-collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Coleção para integração com a Edge Function create-lead-from-fattura"
+  },
+  "item": [
+    {
+      "name": "Create Lead from Fattura",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "apikey", "value": "{{apikey}}" },
+          { "key": "Authorization", "value": "Bearer {{apikey}}", "type": "text" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/functions/v1/create-lead-from-fattura",
+          "host": ["{{baseUrl}}"],
+          "path": ["functions", "v1", "create-lead-from-fattura"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"empresa\": \"Empresa Teste Ltda\",\n  \"nome_cliente\": \"João Silva Santos\",\n  \"email\": \"joao.silva@empresateste.com.br\",\n  \"cnpj\": \"12.345.678/0001-90\",\n  \"telefone\": \"(11) 99999-9999\",\n  \"vendedor\": \"Carlos Vendedor\",\n  \"observacoes\": \"Cliente interessado em site institucional completo\",\n  \"link_blaster\": \"https://blaster.zipline.com.br/egestor/#999999\",\n  \"fattura_id\": \"FAT_12345_2024\"\n}",
+          "options": {
+            "raw": { "language": "json" }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status é 201 ou 409\", function () { pm.expect([201,409]).to.include(pm.response.code); });",
+              "if (pm.response.code === 201) { const json = pm.response.json(); pm.test('Payload de sucesso', function(){ pm.expect(json.success).to.be.true; pm.expect(json.leadId).to.be.a('string'); }); }",
+              "if (pm.response.code === 409) { const json = pm.response.json(); pm.test('Payload de duplicado', function(){ pm.expect(json.success).to.be.false; pm.expect(json.existingLeadId).to.be.a('string'); }); }"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ]
+}
