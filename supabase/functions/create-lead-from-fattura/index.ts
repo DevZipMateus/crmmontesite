@@ -59,12 +59,74 @@ serve(async (req) => {
     if (!data.empresa || !data.nome_cliente) {
       console.log('Missing required fields:', { empresa: data.empresa, nome_cliente: data.nome_cliente });
       
-      console.log('Validation failed: Missing required fields');
-
       return new Response(
         JSON.stringify({ 
           success: false, 
           error: 'Campos obrigatórios ausentes: empresa e nome_cliente são necessários' 
+        }), 
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Validate field formats
+    const validationErrors: string[] = [];
+
+    // Email validation (if provided)
+    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      validationErrors.push('Email deve ter um formato válido');
+    }
+
+    // CNPJ validation (if provided) - basic format check
+    if (data.cnpj) {
+      const cnpjClean = data.cnpj.replace(/[^\d]/g, '');
+      if (cnpjClean.length !== 11 && cnpjClean.length !== 14) {
+        validationErrors.push('CNPJ/CPF deve ter 11 ou 14 dígitos');
+      }
+    }
+
+    // Phone validation (if provided) - basic format check
+    if (data.telefone && !/^\(?(\d{2})\)?\s?9?\d{4}-?\d{4}$/.test(data.telefone.replace(/\s/g, ''))) {
+      validationErrors.push('Telefone deve ter um formato válido (ex: (11) 99999-9999)');
+    }
+
+    // URL validation for link_blaster (if provided)
+    if (data.link_blaster && !/^https?:\/\/.+/.test(data.link_blaster)) {
+      validationErrors.push('Link Blaster deve ser uma URL válida');
+    }
+
+    // String length validations
+    if (data.empresa.trim().length < 2) {
+      validationErrors.push('Nome da empresa deve ter pelo menos 2 caracteres');
+    }
+
+    if (data.nome_cliente.trim().length < 2) {
+      validationErrors.push('Nome do cliente deve ter pelo menos 2 caracteres');
+    }
+
+    if (data.empresa.trim().length > 255) {
+      validationErrors.push('Nome da empresa deve ter no máximo 255 caracteres');
+    }
+
+    if (data.nome_cliente.trim().length > 255) {
+      validationErrors.push('Nome do cliente deve ter no máximo 255 caracteres');
+    }
+
+    if (data.observacoes && data.observacoes.length > 1000) {
+      validationErrors.push('Observações devem ter no máximo 1000 caracteres');
+    }
+
+    // Return validation errors if any
+    if (validationErrors.length > 0) {
+      console.log('Validation errors:', validationErrors);
+      
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Dados inválidos',
+          details: validationErrors
         }), 
         { 
           status: 400, 
