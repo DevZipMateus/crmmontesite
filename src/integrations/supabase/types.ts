@@ -216,8 +216,10 @@ export type Database = {
       }
       leads: {
         Row: {
+          cnpj: string | null
           created_at: string
           data_ultimo_contato: string
+          email: string | null
           empresa: string
           id: string
           link_blaster: string | null
@@ -232,8 +234,10 @@ export type Database = {
           vendedor: string | null
         }
         Insert: {
+          cnpj?: string | null
           created_at?: string
           data_ultimo_contato?: string
+          email?: string | null
           empresa: string
           id?: string
           link_blaster?: string | null
@@ -248,8 +252,10 @@ export type Database = {
           vendedor?: string | null
         }
         Update: {
+          cnpj?: string | null
           created_at?: string
           data_ultimo_contato?: string
+          email?: string | null
           empresa?: string
           id?: string
           link_blaster?: string | null
