@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Fattura Leads API",
-    "_postman_id": "b9f9a3a0-8a2d-4f6e-9f5e-collection",
+    "_postman_id": "d6e9f1a0-1234-4cde-9abc-collection",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Coleção para integração com a Edge Function create-lead-from-fattura"
   },
@@ -12,14 +12,9 @@
         "method": "POST",
         "header": [
           { "key": "Content-Type", "value": "application/json" },
-          { "key": "apikey", "value": "{{apikey}}" },
-          { "key": "Authorization", "value": "Bearer {{apikey}}", "type": "text" }
+          { "key": "apikey", "value": "{{apikey}}" }
         ],
-        "url": {
-          "raw": "{{baseUrl}}/functions/v1/create-lead-from-fattura",
-          "host": ["{{baseUrl}}"],
-          "path": ["functions", "v1", "create-lead-from-fattura"]
-        },
+        "url": "{{baseUrl}}/functions/v1/create-lead-from-fattura",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"empresa\": \"Empresa Teste Ltda\",\n  \"nome_cliente\": \"João Silva Santos\",\n  \"email\": \"joao.silva@empresateste.com.br\",\n  \"cnpj\": \"12.345.678/0001-90\",\n  \"telefone\": \"(11) 99999-9999\",\n  \"vendedor\": \"Carlos Vendedor\",\n  \"observacoes\": \"Cliente interessado em site institucional completo\",\n  \"link_blaster\": \"https://blaster.zipline.com.br/egestor/#999999\",\n  \"fattura_id\": \"FAT_12345_2024\"\n}",
