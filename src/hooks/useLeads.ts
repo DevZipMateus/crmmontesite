@@ -123,10 +123,7 @@ export const useUpdateLead = () => {
         .maybeSingle();
 
       if (error) throw error;
-      if (!data) {
-        throw new Error('Lead não encontrado para atualização.');
-      }
-      return data;
+      return data as any;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leads'] });
@@ -178,10 +175,7 @@ export const useCreateLead = () => {
         .maybeSingle();
 
       if (error) throw error;
-      if (!data) {
-        throw new Error('Falha ao criar lead. Tente novamente.');
-      }
-      return data;
+      return data as any;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leads'] });
