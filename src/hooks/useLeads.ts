@@ -125,7 +125,14 @@ export const useUpdateLead = () => {
       if (error) throw error;
       return data as any;
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      // Atualiza o cache imediatamente para refletir a nova situação
+      queryClient.setQueriesData({ queryKey: ['leads'], exact: false }, (oldData: any) => {
+        if (!Array.isArray(oldData)) return oldData;
+        return oldData.map((lead: any) =>
+          lead.id === variables.id ? { ...lead, ...variables.updates } : lead
+        );
+      });
       queryClient.invalidateQueries({ queryKey: ['leads'] });
       toast({
         title: "Lead atualizado",

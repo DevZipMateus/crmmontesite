@@ -93,6 +93,8 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Lead - {lead.empresa}</DialogTitle>
+          {/* Descrição para acessibilidade, evita warning de aria-describedby */}
+          <p className="sr-only" id="lead-edit-desc">Atualize as informações do lead, como situação, vendedor e observações.</p>
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
