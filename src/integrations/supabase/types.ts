@@ -836,41 +836,6 @@ export type Database = {
         Args: { blaster_url: string }
         Returns: string
       }
-      get_project_by_submission_hash: {
-        Args: { p_hash: string }
-        Returns: {
-          assigned_programmer: string | null
-          blaster_link: string | null
-          client_name: string
-          client_submission_hash: string | null
-          client_type: string | null
-          cnpj: string | null
-          created_at: string | null
-          customization_deadline: string | null
-          data_formulario: string | null
-          domain: string | null
-          email_complementar: string | null
-          formulario_preenchido: boolean | null
-          id: string
-          lead_id: string | null
-          manually_archived: boolean | null
-          modelo_escolhido: string | null
-          observacoes_cliente: string | null
-          partner_hash: string | null
-          partner_link: string | null
-          partner_webhook_url: string | null
-          personalization_id: string | null
-          project_source: string | null
-          provider_credentials: string | null
-          requires_paid_customization: boolean | null
-          responsible_name: string | null
-          site_ready_date: string | null
-          status: string | null
-          telefone: string | null
-          template: string | null
-          updated_at: string | null
-        }
-      }
       string_similarity: {
         Args: { str1: string; str2: string }
         Returns: number
