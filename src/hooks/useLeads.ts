@@ -115,35 +115,54 @@ export const useUpdateLead = () => {
 
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Lead> }) => {
+      console.log('🚀 Iniciando atualização do lead:', { id, updates });
+      
       const { data, error } = await supabase
         .from('leads')
         .update(updates)
         .eq('id', id)
         .select()
-        .maybeSingle();
+        .single();
 
-      if (error) throw error;
-      return data as any;
+      console.log('📊 Resposta do Supabase:', { data, error });
+
+      if (error) {
+        console.error('❌ Erro ao atualizar lead:', error);
+        throw error;
+      }
+
+      if (!data) {
+        console.warn('⚠️ Nenhum dado retornado após atualização');
+        throw new Error('Nenhum lead foi atualizado');
+      }
+
+      console.log('✅ Lead atualizado com sucesso:', data);
+      return data;
     },
     onSuccess: (data, variables) => {
-      // Atualiza o cache imediatamente para refletir a nova situação
-      queryClient.setQueriesData({ queryKey: ['leads'], exact: false }, (oldData: any) => {
+      console.log('🎉 Sucesso - atualizando cache:', { data, variables });
+      
+      // Atualiza o cache imediatamente
+      queryClient.setQueriesData({ queryKey: ['leads'] }, (oldData: any) => {
         if (!Array.isArray(oldData)) return oldData;
         return oldData.map((lead: any) =>
-          lead.id === variables.id ? { ...lead, ...variables.updates } : lead
+          lead.id === variables.id ? { ...lead, ...variables.updates, updated_at: new Date().toISOString() } : lead
         );
       });
+      
+      // Invalida para garantir dados atualizados
       queryClient.invalidateQueries({ queryKey: ['leads'] });
+      
       toast({
-        title: "Lead atualizado",
-        description: "As informações do lead foram atualizadas com sucesso.",
+        title: "Lead atualizado com sucesso",
+        description: `Situação alterada para: ${variables.updates.situacao || 'Nova situação'}`,
       });
     },
     onError: (error) => {
-      console.error('Erro ao atualizar lead:', error);
+      console.error('❌ Erro na mutation do lead:', error);
       toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Não foi possível atualizar o lead. Tente novamente.",
+        title: "Erro ao atualizar lead",
+        description: error instanceof Error ? error.message : "Verifique sua conexão e tente novamente.",
         variant: "destructive",
       });
     },
