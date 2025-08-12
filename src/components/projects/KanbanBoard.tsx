@@ -84,13 +84,7 @@ export default function KanbanBoard({
         // Filtrar projetos arquivados apenas se não houver busca ativa
         const hasActiveSearch = searchQuery.trim().length > 0;
         if (!hasActiveSearch) {
-          updatedProjects = updatedProjects.filter(project => {
-            // Para "Site pronto", filtrar arquivados
-            if (project.status === "Site pronto" && project.isArchived) {
-              return false;
-            }
-            return true;
-          });
+          updatedProjects = updatedProjects.filter(project => !project.isArchived);
         }
 
         updatedProjects = updatedProjects.sort((a, b) => {

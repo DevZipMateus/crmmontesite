@@ -148,6 +148,7 @@ export default function ProjectCard({
         <ProjectCardActions 
           projectId={project.id}
           projectName={project.client_name}
+          isArchived={!!project.isArchived}
           onViewEdit={handleViewEdit}
           onProjectDeleted={onProjectDeleted}
         />
