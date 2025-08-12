@@ -44,11 +44,15 @@ export async function updateProject(id: string, values: Partial<Project>) {
       .update(updateData)
       .eq('id', id)
       .select('*')
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error("Erro ao atualizar projeto:", error);
       throw error;
+    }
+
+    if (!data) {
+      throw new Error("Projeto não encontrado ou você não tem permissão para atualizar.");
     }
     
     console.log("Project updated successfully:", data);
