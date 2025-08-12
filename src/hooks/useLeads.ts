@@ -120,9 +120,12 @@ export const useUpdateLead = () => {
         .update(updates)
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) {
+        throw new Error('Lead não encontrado para atualização.');
+      }
       return data;
     },
     onSuccess: () => {
@@ -136,7 +139,7 @@ export const useUpdateLead = () => {
       console.error('Erro ao atualizar lead:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar o lead. Tente novamente.",
+        description: error instanceof Error ? error.message : "Não foi possível atualizar o lead. Tente novamente.",
         variant: "destructive",
       });
     },
@@ -172,9 +175,12 @@ export const useCreateLead = () => {
           nome_cliente: leadData.nome_cliente?.trim()
         }])
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) {
+        throw new Error('Falha ao criar lead. Tente novamente.');
+      }
       return data;
     },
     onSuccess: () => {
