@@ -28,12 +28,13 @@ export async function updateProject(id: string, values: Partial<Project>) {
     if (values.provider_credentials !== undefined) updateData.provider_credentials = values.provider_credentials;
     if (values.assigned_programmer !== undefined) updateData.assigned_programmer = values.assigned_programmer;
     
-    // Handle partner_link based on client_type
-    if (values.client_type === 'parceiro') {
-      updateData.partner_link = values.partner_link;
-    } else {
-      // If client type is not 'parceiro', set partner_link to null
-      updateData.partner_link = null;
+    // Handle partner_link only if client_type is being updated
+    if (values.client_type !== undefined) {
+      if (values.client_type === 'parceiro') {
+        updateData.partner_link = values.partner_link;
+      } else {
+        updateData.partner_link = null;
+      }
     }
     
     console.log("Final update data:", updateData);
@@ -43,21 +44,28 @@ export async function updateProject(id: string, values: Partial<Project>) {
       .from('projects')
       .update(updateData)
       .eq('id', id)
-      .select('*')
-      .maybeSingle();
+      .select('*'); // return array to avoid 406 when 0 rows
     
     if (error) {
       console.error("Erro ao atualizar projeto:", error);
       throw error;
     }
 
-    if (!data) {
-      throw new Error("Projeto não encontrado ou você não tem permissão para atualizar.");
+    // If no rows were updated, it could be RLS (not authenticated) or not found
+    if (!data || data.length === 0) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const isLoggedIn = !!sessionData.session;
+      console.warn("Update returned no rows. Logged in:", isLoggedIn);
+      const message = isLoggedIn
+        ? "Projeto não encontrado ou você não tem permissão para atualizar."
+        : "Você precisa estar logado para atualizar projetos.";
+      throw new Error(message);
     }
+
+    const updatedProject = data[0];
+    console.log("Project updated successfully:", updatedProject);
     
-    console.log("Project updated successfully:", data);
-    
-    return { success: true, data };
+    return { success: true, data: updatedProject };
   } catch (error) {
     console.error("Erro ao atualizar projeto:", error);
     
