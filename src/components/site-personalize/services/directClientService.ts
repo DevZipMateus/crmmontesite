@@ -48,31 +48,42 @@ export const savePersonalizationData = async (
 };
 
 export const createProject = async (formData: any, personalizationId: string, toast: any) => {
-  try {
-    const { data: projectData, error: projectError } = await supabase
-      .from("projects")
-      .insert({
-        client_name: formData.nome_empresa,
-        responsible_name: formData.nome_empresa,
-        template: formData.modelo,
-        status: "Recebido",
-        client_type: "cliente_final",
-        personalization_id: personalizationId,
-        cnpj: formData.cnpj_cpf || null,
-        telefone: formData.telefone || null
-      })
-      .select();
+  console.log("🔄 Creating project for personalization:", personalizationId);
+  
+  const { data: projectData, error: projectError } = await supabase
+    .from("projects")
+    .insert({
+      client_name: formData.nome_empresa,
+      responsible_name: formData.nome_empresa,
+      template: formData.modelo,
+      status: "Recebido",
+      client_type: "cliente_final",
+      personalization_id: personalizationId,
+      cnpj: formData.cnpj_cpf || null,
+      telefone: formData.telefone || null
+    })
+    .select();
 
-    if (projectError) {
-      console.error("❌ Project creation error:", projectError);
-      toast({
-        title: "Aviso",
-        description: "Sua personalização foi salva, mas houve um problema na criação do projeto.",
-      });
-    } else {
-      console.log("✅ Project created successfully:", projectData);
-    }
-  } catch (projectError) {
-    console.error("❌ Project creation exception:", projectError);
+  if (projectError) {
+    console.error("❌ CRITICAL: Project creation failed:", projectError);
+    toast({
+      title: "Erro Crítico",
+      description: "Falha ao criar projeto. O formulário não será processado corretamente.",
+      variant: "destructive"
+    });
+    throw new Error(`Falha crítica na criação do projeto: ${projectError.message}`);
   }
+
+  if (!projectData || projectData.length === 0) {
+    console.error("❌ CRITICAL: Project created but no data returned");
+    toast({
+      title: "Erro Crítico", 
+      description: "Projeto criado mas dados não retornados. Contate o suporte.",
+      variant: "destructive"
+    });
+    throw new Error("Projeto criado mas dados não retornados");
+  }
+
+  console.log("✅ Project created successfully:", projectData[0]);
+  return projectData[0];
 };
