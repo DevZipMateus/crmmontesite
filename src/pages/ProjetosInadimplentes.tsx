@@ -228,7 +228,7 @@ const ProjetosInadimplentes = () => {
                         )}
                         {project.remove_from_hostinger && (
                           <Badge variant="destructive" className="text-xs">
-                            Remover da Hostinger
+                            Removido da Hostinger
                           </Badge>
                         )}
                       </div>
