@@ -17,68 +17,149 @@ const getImprovedIntroduction = () => {
   return `Crie um site institucional completo com base nas informações da empresa que irei fornecer a seguir.
 
 ⚙️ CONFIGURAÇÕES TÉCNICAS
-Otimizar completamente o site para SEO, aplicando:
 
-Heading tags bem estruturadas (H1, H2, H3)
+SEO e Metadados:
 
-Meta descriptions exclusivas e atrativas
+Estruturar corretamente headings (H1, H2, H3) em ordem hierárquica.
 
-URLs amigáveis
+Criar <title> exclusivos e descritivos para cada página.
 
-Texto alternativo (alt) em todas as imagens
+Criar <meta name="description"> únicas, objetivas e atrativas para cada página.
 
-Criar automaticamente os arquivos:
+Organizar todas as tags <meta> de forma limpa e sem duplicações.
 
-sitemap.xml (para indexação nos buscadores)
+Criar Open Graph tags para otimizar compartilhamento em redes sociais:
 
-robots.txt (permitindo todos os bots, exceto caminhos irrelevantes como /admin ou /login)
+og:title → mesmo conteúdo do <title>.
 
-O site deve ser totalmente responsivo, adaptando-se a celulares, tablets e desktops, sem rolagem horizontal e com bom desempenho em 3G.
+og:description → mesmo conteúdo do <meta name="description">.
 
-Garantir carregamento rápido, otimizando imagens e elementos visuais.
+og:image → usar a logo da empresa como imagem padrão.
 
-Inserir botão flutuante do WhatsApp com número informado.
+og:type → website.
 
-Embutir um mapa interativo com a localização exata da empresa (caso endereço seja fornecido).
+og:url → URL da página.
 
-Incluir menu fixo no topo com navegação por âncoras suaves para as seções: "Início", "Sobre", "Serviços", "Planos", "Depoimentos", "Localização", "Contato".
+Garantir URLs amigáveis.
 
-Usar a logo enviada como referência de identidade visual.
+Adicionar texto alternativo (alt) em todas as imagens.
 
-Paleta de cores baseada na regra 60/30/10:
+Gerar automaticamente sitemap.xml e robots.txt.
 
-60% branco (plano de fundo principal)
+Desempenho e responsividade:
 
-30% cor primária da logo
+Site 100% responsivo.
 
-10% cor de destaque da logo
+Carregamento rápido e otimizado.
 
-🎨 ESTILO VISUAL (ESTÉTICA E PERSONALIDADE)
-Evitar visual genérico ou padrão. Criar um layout moderno, bonito e único.
+Funcionalidades extras:
 
-Usar fontes elegantes ou aconchegantes (dependendo do segmento).
+Botão flutuante de WhatsApp (ver regra abaixo).
 
-Usar ícones personalizados e imagens com boa resolução.
+Mapa interativo (se endereço for fornecido).
 
-Aplicar transições suaves entre seções e scroll leve.
+Menu fixo com navegação por âncoras.
 
-Valorização dos diferenciais da empresa em seções visuais com destaque.
+📲 RASTREAMENTO DE BOTÕES DE WHATSAPP (Google Tag Manager)
 
-Trabalhar com espaços em branco bem distribuídos, blocos bem definidos e harmonia visual.
+Todos os botões de contato que direcionam para o WhatsApp devem conter no href a URL completa com domínio wa.me ou api.whatsapp.com, como:
 
-♿ ACESSIBILIDADE (UX INCLUSIVO)
-Garantir bom contraste de cores.
+href="https://wa.me/5599999999999"
+href="https://api.whatsapp.com/send?phone=5599999999999"
 
-Utilizar textos legíveis, com espaçamento adequado.
+Proibições:
 
-Tornar o site navegável por teclado e compatível com leitores de tela.
+Não usar redirecionamentos via JavaScript que ocultem a URL original.
 
-Evitar texto em imagens quando possível.
+Não usar funções de clique que envolvam o botão e escondam o link.
 
-📊 OPCIONAIS DE RASTREAMENTO E MÍDIA
-Preparar estrutura do site para futura integração com Google Analytics e Pixel do Facebook.
+Objetivo: garantir que a variável Click URL capture a palavra "whatsapp" para configuração correta no GTM.
 
-Incluir meta tags para Open Graph (OG) e Twitter Card, para uma boa visualização ao compartilhar o site nas redes sociais.`;
+Manter o estilo visual e a funcionalidade original dos botões.
+
+🎨 ESTILO VISUAL
+
+Layout moderno, bonito e único.
+
+Fontes elegantes e ícones personalizados.
+
+Transições suaves.
+
+Paleta de cores 60/30/10:
+
+60% branco,
+
+30% cor primária,
+
+10% cor de destaque.
+
+♿ ACESSIBILIDADE
+
+Garantir contraste adequado e textos legíveis.
+
+Navegabilidade por teclado.
+
+Compatibilidade com leitores de tela.
+
+🎨 REGRAS DE CONTRASTE PARA BOTÕES (WCAG AA)
+
+Objetivo: garantir contraste adequado entre texto e fundo em todos os estados: normal, hover, focus, active.
+
+✅ CHECKLIST:
+
+Estado Normal:
+
+Contraste mínimo 4.5:1.
+
+Texto visível sobre o fundo.
+
+Estado Hover:
+
+Nunca usar texto branco sobre fundo branco.
+
+Nunca usar texto escuro sobre fundo escuro.
+
+Botões Transparentes/Semitransparentes:
+
+Sempre adicionar um fundo visível (bg-white/10, bg-primary/20).
+
+Botões Outline:
+
+Borda visível no contexto (border-white/60 ou border-primary/60).
+
+🔧 Implementação prática:
+
+Fundo escuro:
+
+/* Normal */
+bg-white/10 text-white border-white/60
+/* Hover */
+hover:bg-accent hover:text-accent-foreground hover:border-accent
+
+Fundo claro:
+
+/* Normal */
+bg-primary/10 text-primary border-primary/60
+/* Hover */
+hover:bg-primary hover:text-primary-foreground hover:border-primary
+
+⚠️ Nunca fazer:
+
+text-white hover:bg-white
+
+text-black hover:bg-black
+
+Bordas fracas (<30% opacidade)
+
+✅ Sempre fazer:
+
+Testar visualmente todos os estados.
+
+Usar ferramentas de contraste para validar.
+
+Ajustar cores considerando o contexto.
+
+`;
 };
 
 /**
