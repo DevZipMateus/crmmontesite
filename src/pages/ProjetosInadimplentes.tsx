@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { CalendarIcon, Edit, ExternalLink, AlertCircle, Trash2 } from "lucide-react";
+import { CalendarIcon, Edit, ExternalLink, AlertCircle, Trash2, Bell } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -184,8 +184,14 @@ const ProjetosInadimplentes = () => {
                 {projects.map((project) => (
                   <div
                     key={project.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
+                    className="flex items-center justify-between p-4 border rounded-lg relative"
                   >
+                    {/* Ícone piscando quando não marcado para remoção da Hostinger */}
+                    {!project.remove_from_hostinger && (
+                      <div className="absolute top-2 right-2">
+                        <Bell className="h-4 w-4 text-orange-500 animate-pulse" />
+                      </div>
+                    )}
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-semibold">{project.client_name}</h3>
