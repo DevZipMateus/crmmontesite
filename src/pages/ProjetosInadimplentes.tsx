@@ -81,9 +81,10 @@ const ProjetosInadimplentes = () => {
       setIsDialogOpen(false);
     },
     onError: (error) => {
+      console.error("Erro ao atualizar projeto:", error);
       toast({
         title: "Erro ao atualizar",
-        description: "Não foi possível salvar as alterações.",
+        description: `Não foi possível salvar as alterações: ${error.message}`,
         variant: "destructive"
       });
     }
@@ -104,15 +105,20 @@ const ProjetosInadimplentes = () => {
   const handleSave = () => {
     if (!selectedProject) return;
 
+    const updateData = {
+      domain: formData.domain.trim() || null,
+      hostinger_link: formData.hostinger_link.trim() || null,
+      blaster_link: formData.blaster_link.trim() || null,
+      payment_date: formData.payment_date || null,
+      remove_from_hostinger: formData.remove_from_hostinger
+    };
+
+    console.log("Dados para atualização:", updateData);
+    console.log("ID do projeto:", selectedProject.id);
+
     updateProjectMutation.mutate({
       id: selectedProject.id,
-      data: {
-        domain: formData.domain.trim(),
-        hostinger_link: formData.hostinger_link.trim(),
-        blaster_link: formData.blaster_link.trim(),
-        payment_date: formData.payment_date || null,
-        remove_from_hostinger: formData.remove_from_hostinger
-      }
+      data: updateData
     });
   };
 
