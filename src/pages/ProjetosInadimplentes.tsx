@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import { CalendarIcon, Edit, ExternalLink, AlertCircle, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface InadimplentProject {
   id: string;
@@ -130,13 +131,41 @@ const ProjetosInadimplentes = () => {
     );
   };
 
+  // Calcular quantos projetos precisam ser removidos da Hostinger
+  const projectsToRemoveFromHostinger = projects.filter(p => p.remove_from_hostinger);
+
   return (
     <PageLayout title="Projetos Inadimplentes">
       <div className="container mx-auto p-6">
         <div className="flex items-center gap-2 mb-6">
           <AlertCircle className="h-6 w-6 text-destructive" />
-          <h1 className="text-2xl font-bold">Projetos Inadimplentes (4 projetos)</h1>
+          <h1 className="text-2xl font-bold">Projetos Inadimplentes ({projects.length} projetos)</h1>
         </div>
+
+        {/* Notificação para remover websites da Hostinger */}
+        {projectsToRemoveFromHostinger.length > 0 && (
+          <Alert className="mb-6 border-orange-500 bg-orange-50 dark:bg-orange-950/20">
+            <Trash2 className="h-4 w-4 text-orange-600" />
+            <AlertTitle className="text-orange-800 dark:text-orange-400">
+              Ação Requerida: Exclusão de Websites na Hostinger
+            </AlertTitle>
+            <AlertDescription className="text-orange-700 dark:text-orange-300">
+              {projectsToRemoveFromHostinger.length === 1 ? (
+                <>
+                  <strong>1 projeto</strong> está marcado para remoção da hospedagem Hostinger: 
+                  <strong> {projectsToRemoveFromHostinger[0].client_name}</strong>
+                </>
+              ) : (
+                <>
+                  <strong>{projectsToRemoveFromHostinger.length} projetos</strong> estão marcados para remoção da hospedagem Hostinger: 
+                  <strong> {projectsToRemoveFromHostinger.map(p => p.client_name).join(", ")}</strong>
+                </>
+              )}
+              <br />
+              Acesse o painel da Hostinger e remova os websites desses clientes inadimplentes.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Card>
           <CardHeader>
