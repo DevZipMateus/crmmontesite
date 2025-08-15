@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { CalendarIcon, Edit, ExternalLink, AlertCircle } from "lucide-react";
+import { CalendarIcon, Edit, ExternalLink, AlertCircle, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -80,6 +81,32 @@ const ProjetosInadimplentes = () => {
     }
   });
 
+  // Mutation para excluir projeto
+  const deleteProjectMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      const { error } = await supabase
+        .from("projects")
+        .delete()
+        .eq("id", projectId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Projeto excluído",
+        description: "O projeto foi removido com sucesso.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["inadimplent-projects"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir o projeto.",
+        variant: "destructive"
+      });
+    }
+  });
+
   const handleEdit = (project: InadimplentProject) => {
     setSelectedProject(project);
     setFormData({
@@ -89,6 +116,10 @@ const ProjetosInadimplentes = () => {
       payment_date: project.payment_date || ""
     });
     setIsDialogOpen(true);
+  };
+
+  const handleDelete = (projectId: string) => {
+    deleteProjectMutation.mutate(projectId);
   };
 
   const handleSave = () => {
@@ -194,6 +225,35 @@ const ProjetosInadimplentes = () => {
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja excluir o projeto "{project.client_name}"? 
+                              Esta ação não pode ser desfeita.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(project.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 ))}
