@@ -27,6 +27,7 @@ export async function updateProject(id: string, values: Partial<Project>) {
     if (values.blaster_link !== undefined) updateData.blaster_link = values.blaster_link;
     if (values.provider_credentials !== undefined) updateData.provider_credentials = values.provider_credentials;
     if (values.assigned_programmer !== undefined) updateData.assigned_programmer = values.assigned_programmer;
+    if (values.is_inadimplente !== undefined) updateData.is_inadimplente = values.is_inadimplente;
     
     // Handle partner_link only if client_type is being updated
     if (values.client_type !== undefined) {

@@ -12,6 +12,17 @@ import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { formatCnpjCpf } from "@/utils/documentFormatter";
 import { updateProject } from "@/server/project-actions";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ProjectInformationProps {
   project: Project;
@@ -68,16 +79,41 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
           <div className="flex justify-between items-center">
             <CardTitle>Informações do Projeto</CardTitle>
             <div className="flex gap-2">
-              <Button
-                variant={project.is_inadimplente ? "destructive" : "outline"}
-                size="sm"
-                onClick={handleToggleInadimplente}
-                disabled={isUpdatingInadimplente}
-                className={project.is_inadimplente ? "" : "border-orange-500 text-orange-600 hover:bg-orange-50"}
-              >
-                <AlertTriangle className="h-4 w-4 mr-2" />
-                {project.is_inadimplente ? "Remover Inadimplência" : "Marcar como Inadimplente"}
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant={project.is_inadimplente ? "destructive" : "outline"}
+                    size="sm"
+                    disabled={isUpdatingInadimplente}
+                    className={project.is_inadimplente ? "" : "border-orange-500 text-orange-600 hover:bg-orange-50"}
+                  >
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    {project.is_inadimplente ? "Remover Inadimplência" : "Marcar como Inadimplente"}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {project.is_inadimplente ? "Remover Inadimplência" : "Confirmar Inadimplência"}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {project.is_inadimplente 
+                        ? `Tem certeza que deseja remover o projeto "${project.client_name}" da lista de inadimplentes?`
+                        : `Tem certeza que deseja marcar o projeto "${project.client_name}" como inadimplente? Esta ação pode afetar os serviços do cliente.`
+                      }
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleToggleInadimplente}
+                      className={project.is_inadimplente ? "" : "bg-orange-600 hover:bg-orange-700"}
+                    >
+                      {project.is_inadimplente ? "Remover" : "Marcar como Inadimplente"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               {!isLoading && isAdmin && (
                 <DeleteProjectDialog 
                   projectId={project.id}
