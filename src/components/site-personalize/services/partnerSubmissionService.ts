@@ -32,6 +32,8 @@ export const submitPartnerClient = async (
     paletacores: data.cores_preferidas || "",
     descricao: data.sobre_empresa || "",
     slogan: data.slogan || "",
+    horario_funcionamento: data.horario_funcionamento || "",
+    estilo_visual: data.estilo_visual || "",
     possuiplanos: data.possuiPlanos || false,
     planos: data.planos || "",
     servicos: data.servicos || "",

@@ -142,6 +142,7 @@ ${observacoesData.paletacores ? `Paleta de cores: ${observacoesData.paletacores}
 Nome da empresa: ${formatTextField(project.client_name)}
 Responsável: ${formatTextField(project.responsible_name)}
 Domínio: ${formatTextField(project.domain)}
+CNPJ/CPF: ${formatTextField(project.cnpj)}
 Telefone: ${formatTextField(project.telefone)}
 Email: ${formatTextField(project.email_complementar)}
 ${observacoesData.endereco ? `Endereço: ${formatTextField(observacoesData.endereco)}` : ''}
@@ -212,15 +213,18 @@ ${personalizationData.paletacores ? `Paleta de cores: ${personalizationData.pale
 Nome da empresa: ${project.client_name || personalizationData.officenome || 'Não informado'}
 Responsável: ${project.responsible_name || personalizationData.responsavelnome || 'Não informado'}
 Domínio: ${project.domain || 'Não informado'}
+CNPJ/CPF: ${formatTextField(project.cnpj)}
 Telefone: ${formatTextField(personalizationData.telefone)}
 Email: ${formatTextField(personalizationData.email)}
 Endereço: ${formatTextField(personalizationData.endereco)}
+Horário de funcionamento: ${formatTextField(personalizationData.horario_funcionamento)}
 Redes Sociais: ${formatTextField(personalizationData.redessociais)}
 
 ## IDENTIDADE VISUAL
 Fonte: ${formatTextField(personalizationData.fonte)}
 Descrição: ${formatTextField(personalizationData.descricao)}
 Slogan: ${formatTextField(personalizationData.slogan)}
+Estilo visual preferido: ${formatTextField(personalizationData.estilo_visual)}
 
 ## SERVIÇOS E PLANOS
 Possui planos: ${formatBooleanField(personalizationData.possuiplanos)}

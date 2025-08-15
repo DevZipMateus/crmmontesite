@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -637,7 +637,9 @@ export type Database = {
           descricao: string
           email: string
           endereco: string
+          estilo_visual: string | null
           fonte: string | null
+          horario_funcionamento: string | null
           id: string
           linkmapa: string | null
           logo_url: string | null
@@ -664,7 +666,9 @@ export type Database = {
           descricao: string
           email: string
           endereco: string
+          estilo_visual?: string | null
           fonte?: string | null
+          horario_funcionamento?: string | null
           id?: string
           linkmapa?: string | null
           logo_url?: string | null
@@ -691,7 +695,9 @@ export type Database = {
           descricao?: string
           email?: string
           endereco?: string
+          estilo_visual?: string | null
           fonte?: string | null
+          horario_funcionamento?: string | null
           id?: string
           linkmapa?: string | null
           logo_url?: string | null
@@ -812,16 +818,16 @@ export type Database = {
     }
     Functions: {
       add_business_days: {
-        Args: { start_date: string; days_to_add: number }
+        Args: { days_to_add: number; start_date: string }
         Returns: string
       }
       auto_link_leads_projects: {
         Args: Record<PropertyKey, never>
         Returns: {
-          lead_id: string
-          project_id: string
           confidence_score: number
+          lead_id: string
           link_method: string
+          project_id: string
         }[]
       }
       calcular_dias_sem_resposta: {
@@ -878,9 +884,9 @@ export type Database = {
       validate_auth_token: {
         Args: { token_input: string }
         Returns: {
+          is_valid: boolean
           partner_id: string
           partner_name: string
-          is_valid: boolean
         }[]
       }
     }
