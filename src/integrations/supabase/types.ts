@@ -412,6 +412,7 @@ export type Database = {
           domain: string | null
           email_complementar: string | null
           formulario_preenchido: boolean | null
+          hostinger_link: string | null
           id: string
           is_inadimplente: boolean | null
           lead_id: string | null
@@ -421,9 +422,11 @@ export type Database = {
           partner_hash: string | null
           partner_link: string | null
           partner_webhook_url: string | null
+          payment_date: string | null
           personalization_id: string | null
           project_source: string | null
           provider_credentials: string | null
+          remove_from_hostinger: boolean
           requires_paid_customization: boolean | null
           responsible_name: string | null
           site_ready_date: string | null
@@ -445,6 +448,7 @@ export type Database = {
           domain?: string | null
           email_complementar?: string | null
           formulario_preenchido?: boolean | null
+          hostinger_link?: string | null
           id?: string
           is_inadimplente?: boolean | null
           lead_id?: string | null
@@ -454,9 +458,11 @@ export type Database = {
           partner_hash?: string | null
           partner_link?: string | null
           partner_webhook_url?: string | null
+          payment_date?: string | null
           personalization_id?: string | null
           project_source?: string | null
           provider_credentials?: string | null
+          remove_from_hostinger?: boolean
           requires_paid_customization?: boolean | null
           responsible_name?: string | null
           site_ready_date?: string | null
@@ -478,6 +484,7 @@ export type Database = {
           domain?: string | null
           email_complementar?: string | null
           formulario_preenchido?: boolean | null
+          hostinger_link?: string | null
           id?: string
           is_inadimplente?: boolean | null
           lead_id?: string | null
@@ -487,9 +494,11 @@ export type Database = {
           partner_hash?: string | null
           partner_link?: string | null
           partner_webhook_url?: string | null
+          payment_date?: string | null
           personalization_id?: string | null
           project_source?: string | null
           provider_credentials?: string | null
+          remove_from_hostinger?: boolean
           requires_paid_customization?: boolean | null
           responsible_name?: string | null
           site_ready_date?: string | null
@@ -860,6 +869,7 @@ export type Database = {
           domain: string | null
           email_complementar: string | null
           formulario_preenchido: boolean | null
+          hostinger_link: string | null
           id: string
           is_inadimplente: boolean | null
           lead_id: string | null
@@ -869,9 +879,11 @@ export type Database = {
           partner_hash: string | null
           partner_link: string | null
           partner_webhook_url: string | null
+          payment_date: string | null
           personalization_id: string | null
           project_source: string | null
           provider_credentials: string | null
+          remove_from_hostinger: boolean
           requires_paid_customization: boolean | null
           responsible_name: string | null
           site_ready_date: string | null
