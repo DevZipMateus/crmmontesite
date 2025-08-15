@@ -45,7 +45,7 @@ const ProjetosInadimplentes = () => {
       const { data, error } = await supabase
         .from("projects")
         .select("*")
-        .or("domain.is.null,status.eq.Aguardando pagamento")
+        .or("domain.is.null,status.eq.Aguardando pagamento,is_inadimplente.eq.true")
         .order("created_at", { ascending: false });
 
       if (error) throw error;

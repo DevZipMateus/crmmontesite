@@ -413,6 +413,7 @@ export type Database = {
           email_complementar: string | null
           formulario_preenchido: boolean | null
           id: string
+          is_inadimplente: boolean | null
           lead_id: string | null
           manually_archived: boolean | null
           modelo_escolhido: string | null
@@ -445,6 +446,7 @@ export type Database = {
           email_complementar?: string | null
           formulario_preenchido?: boolean | null
           id?: string
+          is_inadimplente?: boolean | null
           lead_id?: string | null
           manually_archived?: boolean | null
           modelo_escolhido?: string | null
@@ -477,6 +479,7 @@ export type Database = {
           email_complementar?: string | null
           formulario_preenchido?: boolean | null
           id?: string
+          is_inadimplente?: boolean | null
           lead_id?: string | null
           manually_archived?: boolean | null
           modelo_escolhido?: string | null
@@ -858,6 +861,7 @@ export type Database = {
           email_complementar: string | null
           formulario_preenchido: boolean | null
           id: string
+          is_inadimplente: boolean | null
           lead_id: string | null
           manually_archived: boolean | null
           modelo_escolhido: string | null

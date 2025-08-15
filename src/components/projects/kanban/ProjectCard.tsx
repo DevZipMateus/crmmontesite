@@ -20,6 +20,8 @@ import { getClientTypeInfo } from "@/utils/clientTypeUtils";
 import { useNavigate } from "react-router-dom";
 import { updateProject } from "@/server/project-actions";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle } from "lucide-react";
 
 interface ProjectCardProps {
   project: Project;
@@ -86,6 +88,35 @@ export default function ProjectCard({
     }
   };
 
+  const handleToggleInadimplente = async () => {
+    try {
+      const newStatus = !project.is_inadimplente;
+      const result = await updateProject(project.id, {
+        is_inadimplente: newStatus
+      });
+
+      if (result.success) {
+        toast({
+          title: newStatus ? "Projeto marcado como inadimplente" : "Projeto removido dos inadimplentes",
+          description: `O projeto foi ${newStatus ? 'adicionado à' : 'removido da'} lista de inadimplentes.`,
+        });
+        
+        if (onProjectUpdated) {
+          onProjectUpdated();
+        }
+      } else {
+        throw new Error(result.message || "Erro ao atualizar status de inadimplência");
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar inadimplência:", error);
+      toast({
+        title: "Erro ao atualizar inadimplência",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card className={`p-3 sm:p-4 lg:p-5 cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow border-l-4 ${clientTypeInfo.borderColor} ${clientTypeInfo.cardBgColor}`}
       draggable
@@ -144,6 +175,19 @@ export default function ProjectCard({
           onStatusChange={onStatusChange}
           isUpdating={isUpdating}
         />
+
+        {/* Botão para marcar como inadimplente */}
+        <div className="flex justify-center pt-2">
+          <Button
+            variant={project.is_inadimplente ? "destructive" : "outline"}
+            size="sm"
+            onClick={handleToggleInadimplente}
+            className={project.is_inadimplente ? "w-full" : "w-full border-orange-500 text-orange-600 hover:bg-orange-50"}
+          >
+            <AlertTriangle className="h-4 w-4 mr-2" />
+            {project.is_inadimplente ? "Remover Inadimplência" : "Marcar como Inadimplente"}
+          </Button>
+        </div>
         
         <ProjectCardActions 
           projectId={project.id}

@@ -47,4 +47,7 @@ export interface Project {
   
   // Campo para formulário de envio de imagens do cliente
   client_submission_hash?: string;
+  
+  // Campo para marcar projeto como inadimplente
+  is_inadimplente?: boolean;
 }
