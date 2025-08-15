@@ -1,14 +1,17 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Project } from "@/types/project";
 import { useModelDetails } from "@/utils/modelUtils";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle2, Clock, AlertTriangle } from "lucide-react";
 import DeleteProjectDialog from "@/components/projects/DeleteProjectDialog";
 import { useNavigate } from "react-router-dom";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { formatCnpjCpf } from "@/utils/documentFormatter";
+import { updateProject } from "@/server/project-actions";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProjectInformationProps {
   project: Project;
@@ -17,6 +20,8 @@ interface ProjectInformationProps {
 export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project }) => {
   const navigate = useNavigate();
   const { isAdmin, isLoading } = useUserPermissions();
+  const { toast } = useToast();
+  const [isUpdatingInadimplente, setIsUpdatingInadimplente] = useState(false);
   
   // Use the new hook to get the model name
   const { modelName, isLoading: modelLoading } = useModelDetails(project.template);
@@ -25,21 +30,64 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
     navigate('/projetos');
   };
 
+  const handleToggleInadimplente = async () => {
+    setIsUpdatingInadimplente(true);
+    try {
+      const newStatus = !project.is_inadimplente;
+      const result = await updateProject(project.id, {
+        is_inadimplente: newStatus
+      });
+
+      if (result.success) {
+        toast({
+          title: newStatus ? "Projeto marcado como inadimplente" : "Projeto removido dos inadimplentes",
+          description: `O projeto foi ${newStatus ? 'adicionado à' : 'removido da'} lista de inadimplentes.`,
+        });
+        
+        // Refresh the page to show updated data
+        window.location.reload();
+      } else {
+        throw new Error(result.message || "Erro ao atualizar status de inadimplência");
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar inadimplência:", error);
+      toast({
+        title: "Erro ao atualizar inadimplência",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingInadimplente(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <Card className="border-gray-100 shadow-sm">
         <CardHeader className="bg-gray-50/50 border-b border-gray-100">
           <div className="flex justify-between items-center">
             <CardTitle>Informações do Projeto</CardTitle>
-            {!isLoading && isAdmin && (
-              <DeleteProjectDialog 
-                projectId={project.id}
-                projectName={project.client_name}
-                onDelete={handleProjectDeleted}
-                variant="button"
+            <div className="flex gap-2">
+              <Button
+                variant={project.is_inadimplente ? "destructive" : "outline"}
                 size="sm"
-              />
-            )}
+                onClick={handleToggleInadimplente}
+                disabled={isUpdatingInadimplente}
+                className={project.is_inadimplente ? "" : "border-orange-500 text-orange-600 hover:bg-orange-50"}
+              >
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                {project.is_inadimplente ? "Remover Inadimplência" : "Marcar como Inadimplente"}
+              </Button>
+              {!isLoading && isAdmin && (
+                <DeleteProjectDialog 
+                  projectId={project.id}
+                  projectName={project.client_name}
+                  onDelete={handleProjectDeleted}
+                  variant="button"
+                  size="sm"
+                />
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-6">
