@@ -285,7 +285,7 @@ const ProjetosInadimplentes = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="payment_date">Data de Pagamento</Label>
+                <Label htmlFor="payment_date">Data da Inadimplência</Label>
                 <Input
                   id="payment_date"
                   type="date"

@@ -45,9 +45,18 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
     setIsUpdatingInadimplente(true);
     try {
       const newStatus = !project.is_inadimplente;
-      const result = await updateProject(project.id, {
+      
+      // Preparar dados para atualização
+      const updateData: any = {
         is_inadimplente: newStatus
-      });
+      };
+      
+      // Se está marcando como inadimplente, definir a data atual como payment_date
+      if (newStatus) {
+        updateData.payment_date = new Date().toISOString();
+      }
+      
+      const result = await updateProject(project.id, updateData);
 
       if (result.success) {
         toast({
