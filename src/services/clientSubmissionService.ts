@@ -37,9 +37,15 @@ export class ClientSubmissionService {
     return data as ClientMediaSubmission;
   }
 
-  static async uploadImages(projectId: string, images: Array<{ file: File; name: string; price?: number }>) {
+  static async uploadImages(projectId: string, images: Array<{ file: File; name: string; description?: string; price?: number }>) {
     const timestamp = Date.now();
-    const uploadedImages: Array<{ url: string; caption?: string }> = [];
+    const uploadedImages: Array<{ 
+      url: string; 
+      name: string;
+      description?: string;
+      price?: number;
+      caption?: string;
+    }> = [];
 
     for (let i = 0; i < images.length; i++) {
       const imageData = images[i];
@@ -52,12 +58,16 @@ export class ClientSubmissionService {
 
       if (uploadError) throw uploadError;
 
+      // Criar caption combinada para compatibilidade
       const caption = imageData.price 
         ? `${imageData.name} - R$ ${imageData.price.toFixed(2)}`
         : imageData.name;
 
       uploadedImages.push({
         url: fileName,
+        name: imageData.name,
+        description: imageData.description,
+        price: imageData.price,
         caption
       });
     }

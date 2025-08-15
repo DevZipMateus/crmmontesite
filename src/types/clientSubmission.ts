@@ -6,7 +6,10 @@ export interface ClientMediaSubmission {
   message?: string;
   media_urls: Array<{
     url: string;
-    caption?: string;
+    name: string;
+    description?: string;
+    price?: number;
+    caption?: string; // mantido para compatibilidade
   }>;
   submission_date: string;
   status: 'pending' | 'viewed' | 'approved' | 'rejected';
@@ -19,6 +22,7 @@ export interface ClientSubmissionFormData {
   images: Array<{
     file: File;
     name: string;
+    description?: string;
     price?: number;
   }>;
 }

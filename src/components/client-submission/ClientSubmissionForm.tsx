@@ -30,6 +30,7 @@ export function ClientSubmissionForm({
   const [selectedImages, setSelectedImages] = useState<Array<{
     file: File;
     name: string;
+    description?: string;
     price?: number;
   }>>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,6 +58,7 @@ export function ClientSubmissionForm({
     const newImages = imageFiles.map(file => ({
       file,
       name: file.name.split('.')[0], // Remove extension for default name
+      description: undefined,
       price: undefined,
     }));
 
@@ -70,6 +72,12 @@ export function ClientSubmissionForm({
   const updateImageName = (index: number, name: string) => {
     setSelectedImages(prev => prev.map((img, i) => 
       i === index ? { ...img, name } : img
+    ));
+  };
+
+  const updateImageDescription = (index: number, description: string) => {
+    setSelectedImages(prev => prev.map((img, i) => 
+      i === index ? { ...img, description } : img
     ));
   };
 
@@ -194,16 +202,36 @@ export function ClientSubmissionForm({
                             />
                           </div>
                           <div>
-                            <label className="text-sm font-medium">Preço (opcional)</label>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              value={imageData.price || ""}
-                              onChange={(e) => updateImagePrice(index, e.target.value ? parseFloat(e.target.value) : undefined)}
-                              placeholder="0.00"
-                              className="mt-1"
+                            <label className="text-sm font-medium">Descrição (opcional)</label>
+                            <Textarea
+                              value={imageData.description || ""}
+                              onChange={(e) => updateImageDescription(index, e.target.value)}
+                              placeholder="Descrição detalhada do produto..."
+                              className="mt-1 min-h-[80px]"
+                              maxLength={500}
                             />
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {(imageData.description || "").length}/500 caracteres
+                            </p>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-sm font-medium">Preço (opcional)</label>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={imageData.price || ""}
+                                onChange={(e) => updateImagePrice(index, e.target.value ? parseFloat(e.target.value) : undefined)}
+                                placeholder="0.00"
+                                className="mt-1"
+                              />
+                            </div>
+                            <div className="flex items-end">
+                              <div className="text-sm text-muted-foreground">
+                                {imageData.price && `R$ ${imageData.price.toFixed(2)}`}
+                              </div>
+                            </div>
                           </div>
                         </div>
                         <Button
