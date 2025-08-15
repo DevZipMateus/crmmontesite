@@ -102,4 +102,72 @@ export class ClientSubmissionService {
 
     return data?.signedUrl || '';
   }
+
+  static async deleteImageFromSubmission(submissionId: string, imageIndex: number) {
+    // Primeiro, buscar a submissão atual
+    const { data: submission, error: fetchError } = await supabase
+      .from('client_media_submissions')
+      .select('media_urls')
+      .eq('id', submissionId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    const mediaUrls = submission.media_urls as any[];
+    
+    if (imageIndex >= 0 && imageIndex < mediaUrls.length) {
+      // Deletar o arquivo do storage
+      const imageToDelete = mediaUrls[imageIndex];
+      const { error: storageError } = await supabase.storage
+        .from('client-submissions')
+        .remove([imageToDelete.url]);
+
+      if (storageError) {
+        console.warn('Erro ao deletar arquivo do storage:', storageError);
+      }
+
+      // Remover a imagem do array
+      const updatedMediaUrls = mediaUrls.filter((_, index) => index !== imageIndex);
+
+      // Atualizar a submissão no banco
+      const { error: updateError } = await supabase
+        .from('client_media_submissions')
+        .update({ media_urls: updatedMediaUrls })
+        .eq('id', submissionId);
+
+      if (updateError) throw updateError;
+    }
+  }
+
+  static async deleteEntireSubmission(submissionId: string) {
+    // Primeiro, buscar a submissão atual para pegar as URLs das imagens
+    const { data: submission, error: fetchError } = await supabase
+      .from('client_media_submissions')
+      .select('media_urls')
+      .eq('id', submissionId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // Deletar todos os arquivos do storage
+    const mediaUrls = submission.media_urls as any[];
+    const filePaths = mediaUrls.map((media) => media.url);
+    if (filePaths.length > 0) {
+      const { error: storageError } = await supabase.storage
+        .from('client-submissions')
+        .remove(filePaths);
+
+      if (storageError) {
+        console.warn('Erro ao deletar arquivos do storage:', storageError);
+      }
+    }
+
+    // Deletar a submissão do banco
+    const { error: deleteError } = await supabase
+      .from('client_media_submissions')
+      .delete()
+      .eq('id', submissionId);
+
+    if (deleteError) throw deleteError;
+  }
 }

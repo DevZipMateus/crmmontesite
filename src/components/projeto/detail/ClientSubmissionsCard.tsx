@@ -15,10 +15,12 @@ import {
   Check, 
   X, 
   Copy,
-  Download
+  Download,
+  Trash2
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { ClientSubmissionsBulkDownloader } from "./ClientSubmissionsBulkDownloader";
 
 interface ClientSubmissionsCardProps {
@@ -146,6 +148,7 @@ export function ClientSubmissionsCard({ projectId, clientSubmissionHash, project
                   key={submission.id}
                   submission={submission}
                   onStatusUpdate={updateStatus}
+                  onSubmissionUpdate={loadSubmissions}
                 />
               ))}
             </div>
@@ -159,10 +162,12 @@ export function ClientSubmissionsCard({ projectId, clientSubmissionHash, project
 interface SubmissionCardProps {
   submission: ClientMediaSubmission;
   onStatusUpdate: (submissionId: string, status: string) => void;
+  onSubmissionUpdate: () => void;
 }
 
-function SubmissionCard({ submission, onStatusUpdate }: SubmissionCardProps) {
+function SubmissionCard({ submission, onStatusUpdate, onSubmissionUpdate }: SubmissionCardProps) {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const { toast } = useToast();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -196,6 +201,42 @@ function SubmissionCard({ submission, onStatusUpdate }: SubmissionCardProps) {
 
     loadImageUrls();
   }, [submission.media_urls]);
+
+  const handleDeleteImage = async (imageIndex: number) => {
+    try {
+      await ClientSubmissionService.deleteImageFromSubmission(submission.id, imageIndex);
+      toast({
+        title: "Sucesso",
+        description: "Imagem excluída com sucesso.",
+      });
+      onSubmissionUpdate();
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir imagem.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteSubmission = async () => {
+    try {
+      await ClientSubmissionService.deleteEntireSubmission(submission.id);
+      toast({
+        title: "Sucesso",
+        description: "Envio excluído completamente.",
+      });
+      onSubmissionUpdate();
+    } catch (error) {
+      console.error('Error deleting submission:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir envio.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="border rounded-lg p-4 space-y-3">
@@ -261,21 +302,90 @@ function SubmissionCard({ submission, onStatusUpdate }: SubmissionCardProps) {
             <DialogHeader>
               <DialogTitle>Imagens - {submission.client_name}</DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
               {imageUrls.map((url, index) => (
-                <div key={index} className="space-y-2">
+                <div key={index} className="space-y-2 border rounded-lg p-3">
                   <img
                     src={url}
                     alt={`Imagem ${index + 1}`}
                     className="w-full h-32 object-cover rounded-lg"
                   />
-                  {submission.media_urls[index]?.caption && (
-                    <p className="text-xs text-muted-foreground">
-                      {submission.media_urls[index].caption}
-                    </p>
-                  )}
+                  <div className="space-y-2">
+                    {submission.media_urls[index]?.name && (
+                      <p className="text-sm font-medium">
+                        {submission.media_urls[index].name}
+                      </p>
+                    )}
+                    {submission.media_urls[index]?.description && (
+                      <p className="text-xs text-muted-foreground">
+                        {submission.media_urls[index].description}
+                      </p>
+                    )}
+                    {submission.media_urls[index]?.price && (
+                      <p className="text-sm font-semibold text-green-600">
+                        R$ {submission.media_urls[index].price.toFixed(2)}
+                      </p>
+                    )}
+                    {submission.media_urls[index]?.caption && (
+                      <p className="text-xs text-muted-foreground">
+                        {submission.media_urls[index].caption}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex justify-end">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="sm">
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Excluir
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Excluir imagem</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tem certeza que deseja excluir esta imagem? Esta ação não pode ser desfeita.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDeleteImage(index)}>
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
               ))}
+            </div>
+            
+            <div className="flex justify-between items-center pt-4 border-t">
+              <span className="text-sm text-muted-foreground">
+                {submission.media_urls.length} imagem(ns) total
+              </span>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Excluir Envio Completo
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Excluir envio completo</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Tem certeza que deseja excluir este envio completo? Todas as imagens serão removidas permanentemente.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteSubmission}>
+                      Excluir Tudo
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </DialogContent>
         </Dialog>
