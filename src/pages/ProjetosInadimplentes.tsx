@@ -189,7 +189,7 @@ const ProjetosInadimplentes = () => {
                     {/* Ícone piscando quando não marcado para remoção da Hostinger */}
                     {!project.remove_from_hostinger && (
                       <div className="absolute top-2 right-2">
-                        <Bell className="h-4 w-4 text-orange-500 animate-pulse" />
+                        <Bell className="h-4 w-4 text-orange-500 animate-pulse hover:animate-bounce transition-all duration-300 drop-shadow-lg" />
                       </div>
                     )}
                     <div className="flex-1">
