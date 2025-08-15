@@ -27,6 +27,7 @@ import Leads from "./pages/Leads";
 import ClientSubmissionPage from "./pages/ClientSubmissionPage";
 import PainelVendas from "./pages/PainelVendas";
 import HostingerDNS from "./pages/HostingerDNS";
+import ProjetosInadimplentes from "./pages/ProjetosInadimplentes";
 
 const queryClient = new QueryClient();
 
@@ -99,6 +100,13 @@ const App = () => {
             <Route path="/hostinger-dns" element={
               <AuthGuard>
                 <HostingerDNS />
+              </AuthGuard>
+            } />
+            
+            {/* Projetos Inadimplentes - Nova rota */}
+            <Route path="/projetos-inadimplentes" element={
+              <AuthGuard>
+                <ProjetosInadimplentes />
               </AuthGuard>
             } />
             

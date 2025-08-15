@@ -9,7 +9,8 @@ import {
   Settings,
   Users,
   ContactRound,
-  Globe
+  Globe,
+  AlertCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -105,6 +106,13 @@ const MainMenuSection: React.FC = () => {
           label="Landing Pages Vendedores"
           href="/landing-pages-vendedores"
           description="Gerenciar formulários e gerar comandos para landing pages"
+        />
+        
+        <MenuItem 
+          icon={<AlertCircle size={24} />}
+          label="Projetos Inadimplentes"
+          href="/projetos-inadimplentes"
+          description="Gerenciar projetos com pagamentos pendentes"
         />
       </div>
     </section>
