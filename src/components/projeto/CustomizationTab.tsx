@@ -8,7 +8,6 @@ import { getProjectCustomizations } from "@/services/customizationService";
 import { CustomizationList } from "@/components/projeto/CustomizationList";
 import { CustomizationRequestForm } from "@/components/projeto/CustomizationRequestForm";
 import { CustomizationDetail } from "@/components/projeto/CustomizationDetail";
-import { updateProjectStatus } from "@/lib/supabase";
 
 interface CustomizationTabProps {
   projectId: string;
@@ -38,11 +37,6 @@ export function CustomizationTab({ projectId, projectStatus }: CustomizationTabP
   const handleSuccess = async () => {
     await loadCustomizations();
     setShowRequestForm(false);
-    
-    // Update project status to "Em Customização" if it's not already
-    if (projectStatus !== "Em Customização") {
-      await updateProjectStatus(projectId, "Em Customização");
-    }
   };
 
   const handleStatusUpdate = () => {
