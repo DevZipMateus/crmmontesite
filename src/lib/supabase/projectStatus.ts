@@ -4,6 +4,7 @@ import { supabase } from './client';
 export const PROJECT_STATUS_TYPES = [
   { value: "Recebido", icon: "Inbox", color: "bg-purple-500" },
   { value: "Criando site", icon: "Code", color: "bg-blue-500" },
+  { value: "Em Customização", icon: "Clock", color: "bg-pink-500" },
   { value: "Configurando Domínio", icon: "Globe", color: "bg-amber-500" },
   { value: "Site pronto", icon: "CheckCircle2", color: "bg-green-500" }
 ];
