@@ -183,7 +183,7 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
         name="slogan"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Slogan da Empresa</FormLabel>
+            <FormLabel>Slogan da Empresa (opcional)</FormLabel>
             <FormControl>
               <Input 
                 placeholder="Digite o slogan da sua empresa"
