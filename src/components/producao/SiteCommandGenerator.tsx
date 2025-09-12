@@ -17,12 +17,19 @@ const getImprovedIntroduction = () => {
   return `Crie um site institucional completo com base nas informações da empresa que irei fornecer a seguir.
 
 ⚙️ CONFIGURAÇÕES TÉCNICAS
-
 SEO e Metadados:
 
 Estruturar corretamente headings (H1, H2, H3) em ordem hierárquica.
 
+O H1 do site deve estar sempre na seção Hero e deve ser o nome da empresa.
+
+O H2 da seção Hero deve ser o texto criado pelo Lovable para descrever a empresa.
+
+O restante do site deve respeitar a hierarquia correta, utilizando H2 para títulos das divisões principais (ex: sobre, serviços, contato) e H3 para subtítulos internos quando necessário.
+
 Criar <title> exclusivos e descritivos para cada página.
+
+O título da aba do Google (browser tab) deve ser sempre o nome da empresa.
 
 Criar <meta name="description"> únicas, objetivas e atrativas para cada página.
 
@@ -34,11 +41,13 @@ og:title → mesmo conteúdo do <title>.
 
 og:description → mesmo conteúdo do <meta name="description">.
 
-og:image → usar a logo da empresa como imagem padrão.
+og:image → sempre usar a logo fornecida como imagem padrão.
 
 og:type → website.
 
 og:url → URL da página.
+
+O favicon do site deve ser sempre a logo fornecida.
 
 Garantir URLs amigáveis.
 
@@ -56,17 +65,24 @@ Funcionalidades extras:
 
 Botão flutuante de WhatsApp (ver regra abaixo).
 
+O botão flutuante do WhatsApp não deve pular, piscar ou ter animações chamativas, devendo permanecer fixo e discreto.
+
 Mapa interativo (se endereço for fornecido).
 
 Menu fixo com navegação por âncoras.
 
+Regras de Header e Hero:
+
+O header deve estar sempre fixo (grudado) no topo da página.
+
+A seção Hero deve começar somente após o header, sem sobreposição.
+
+Não adicionar botões ou ícones de seta/mouse na parte inferior da Hero, pois atrapalham a visualização.
+
 📲 RASTREAMENTO DE BOTÕES DE WHATSAPP (Google Tag Manager)
-
 Todos os botões de contato que direcionam para o WhatsApp devem conter no href a URL completa com domínio wa.me ou api.whatsapp.com, como:
-
 href="https://wa.me/5599999999999"
 href="https://api.whatsapp.com/send?phone=5599999999999"
-
 Proibições:
 
 Não usar redirecionamentos via JavaScript que ocultem a URL original.
@@ -74,7 +90,6 @@ Não usar redirecionamentos via JavaScript que ocultem a URL original.
 Não usar funções de clique que envolvam o botão e escondam o link.
 
 Objetivo: garantir que a variável Click URL capture a palavra "whatsapp" para configuração correta no GTM.
-
 Manter o estilo visual e a funcionalidade original dos botões.
 
 🎨 ESTILO VISUAL
@@ -102,9 +117,7 @@ Navegabilidade por teclado.
 Compatibilidade com leitores de tela.
 
 🎨 REGRAS DE CONTRASTE PARA BOTÕES (WCAG AA)
-
 Objetivo: garantir contraste adequado entre texto e fundo em todos os estados: normal, hover, focus, active.
-
 ✅ CHECKLIST:
 
 Estado Normal:
@@ -128,29 +141,20 @@ Botões Outline:
 Borda visível no contexto (border-white/60 ou border-primary/60).
 
 🔧 Implementação prática:
-
 Fundo escuro:
-
 /* Normal */
 bg-white/10 text-white border-white/60
 /* Hover */
 hover:bg-accent hover:text-accent-foreground hover:border-accent
-
 Fundo claro:
-
 /* Normal */
 bg-primary/10 text-primary border-primary/60
 /* Hover */
 hover:bg-primary hover:text-primary-foreground hover:border-primary
-
 ⚠️ Nunca fazer:
-
 text-white hover:bg-white
-
 text-black hover:bg-black
-
-Bordas fracas (<30% opacidade)
-
+⚠️ Bordas fracas (<30% opacidade)
 ✅ Sempre fazer:
 
 Testar visualmente todos os estados.
@@ -158,6 +162,10 @@ Testar visualmente todos os estados.
 Usar ferramentas de contraste para validar.
 
 Ajustar cores considerando o contexto.
+
+✍️ PADRÃO DE ESCRITA
+
+O Lovable deve seguir o padrão brasileiro de escrita, utilizando apenas a primeira letra maiúscula nas frases, e não o padrão americano em que todas as palavras começam com maiúscula.
 
 `;
 };
