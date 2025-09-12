@@ -157,15 +157,12 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
         </div>
       </div>
 
-      {accept.includes("image") && (
-        <Alert className="bg-blue-50 border-blue-200">
-          <Info className="h-4 w-4 text-blue-500" />
-          <AlertDescription className="text-xs text-blue-700">
-            Tamanho máximo: 10MB por arquivo. Formatos recomendados: JPG, PNG.
-            Para evitar erros, use nomes simples sem caracteres especiais.
-          </AlertDescription>
-        </Alert>
-      )}
+      <Alert className="bg-amber-50 border-amber-200">
+        <AlertTriangle className="h-4 w-4 text-amber-600" />
+        <AlertDescription className="text-xs text-amber-800 font-medium">
+          Tamanho máximo: 10MB por arquivo. Formatos aceitos: JPG, PNG (imagens) e MP4 (vídeos). Envie mídias nítidas e em alta qualidade. Use nomes simples, sem espaços ou caracteres especiais.
+        </AlertDescription>
+      </Alert>
 
       {previews.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

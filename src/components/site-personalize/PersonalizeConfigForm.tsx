@@ -39,7 +39,7 @@ export const PersonalizeConfigForm: React.FC<PersonalizeConfigFormProps> = ({
         
         <MediaUploader 
           label="Upload de Mídias"
-          description="Adicione imagens, vídeos e GIFs para o seu site. Inclua legendas descritivas para cada mídia."
+          description="Adicione imagens e vídeos para o seu site. Utilize arquivos em boa qualidade, pois serão exibidos diretamente no site. Não realizamos edições nas mídias enviadas."
           accept="image/*,video/*,.gif"
           multiple={true}
           previews={midiaPreviews}
