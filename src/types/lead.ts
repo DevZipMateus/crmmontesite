@@ -41,7 +41,8 @@ export interface LeadFilters {
 export const SITUACOES_PADRONIZADAS = [
   'Novo cliente',
   'Em Contato',
-  'Aguardando Resposta',  // ✅ Esta situação já estava incluída
+  'Aguardando',
+  'Aguardando Resposta',
   'Preenchendo Formulário',
   'Em Desenvolvimento',
   'Configurando Domínio',
