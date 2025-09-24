@@ -33,6 +33,7 @@ export function ClientSubmissionForm({
     price?: number;
   }>>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -64,6 +65,50 @@ export function ClientSubmissionForm({
     }));
 
     setSelectedImages(prev => [...prev, ...newImages]);
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(false);
+
+    const files = Array.from(event.dataTransfer.files);
+    const allowedTypes = ['image/', 'video/'];
+    const validFiles = files.filter(file => 
+      allowedTypes.some(type => file.type.startsWith(type)) || 
+      file.name.toLowerCase().endsWith('.gif')
+    );
+    
+    if (validFiles.length !== files.length) {
+      toast({
+        title: "Aviso",
+        description: "Apenas imagens (JPG, PNG, GIF) e vídeos (MP4) são permitidos.",
+        variant: "destructive",
+      });
+    }
+
+    if (validFiles.length > 0) {
+      const newImages = validFiles.map(file => ({
+        file,
+        name: file.name.split('.')[0],
+        description: undefined,
+        price: undefined,
+      }));
+
+      setSelectedImages(prev => [...prev, ...newImages]);
+    }
   };
 
   const removeImage = (index: number) => {
@@ -146,7 +191,16 @@ export function ClientSubmissionForm({
             <div className="space-y-4">
               <FormLabel>Mídias *</FormLabel>
               
-              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6">
+              <div 
+                className={`border-2 border-dashed rounded-lg p-6 transition-colors ${
+                  isDragOver 
+                    ? 'border-primary bg-primary/5' 
+                    : 'border-muted-foreground/25 hover:border-muted-foreground/50'
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
                 <input
                   type="file"
                   multiple
@@ -159,9 +213,13 @@ export function ClientSubmissionForm({
                   htmlFor="media-upload"
                   className="flex flex-col items-center justify-center cursor-pointer"
                 >
-                  <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    Clique para selecionar mídias ou arraste aqui
+                  <Upload className={`h-10 w-10 mb-2 ${
+                    isDragOver ? 'text-primary' : 'text-muted-foreground'
+                  }`} />
+                  <p className={`text-sm ${
+                    isDragOver ? 'text-primary font-medium' : 'text-muted-foreground'
+                  }`}>
+                    {isDragOver ? 'Solte os arquivos aqui' : 'Clique para selecionar mídias ou arraste aqui'}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Formatos aceitos: PNG, JPG, JPEG, GIF, MP4
