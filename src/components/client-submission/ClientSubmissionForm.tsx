@@ -16,7 +16,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-const formSchema = z.object({});
+const formSchema = z.object({
+  message: z.string().optional(),
+});
 
 interface ClientSubmissionFormProps {
   projectId: string;
@@ -38,7 +40,9 @@ export function ClientSubmissionForm({ projectId, projectName, onSubmissionCompl
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {},
+    defaultValues: {
+      message: "",
+    },
   });
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -238,7 +242,7 @@ export function ClientSubmissionForm({ projectId, projectName, onSubmissionCompl
         </Alert>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-6">
             {/* Category Management */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -477,7 +481,7 @@ export function ClientSubmissionForm({ projectId, projectName, onSubmissionCompl
                 `Enviar ${getTotalImages()} mídia${getTotalImages() !== 1 ? 's' : ''} para ${projectName}`
               )}
             </Button>
-          </form>
+          </div>
         </Form>
       </CardContent>
     </Card>
