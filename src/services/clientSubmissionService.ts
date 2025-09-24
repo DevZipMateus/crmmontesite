@@ -37,7 +37,7 @@ export class ClientSubmissionService {
     return data as ClientMediaSubmission;
   }
 
-  static async uploadImages(projectId: string, images: Array<{ file: File; name: string; description?: string; price?: number }>) {
+  static async uploadImages(projectId: string, images: Array<{ file: File; name: string; description?: string; price?: number; category?: string }>) {
     const timestamp = Date.now();
     const uploadedImages: Array<{ 
       url: string; 
@@ -45,12 +45,15 @@ export class ClientSubmissionService {
       description?: string;
       price?: number;
       caption?: string;
+      category?: string;
     }> = [];
 
     for (let i = 0; i < images.length; i++) {
       const imageData = images[i];
       const fileExt = imageData.file.name.split('.').pop();
-      const fileName = `${projectId}/${timestamp}/${i + 1}.${fileExt}`;
+      // Include category in folder structure
+      const categoryFolder = imageData.category ? `${imageData.category.replace(/[^a-zA-Z0-9]/g, '_')}/` : '';
+      const fileName = `${projectId}/${timestamp}/${categoryFolder}${i + 1}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('client-submissions')
@@ -68,7 +71,8 @@ export class ClientSubmissionService {
         name: imageData.name,
         description: imageData.description,
         price: imageData.price,
-        caption
+        caption,
+        category: imageData.category
       });
     }
 

@@ -16,7 +16,8 @@ import {
   X, 
   Copy,
   Download,
-  Trash2
+  Trash2,
+  Folder
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -302,62 +303,83 @@ function SubmissionCard({ submission, onStatusUpdate, onSubmissionUpdate }: Subm
             <DialogHeader>
               <DialogTitle>Imagens - {submission.client_name}</DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
-              {imageUrls.map((url, index) => (
-                <div key={index} className="space-y-2 border rounded-lg p-3">
-                  <img
-                    src={url}
-                    alt={`Imagem ${index + 1}`}
-                    className="w-full h-32 object-cover rounded-lg"
-                  />
-                  <div className="space-y-2">
-                    {submission.media_urls[index]?.name && (
-                      <p className="text-sm font-medium">
-                        {submission.media_urls[index].name}
-                      </p>
-                    )}
-                    {submission.media_urls[index]?.description && (
-                      <p className="text-xs text-muted-foreground">
-                        {submission.media_urls[index].description}
-                      </p>
-                    )}
-                    {submission.media_urls[index]?.price && (
-                      <p className="text-sm font-semibold text-green-600">
-                        R$ {submission.media_urls[index].price.toFixed(2)}
-                      </p>
-                    )}
-                    {submission.media_urls[index]?.caption && (
-                      <p className="text-xs text-muted-foreground">
-                        {submission.media_urls[index].caption}
-                      </p>
-                    )}
+            <div className="max-h-96 overflow-y-auto space-y-4">
+              {/* Group images by category */}
+              {(() => {
+                const groupedByCategory = submission.media_urls.reduce((acc, media, index) => {
+                  const category = media.category || 'Geral';
+                  if (!acc[category]) acc[category] = [];
+                  acc[category].push({ media, index, url: imageUrls[index] });
+                  return acc;
+                }, {} as Record<string, Array<{ media: any; index: number; url: string }>>);
+
+                return Object.entries(groupedByCategory).map(([category, items]) => (
+                  <div key={category} className="space-y-3">
+                    <div className="flex items-center gap-2 sticky top-0 bg-background py-2 border-b">
+                      <Folder className="h-4 w-4 text-primary" />
+                      <h4 className="font-medium text-sm">{category} ({items.length})</h4>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 ml-6">
+                      {items.map(({ media, index, url }) => (
+                        <div key={index} className="space-y-2 border rounded-lg p-3">
+                          <img
+                            src={url}
+                            alt={`${media.name || `Imagem ${index + 1}`}`}
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                          <div className="space-y-2">
+                            {media.name && (
+                              <p className="text-sm font-medium">
+                                {media.name}
+                              </p>
+                            )}
+                            {media.description && (
+                              <p className="text-xs text-muted-foreground">
+                                {media.description}
+                              </p>
+                            )}
+                            {media.price && (
+                              <p className="text-sm font-semibold text-green-600">
+                                R$ {media.price.toFixed(2)}
+                              </p>
+                            )}
+                            {media.caption && (
+                              <p className="text-xs text-muted-foreground">
+                                {media.caption}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex justify-end">
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="destructive" size="sm">
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  Excluir
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Excluir imagem</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem certeza que deseja excluir esta imagem? Esta ação não pode ser desfeita.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDeleteImage(index)}>
+                                    Excluir
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex justify-end">
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm">
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Excluir
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Excluir imagem</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Tem certeza que deseja excluir esta imagem? Esta ação não pode ser desfeita.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDeleteImage(index)}>
-                            Excluir
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
-              ))}
+                ));
+              })()}
             </div>
             
             <div className="flex justify-between items-center pt-4 border-t">

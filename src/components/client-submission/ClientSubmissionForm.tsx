@@ -1,16 +1,19 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ClientSubmissionService } from "@/services/clientSubmissionService";
-import { ClientSubmissionFormData } from "@/types/clientSubmission";
-import { Upload, X, Image as ImageIcon, AlertCircle } from "lucide-react";
+import { Upload, X, DollarSign, Image as ImageIcon, Video, Plus, Folder, FolderOpen, FolderPlus, AlertCircle } from "lucide-react";
+import { ImageCategory } from "@/types/clientSubmission";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const formSchema = z.object({});
@@ -21,19 +24,16 @@ interface ClientSubmissionFormProps {
   onSubmissionComplete: () => void;
 }
 
-export function ClientSubmissionForm({ 
-  projectId, 
-  projectName, 
-  onSubmissionComplete 
-}: ClientSubmissionFormProps) {
-  const [selectedImages, setSelectedImages] = useState<Array<{
-    file: File;
-    name: string;
-    description?: string;
-    price?: number;
-  }>>([]);
+export function ClientSubmissionForm({ projectId, projectName, onSubmissionComplete }: ClientSubmissionFormProps) {
+  const [categories, setCategories] = useState<ImageCategory[]>([
+    { id: '1', name: 'Geral', images: [] }
+  ]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('1');
+  const [newCategoryName, setNewCategoryName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isDragOverCategory, setIsDragOverCategory] = useState<string | null>(null);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -59,12 +59,12 @@ export function ClientSubmissionForm({
 
     const newImages = validFiles.map(file => ({
       file,
-      name: file.name.split('.')[0], // Remove extension for default name
+      name: file.name.split('.')[0],
       description: undefined,
       price: undefined,
     }));
 
-    setSelectedImages(prev => [...prev, ...newImages]);
+    addImagesToCategory(selectedCategoryId, newImages);
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -83,6 +83,9 @@ export function ClientSubmissionForm({
     event.preventDefault();
     event.stopPropagation();
     setIsDragOver(false);
+
+    const targetCategoryId = isDragOverCategory || selectedCategoryId;
+    setIsDragOverCategory(null);
 
     const files = Array.from(event.dataTransfer.files);
     const allowedTypes = ['image/', 'video/'];
@@ -107,62 +110,110 @@ export function ClientSubmissionForm({
         price: undefined,
       }));
 
-      setSelectedImages(prev => [...prev, ...newImages]);
+      addImagesToCategory(targetCategoryId, newImages);
     }
   };
 
-  const removeImage = (index: number) => {
-    setSelectedImages(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const updateImageName = (index: number, name: string) => {
-    setSelectedImages(prev => prev.map((img, i) => 
-      i === index ? { ...img, name } : img
-    ));
-  };
-
-  const updateImageDescription = (index: number, description: string) => {
-    setSelectedImages(prev => prev.map((img, i) => 
-      i === index ? { ...img, description } : img
-    ));
-  };
-
-  const updateImagePrice = (index: number, price: number | undefined) => {
-    setSelectedImages(prev => prev.map((img, i) => 
-      i === index ? { ...img, price } : img
-    ));
-  };
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (selectedImages.length === 0) {
+  // Category management functions
+  const addCategory = () => {
+    if (newCategoryName.trim()) {
+      const newCategory: ImageCategory = {
+        id: Date.now().toString(),
+        name: newCategoryName.trim(),
+        images: []
+      };
+      setCategories(prev => [...prev, newCategory]);
+      setNewCategoryName('');
+      setIsAddingCategory(false);
       toast({
-        title: "Erro",
-        description: "Selecione pelo menos um arquivo para enviar.",
+        title: "Categoria criada",
+        description: `Pasta "${newCategory.name}" criada com sucesso.`,
+      });
+    }
+  };
+
+  const addImagesToCategory = (categoryId: string, images: Array<{ file: File; name: string; description?: string; price?: number }>) => {
+    setCategories(prev => prev.map(cat => 
+      cat.id === categoryId 
+        ? { ...cat, images: [...cat.images, ...images] }
+        : cat
+    ));
+  };
+
+  const removeImage = (categoryId: string, imageIndex: number) => {
+    setCategories(prev => prev.map(cat => 
+      cat.id === categoryId
+        ? { ...cat, images: cat.images.filter((_, i) => i !== imageIndex) }
+        : cat
+    ));
+  };
+
+  const updateImageName = (categoryId: string, imageIndex: number, name: string) => {
+    setCategories(prev => prev.map(cat => 
+      cat.id === categoryId
+        ? { ...cat, images: cat.images.map((img, i) => i === imageIndex ? { ...img, name } : img) }
+        : cat
+    ));
+  };
+
+  const updateImageDescription = (categoryId: string, imageIndex: number, description: string) => {
+    setCategories(prev => prev.map(cat => 
+      cat.id === categoryId
+        ? { ...cat, images: cat.images.map((img, i) => i === imageIndex ? { ...img, description } : img) }
+        : cat
+    ));
+  };
+
+  const updateImagePrice = (categoryId: string, imageIndex: number, price: number) => {
+    setCategories(prev => prev.map(cat => 
+      cat.id === categoryId
+        ? { ...cat, images: cat.images.map((img, i) => i === imageIndex ? { ...img, price } : img) }
+        : cat
+    ));
+  };
+
+  const getTotalImages = () => {
+    return categories.reduce((total, cat) => total + cat.images.length, 0);
+  };
+
+  const onSubmit = async () => {
+    const totalImages = getTotalImages();
+    
+    if (totalImages === 0) {
+      toast({
+        title: "Aviso",
+        description: "Adicione pelo menos uma mídia para enviar.",
         variant: "destructive",
       });
       return;
     }
 
     setIsSubmitting(true);
-
+    
     try {
-      const formData: ClientSubmissionFormData = {
-        images: selectedImages,
-      };
+      // Flatten all images with their categories
+      const allImages = categories.flatMap(category => 
+        category.images.map(image => ({
+          ...image,
+          category: category.name
+        }))
+      );
 
-      await ClientSubmissionService.submitClientMedia(projectId, formData);
-
-      toast({
-        title: "Sucesso!",
-        description: "Seus arquivos foram enviados com sucesso.",
+      await ClientSubmissionService.submitClientMedia(projectId, {
+        images: allImages
       });
-
+      
+      toast({
+        title: "Sucesso",
+        description: "Mídias enviadas com sucesso!",
+      });
+      
       onSubmissionComplete();
     } catch (error) {
       console.error('Error submitting media:', error);
       toast({
         title: "Erro",
-        description: "Erro ao enviar arquivos. Tente novamente.",
+        description: "Erro ao enviar mídias. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -171,25 +222,110 @@ export function ClientSubmissionForm({
   };
 
   return (
-    <Card className="max-w-2xl mx-auto">
+    <Card className="max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle>Enviar Mídias - {projectName}</CardTitle>
         <CardDescription>
-          Envie suas imagens e vídeos para que nossa equipe possa trabalhar no seu projeto.
+          Organize suas imagens e vídeos em pastas por categoria para facilitar o desenvolvimento do seu projeto.
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <Alert className="mb-6 bg-blue-50 border-blue-200">
+          <AlertCircle className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-sm text-blue-800 font-medium">
+            As imagens enviadas serão utilizadas no seu site
+          </AlertDescription>
+        </Alert>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <Alert className="bg-blue-50 border-blue-200">
-              <AlertCircle className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-sm text-blue-800 font-medium">
-                As imagens enviadas serão utilizadas no seu site
-              </AlertDescription>
-            </Alert>
-
+            {/* Category Management */}
             <div className="space-y-4">
-              <FormLabel>Mídias *</FormLabel>
+              <div className="flex items-center justify-between">
+                <FormLabel>Organizar por Pastas</FormLabel>
+                <Dialog open={isAddingCategory} onOpenChange={setIsAddingCategory}>
+                  <DialogTrigger asChild>
+                    <Button type="button" variant="outline" size="sm">
+                      <FolderPlus className="h-4 w-4 mr-2" />
+                      Nova Pasta
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Criar Nova Pasta</DialogTitle>
+                      <DialogDescription>
+                        Crie uma nova pasta para organizar suas mídias por categoria.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <Input
+                        placeholder="Nome da pasta (ex: Produtos, Serviços, Eventos...)"
+                        value={newCategoryName}
+                        onChange={(e) => setNewCategoryName(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && addCategory()}
+                      />
+                      <div className="flex gap-2">
+                        <Button type="button" onClick={addCategory} disabled={!newCategoryName.trim()}>
+                          Criar Pasta
+                        </Button>
+                        <Button type="button" variant="outline" onClick={() => {
+                          setIsAddingCategory(false);
+                          setNewCategoryName('');
+                        }}>
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              {/* Categories Tabs */}
+              <div className="flex flex-wrap gap-2 border-b">
+                {categories.map((category) => {
+                  const isActive = selectedCategoryId === category.id;
+                  const hasImages = category.images.length > 0;
+                  
+                  return (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() => setSelectedCategoryId(category.id)}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setIsDragOverCategory(category.id);
+                      }}
+                      onDragLeave={() => setIsDragOverCategory(null)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-t-lg border-b-2 transition-colors ${
+                        isActive 
+                          ? 'border-primary bg-primary/5 text-primary' 
+                          : isDragOverCategory === category.id
+                          ? 'border-primary/50 bg-primary/2 text-primary/70'
+                          : 'border-transparent hover:border-muted-foreground/50'
+                      }`}
+                    >
+                      {isActive ? (
+                        <FolderOpen className="h-4 w-4" />
+                      ) : (
+                        <Folder className="h-4 w-4" />
+                      )}
+                      <span className="text-sm font-medium">{category.name}</span>
+                      {hasImages && (
+                        <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+                          {category.images.length}
+                        </Badge>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Upload Area */}
+            <div className="space-y-4">
+              <FormLabel>
+                Adicionar Mídias à pasta "{categories.find(c => c.id === selectedCategoryId)?.name}"
+              </FormLabel>
               
               <div 
                 className={`border-2 border-dashed rounded-lg p-6 transition-colors ${
@@ -226,91 +362,120 @@ export function ClientSubmissionForm({
                   </p>
                 </label>
               </div>
+            </div>
 
-              {selectedImages.length > 0 && (
-                <div className="space-y-4">
-                  {selectedImages.map((imageData, index) => (
-                    <div key={index} className="border rounded-lg p-4 space-y-3">
-                      <div className="flex gap-4">
-                        <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                          {imageData.file.type.startsWith('video/') ? (
-                            <video
-                              src={URL.createObjectURL(imageData.file)}
-                              className="w-full h-full object-cover"
-                              controls={false}
-                              muted
-                            />
-                          ) : (
-                            <img
-                              src={URL.createObjectURL(imageData.file)}
-                              alt={`Preview ${index + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                          )}
-                        </div>
-                        <div className="flex-1 space-y-3">
-                          <div>
-                            <label className="text-sm font-medium">Nome do Produto *</label>
-                            <Input
-                              value={imageData.name}
-                              onChange={(e) => updateImageName(index, e.target.value)}
-                              placeholder="Nome do produto/imagem"
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium">Descrição (opcional)</label>
-                            <Textarea
-                              value={imageData.description || ""}
-                              onChange={(e) => updateImageDescription(index, e.target.value)}
-                              placeholder="Descrição detalhada do produto..."
-                              className="mt-1 min-h-[80px]"
-                              maxLength={500}
-                            />
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {(imageData.description || "").length}/500 caracteres
-                            </p>
-                          </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-sm font-medium">Preço (opcional)</label>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={imageData.price || ""}
-                                onChange={(e) => updateImagePrice(index, e.target.value ? parseFloat(e.target.value) : undefined)}
-                                placeholder="0.00"
-                                className="mt-1"
-                              />
+            {/* Preview das imagens por categoria */}
+            {categories.some(cat => cat.images.length > 0) && (
+              <div className="space-y-6">
+                {categories.filter(cat => cat.images.length > 0).map((category) => (
+                  <div key={category.id} className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Folder className="h-5 w-5 text-primary" />
+                      <FormLabel>{category.name} ({category.images.length})</FormLabel>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-6">
+                      {category.images.map((image, imageIndex) => {
+                        const isVideo = image.file.type.startsWith('video/');
+                        const isGif = image.file.name.toLowerCase().endsWith('.gif');
+                        
+                        return (
+                          <div key={imageIndex} className="border rounded-lg p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                {isVideo ? (
+                                  <Video className="h-5 w-5 text-blue-500" />
+                                ) : (
+                                  <ImageIcon className="h-5 w-5 text-green-500" />
+                                )}
+                                <span className="text-sm font-medium">
+                                  {isVideo ? 'Vídeo' : isGif ? 'GIF' : 'Imagem'} {imageIndex + 1}
+                                </span>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeImage(category.id, imageIndex)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
                             </div>
-                            <div className="flex items-end">
-                              <div className="text-sm text-muted-foreground">
-                                {imageData.price && `R$ ${imageData.price.toFixed(2)}`}
+                            
+                            <div className="aspect-video bg-muted rounded-lg flex items-center justify-center overflow-hidden">
+                              {isVideo ? (
+                                <video
+                                  src={URL.createObjectURL(image.file)}
+                                  className="max-w-full max-h-full"
+                                  controls
+                                />
+                              ) : (
+                                <img
+                                  src={URL.createObjectURL(image.file)}
+                                  alt="Preview"
+                                  className="max-w-full max-h-full object-contain"
+                                />
+                              )}
+                            </div>
+
+                            <div className="space-y-3">
+                              <div>
+                                <label className="text-sm font-medium">Nome do Produto *</label>
+                                <Input
+                                  value={image.name}
+                                  onChange={(e) => updateImageName(category.id, imageIndex, e.target.value)}
+                                  placeholder="Nome do produto ou item"
+                                  className="mt-1"
+                                />
+                              </div>
+                              
+                              <div>
+                                <label className="text-sm font-medium">Descrição (opcional)</label>
+                                <Textarea
+                                  value={image.description || ''}
+                                  onChange={(e) => updateImageDescription(category.id, imageIndex, e.target.value)}
+                                  placeholder="Descrição detalhada do produto..."
+                                  className="mt-1"
+                                  rows={3}
+                                />
+                              </div>
+
+                              <div>
+                                <label className="text-sm font-medium flex items-center gap-1">
+                                  <DollarSign className="h-4 w-4" />
+                                  Preço (opcional)
+                                </label>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  value={image.price || ''}
+                                  onChange={(e) => updateImagePrice(category.id, imageIndex, parseFloat(e.target.value) || 0)}
+                                  placeholder="0.00"
+                                  className="mt-1"
+                                />
                               </div>
                             </div>
                           </div>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => removeImage(index)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Arquivo: {imageData.file.name}
-                      </p>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
-            <Button type="submit" disabled={isSubmitting} className="w-full">
-              {isSubmitting ? "Enviando..." : `Enviar ${selectedImages.length} arquivo(s)`}
+            <Button
+              type="button"
+              onClick={onSubmit}
+              disabled={isSubmitting || getTotalImages() === 0}
+              className="w-full"
+            >
+              {isSubmitting ? (
+                "Enviando..."
+              ) : (
+                `Enviar ${getTotalImages()} mídia${getTotalImages() !== 1 ? 's' : ''} para ${projectName}`
+              )}
             </Button>
           </form>
         </Form>
