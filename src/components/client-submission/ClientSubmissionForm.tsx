@@ -10,11 +10,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ClientSubmissionService } from "@/services/clientSubmissionService";
 import { ClientSubmissionFormData } from "@/types/clientSubmission";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { Upload, X, Image as ImageIcon, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-const formSchema = z.object({
-  message: z.string().optional(),
-});
+const formSchema = z.object({});
 
 interface ClientSubmissionFormProps {
   projectId: string;
@@ -38,24 +37,26 @@ export function ClientSubmissionForm({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      message: "",
-    },
+    defaultValues: {},
   });
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    const allowedTypes = ['image/', 'video/'];
+    const validFiles = files.filter(file => 
+      allowedTypes.some(type => file.type.startsWith(type)) || 
+      file.name.toLowerCase().endsWith('.gif')
+    );
     
-    if (imageFiles.length !== files.length) {
+    if (validFiles.length !== files.length) {
       toast({
         title: "Aviso",
-        description: "Apenas arquivos de imagem são permitidos.",
+        description: "Apenas imagens (JPG, PNG, GIF) e vídeos (MP4) são permitidos.",
         variant: "destructive",
       });
     }
 
-    const newImages = imageFiles.map(file => ({
+    const newImages = validFiles.map(file => ({
       file,
       name: file.name.split('.')[0], // Remove extension for default name
       description: undefined,
@@ -91,7 +92,7 @@ export function ClientSubmissionForm({
     if (selectedImages.length === 0) {
       toast({
         title: "Erro",
-        description: "Selecione pelo menos uma imagem para enviar.",
+        description: "Selecione pelo menos um arquivo para enviar.",
         variant: "destructive",
       });
       return;
@@ -101,7 +102,6 @@ export function ClientSubmissionForm({
 
     try {
       const formData: ClientSubmissionFormData = {
-        message: values.message || undefined,
         images: selectedImages,
       };
 
@@ -109,15 +109,15 @@ export function ClientSubmissionForm({
 
       toast({
         title: "Sucesso!",
-        description: "Suas imagens foram enviadas com sucesso.",
+        description: "Seus arquivos foram enviados com sucesso.",
       });
 
       onSubmissionComplete();
     } catch (error) {
-      console.error('Error submitting images:', error);
+      console.error('Error submitting media:', error);
       toast({
         title: "Erro",
-        description: "Erro ao enviar imagens. Tente novamente.",
+        description: "Erro ao enviar arquivos. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -128,53 +128,43 @@ export function ClientSubmissionForm({
   return (
     <Card className="max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Enviar Imagens - {projectName}</CardTitle>
+        <CardTitle>Enviar Mídias - {projectName}</CardTitle>
         <CardDescription>
-          Envie suas imagens para que nossa equipe possa trabalhar no seu projeto.
+          Envie suas imagens e vídeos para que nossa equipe possa trabalhar no seu projeto.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="message"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mensagem (opcional)</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Descreva as imagens ou deixe observações..."
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <Alert className="bg-blue-50 border-blue-200">
+              <AlertCircle className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-sm text-blue-800 font-medium">
+                As imagens enviadas serão utilizadas no seu site
+              </AlertDescription>
+            </Alert>
 
             <div className="space-y-4">
-              <FormLabel>Imagens *</FormLabel>
+              <FormLabel>Mídias *</FormLabel>
               
               <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6">
                 <input
                   type="file"
                   multiple
-                  accept="image/*"
+                  accept="image/*,video/*,.gif"
                   onChange={handleImageSelect}
                   className="hidden"
-                  id="image-upload"
+                  id="media-upload"
                 />
                 <label
-                  htmlFor="image-upload"
+                  htmlFor="media-upload"
                   className="flex flex-col items-center justify-center cursor-pointer"
                 >
                   <Upload className="h-10 w-10 text-muted-foreground mb-2" />
                   <p className="text-sm text-muted-foreground">
-                    Clique para selecionar imagens ou arraste aqui
+                    Clique para selecionar mídias ou arraste aqui
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Formatos aceitos: PNG, JPG, JPEG
+                    Formatos aceitos: PNG, JPG, JPEG, GIF, MP4
                   </p>
                 </label>
               </div>
@@ -185,15 +175,24 @@ export function ClientSubmissionForm({
                     <div key={index} className="border rounded-lg p-4 space-y-3">
                       <div className="flex gap-4">
                         <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                          <img
-                            src={URL.createObjectURL(imageData.file)}
-                            alt={`Preview ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
+                          {imageData.file.type.startsWith('video/') ? (
+                            <video
+                              src={URL.createObjectURL(imageData.file)}
+                              className="w-full h-full object-cover"
+                              controls={false}
+                              muted
+                            />
+                          ) : (
+                            <img
+                              src={URL.createObjectURL(imageData.file)}
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          )}
                         </div>
                         <div className="flex-1 space-y-3">
                           <div>
-                            <label className="text-sm font-medium">Nome da imagem *</label>
+                            <label className="text-sm font-medium">Nome do Produto *</label>
                             <Input
                               value={imageData.name}
                               onChange={(e) => updateImageName(index, e.target.value)}
@@ -253,7 +252,7 @@ export function ClientSubmissionForm({
             </div>
 
             <Button type="submit" disabled={isSubmitting} className="w-full">
-              {isSubmitting ? "Enviando..." : `Enviar ${selectedImages.length} imagem(ns)`}
+              {isSubmitting ? "Enviando..." : `Enviar ${selectedImages.length} arquivo(s)`}
             </Button>
           </form>
         </Form>
