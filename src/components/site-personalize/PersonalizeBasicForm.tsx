@@ -16,9 +16,10 @@ export interface FormValues {
   historia_empresa: string;
   mercado_atuacao: string;
   slogan?: string;
+  possuiServicos?: boolean;
+  servicosOferecidos?: string;
   possuiProdutos?: boolean;
   produtos?: string;
-  servicosOferecidos?: string;
   endereco?: string;
   horario_funcionamento?: string;
   redes_sociais?: string;

@@ -29,9 +29,10 @@ const formSchema = z.object({
   historia_empresa: z.string().min(10, "História da empresa é obrigatória (mínimo 10 caracteres)"),
   mercado_atuacao: z.string().optional(),
   slogan: z.string().optional(),
+  possuiServicos: z.boolean().optional(),
+  servicosOferecidos: z.string().optional(),
   possuiProdutos: z.boolean().optional(),
   produtos: z.string().optional(),
-  servicosOferecidos: z.string().min(1, "Serviços oferecidos são obrigatórios"),
   endereco: z.string().min(1, "Endereço é obrigatório"),
   horario_funcionamento: z.string().min(1, "Horário de funcionamento é obrigatório"),
   redes_sociais: z.string().optional(),
@@ -86,9 +87,10 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
       historia_empresa: "",
       mercado_atuacao: "",
       slogan: "",
+      possuiServicos: false,
+      servicosOferecidos: "",
       possuiProdutos: false,
       produtos: "",
-      servicosOferecidos: "",
       endereco: "",
       horario_funcionamento: "",
       redes_sociais: "",
@@ -158,7 +160,7 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
           {/* Produtos, Serviços & Avaliações */}
           <div className="space-y-6">
             <div className="border-b pb-4">
-              <h3 className="text-lg font-medium text-gray-900">Produtos, Serviços & Avaliações</h3>
+              <h3 className="text-lg font-medium text-gray-900">Produtos, Serviços e Planos</h3>
               <p className="text-sm text-gray-500 mt-1">Detalhes sobre seus produtos, serviços e avaliações de clientes</p>
             </div>
             <PersonalizeServicosForm 
