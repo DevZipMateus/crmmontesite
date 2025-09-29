@@ -78,14 +78,19 @@ export const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = (
         control={form.control}
         name="possuiProdutos"
         render={({ field }) => (
-          <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-            <FormControl>
-              <Checkbox
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            </FormControl>
-            <FormLabel>Possui Produtos?</FormLabel>
+          <FormItem className="space-y-2">
+            <div className="flex flex-row items-center space-x-3 space-y-0">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <FormLabel>Possui Produtos?</FormLabel>
+            </div>
+            <p className="text-sm text-muted-foreground ml-7">
+              Produtos são itens físicos ou digitais que você vende (ex: equipamentos, softwares, materiais)
+            </p>
           </FormItem>
         )}
       />
