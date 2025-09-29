@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PersonalizeForm } from "@/components/site-personalize/PersonalizeForm";
-import ModeloDetails from "@/components/site-personalize/ModeloDetails";
+
 import { LoadingState } from "@/components/site-personalize/LoadingState";
 import { ErrorState } from "@/components/site-personalize/ErrorState";
 import { useModelFromUrl } from "@/components/site-personalize/useModelFromUrl";
@@ -75,16 +75,6 @@ export default function PublicPersonalizeForm() {
             Preencha o formulário abaixo com as informações da sua empresa/escritório para personalizar seu site.
           </CardDescription>
           
-          {modeloDetails && (
-            <div className="pt-4">
-              <ModeloDetails modelo={{
-                id: modeloDetails.id,
-                name: modeloDetails.name,
-                description: modeloDetails.description,
-                imageUrl: ""
-              }} />
-            </div>
-          )}
         </CardHeader>
         
         {networkError && (

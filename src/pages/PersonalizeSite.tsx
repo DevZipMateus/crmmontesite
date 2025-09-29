@@ -12,7 +12,7 @@ import {
 import { PersonalizeForm } from "@/components/site-personalize/PersonalizeForm";
 import { useFileUploadHandlers } from "@/components/site-personalize/FileUploadHandlers";
 import { useFormSubmission } from "@/components/site-personalize/useFormSubmission";
-import ModeloDetails from "@/components/site-personalize/ModeloDetails";
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { modelosDisponiveis } from "@/components/site-personalize/modelosData";
 
@@ -108,7 +108,7 @@ export default function PersonalizeSite() {
             </Select>
           </div>
           
-          {modeloDetails && <ModeloDetails modelo={modeloDetails} />}
+          
         </CardHeader>
         <CardContent>
           <PersonalizeForm
