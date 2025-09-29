@@ -4,8 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Filter, X, Plus, ArrowUpDown, MessageSquare } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Search, Filter, X, Plus, ArrowUpDown, MessageSquare, CalendarIcon } from "lucide-react";
 import { LeadFilters } from "@/types/lead";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface LeadFiltersProps {
   filters: LeadFilters;
@@ -52,7 +57,7 @@ const LeadFiltersComponent: React.FC<LeadFiltersProps> = ({
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-8 gap-3">
         <div className="sm:col-span-2 lg:col-span-1">
           <div className="relative">
             <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -169,6 +174,62 @@ const LeadFiltersComponent: React.FC<LeadFiltersProps> = ({
             <SelectItem value="sem">Sem observação</SelectItem>
           </SelectContent>
         </Select>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "justify-start text-left font-normal",
+                !filters.dataInicio && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {filters.dataInicio ? (
+                format(filters.dataInicio, "dd/MM/yyyy", { locale: ptBR })
+              ) : (
+                <span>De</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={filters.dataInicio}
+              onSelect={(date) => onFiltersChange({ ...filters, dataInicio: date })}
+              initialFocus
+              className="pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "justify-start text-left font-normal",
+                !filters.dataFim && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {filters.dataFim ? (
+                format(filters.dataFim, "dd/MM/yyyy", { locale: ptBR })
+              ) : (
+                <span>Até</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={filters.dataFim}
+              onSelect={(date) => onFiltersChange({ ...filters, dataFim: date })}
+              initialFocus
+              className="pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
 
         <Select
           value={filters.ordenacao || 'default'}

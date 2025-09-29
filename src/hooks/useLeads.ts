@@ -76,6 +76,35 @@ export const useLeads = (filters?: LeadFilters) => {
         });
       }
 
+      // Filtro por período de datas (feito no frontend)
+      if (filters?.dataInicio || filters?.dataFim) {
+        filteredData = filteredData.filter(lead => {
+          const leadDate = new Date(lead.data_ultimo_contato);
+          
+          if (filters.dataInicio && filters.dataFim) {
+            const startDate = new Date(filters.dataInicio);
+            const endDate = new Date(filters.dataFim);
+            // Set end date to end of day
+            endDate.setHours(23, 59, 59, 999);
+            return leadDate >= startDate && leadDate <= endDate;
+          }
+          
+          if (filters.dataInicio) {
+            const startDate = new Date(filters.dataInicio);
+            return leadDate >= startDate;
+          }
+          
+          if (filters.dataFim) {
+            const endDate = new Date(filters.dataFim);
+            // Set end date to end of day
+            endDate.setHours(23, 59, 59, 999);
+            return leadDate <= endDate;
+          }
+          
+          return true;
+        });
+      }
+
       // Aplicar ordenação
       if (filters?.ordenacao) {
         filteredData.sort((a, b) => {

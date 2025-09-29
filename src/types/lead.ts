@@ -35,6 +35,8 @@ export interface LeadFilters {
   faixaDias?: string;
   ordenacao?: 'asc' | 'desc' | 'dias_asc' | 'dias_desc';
   comObservacao?: boolean;
+  dataInicio?: Date;
+  dataFim?: Date;
 }
 
 // Situações padronizadas dos leads
