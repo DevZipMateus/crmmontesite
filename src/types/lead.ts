@@ -33,7 +33,7 @@ export interface LeadFilters {
   situacao?: string;
   diasSemResposta?: number;
   faixaDias?: string;
-  ordenacao?: 'asc' | 'desc' | 'dias_asc' | 'dias_desc';
+  ordenacao?: 'asc' | 'desc' | 'dias_asc' | 'dias_desc' | 'cadastro_asc' | 'cadastro_desc';
   comObservacao?: boolean;
   dataInicio?: Date;
   dataFim?: Date;

@@ -76,29 +76,29 @@ export const useLeads = (filters?: LeadFilters) => {
         });
       }
 
-      // Filtro por período de datas (feito no frontend)
+      // Filtro por período de datas de cadastro (feito no frontend)
       if (filters?.dataInicio || filters?.dataFim) {
         filteredData = filteredData.filter(lead => {
-          const leadDate = new Date(lead.data_ultimo_contato);
+          const leadCreatedDate = new Date(lead.created_at);
           
           if (filters.dataInicio && filters.dataFim) {
             const startDate = new Date(filters.dataInicio);
             const endDate = new Date(filters.dataFim);
             // Set end date to end of day
             endDate.setHours(23, 59, 59, 999);
-            return leadDate >= startDate && leadDate <= endDate;
+            return leadCreatedDate >= startDate && leadCreatedDate <= endDate;
           }
           
           if (filters.dataInicio) {
             const startDate = new Date(filters.dataInicio);
-            return leadDate >= startDate;
+            return leadCreatedDate >= startDate;
           }
           
           if (filters.dataFim) {
             const endDate = new Date(filters.dataFim);
             // Set end date to end of day
             endDate.setHours(23, 59, 59, 999);
-            return leadDate <= endDate;
+            return leadCreatedDate <= endDate;
           }
           
           return true;
@@ -108,16 +108,22 @@ export const useLeads = (filters?: LeadFilters) => {
       // Aplicar ordenação
       if (filters?.ordenacao) {
         filteredData.sort((a, b) => {
-          const dateA = new Date(a.data_ultimo_contato);
-          const dateB = new Date(b.data_ultimo_contato);
-          const daysA = Math.ceil((new Date().getTime() - dateA.getTime()) / (1000 * 60 * 60 * 24));
-          const daysB = Math.ceil((new Date().getTime() - dateB.getTime()) / (1000 * 60 * 60 * 24));
+          const contactDateA = new Date(a.data_ultimo_contato);
+          const contactDateB = new Date(b.data_ultimo_contato);
+          const createdDateA = new Date(a.created_at);
+          const createdDateB = new Date(b.created_at);
+          const daysA = Math.ceil((new Date().getTime() - contactDateA.getTime()) / (1000 * 60 * 60 * 24));
+          const daysB = Math.ceil((new Date().getTime() - contactDateB.getTime()) / (1000 * 60 * 60 * 24));
           
           switch (filters.ordenacao) {
             case 'asc':
-              return dateA.getTime() - dateB.getTime();
+              return contactDateA.getTime() - contactDateB.getTime();
             case 'desc':
-              return dateB.getTime() - dateA.getTime();
+              return contactDateB.getTime() - contactDateA.getTime();
+            case 'cadastro_asc':
+              return createdDateA.getTime() - createdDateB.getTime();
+            case 'cadastro_desc':
+              return createdDateB.getTime() - createdDateA.getTime();
             case 'dias_asc':
               // Para leads com "Site Pronto", considerar 0 dias
               const adjustedDaysA = a.situacao.toLowerCase().includes('site pronto') ? 0 : daysA;

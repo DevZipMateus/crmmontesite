@@ -188,7 +188,7 @@ const LeadFiltersComponent: React.FC<LeadFiltersProps> = ({
               {filters.dataInicio ? (
                 format(filters.dataInicio, "dd/MM/yyyy", { locale: ptBR })
               ) : (
-                <span>De</span>
+                <span>Cadastro De</span>
               )}
             </Button>
           </PopoverTrigger>
@@ -216,7 +216,7 @@ const LeadFiltersComponent: React.FC<LeadFiltersProps> = ({
               {filters.dataFim ? (
                 format(filters.dataFim, "dd/MM/yyyy", { locale: ptBR })
               ) : (
-                <span>Até</span>
+                <span>Cadastro Até</span>
               )}
             </Button>
           </PopoverTrigger>
@@ -244,10 +244,12 @@ const LeadFiltersComponent: React.FC<LeadFiltersProps> = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="default">Padrão</SelectItem>
-            <SelectItem value="dias_asc">Dias ↑</SelectItem>
-            <SelectItem value="dias_desc">Dias ↓</SelectItem>
-            <SelectItem value="asc">Data ↑</SelectItem>
-            <SelectItem value="desc">Data ↓</SelectItem>
+            <SelectItem value="dias_asc">Dias s/ Contato ↑</SelectItem>
+            <SelectItem value="dias_desc">Dias s/ Contato ↓</SelectItem>
+            <SelectItem value="asc">Último Contato ↑</SelectItem>
+            <SelectItem value="desc">Último Contato ↓</SelectItem>
+            <SelectItem value="cadastro_asc">Data Cadastro ↑</SelectItem>
+            <SelectItem value="cadastro_desc">Data Cadastro ↓</SelectItem>
           </SelectContent>
         </Select>
       </div>
