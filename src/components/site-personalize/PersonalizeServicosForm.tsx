@@ -35,14 +35,19 @@ export const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = (
         control={form.control}
         name="possuiServicos"
         render={({ field }) => (
-          <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-            <FormControl>
-              <Checkbox
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            </FormControl>
-            <FormLabel>Serviços Oferecidos?</FormLabel>
+          <FormItem className="space-y-2">
+            <div className="flex flex-row items-center space-x-3 space-y-0">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <FormLabel>Serviços Oferecidos?</FormLabel>
+            </div>
+            <p className="text-sm text-muted-foreground ml-7">
+              Serviços são instalação de produtos ou manutenções realizadas...
+            </p>
           </FormItem>
         )}
       />
@@ -55,9 +60,6 @@ export const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = (
           render={({ field }) => (
             <FormItem>
               <FormLabel>Serviços Oferecidos</FormLabel>
-              <p className="text-sm text-muted-foreground mb-2">
-                Serviços são instalação de produtos ou manutenções realizadas...
-              </p>
               <FormControl>
                 <Textarea
                   placeholder="Descreva os serviços que você presta (ex: instalação, manutenção, consultoria)"
@@ -114,14 +116,19 @@ export const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = (
         control={form.control}
         name="possuiPlanos"
         render={({ field }) => (
-          <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-            <FormControl>
-              <Checkbox
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            </FormControl>
-            <FormLabel>Possui planos?</FormLabel>
+          <FormItem className="space-y-2">
+            <div className="flex flex-row items-center space-x-3 space-y-0">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <FormLabel>Possui planos?</FormLabel>
+            </div>
+            <p className="text-sm text-muted-foreground ml-7">
+              Exemplos: serviços de instalação mais manutenção por X valor, Compra de um produto mais instalação por um X valor
+            </p>
           </FormItem>
         )}
       />
@@ -134,9 +141,6 @@ export const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = (
           render={({ field }) => (
             <FormItem>
               <FormLabel>Planos Oferecidos</FormLabel>
-              <p className="text-sm text-muted-foreground mb-2">
-                Exemplos: serviços de instalação mais manutenção por X valor, Compra de um produto mais instalação por um X valor
-              </p>
               <FormControl>
                 <Textarea
                   placeholder="Descreva os planos oferecidos (nome, valor, serviços incluídos)"
