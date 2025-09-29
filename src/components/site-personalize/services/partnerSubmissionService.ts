@@ -30,10 +30,9 @@ export const submitPartnerClient = async (
     redessociais: data.redes_sociais || "",
     fonte: "",
     paletacores: data.cores_preferidas || "",
-    descricao: data.sobre_empresa || "",
+    descricao: `${data.visao_missao_valores || ""} | ${data.historia_empresa || ""} | ${data.mercado_atuacao || ""}`,
     slogan: data.slogan || "",
     horario_funcionamento: data.horario_funcionamento || "",
-    estilo_visual: data.estilo_visual || "",
     possuiplanos: data.possuiPlanos || false,
     planos: data.planos || "",
     servicos: data.servicos || "",
@@ -65,7 +64,7 @@ export const submitPartnerClient = async (
   console.log("✅ Personalization created:", personalizationResult);
 
   // Preparar observações estruturadas (mantém compatibilidade)
-  const observacoes = data.sobre_empresa + 
+  const observacoes = `${data.visao_missao_valores || ""} | ${data.historia_empresa || ""} | ${data.mercado_atuacao || ""}` + 
     (data.servicos ? ` | Serviços: ${data.servicos}` : '') +
     (data.depoimentos ? ` | Depoimentos: ${data.depoimentos}` : '') +
     (data.planos ? ` | Planos: ${data.planos}` : '') +

@@ -25,15 +25,15 @@ const formSchema = z.object({
       return cleanValue.length >= 11;
     }, "Digite pelo menos 11 dígitos")
     .refine((value) => validateCnpjCpf(value), "Digite um CNPJ (14 dígitos) ou CPF (11 dígitos) válido"),
-  sobre_empresa: z.string().min(10, "Sobre a empresa é obrigatório (mínimo 10 caracteres)"),
+  visao_missao_valores: z.string().min(10, "Visão, missão e valores são obrigatórios (mínimo 10 caracteres)"),
+  historia_empresa: z.string().min(10, "História da empresa é obrigatória (mínimo 10 caracteres)"),
+  mercado_atuacao: z.string().min(10, "Mercado de atuação é obrigatório (mínimo 10 caracteres)"),
   slogan: z.string().optional(),
-  servicos: z.string().min(1, "Serviços são obrigatórios"),
+  servicos: z.string().min(1, "Produtos, serviços e planos são obrigatórios"),
   endereco: z.string().min(1, "Endereço é obrigatório"),
   horario_funcionamento: z.string().min(1, "Horário de funcionamento é obrigatório"),
   redes_sociais: z.string().optional(),
   cores_preferidas: z.string().optional(),
-  estilo_visual: z.string().optional(),
-  observacoes: z.string().optional(),
   possuiPlanos: z.boolean().optional(),
   planos: z.string().optional(),
   depoimentos: z.string().optional(),
@@ -80,15 +80,15 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
       email: "",
       telefone: "",
       cnpj_cpf: "",
-      sobre_empresa: "",
+      visao_missao_valores: "",
+      historia_empresa: "",
+      mercado_atuacao: "",
       slogan: "",
       servicos: "",
       endereco: "",
       horario_funcionamento: "",
       redes_sociais: "",
       cores_preferidas: "",
-      estilo_visual: "",
-      observacoes: "",
       possuiPlanos: false,
       planos: "",
       depoimentos: "",
@@ -151,11 +151,11 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
             />
           </div>
 
-          {/* Serviços & Conteúdo */}
+          {/* Produtos, Serviços & Avaliações */}
           <div className="space-y-6">
             <div className="border-b pb-4">
-              <h3 className="text-lg font-medium text-gray-900">Serviços & Conteúdo</h3>
-              <p className="text-sm text-gray-500 mt-1">Detalhes sobre seus serviços e depoimentos</p>
+              <h3 className="text-lg font-medium text-gray-900">Produtos, Serviços & Avaliações</h3>
+              <p className="text-sm text-gray-500 mt-1">Detalhes sobre seus produtos, serviços e avaliações de clientes</p>
             </div>
             <PersonalizeServicosForm 
               form={form}
@@ -165,11 +165,11 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
             />
           </div>
 
-          {/* Configurações */}
+          {/* Mídias do Site */}
           <div className="space-y-6">
             <div className="border-b pb-4">
-              <h3 className="text-lg font-medium text-gray-900">Configurações</h3>
-              <p className="text-sm text-gray-500 mt-1">Configurações adicionais do seu site</p>
+              <h3 className="text-lg font-medium text-gray-900">Mídias do Site</h3>
+              <p className="text-sm text-gray-500 mt-1">Imagens e vídeos para o seu site</p>
             </div>
             <PersonalizeConfigForm 
               form={form}

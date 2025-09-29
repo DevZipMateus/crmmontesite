@@ -81,13 +81,15 @@ export const useFormSubmission = (props: SubmissionProps) => {
 
     try {
       // Validate required fields - VALIDAÇÃO REFORÇADA incluindo CNPJ/CPF obrigatório
-      if (!data.nome_empresa || !data.telefone || !data.email || !data.cnpj_cpf || !data.sobre_empresa) {
+      if (!data.nome_empresa || !data.telefone || !data.email || !data.cnpj_cpf || !data.visao_missao_valores || !data.historia_empresa || !data.mercado_atuacao) {
         const missingFields = [];
         if (!data.nome_empresa) missingFields.push("Nome da empresa");
         if (!data.telefone) missingFields.push("Telefone");
         if (!data.email) missingFields.push("Email");
         if (!data.cnpj_cpf) missingFields.push("CNPJ ou CPF");
-        if (!data.sobre_empresa) missingFields.push("Sobre a empresa");
+        if (!data.visao_missao_valores) missingFields.push("Visão, missão e valores");
+        if (!data.historia_empresa) missingFields.push("História da empresa");
+        if (!data.mercado_atuacao) missingFields.push("Mercado de atuação");
         
         throw new Error(`Por favor, preencha todos os campos obrigatórios: ${missingFields.join(", ")}`);
       }

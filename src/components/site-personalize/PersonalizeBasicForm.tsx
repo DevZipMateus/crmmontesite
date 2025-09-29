@@ -12,15 +12,15 @@ export interface FormValues {
   email: string;
   telefone: string;
   cnpj_cpf: string;
-  sobre_empresa: string;
+  visao_missao_valores: string;
+  historia_empresa: string;
+  mercado_atuacao: string;
   slogan?: string;
   servicos?: string;
   endereco?: string;
   horario_funcionamento?: string;
   redes_sociais?: string;
   cores_preferidas?: string;
-  estilo_visual?: string;
-  observacoes?: string;
   possuiPlanos?: boolean;
   planos?: string;
   depoimentos?: string;
@@ -62,17 +62,17 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
         )}
       />
 
-      {/* Email */}
+      {/* Email Empresarial */}
       <FormField
         control={form.control}
         name="email"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Email *</FormLabel>
+            <FormLabel>Email Empresarial *</FormLabel>
             <FormControl>
               <Input 
                 type="email"
-                placeholder="seu@email.com"
+                placeholder="contato@suaempresa.com (email por onde seu cliente entra em contato com você)"
                 {...field}
               />
             </FormControl>
@@ -81,13 +81,13 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
         )}
       />
 
-      {/* Telefone */}
+      {/* Telefone da Empresa */}
       <FormField
         control={form.control}
         name="telefone"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Telefone *</FormLabel>
+            <FormLabel>Telefone da Empresa *</FormLabel>
             <FormControl>
               <Input 
                 placeholder="(11) 99999-9999"
@@ -158,24 +158,67 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
         )}
       />
 
-      {/* Sobre a empresa */}
-      <FormField
-        control={form.control}
-        name="sobre_empresa"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Sobre a Empresa *</FormLabel>
-            <FormControl>
-              <Textarea 
-                placeholder="Conte um pouco sobre sua empresa, história, missão, valores... (obrigatório)"
-                className="min-h-[100px]"
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      {/* Seção Sobre a Empresa */}
+      <div className="space-y-4 pt-4 border-t">
+        <h3 className="text-lg font-medium">Sobre a Empresa</h3>
+        
+        {/* Visão, Missão e Valores */}
+        <FormField
+          control={form.control}
+          name="visao_missao_valores"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Visão, Missão e Valores *</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Se não tiver, coloque no ChatGPT o nome da empresa e peça para ele criar"
+                  className="min-h-[100px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* História da Empresa */}
+        <FormField
+          control={form.control}
+          name="historia_empresa"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>História da Empresa *</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Como surgiu, quando surgiu, qual o objetivo"
+                  className="min-h-[100px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Mercado no Qual Atuamos */}
+        <FormField
+          control={form.control}
+          name="mercado_atuacao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Mercado no Qual Atuamos *</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Ex: Atuamos no mercado X trazendo a melhor qualidade..."
+                  className="min-h-[100px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
       {/* Slogan */}
       <FormField
@@ -183,10 +226,10 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
         name="slogan"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Slogan da Empresa (opcional)</FormLabel>
+            <FormLabel>Slogan (opcional)</FormLabel>
             <FormControl>
               <Input 
-                placeholder="Digite o slogan da sua empresa"
+                placeholder="Frase de efeito (ex: Red Bull te dá asas)"
                 {...field}
               />
             </FormControl>
@@ -221,35 +264,16 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
         onRemove={handleRemoveLogo}
       />
 
-      {/* Cores Preferidas */}
+      {/* Cores que Quer no Site */}
       <FormField
         control={form.control}
         name="cores_preferidas"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Cores Preferidas</FormLabel>
+            <FormLabel>Cores que Quer no Site</FormLabel>
             <FormControl>
               <Input 
                 placeholder="Ex: Azul marinho, branco, dourado"
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      {/* Estilo Visual */}
-      <FormField
-        control={form.control}
-        name="estilo_visual"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Estilo Visual Desejado</FormLabel>
-            <FormControl>
-              <Textarea 
-                placeholder="Descreva o estilo visual que deseja (moderno, clássico, minimalista, etc.)"
-                className="min-h-[80px]"
                 {...field}
               />
             </FormControl>

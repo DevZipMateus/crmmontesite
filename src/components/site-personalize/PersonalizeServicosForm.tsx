@@ -28,7 +28,7 @@ export const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = (
 }) => {
   return (
     <div className="space-y-4 pt-4 border-t">
-      <h3 className="text-lg font-medium">Serviços e Planos</h3>
+      <h3 className="text-lg font-medium">Produtos, Serviços e Planos</h3>
       
       <FormField
         control={form.control}
@@ -52,7 +52,7 @@ export const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = (
           name="planos"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Planos de Negócios</FormLabel>
+              <FormLabel>Planos Oferecidos</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Descreva os planos oferecidos (nome, valor, serviços incluídos)"
@@ -71,10 +71,10 @@ export const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = (
         name="servicos"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Serviços e Produtos*</FormLabel>
+            <FormLabel>Produtos, Serviços e Planos*</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="Liste os principais serviços oferecidos"
+                placeholder="Produtos com os quais você trabalha, serviços que presta (ex: prestação de serviço) e planos oferecidos (ex: combo de serviços por tanto)"
                 rows={4}
                 {...field}
               />
@@ -85,17 +85,17 @@ export const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = (
       />
 
       <div className="space-y-4 pt-4 border-t">
-        <h3 className="text-lg font-medium">Depoimentos</h3>
+        <h3 className="text-lg font-medium">Avaliações</h3>
         
         <FormField
           control={form.control}
           name="depoimentos"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Depoimentos de Clientes</FormLabel>
+              <FormLabel>Avaliações de Clientes</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Inclua depoimentos de clientes no formato: Nome, empresa: Depoimento"
+                  placeholder="Inclua avaliações de clientes no formato: Nome, empresa: Avaliação. Podem ser tanto escritas como imagens"
                   rows={4}
                   {...field}
                 />
@@ -106,8 +106,8 @@ export const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = (
         />
 
         <MediaUploader 
-          label="Imagens para Depoimentos"
-          description="Adicione imagens relacionadas aos depoimentos. Múltiplas imagens permitidas."
+          label="Imagens de Avaliações"
+          description="Adicione imagens de avaliações dos clientes. Múltiplas imagens permitidas."
           accept="image/*"
           multiple={true}
           previews={depoimentoPreviews}
