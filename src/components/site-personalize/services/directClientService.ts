@@ -26,7 +26,11 @@ export const savePersonalizationData = async (
       horario_funcionamento: formData.horario_funcionamento || "",
       possuiplanos: formData.possuiPlanos || false,
       planos: formData.planos || "",
-      servicos: formData.servicos || "",
+      servicos: [
+        formData.possuiProdutos && formData.produtos ? `Produtos: ${formData.produtos}` : '',
+        formData.servicosOferecidos ? `Serviços: ${formData.servicosOferecidos}` : '',
+        formData.possuiPlanos && formData.planos ? `Planos: ${formData.planos}` : ''
+      ].filter(Boolean).join(' | ') || "",
       depoimentos: formData.depoimentos || "",
       botaowhatsapp: formData.botaoWhatsapp || false,
       possuimapa: formData.possuiMapa || false,

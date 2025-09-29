@@ -35,7 +35,11 @@ export const submitPartnerClient = async (
     horario_funcionamento: data.horario_funcionamento || "",
     possuiplanos: data.possuiPlanos || false,
     planos: data.planos || "",
-    servicos: data.servicos || "",
+    servicos: [
+      data.possuiProdutos && data.produtos ? `Produtos: ${data.produtos}` : '',
+      data.servicosOferecidos ? `Serviços: ${data.servicosOferecidos}` : '',
+      data.possuiPlanos && data.planos ? `Planos: ${data.planos}` : ''
+    ].filter(Boolean).join(' | ') || "",
     depoimentos: data.depoimentos || "",
     botaowhatsapp: data.botaoWhatsapp || false,
     possuimapa: data.possuiMapa || false,
@@ -64,10 +68,15 @@ export const submitPartnerClient = async (
   console.log("✅ Personalization created:", personalizationResult);
 
   // Preparar observações estruturadas (mantém compatibilidade)
+  const servicosCompletos = [
+    data.possuiProdutos && data.produtos ? `Produtos: ${data.produtos}` : '',
+    data.servicosOferecidos ? `Serviços: ${data.servicosOferecidos}` : '',
+    data.possuiPlanos && data.planos ? `Planos: ${data.planos}` : ''
+  ].filter(Boolean).join(' | ');
+  
   const observacoes = `${data.visao_missao_valores || ""} | ${data.historia_empresa || ""} | ${data.mercado_atuacao || ""}` + 
-    (data.servicos ? ` | Serviços: ${data.servicos}` : '') +
+    (servicosCompletos ? ` | ${servicosCompletos}` : '') +
     (data.depoimentos ? ` | Depoimentos: ${data.depoimentos}` : '') +
-    (data.planos ? ` | Planos: ${data.planos}` : '') +
     (data.slogan ? ` | Slogan: ${data.slogan}` : '');
 
   // Preparar dados para o endpoint receive-form-data

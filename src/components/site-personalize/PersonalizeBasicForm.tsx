@@ -16,7 +16,9 @@ export interface FormValues {
   historia_empresa: string;
   mercado_atuacao: string;
   slogan?: string;
-  servicos?: string;
+  possuiProdutos?: boolean;
+  produtos?: string;
+  servicosOferecidos?: string;
   endereco?: string;
   horario_funcionamento?: string;
   redes_sociais?: string;
@@ -206,7 +208,7 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
           name="mercado_atuacao"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Mercado no Qual Atuamos *</FormLabel>
+              <FormLabel>Mercado no Qual Atuamos</FormLabel>
               <FormControl>
                 <Textarea 
                   placeholder="Ex: Atuamos no mercado X trazendo a melhor qualidade..."
