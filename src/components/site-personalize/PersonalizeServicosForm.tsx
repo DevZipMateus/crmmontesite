@@ -30,6 +30,49 @@ export const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = (
     <div className="space-y-4 pt-4 border-t">
       <h3 className="text-lg font-medium">Produtos, Serviços e Planos</h3>
       
+      {/* Possui Produtos */}
+      <FormField
+        control={form.control}
+        name="possuiProdutos"
+        render={({ field }) => (
+          <FormItem className="space-y-2">
+            <div className="flex flex-row items-center space-x-3 space-y-0">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <FormLabel>Possui Produtos?</FormLabel>
+            </div>
+            <p className="text-sm text-muted-foreground ml-7">
+              Produtos são itens físicos ou digitais que você vende (ex: equipamentos, softwares, materiais)
+            </p>
+          </FormItem>
+        )}
+      />
+
+      {/* Campo condicional Produtos Oferecidos */}
+      {form.watch("possuiProdutos") && (
+        <FormField
+          control={form.control}
+          name="produtos"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Produtos Oferecidos</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Descreva os produtos que você oferece"
+                  rows={3}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
       {/* Possui Serviços */}
       <FormField
         control={form.control}
@@ -63,49 +106,6 @@ export const PersonalizeServicosForm: React.FC<PersonalizeServicosFormProps> = (
               <FormControl>
                 <Textarea
                   placeholder="Descreva os serviços que você presta (ex: instalação, manutenção, consultoria)"
-                  rows={3}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
-
-      {/* Possui Produtos - sempre visível */}
-      <FormField
-        control={form.control}
-        name="possuiProdutos"
-        render={({ field }) => (
-          <FormItem className="space-y-2">
-            <div className="flex flex-row items-center space-x-3 space-y-0">
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <FormLabel>Possui Produtos?</FormLabel>
-            </div>
-            <p className="text-sm text-muted-foreground ml-7">
-              Produtos são itens físicos ou digitais que você vende (ex: equipamentos, softwares, materiais)
-            </p>
-          </FormItem>
-        )}
-      />
-
-      {/* Campo condicional Produtos Oferecidos */}
-      {form.watch("possuiProdutos") && (
-        <FormField
-          control={form.control}
-          name="produtos"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Produtos Oferecidos</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Descreva os produtos que você oferece"
                   rows={3}
                   {...field}
                 />
