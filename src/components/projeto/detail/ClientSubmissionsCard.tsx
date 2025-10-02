@@ -23,6 +23,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { ClientSubmissionsBulkDownloader } from "./ClientSubmissionsBulkDownloader";
+import JSZip from 'jszip';
 
 interface ClientSubmissionsCardProps {
   projectId: string;
@@ -168,6 +169,7 @@ interface SubmissionCardProps {
 
 function SubmissionCard({ submission, onStatusUpdate, onSubmissionUpdate }: SubmissionCardProps) {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
 
   const getStatusColor = (status: string) => {
@@ -239,6 +241,82 @@ function SubmissionCard({ submission, onStatusUpdate, onSubmissionUpdate }: Subm
     }
   };
 
+  const downloadSubmissionImages = async () => {
+    setIsDownloading(true);
+    const zip = new JSZip();
+    
+    try {
+      const submissionDate = new Date(submission.submission_date).toLocaleDateString('pt-BR').replace(/\//g, '-');
+      const zipName = `${submission.client_name}_${submissionDate}_envio.zip`;
+      
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (let i = 0; i < submission.media_urls.length; i++) {
+        const media = submission.media_urls[i];
+        
+        try {
+          const imageUrl = await ClientSubmissionService.getImageUrl(media.url);
+          
+          if (imageUrl) {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            
+            // Detectar extensão do arquivo
+            const extension = media.url.split('.').pop()?.toLowerCase() || 'jpg';
+            
+            // Nome do arquivo com informações úteis
+            let fileName = media.name || `imagem_${i + 1}`;
+            if (!fileName.includes('.')) {
+              fileName = `${fileName}.${extension}`;
+            }
+            
+            // Adicionar categoria ao caminho se existir
+            const folderPath = media.category ? `${media.category}/` : '';
+            
+            zip.file(`${folderPath}${fileName}`, blob);
+            successCount++;
+          }
+        } catch (error) {
+          console.error(`Error downloading image ${i}:`, error);
+          errorCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        const content = await zip.generateAsync({ type: 'blob' });
+        const url = window.URL.createObjectURL(content);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = zipName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        toast({
+          title: "Download concluído!",
+          description: `${successCount} imagem(ns) baixada(s)${errorCount > 0 ? `. ${errorCount} erro(s).` : '.'}`,
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível baixar nenhuma imagem.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error creating zip:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao criar arquivo ZIP.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <div className="border rounded-lg p-4 space-y-3">
       <div className="flex items-start justify-between">
@@ -292,14 +370,25 @@ function SubmissionCard({ submission, onStatusUpdate, onSubmissionUpdate }: Subm
           {submission.media_urls.length} imagem(ns)
         </span>
         
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Eye className="h-4 w-4 mr-2" />
-              Ver Imagens
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl">
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={downloadSubmissionImages}
+            disabled={isDownloading}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            {isDownloading ? "Baixando..." : "Baixar Envio"}
+          </Button>
+          
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Eye className="h-4 w-4 mr-2" />
+                Ver Imagens
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl">
             <DialogHeader>
               <DialogTitle>Imagens - {submission.client_name}</DialogTitle>
             </DialogHeader>
@@ -411,6 +500,7 @@ function SubmissionCard({ submission, onStatusUpdate, onSubmissionUpdate }: Subm
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
     </div>
   );
