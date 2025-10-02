@@ -360,14 +360,14 @@ export function ClientSubmissionsBulkDownloader({
               return (
                 <div key={category} className="border rounded-lg">
                   <Collapsible open={isOpen} onOpenChange={() => toggleCategory(category)}>
-                    <div className="flex items-center justify-between p-4 bg-muted/50">
-                      <CollapsibleTrigger className="flex items-center gap-2 hover:bg-muted rounded px-2 py-1 transition-colors">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-4 bg-muted/50">
+                      <CollapsibleTrigger className="flex items-center gap-2 hover:bg-muted rounded px-2 py-1 transition-colors flex-1">
                         {isOpen ? (
-                          <ChevronDown className="h-4 w-4" />
+                          <ChevronDown className="h-4 w-4 flex-shrink-0" />
                         ) : (
-                          <ChevronRight className="h-4 w-4" />
+                          <ChevronRight className="h-4 w-4 flex-shrink-0" />
                         )}
-                        <Folder className="h-4 w-4 text-primary" />
+                        <Folder className="h-4 w-4 text-primary flex-shrink-0" />
                         <span className="font-medium">{category}</span>
                         <span className="text-sm text-muted-foreground">({categoryImages.length} imagens)</span>
                       </CollapsibleTrigger>
@@ -377,6 +377,7 @@ export function ClientSubmissionsBulkDownloader({
                         disabled={downloadingCategory === category}
                         size="sm"
                         variant="outline"
+                        className="whitespace-nowrap w-full sm:w-auto"
                       >
                         <Download className="h-4 w-4 mr-2" />
                         {downloadingCategory === category ? "Baixando..." : "Baixar Pasta"}
