@@ -17,11 +17,13 @@ import {
   Copy,
   Download,
   Trash2,
-  Folder
+  Folder,
+  FileDown
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ClientSubmissionsBulkDownloader } from "./ClientSubmissionsBulkDownloader";
 import JSZip from 'jszip';
 
@@ -86,6 +88,133 @@ export function ClientSubmissionsCard({ projectId, clientSubmissionHash, project
     }
   };
 
+  const exportSubmissionData = async (format: 'csv' | 'json' | 'txt') => {
+    try {
+      const exportDate = new Date().toLocaleString('pt-BR');
+      const totalImages = submissions.reduce((sum, sub) => sum + sub.media_urls.length, 0);
+
+      if (format === 'csv') {
+        // CSV Export
+        const headers = ['Nome do Arquivo', 'Descrição', 'Valor', 'Categoria', 'Data do Envio', 'Cliente', 'Email', 'Status'];
+        const rows = [headers.join(',')];
+
+        submissions.forEach(submission => {
+          submission.media_urls.forEach(media => {
+            const row = [
+              `"${media.name || ''}"`,
+              `"${media.description || ''}"`,
+              media.price ? `"R$ ${media.price.toFixed(2)}"` : '""',
+              `"${media.category || 'Geral'}"`,
+              `"${new Date(submission.submission_date).toLocaleDateString('pt-BR')}"`,
+              `"${submission.client_name}"`,
+              `"${submission.client_email || ''}"`,
+              `"${getStatusText(submission.status)}"`
+            ];
+            rows.push(row.join(','));
+          });
+        });
+
+        const csvContent = rows.join('\n');
+        const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        downloadFile(blob, `envios_${projectName}_${Date.now()}.csv`);
+
+      } else if (format === 'json') {
+        // JSON Export
+        const jsonData = {
+          projeto: projectName,
+          data_exportacao: exportDate,
+          total_envios: submissions.length,
+          total_imagens: totalImages,
+          envios: submissions.map(submission => ({
+            cliente: submission.client_name,
+            email: submission.client_email || '',
+            data_envio: new Date(submission.submission_date).toLocaleString('pt-BR'),
+            status: getStatusText(submission.status),
+            mensagem: submission.message || '',
+            imagens: submission.media_urls.map(media => ({
+              nome_arquivo: media.name || '',
+              descricao: media.description || '',
+              valor: media.price || null,
+              categoria: media.category || 'Geral'
+            }))
+          }))
+        };
+
+        const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
+        downloadFile(blob, `envios_${projectName}_${Date.now()}.json`);
+
+      } else if (format === 'txt') {
+        // TXT Export
+        let txtContent = `=== RELATÓRIO DE ENVIOS - PROJETO: ${projectName} ===\n`;
+        txtContent += `Data da Exportação: ${exportDate}\n\n`;
+        txtContent += `Total de Envios: ${submissions.length}\n`;
+        txtContent += `Total de Imagens: ${totalImages}\n\n`;
+
+        submissions.forEach((submission, idx) => {
+          txtContent += `${'='.repeat(60)}\n`;
+          txtContent += `ENVIO #${idx + 1}\n`;
+          txtContent += `${'='.repeat(60)}\n`;
+          txtContent += `Cliente: ${submission.client_name}\n`;
+          txtContent += `Email: ${submission.client_email || 'Não informado'}\n`;
+          txtContent += `Data: ${new Date(submission.submission_date).toLocaleString('pt-BR')}\n`;
+          txtContent += `Status: ${getStatusText(submission.status)}\n`;
+          if (submission.message) {
+            txtContent += `Mensagem: ${submission.message}\n`;
+          }
+          txtContent += `\nImagens:\n`;
+
+          submission.media_urls.forEach((media, mediaIdx) => {
+            txtContent += `  ${mediaIdx + 1}. ${media.name || `imagem_${mediaIdx + 1}`}\n`;
+            if (media.description) {
+              txtContent += `     Descrição: ${media.description}\n`;
+            }
+            if (media.price) {
+              txtContent += `     Valor: R$ ${media.price.toFixed(2)}\n`;
+            }
+            txtContent += `     Categoria: ${media.category || 'Geral'}\n\n`;
+          });
+        });
+
+        const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+        downloadFile(blob, `envios_${projectName}_${Date.now()}.txt`);
+      }
+
+      toast({
+        title: "Exportação concluída!",
+        description: `Dados exportados como ${format.toUpperCase()} com sucesso.`,
+      });
+
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao exportar dados.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const downloadFile = (blob: Blob, filename: string) => {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pending': return 'Pendente';
+      case 'viewed': return 'Visualizado';
+      case 'approved': return 'Aprovado';
+      case 'rejected': return 'Rejeitado';
+      default: return status;
+    }
+  };
+
 
   if (loading) {
     return (
@@ -118,12 +247,35 @@ export function ClientSubmissionsCard({ projectId, clientSubmissionHash, project
               Imagens enviadas pelo cliente para o projeto
             </CardDescription>
           </div>
-          {clientSubmissionHash && (
-            <Button variant="outline" size="sm" onClick={copySubmissionLink}>
-              <Copy className="h-4 w-4 mr-2" />
-              Copiar Link
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {clientSubmissionHash && (
+              <Button variant="outline" size="sm" onClick={copySubmissionLink}>
+                <Copy className="h-4 w-4 mr-2" />
+                Copiar Link
+              </Button>
+            )}
+            {submissions.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <FileDown className="h-4 w-4 mr-2" />
+                    Exportar Dados
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => exportSubmissionData('csv')}>
+                    📄 Exportar como CSV/Excel
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => exportSubmissionData('json')}>
+                    📋 Exportar como JSON
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => exportSubmissionData('txt')}>
+                    📝 Exportar como TXT
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
