@@ -75,7 +75,7 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
         }
         
         console.log("Fetched projects:", data);
-        let filteredProjects = data || [];
+        let filteredProjects: any[] = data || [];
         
         // Aplicar filtro de texto de busca cliente-side
         if (actualSearchQuery.trim()) {
@@ -91,13 +91,16 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
           );
         }
         
-        // Adicionar flag de arquivamento aos projetos
-        filteredProjects = filteredProjects.map(project => ({
+        // Adicionar flag de arquivamento aos projetos e filtrar arquivados
+        const projectsWithArchiveFlag = filteredProjects.map(project => ({
           ...project,
           isArchived: shouldArchiveProject(project)
-        }));
+        })) as Project[];
         
-        setProjects(filteredProjects);
+        // Filtrar projetos arquivados
+        const activeProjects = projectsWithArchiveFlag.filter(project => !project.isArchived);
+        
+        setProjects(activeProjects);
       } catch (error) {
         console.error('Error fetching projects:', error);
         setProjects([]);
