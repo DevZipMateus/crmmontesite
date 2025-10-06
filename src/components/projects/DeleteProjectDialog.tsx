@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { deleteProject } from "@/server/project-actions";
+import { deleteProject } from "@/server/project";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,24 +67,30 @@ export default function DeleteProjectDialog({
 
   const handleDelete = async () => {
     try {
+      console.log("🗑️ Iniciando exclusão do projeto:", projectId);
       setIsDeleting(true);
       const result = await deleteProject(projectId);
       
+      console.log("🗑️ Resultado da exclusão:", result);
+      
       if (result.success) {
+        console.log("✅ Projeto excluído com sucesso");
+        setOpen(false);
         if (onDelete) {
           onDelete();
         }
+      } else {
+        console.error("❌ Falha ao excluir projeto:", result.error);
       }
     } catch (error) {
-      console.error("Erro ao excluir projeto:", error);
+      console.error("❌ Erro ao excluir projeto:", error);
       toast({
         title: "Erro ao excluir projeto",
-        description: "Ocorreu um erro ao tentar excluir o projeto.",
+        description: error instanceof Error ? error.message : "Ocorreu um erro ao tentar excluir o projeto.",
         variant: "destructive",
       });
     } finally {
       setIsDeleting(false);
-      setOpen(false);
     }
   };
 
