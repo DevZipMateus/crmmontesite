@@ -40,7 +40,7 @@ export default function DeleteProjectDialog({
   const { data: dependencies, isLoading } = useQuery({
     queryKey: ["project-dependencies", projectId],
     queryFn: async () => {
-      const [leadsResult, webhooksResult] = await Promise.all([
+      const [leadsResult, webhooksResult, submissionsResult] = await Promise.all([
         supabase
           .from('leads')
           .select('id, empresa')
@@ -48,13 +48,18 @@ export default function DeleteProjectDialog({
         supabase
           .from('webhook_logs')
           .select('id')
+          .eq('project_id', projectId),
+        supabase
+          .from('client_media_submissions')
+          .select('id')
           .eq('project_id', projectId)
       ]);
 
       return {
         leads: leadsResult.data || [],
         webhooks: webhooksResult.data || [],
-        hasErrors: leadsResult.error || webhooksResult.error
+        submissions: submissionsResult.data || [],
+        hasErrors: leadsResult.error || webhooksResult.error || submissionsResult.error
       };
     },
     enabled: open,
@@ -134,6 +139,9 @@ export default function DeleteProjectDialog({
                       )}
                       {dependencies.webhooks.length > 0 && (
                         <li>• {dependencies.webhooks.length} log(s) de webhook serão excluídos</li>
+                      )}
+                      {dependencies.submissions.length > 0 && (
+                        <li>• {dependencies.submissions.length} envio(s) de mídia serão excluídos</li>
                       )}
                       <li>• Todas as customizações serão excluídas</li>
                       <li>• O projeto será permanentemente removido</li>

@@ -730,6 +730,47 @@ export type Database = {
         }
         Relationships: []
       }
+      template_iframe_configs: {
+        Row: {
+          created_at: string
+          id: string
+          iframe_code: string
+          is_active: boolean
+          is_global_active: boolean
+          name: string
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          iframe_code: string
+          is_active?: boolean
+          is_global_active?: boolean
+          name?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          iframe_code?: string
+          is_active?: boolean
+          is_global_active?: boolean
+          name?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_iframe_configs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       templates: {
         Row: {
           category_id: string | null

@@ -73,7 +73,40 @@ export async function deleteProject(id: string) {
       }
     }
     
-    // Step 3: Delete all customizations related to the project
+    // Step 3: Delete all client media submissions related to the project
+    const { data: submissions, error: submissionsCheckError } = await supabase
+      .from('client_media_submissions')
+      .select('id')
+      .eq('project_id', id);
+    
+    if (submissionsCheckError) {
+      console.error("Erro ao verificar envios de mídia:", submissionsCheckError);
+      toast({
+        title: "Erro ao verificar envios de mídia",
+        description: submissionsCheckError.message,
+        variant: "destructive",
+      });
+      return { success: false, error: submissionsCheckError };
+    }
+
+    if (submissions && submissions.length > 0) {
+      const { error: submissionsError } = await supabase
+        .from('client_media_submissions')
+        .delete()
+        .eq('project_id', id);
+      
+      if (submissionsError) {
+        console.error("Erro ao excluir envios de mídia:", submissionsError);
+        toast({
+          title: "Erro ao excluir envios de mídia",
+          description: submissionsError.message,
+          variant: "destructive",
+        });
+        return { success: false, error: submissionsError };
+      }
+    }
+    
+    // Step 4: Delete all customizations related to the project
     const { error: customizationsError } = await supabase
       .from('project_customizations')
       .delete()
@@ -89,7 +122,7 @@ export async function deleteProject(id: string) {
       return { success: false, error: customizationsError };
     }
     
-    // Step 4: Finally, delete the project
+    // Step 5: Finally, delete the project
     const { error: projectError } = await supabase
       .from('projects')
       .delete()
@@ -109,6 +142,9 @@ export async function deleteProject(id: string) {
     if (linkedLeads && linkedLeads.length > 0) {
       successMessage += ` ${linkedLeads.length} lead(s) foram desvinculados.`;
     }
+    if (submissions && submissions.length > 0) {
+      successMessage += ` ${submissions.length} envio(s) de mídia foram excluídos.`;
+    }
     
     toast({
       title: "Projeto excluído com sucesso",
@@ -118,7 +154,8 @@ export async function deleteProject(id: string) {
     return { 
       success: true, 
       unlinkedLeads: linkedLeads ? linkedLeads.length : 0,
-      deletedWebhookLogs: webhookLogs ? webhookLogs.length : 0
+      deletedWebhookLogs: webhookLogs ? webhookLogs.length : 0,
+      deletedSubmissions: submissions ? submissions.length : 0
     };
   } catch (error) {
     console.error("Erro ao excluir projeto:", error);
