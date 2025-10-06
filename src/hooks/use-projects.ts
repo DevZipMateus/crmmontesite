@@ -12,6 +12,7 @@ interface ProjectFilters {
   dateFromFilter?: Date | null;
   dateToFilter?: Date | null;
   searchQuery?: string;
+  showArchived?: boolean;
 }
 
 export function useProjects(filters: ProjectFilters | string | null = null, searchQuery: string = "") {
@@ -22,7 +23,7 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
     filters = { statusFilter: null };
   }
 
-  const { statusFilter, responsibleFilter = '', domainFilter = '', dateFromFilter = null, dateToFilter = null } = 
+  const { statusFilter, responsibleFilter = '', domainFilter = '', dateFromFilter = null, dateToFilter = null, showArchived = false } = 
     (filters as ProjectFilters);
     
   const actualSearchQuery = (filters as ProjectFilters).searchQuery || searchQuery;
@@ -91,16 +92,18 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
           );
         }
         
-        // Adicionar flag de arquivamento aos projetos e filtrar arquivados
+        // Adicionar flag de arquivamento aos projetos
         const projectsWithArchiveFlag = filteredProjects.map(project => ({
           ...project,
           isArchived: shouldArchiveProject(project)
         })) as Project[];
         
-        // Filtrar projetos arquivados
-        const activeProjects = projectsWithArchiveFlag.filter(project => !project.isArchived);
+        // Filtrar projetos baseado na opção showArchived
+        const finalProjects = showArchived 
+          ? projectsWithArchiveFlag.filter(project => project.isArchived)
+          : projectsWithArchiveFlag.filter(project => !project.isArchived);
         
-        setProjects(activeProjects);
+        setProjects(finalProjects);
       } catch (error) {
         console.error('Error fetching projects:', error);
         setProjects([]);
@@ -120,7 +123,7 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
 
   useEffect(() => {
     fetchProjects();
-  }, [statusFilter, responsibleFilter, domainFilter, dateFromFilter, dateToFilter, actualSearchQuery]);
+  }, [statusFilter, responsibleFilter, domainFilter, dateFromFilter, dateToFilter, actualSearchQuery, showArchived]);
 
   return { projects, setProjects, loading, fetchProjects };
 }

@@ -2,7 +2,7 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Archive } from "lucide-react";
 import KanbanBoard from "@/components/projects/KanbanBoard";
 import ProjectListView from "@/components/projects/ProjectListView";
 import ViewToggle from "@/components/projects/ViewToggle";
@@ -20,6 +20,7 @@ export default function Projetos() {
   const [domainFilter, setDomainFilter] = useState("");
   const [dateFromFilter, setDateFromFilter] = useState<Date | null>(null);
   const [dateToFilter, setDateToFilter] = useState<Date | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
   
   const navigate = useNavigate();
   
@@ -30,7 +31,8 @@ export default function Projetos() {
     domainFilter,
     dateFromFilter,
     dateToFilter,
-    searchQuery
+    searchQuery,
+    showArchived
   };
   
   const { projects, setProjects, loading, fetchProjects } = useProjects(filters);
@@ -84,6 +86,16 @@ export default function Projetos() {
         title="Projetos"
         actions={
           <div className="flex flex-wrap items-center gap-2 lg:gap-3">
+            <Button
+              variant={showArchived ? "default" : "outline"}
+              onClick={() => setShowArchived(!showArchived)}
+              className="flex items-center gap-2 px-3 lg:px-4 text-sm lg:text-base"
+              aria-label={showArchived ? "Mostrar projetos ativos" : "Mostrar projetos arquivados"}
+            >
+              <Archive className="h-4 w-4" />
+              <span className="hidden sm:inline">{showArchived ? "Ver Ativos" : "Ver Arquivados"}</span>
+              <span className="sm:hidden">{showArchived ? "Ativos" : "Arquivo"}</span>
+            </Button>
             <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
             <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
             <Button 
