@@ -71,6 +71,21 @@ Mapa interativo (se endereço for fornecido).
 
 Menu fixo com navegação por âncoras.
 
+Rodapé dinâmico MonteSite (OBRIGATÓRIO):
+
+Implementar o sistema de rodapé dinâmico desenvolvido pelo MonteSite. Este rodapé é controlado por um painel admin e atualiza automaticamente todos os sites.
+
+Passos de implementação:
+1. Abra o arquivo index.html
+2. Localize a tag <body>
+3. Logo após a linha <div id="root"></div>, adicione estas 2 linhas:
+
+<!-- Rodapé MonteSite - Atualização Automática -->
+<div id="montesite-footer-badge"></div>
+<script src="https://vaabpicspdbolvutnscp.supabase.co/functions/v1/get-footer-iframe"></script>
+
+Importante: O rodapé será carregado automaticamente e se adaptará ao design do site.
+
 Regras de Header e Hero:
 
 O header deve estar sempre fixo (grudado) no topo da página.
