@@ -2,12 +2,13 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
-import { FileText, Award } from "lucide-react";
+import { FileText, Award, Copy } from "lucide-react";
 import { Project } from "@/types/project";
 import { formatDate } from "@/utils/formatters";
 import { generateSiteCommand } from "./SiteCommandGenerator";
 import { generateEgestorCommand } from "./EGestorCommandGenerator";
 import { ClientTypeBadge } from "@/components/projects/ClientTypeBadge";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProjectTableProps {
   projects: Project[];
@@ -16,6 +17,7 @@ interface ProjectTableProps {
   selectedProjectId: string | null;
   isGenerating: boolean;
   setIsGenerating: (isGenerating: boolean) => void;
+  generatedText: string | null;
 }
 
 export const ProjectTable: React.FC<ProjectTableProps> = ({ 
@@ -24,8 +26,29 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
   onGenerateCommand,
   selectedProjectId, 
   isGenerating,
-  setIsGenerating
+  setIsGenerating,
+  generatedText
 }) => {
+  const { toast } = useToast();
+
+  const copyToClipboard = () => {
+    if (generatedText) {
+      navigator.clipboard.writeText(generatedText)
+        .then(() => {
+          toast({
+            title: "Copiado com sucesso!",
+            description: "O comando foi copiado para a área de transferência."
+          });
+        })
+        .catch(() => {
+          toast({
+            title: "Erro ao copiar",
+            description: "Não foi possível copiar o texto. Tente novamente.",
+            variant: "destructive"
+          });
+        });
+    }
+  };
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -50,27 +73,40 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
               <TableCell>{project.responsible_name || "—"}</TableCell>
               <TableCell>{formatDate(project.created_at)}</TableCell>
               <TableCell className="space-y-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    onSelectProject(project.id);
-                    generateSiteCommand({ 
-                      project, 
-                      setIsGenerating, 
-                      setGeneratedText: onGenerateCommand 
-                    });
-                  }}
-                  className="flex items-center gap-2 w-full"
-                  disabled={isGenerating}
-                >
-                  {isGenerating && selectedProjectId === project.id ? (
-                    <div className="animate-spin h-4 w-4 border-b-2 border-primary rounded-full mr-2" />
-                  ) : (
-                    <FileText className="h-4 w-4" />
-                  )}
-                  Gerar Comando
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      onSelectProject(project.id);
+                      generateSiteCommand({ 
+                        project, 
+                        setIsGenerating, 
+                        setGeneratedText: onGenerateCommand 
+                      });
+                    }}
+                    className="flex items-center gap-2 flex-1"
+                    disabled={isGenerating}
+                  >
+                    {isGenerating && selectedProjectId === project.id ? (
+                      <div className="animate-spin h-4 w-4 border-b-2 border-primary rounded-full mr-2" />
+                    ) : (
+                      <FileText className="h-4 w-4" />
+                    )}
+                    Gerar Comando
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={copyToClipboard}
+                    className="flex items-center gap-2"
+                    disabled={!generatedText || selectedProjectId !== project.id}
+                  >
+                    <Copy className="h-4 w-4" />
+                    Copiar
+                  </Button>
+                </div>
                 
                 {project.client_type?.toLowerCase() === "parceiro" && (
                   <Button

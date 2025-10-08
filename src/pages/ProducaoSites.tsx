@@ -53,6 +53,7 @@ export default function ProducaoSites() {
                   selectedProjectId={selectedProjectId}
                   isGenerating={isGenerating}
                   setIsGenerating={setIsGenerating}
+                  generatedText={generatedText}
                 />
               </div>
             </div>
