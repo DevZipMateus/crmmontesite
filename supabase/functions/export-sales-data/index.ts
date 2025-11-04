@@ -106,6 +106,13 @@ Deno.serve(async (req) => {
         );
       }
 
+      // Transform leads array to situacao_lead field
+      const transformedProject = {
+        ...project,
+        situacao_lead: project.leads?.[0]?.situacao || null,
+        leads: undefined
+      };
+
       // Log successful access
       await supabase
         .from('auth_logs')
@@ -124,7 +131,7 @@ Deno.serve(async (req) => {
       console.log(`Successfully exported project: ${projectId}`);
 
       return new Response(
-        JSON.stringify(project),
+        JSON.stringify(transformedProject),
         { 
           headers: { 
             ...corsHeaders, 
@@ -201,6 +208,13 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Transform leads array to situacao_lead field for all projects
+    const transformedProjects = (projects || []).map(project => ({
+      ...project,
+      situacao_lead: project.leads?.[0]?.situacao || null,
+      leads: undefined
+    }));
+
     // Log successful access
     await supabase
       .from('auth_logs')
@@ -217,17 +231,17 @@ Deno.serve(async (req) => {
         error_message: null
       });
 
-    console.log(`Successfully exported ${projects?.length || 0} projects with filters:`, {
+    console.log(`Successfully exported ${transformedProjects.length} projects with filters:`, {
       fields, status, since, limit, offset
     });
 
     return new Response(
-      JSON.stringify(projects || []),
+      JSON.stringify(transformedProjects),
       { 
         headers: { 
           ...corsHeaders, 
           'Content-Type': 'application/json',
-          'X-Total-Count': String(projects?.length || 0)
+          'X-Total-Count': String(transformedProjects.length)
         } 
       }
     );
