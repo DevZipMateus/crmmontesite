@@ -75,6 +75,9 @@ Deno.serve(async (req) => {
         *,
         site_personalizacoes!inner(
           email
+        ),
+        leads(
+          situacao
         )
       `;
       
@@ -133,7 +136,7 @@ Deno.serve(async (req) => {
 
     // Handle fields selection for lightweight queries
     if (fields) {
-      const allowedFields = ['id', 'client_name', 'status', 'created_at', 'updated_at', 'domain', 'template', 'responsible_name'];
+      const allowedFields = ['id', 'client_name', 'status', 'created_at', 'updated_at', 'domain', 'template', 'responsible_name', 'formulario_preenchido', 'data_formulario'];
       const requestedFields = fields.split(',').map(f => f.trim());
       const validFields = requestedFields.filter(f => allowedFields.includes(f));
       
@@ -141,11 +144,14 @@ Deno.serve(async (req) => {
         selectFields = validFields.join(', ');
       }
     } else {
-      // Default full query with site_personalizacoes
+      // Default full query with site_personalizacoes and leads
       selectFields = `
         *,
         site_personalizacoes!inner(
           email
+        ),
+        leads(
+          situacao
         )
       `;
     }
