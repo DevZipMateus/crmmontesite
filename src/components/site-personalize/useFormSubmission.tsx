@@ -7,6 +7,7 @@ import { SubmissionProps, UploadProgress } from "./types/submission";
 import { submitPartnerClient } from "./services/partnerSubmissionService";
 import { uploadFiles } from "./services/fileUploadService";
 import { savePersonalizationData, createProject } from "./services/directClientService";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useFormSubmission = (props: SubmissionProps) => {
   const { 
@@ -17,7 +18,8 @@ export const useFormSubmission = (props: SubmissionProps) => {
     modeloSelecionado, 
     projectHash, 
     hashFromUrl,
-    onSuccess 
+    onSuccess,
+    leadFormHash
   } = props;
   
   const { toast } = useToast();
@@ -76,10 +78,56 @@ export const useFormSubmission = (props: SubmissionProps) => {
     
     const hash = projectHash || hashFromUrl;
     console.log("Hash detectada:", hash);
-    console.log("Tipo de submissão:", hash ? "Cliente de parceiro" : "Cliente direto");
+    console.log("Lead form hash:", leadFormHash);
+    console.log("Tipo de submissão:", leadFormHash ? "Lead form" : hash ? "Cliente de parceiro" : "Cliente direto");
     console.log("Dados do formulário:", data);
 
     try {
+      // FLUXO PARA FORMULÁRIOS DE LEAD (COM leadFormHash)
+      if (leadFormHash) {
+        console.log("📤 Processando formulário de lead...");
+        
+        const leadFormData = {
+          form_hash: leadFormHash,
+          modelo: modeloSelecionado || "Modelo 1",
+          observacoes: data.historia_empresa || "",
+          email: data.email,
+          officenome: data.nome_empresa,
+          responsavelnome: data.nome_empresa,
+          telefone: data.telefone,
+          endereco: data.endereco,
+          descricao: data.visao_missao_valores,
+          servicos: data.servicosOferecidos || "",
+          redessociais: data.redes_sociais,
+          slogan: data.slogan,
+          paletacores: data.cores_preferidas,
+          fonte: "",
+          estilo_visual: "",
+          possuiplanos: data.possuiPlanos,
+          planos: data.planos,
+          possuimapa: data.possuiMapa,
+          linkmapa: data.linkMapa,
+          horario_funcionamento: data.horario_funcionamento,
+          botaowhatsapp: data.botaoWhatsapp
+        };
+
+        const response = await supabase.functions.invoke('receive-lead-form-data', {
+          body: leadFormData
+        });
+
+        if (response.error) {
+          throw new Error(response.error.message || 'Erro ao processar formulário');
+        }
+
+        toast({
+          title: "Formulário enviado com sucesso!",
+          description: "Suas informações foram processadas e o projeto foi criado.",
+        });
+
+        console.log("🎯 Formulário de lead processado - redirecionando...");
+        redirectToConfirmation();
+        return;
+      }
       // Validate required fields - VALIDAÇÃO REFORÇADA incluindo CNPJ/CPF obrigatório
       if (!data.nome_empresa || !data.telefone || !data.email || !data.cnpj_cpf || !data.visao_missao_valores || !data.historia_empresa || !data.mercado_atuacao) {
         const missingFields = [];

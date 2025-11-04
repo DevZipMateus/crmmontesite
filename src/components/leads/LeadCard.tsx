@@ -16,6 +16,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Lead } from "@/types/lead";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { LeadFormUrlGenerator } from "./LeadFormUrlGenerator";
 
 interface LeadCardProps {
   lead: Lead;
@@ -128,6 +129,11 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onEdit, onDelete }) => {
         )}
 
         <div className="flex flex-col gap-3 pt-2 mt-auto">
+          {/* Gerador de URL do Formulário */}
+          <div className="pt-2 border-t">
+            <LeadFormUrlGenerator lead={lead} compact />
+          </div>
+          
           <div className="flex flex-wrap gap-2">
             {lead.link_blaster && (
               <Button 

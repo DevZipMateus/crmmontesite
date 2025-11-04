@@ -221,6 +221,7 @@ export type Database = {
           data_ultimo_contato: string
           email: string | null
           empresa: string
+          form_hash: string | null
           id: string
           link_blaster: string | null
           link_chat: string | null
@@ -239,6 +240,7 @@ export type Database = {
           data_ultimo_contato?: string
           email?: string | null
           empresa: string
+          form_hash?: string | null
           id?: string
           link_blaster?: string | null
           link_chat?: string | null
@@ -257,6 +259,7 @@ export type Database = {
           data_ultimo_contato?: string
           email?: string | null
           empresa?: string
+          form_hash?: string | null
           id?: string
           link_blaster?: string | null
           link_chat?: string | null
@@ -875,7 +878,7 @@ export type Database = {
         Returns: string
       }
       auto_link_leads_projects: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           confidence_score: number
           lead_id: string
@@ -887,14 +890,8 @@ export type Database = {
         Args: { data_contato: string }
         Returns: number
       }
-      create_bucket_policy: {
-        Args: { bucket_name: string }
-        Returns: boolean
-      }
-      extract_blaster_id: {
-        Args: { blaster_url: string }
-        Returns: string
-      }
+      create_bucket_policy: { Args: { bucket_name: string }; Returns: boolean }
+      extract_blaster_id: { Args: { blaster_url: string }; Returns: string }
       get_project_by_submission_hash: {
         Args: { p_hash: string }
         Returns: {
@@ -932,6 +929,12 @@ export type Database = {
           telefone: string | null
           template: string | null
           updated_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "projects"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
       string_similarity: {

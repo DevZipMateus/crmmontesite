@@ -7,6 +7,7 @@ import { Edit, Calendar, ExternalLink, Trash } from "lucide-react";
 import { Lead } from "@/types/lead";
 import { ProjectLinkIndicator } from "./ProjectLinkIndicator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { LeadFormUrlGenerator } from "./LeadFormUrlGenerator";
 
 interface LeadTableViewProps {
   leads: Lead[];
@@ -79,6 +80,7 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
               <TableHead className="min-w-[100px] hidden lg:table-cell">Último Contato</TableHead>
               <TableHead className="min-w-[60px] hidden lg:table-cell">Dias</TableHead>
               <TableHead className="min-w-[200px] hidden xl:table-cell">Observações</TableHead>
+              <TableHead className="min-w-[150px] hidden lg:table-cell">Formulário</TableHead>
               <TableHead className="min-w-[120px] sticky right-0 bg-background">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -139,6 +141,9 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
                         <span className="text-gray-400 text-sm">—</span>
                       )}
                     </div>
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    <LeadFormUrlGenerator lead={lead} compact />
                   </TableCell>
                   <TableCell className="sticky right-0 bg-background">
                     <div className="flex items-center gap-1">

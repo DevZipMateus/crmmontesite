@@ -8,6 +8,7 @@ export interface SubmissionProps {
   projectHash?: string;
   hashFromUrl?: string;
   onSuccess?: () => void;
+  leadFormHash?: string;
 }
 
 export interface UploadProgress {

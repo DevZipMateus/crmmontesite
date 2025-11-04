@@ -13,6 +13,7 @@ import ProjetoEditar from "./pages/ProjetoEditar";
 import PersonalizeSite from "./pages/PersonalizeSite";
 import Confirmacao from "./pages/Confirmacao";
 import SiteDetalhe from "./pages/SiteDetalhe";
+import LeadFormPage from "./pages/LeadFormPage";
 import ProducaoSites from "./pages/ProducaoSites";
 import Login from "./pages/Login";
 import AuthGuard from "./components/auth/AuthGuard";
@@ -54,6 +55,9 @@ const App = () => {
             
             {/* Página de formulário público para clientes - Keep this accessible without authentication */}
             <Route path="/formulario/:modelo" element={<PublicPersonalizeForm />} />
+            
+            {/* Página de formulário de lead - público */}
+            <Route path="/formulario/lead/:form_hash" element={<LeadFormPage />} />
             
             {/* Página de confirmação pública - Keep this accessible without authentication */}
             <Route path="/confirmacao" element={<Confirmacao />} />

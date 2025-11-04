@@ -46,15 +46,25 @@ const formSchema = z.object({
 });
 
 interface PersonalizeFormProps {
-  modeloSelecionado: string;
+  modeloSelecionado?: string;
   projectHash?: string;
   onSuccess?: () => void;
+  leadFormHash?: string;
+  leadData?: {
+    empresa: string;
+    nome_cliente: string;
+    email?: string;
+    cnpj?: string;
+    telefone?: string;
+  };
 }
 
 export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
-  modeloSelecionado,
+  modeloSelecionado = "",
   projectHash,
-  onSuccess
+  onSuccess,
+  leadFormHash,
+  leadData
 }) => {
   // File states
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -79,10 +89,10 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nome_empresa: "",
-      email: "",
-      telefone: "",
-      cnpj_cpf: "",
+      nome_empresa: leadData?.empresa || "",
+      email: leadData?.email || "",
+      telefone: leadData?.telefone || "",
+      cnpj_cpf: leadData?.cnpj || "",
       visao_missao_valores: "",
       historia_empresa: "",
       mercado_atuacao: "",
@@ -111,7 +121,8 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     midiaCaptions,
     modeloSelecionado,
     projectHash,
-    onSuccess
+    onSuccess,
+    leadFormHash
   });
 
   // Estado de confirmação MELHORADO

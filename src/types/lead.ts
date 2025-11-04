@@ -17,6 +17,8 @@ export interface Lead {
   project_id?: string;
   link_confidence_score?: number;
   link_method?: string;
+  // Campo para formulário de lead
+  form_hash?: string;
 }
 
 export interface LeadNote {
