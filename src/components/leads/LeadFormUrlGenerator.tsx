@@ -35,35 +35,32 @@ export const LeadFormUrlGenerator: React.FC<LeadFormUrlGeneratorProps> = ({
 
   if (compact) {
     return (
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5">
         {isGenerating ? (
-          <Skeleton className="h-9 w-20" />
+          <Skeleton className="h-8 w-16" />
         ) : formUrl ? (
           <>
             <Button
               variant="outline"
               size="sm"
               onClick={copyUrl}
-              className="flex items-center gap-1 px-2"
+              className="px-2 h-8"
               title="Copiar URL"
             >
-              <Copy className="h-4 w-4" />
-              <span className="hidden xl:inline">Copiar</span>
+              <Copy className="h-3.5 w-3.5" />
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={openForm}
-              className="flex items-center gap-1 px-2"
+              className="px-2 h-8"
               title="Abrir formulário"
             >
-              <ExternalLink className="h-4 w-4" />
-              <span className="hidden xl:inline">Abrir</span>
+              <ExternalLink className="h-3.5 w-3.5" />
             </Button>
             {isCompleted && (
-              <Badge variant="default" className="bg-green-600 px-2">
-                <CheckCircle2 className="h-3 w-3" />
-                <span className="hidden xl:inline ml-1">Preenchido</span>
+              <Badge variant="default" className="bg-green-600 px-1.5 h-8" title="Formulário preenchido">
+                <CheckCircle2 className="h-3.5 w-3.5" />
               </Badge>
             )}
           </>
@@ -72,11 +69,10 @@ export const LeadFormUrlGenerator: React.FC<LeadFormUrlGeneratorProps> = ({
             variant="outline"
             size="sm"
             onClick={generateUrl}
-            className="flex items-center gap-1 px-2"
+            className="px-2 h-8"
             title="Gerar formulário"
           >
-            <FileText className="h-4 w-4" />
-            <span className="hidden xl:inline">Gerar</span>
+            <FileText className="h-3.5 w-3.5" />
           </Button>
         )}
       </div>

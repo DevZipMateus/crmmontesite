@@ -69,19 +69,19 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
   return (
     <div className="w-full">
       <div className="rounded-md border overflow-x-auto">
-        <div className="pr-[300px]">
+        <div className="pr-[260px]">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="min-w-[150px]">Empresa</TableHead>
                 <TableHead className="min-w-[150px]">Cliente</TableHead>
-                <TableHead className="min-w-[100px] hidden lg:table-cell">Projeto</TableHead>
-                <TableHead className="min-w-[120px] hidden lg:table-cell">Vendedor</TableHead>
+                <TableHead className="min-w-[100px] hidden xl:table-cell">Projeto</TableHead>
+                <TableHead className="min-w-[120px] hidden xl:table-cell">Vendedor</TableHead>
                 <TableHead className="min-w-[120px]">Situação</TableHead>
-                <TableHead className="min-w-[100px] hidden md:table-cell">Último Contato</TableHead>
-                <TableHead className="min-w-[60px] hidden md:table-cell">Dias</TableHead>
+                <TableHead className="min-w-[100px] hidden lg:table-cell">Último Contato</TableHead>
+                <TableHead className="min-w-[60px] hidden lg:table-cell">Dias</TableHead>
                 <TableHead className="min-w-[200px] hidden xl:table-cell">Observações</TableHead>
-                <TableHead className="w-[180px] min-w-[180px] max-w-[180px] hidden md:table-cell sticky right-[112px] bg-background z-10">Formulário</TableHead>
+                <TableHead className="w-[140px] min-w-[140px] max-w-[140px] hidden md:table-cell sticky right-[112px] bg-background z-10">Formulário</TableHead>
                 <TableHead className="w-[112px] min-w-[112px] max-w-[112px] sticky right-0 bg-background z-20">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -93,10 +93,10 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
                  <TableRow key={lead.id} className="hover:bg-muted/50">
                   <TableCell className="font-medium">{lead.empresa || '-'}</TableCell>
                   <TableCell>{lead.nome_cliente || '-'}</TableCell>
-                  <TableCell className="hidden lg:table-cell">
+                  <TableCell className="hidden xl:table-cell">
                     <ProjectLinkIndicator lead={lead} />
                   </TableCell>
-                  <TableCell className="hidden lg:table-cell">{lead.vendedor || '-'}</TableCell>
+                  <TableCell className="hidden xl:table-cell">{lead.vendedor || '-'}</TableCell>
                   <TableCell>
                     <Badge 
                       variant="outline" 
@@ -105,13 +105,13 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
                       {lead.situacao}
                     </Badge>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">
+                  <TableCell className="hidden lg:table-cell">
                     <div className="flex items-center gap-1 text-sm">
                       <Calendar className="h-4 w-4" />
                       {formatDate(lead.data_ultimo_contato)}
                     </div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">
+                  <TableCell className="hidden lg:table-cell">
                     <span className={`font-medium ${getDaysColor(daysSinceContact, lead.situacao)}`}>
                       {lead.situacao.toLowerCase().includes('site pronto') ? '—' : `${daysSinceContact}d`}
                     </span>
@@ -133,7 +133,7 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="w-[180px] min-w-[180px] max-w-[180px] hidden md:table-cell sticky right-[112px] bg-background z-10">
+                  <TableCell className="w-[140px] min-w-[140px] max-w-[140px] hidden md:table-cell sticky right-[112px] bg-background z-10">
                     <LeadFormUrlGenerator lead={lead} compact />
                   </TableCell>
                   <TableCell className="w-[112px] min-w-[112px] max-w-[112px] sticky right-0 bg-background z-20">
