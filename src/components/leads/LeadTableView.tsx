@@ -8,6 +8,7 @@ import { Lead } from "@/types/lead";
 import { ProjectLinkIndicator } from "./ProjectLinkIndicator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { LeadFormUrlGenerator } from "./LeadFormUrlGenerator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface LeadTableViewProps {
   leads: Lead[];
@@ -20,7 +21,7 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
     return new Date(dateString).toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: '2-digit'
     });
   };
 
@@ -67,141 +68,171 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
   };
 
   return (
-    <div className="w-full">
-      <div className="overflow-x-auto border rounded-lg">
-        <Table className="min-w-full">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="min-w-[120px]">Empresa</TableHead>
-              <TableHead className="min-w-[100px]">Cliente</TableHead>
-              <TableHead className="min-w-[80px] hidden sm:table-cell">Projeto</TableHead>
-              <TableHead className="min-w-[100px] hidden md:table-cell">Vendedor</TableHead>
-              <TableHead className="min-w-[100px]">Situação</TableHead>
-              <TableHead className="min-w-[100px] hidden lg:table-cell">Último Contato</TableHead>
-              <TableHead className="min-w-[60px] hidden lg:table-cell">Dias</TableHead>
-              <TableHead className="min-w-[200px] hidden xl:table-cell">Observações</TableHead>
-              <TableHead className="min-w-[150px] hidden lg:table-cell">Formulário</TableHead>
-              <TableHead className="min-w-[120px] sticky right-0 bg-background">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {leads.map((lead) => {
-              const daysSinceContact = calculateDaysSinceContact(lead.data_ultimo_contato, lead.situacao);
-              
-              return (
-                <TableRow key={lead.id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium max-w-[120px] truncate" title={lead.empresa}>
-                    {lead.empresa}
-                  </TableCell>
-                  <TableCell className="max-w-[100px] truncate" title={lead.nome_cliente}>
-                    {lead.nome_cliente}
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    {lead.project_id ? (
-                      <ProjectLinkIndicator lead={lead} />
-                    ) : (
-                      <span className="text-gray-400 text-sm">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell max-w-[100px] truncate">
-                    {lead.vendedor || '—'}
-                  </TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant="outline" 
-                      className={`${getSituacaoColor(lead.situacao)} text-xs whitespace-nowrap`}
-                    >
-                      {lead.situacao}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell">
-                    <div className="flex items-center gap-1 text-sm">
-                      <Calendar className="h-4 w-4" />
-                      {formatDate(lead.data_ultimo_contato)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell">
-                    <span className={`font-medium ${getDaysColor(daysSinceContact, lead.situacao)}`}>
-                      {lead.situacao.toLowerCase().includes('site pronto') ? '—' : `${daysSinceContact}d`}
-                    </span>
-                  </TableCell>
-                  <TableCell className="hidden xl:table-cell">
-                    <div className="max-w-[200px]">
-                      {lead.observacoes ? (
-                        <span 
-                          className="text-sm text-gray-600 truncate block" 
-                          title={lead.observacoes}
-                        >
-                          {lead.observacoes.length > 50 
-                            ? `${lead.observacoes.substring(0, 50)}...` 
-                            : lead.observacoes
-                          }
-                        </span>
-                      ) : (
-                        <span className="text-gray-400 text-sm">—</span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell">
-                    <LeadFormUrlGenerator lead={lead} compact />
-                  </TableCell>
-                  <TableCell className="sticky right-0 bg-background">
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onEdit(lead)}
-                        className="text-xs px-2 py-1"
-                      >
-                        <span className="hidden sm:inline">Editar</span>
-                        <span className="sm:hidden">E</span>
-                      </Button>
-                      {lead.link_chat && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className="px-2 py-1"
-                        >
-                          <a
-                            href={lead.link_chat}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="Abrir chat"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        </Button>
-                      )}
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive" size="sm" title="Excluir lead" className="px-2 py-1">
-                            <Trash className="h-3 w-3" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Excluir lead?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Esta ação não pode ser desfeita. Isso irá remover o lead "{lead.empresa}".
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => onDelete(lead)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                              Confirmar
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </TableCell>
+    <TooltipProvider>
+      <div className="w-full">
+        <div className="overflow-x-auto border rounded-lg">
+          <div className="pr-[260px]">
+            <Table className="min-w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[140px] min-w-[140px] max-w-[140px]">Empresa</TableHead>
+                  <TableHead className="w-[120px] min-w-[120px] max-w-[120px]">Cliente</TableHead>
+                  <TableHead className="w-[70px] min-w-[70px] max-w-[70px]">Projeto</TableHead>
+                  <TableHead className="w-[100px] min-w-[100px] max-w-[100px]">Vendedor</TableHead>
+                  <TableHead className="w-[130px] min-w-[130px] max-w-[130px]">Situação</TableHead>
+                  <TableHead className="w-[110px] min-w-[110px] max-w-[110px]">Último Contato</TableHead>
+                  <TableHead className="w-[50px] min-w-[50px] max-w-[50px]">Dias</TableHead>
+                  <TableHead className="w-[180px] min-w-[180px] max-w-[180px]">Observações</TableHead>
+                  <TableHead className="w-[140px] min-w-[140px] max-w-[140px] sticky right-[120px] bg-background z-10">Formulário</TableHead>
+                  <TableHead className="w-[120px] min-w-[120px] max-w-[120px] sticky right-0 bg-background z-20">Ações</TableHead>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+              </TableHeader>
+              <TableBody>
+                {leads.map((lead) => {
+                  const daysSinceContact = calculateDaysSinceContact(lead.data_ultimo_contato, lead.situacao);
+                  
+                  return (
+                    <TableRow key={lead.id} className="hover:bg-muted/50">
+                      <TableCell className="font-medium w-[140px] min-w-[140px] max-w-[140px]">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="truncate block cursor-help">{lead.empresa}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{lead.empresa}</TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell className="w-[120px] min-w-[120px] max-w-[120px]">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="truncate block cursor-help">{lead.nome_cliente}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{lead.nome_cliente}</TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell className="w-[70px] min-w-[70px] max-w-[70px]">
+                        {lead.project_id ? (
+                          <ProjectLinkIndicator lead={lead} />
+                        ) : (
+                          <span className="text-muted-foreground text-sm">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="w-[100px] min-w-[100px] max-w-[100px]">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="truncate block cursor-help">{lead.vendedor || '—'}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{lead.vendedor || 'Não definido'}</TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell className="w-[130px] min-w-[130px] max-w-[130px]">
+                        <Badge 
+                          variant="outline" 
+                          className={`${getSituacaoColor(lead.situacao)} text-xs whitespace-nowrap`}
+                        >
+                          {lead.situacao}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="w-[110px] min-w-[110px] max-w-[110px]">
+                        <div className="text-sm whitespace-nowrap">
+                          {formatDate(lead.data_ultimo_contato)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="w-[50px] min-w-[50px] max-w-[50px] text-center">
+                        <span className={`font-medium ${getDaysColor(daysSinceContact, lead.situacao)}`}>
+                          {lead.situacao.toLowerCase().includes('site pronto') ? '—' : daysSinceContact}
+                        </span>
+                      </TableCell>
+                      <TableCell className="w-[180px] min-w-[180px] max-w-[180px]">
+                        {lead.observacoes ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="text-sm text-muted-foreground truncate block cursor-help">
+                                {lead.observacoes}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p className="whitespace-normal">{lead.observacoes}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="w-[140px] min-w-[140px] max-w-[140px] sticky right-[120px] bg-background z-10">
+                        <LeadFormUrlGenerator lead={lead} compact />
+                      </TableCell>
+                      <TableCell className="w-[120px] min-w-[120px] max-w-[120px] sticky right-0 bg-background z-20">
+                        <div className="flex items-center gap-0.5">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => onEdit(lead)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Edit className="h-3.5 w-3.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Editar</TooltipContent>
+                          </Tooltip>
+                          {lead.link_chat && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  asChild
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <a
+                                    href={lead.link_chat}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <ExternalLink className="h-3.5 w-3.5" />
+                                  </a>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Abrir chat</TooltipContent>
+                            </Tooltip>
+                          )}
+                          <AlertDialog>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="destructive" size="sm" className="h-8 w-8 p-0">
+                                    <Trash className="h-3.5 w-3.5" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                              </TooltipTrigger>
+                              <TooltipContent>Excluir</TooltipContent>
+                            </Tooltip>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir lead?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta ação não pode ser desfeita. Isso irá remover o lead "{lead.empresa}".
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => onDelete(lead)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                  Confirmar
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }

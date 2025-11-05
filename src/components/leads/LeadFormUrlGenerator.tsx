@@ -6,6 +6,7 @@ import { Copy, ExternalLink, FileText, CheckCircle2, Clock } from 'lucide-react'
 import { Lead } from '@/types/lead';
 import { useLeadFormUrl } from '@/hooks/useLeadFormUrl';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface LeadFormUrlGeneratorProps {
   lead: Lead;
@@ -35,47 +36,66 @@ export const LeadFormUrlGenerator: React.FC<LeadFormUrlGeneratorProps> = ({
 
   if (compact) {
     return (
-      <div className="flex items-center gap-2">
-        {isGenerating ? (
-          <Skeleton className="h-9 w-32" />
-        ) : formUrl ? (
-          <>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={copyUrl}
-              className="flex items-center gap-2"
-            >
-              <Copy className="h-4 w-4" />
-              Copiar URL
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={openForm}
-              className="flex items-center gap-2"
-            >
-              <ExternalLink className="h-4 w-4" />
-            </Button>
-            {isCompleted && (
-              <Badge variant="default" className="bg-green-600">
-                <CheckCircle2 className="h-3 w-3 mr-1" />
-                Preenchido
-              </Badge>
-            )}
-          </>
-        ) : (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={generateUrl}
-            className="flex items-center gap-2"
-          >
-            <FileText className="h-4 w-4" />
-            Gerar Formulário
-          </Button>
-        )}
-      </div>
+      <TooltipProvider>
+        <div className="flex items-center gap-0.5">
+          {isGenerating ? (
+            <Skeleton className="h-8 w-20" />
+          ) : formUrl ? (
+            <>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={copyUrl}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Copiar URL</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={openForm}
+                    className="h-8 w-8 p-0"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Abrir Formulário</TooltipContent>
+              </Tooltip>
+              {isCompleted && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge variant="default" className="bg-green-600 h-8 px-1">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>Preenchido</TooltipContent>
+                </Tooltip>
+              )}
+            </>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={generateUrl}
+                  className="h-8 w-8 p-0"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Gerar Formulário</TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+      </TooltipProvider>
     );
   }
 
