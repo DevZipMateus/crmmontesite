@@ -77,10 +77,10 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
               <TableHead className="min-w-[80px] hidden sm:table-cell">Projeto</TableHead>
               <TableHead className="min-w-[100px] hidden md:table-cell">Vendedor</TableHead>
               <TableHead className="min-w-[100px]">Situação</TableHead>
-              <TableHead className="min-w-[100px] hidden lg:table-cell">Último Contato</TableHead>
-              <TableHead className="min-w-[60px] hidden lg:table-cell">Dias</TableHead>
+              <TableHead className="min-w-[100px] hidden md:table-cell">Último Contato</TableHead>
+              <TableHead className="min-w-[60px] hidden md:table-cell">Dias</TableHead>
               <TableHead className="min-w-[200px] hidden xl:table-cell">Observações</TableHead>
-              <TableHead className="min-w-[150px] hidden lg:table-cell">Formulário</TableHead>
+              <TableHead className="min-w-[150px] hidden md:table-cell">Formulário</TableHead>
               <TableHead className="min-w-[120px] sticky right-0 bg-background">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -114,13 +114,13 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
                       {lead.situacao}
                     </Badge>
                   </TableCell>
-                  <TableCell className="hidden lg:table-cell">
+                  <TableCell className="hidden md:table-cell">
                     <div className="flex items-center gap-1 text-sm">
                       <Calendar className="h-4 w-4" />
                       {formatDate(lead.data_ultimo_contato)}
                     </div>
                   </TableCell>
-                  <TableCell className="hidden lg:table-cell">
+                  <TableCell className="hidden md:table-cell">
                     <span className={`font-medium ${getDaysColor(daysSinceContact, lead.situacao)}`}>
                       {lead.situacao.toLowerCase().includes('site pronto') ? '—' : `${daysSinceContact}d`}
                     </span>
@@ -142,7 +142,7 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="hidden lg:table-cell">
+                  <TableCell className="hidden md:table-cell">
                     <LeadFormUrlGenerator lead={lead} compact />
                   </TableCell>
                   <TableCell className="sticky right-0 bg-background">
