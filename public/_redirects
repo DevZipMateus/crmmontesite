@@ -1,0 +1,4 @@
+# Redirect all routes to index.html for SPA routing
+# This ensures React Router handles all navigation, including friendly URLs like /formulario/cliente
+/formulario/*  /index.html  200
+/*  /index.html  200
