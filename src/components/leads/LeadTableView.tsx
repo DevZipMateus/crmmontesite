@@ -71,7 +71,7 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
     <TooltipProvider>
       <div className="w-full">
         <div className="overflow-x-auto border rounded-lg">
-          <div className="pr-[260px]">
+          <div>
             <Table className="min-w-full">
               <TableHeader>
                 <TableRow>
