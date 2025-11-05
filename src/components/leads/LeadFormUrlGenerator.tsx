@@ -35,32 +35,32 @@ export const LeadFormUrlGenerator: React.FC<LeadFormUrlGeneratorProps> = ({
 
   if (compact) {
     return (
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-2">
         {isGenerating ? (
-          <Skeleton className="h-8 w-16" />
+          <Skeleton className="h-9 w-32" />
         ) : formUrl ? (
           <>
             <Button
               variant="outline"
               size="sm"
               onClick={copyUrl}
-              className="px-2 h-8"
-              title="Copiar URL"
+              className="flex items-center gap-2"
             >
-              <Copy className="h-3.5 w-3.5" />
+              <Copy className="h-4 w-4" />
+              Copiar URL
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={openForm}
-              className="px-2 h-8"
-              title="Abrir formulário"
+              className="flex items-center gap-2"
             >
-              <ExternalLink className="h-3.5 w-3.5" />
+              <ExternalLink className="h-4 w-4" />
             </Button>
             {isCompleted && (
-              <Badge variant="default" className="bg-green-600 px-1.5 h-8" title="Formulário preenchido">
-                <CheckCircle2 className="h-3.5 w-3.5" />
+              <Badge variant="default" className="bg-green-600">
+                <CheckCircle2 className="h-3 w-3 mr-1" />
+                Preenchido
               </Badge>
             )}
           </>
@@ -69,10 +69,10 @@ export const LeadFormUrlGenerator: React.FC<LeadFormUrlGeneratorProps> = ({
             variant="outline"
             size="sm"
             onClick={generateUrl}
-            className="px-2 h-8"
-            title="Gerar formulário"
+            className="flex items-center gap-2"
           >
-            <FileText className="h-3.5 w-3.5" />
+            <FileText className="h-4 w-4" />
+            Gerar Formulário
           </Button>
         )}
       </div>
