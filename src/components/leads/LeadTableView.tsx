@@ -80,7 +80,7 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
               <TableHead className="min-w-[100px] hidden md:table-cell">Último Contato</TableHead>
               <TableHead className="min-w-[60px] hidden md:table-cell">Dias</TableHead>
               <TableHead className="min-w-[200px] hidden xl:table-cell">Observações</TableHead>
-              <TableHead className="min-w-[150px] hidden md:table-cell">Formulário</TableHead>
+              <TableHead className="min-w-[150px] hidden md:table-cell sticky right-[128px] bg-background z-10">Formulário</TableHead>
               <TableHead className="min-w-[120px] sticky right-0 bg-background">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -142,7 +142,7 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">
+                  <TableCell className="hidden md:table-cell sticky right-[128px] bg-background">
                     <LeadFormUrlGenerator lead={lead} compact />
                   </TableCell>
                   <TableCell className="sticky right-0 bg-background">
