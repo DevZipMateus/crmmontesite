@@ -68,44 +68,35 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
 
   return (
     <div className="w-full">
-      <div className="overflow-x-auto border rounded-lg">
-        <Table className="min-w-full">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="min-w-[120px]">Empresa</TableHead>
-              <TableHead className="min-w-[100px]">Cliente</TableHead>
-              <TableHead className="min-w-[80px] hidden sm:table-cell">Projeto</TableHead>
-              <TableHead className="min-w-[100px] hidden md:table-cell">Vendedor</TableHead>
-              <TableHead className="min-w-[100px]">Situação</TableHead>
-              <TableHead className="min-w-[100px] hidden md:table-cell">Último Contato</TableHead>
-              <TableHead className="min-w-[60px] hidden md:table-cell">Dias</TableHead>
-              <TableHead className="min-w-[200px] hidden xl:table-cell">Observações</TableHead>
-              <TableHead className="min-w-[150px] hidden md:table-cell sticky right-[128px] bg-background z-10">Formulário</TableHead>
-              <TableHead className="min-w-[120px] sticky right-0 bg-background">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
+      <div className="rounded-md border overflow-x-auto">
+        <div className="pr-[300px]">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="min-w-[150px]">Empresa</TableHead>
+                <TableHead className="min-w-[150px]">Cliente</TableHead>
+                <TableHead className="min-w-[100px] hidden lg:table-cell">Projeto</TableHead>
+                <TableHead className="min-w-[120px] hidden lg:table-cell">Vendedor</TableHead>
+                <TableHead className="min-w-[120px]">Situação</TableHead>
+                <TableHead className="min-w-[100px] hidden md:table-cell">Último Contato</TableHead>
+                <TableHead className="min-w-[60px] hidden md:table-cell">Dias</TableHead>
+                <TableHead className="min-w-[200px] hidden xl:table-cell">Observações</TableHead>
+                <TableHead className="w-[180px] min-w-[180px] max-w-[180px] hidden md:table-cell sticky right-[112px] bg-background z-10">Formulário</TableHead>
+                <TableHead className="w-[112px] min-w-[112px] max-w-[112px] sticky right-0 bg-background z-20">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
           <TableBody>
             {leads.map((lead) => {
               const daysSinceContact = calculateDaysSinceContact(lead.data_ultimo_contato, lead.situacao);
               
               return (
-                <TableRow key={lead.id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium max-w-[120px] truncate" title={lead.empresa}>
-                    {lead.empresa}
+                 <TableRow key={lead.id} className="hover:bg-muted/50">
+                  <TableCell className="font-medium">{lead.empresa || '-'}</TableCell>
+                  <TableCell>{lead.nome_cliente || '-'}</TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    <ProjectLinkIndicator lead={lead} />
                   </TableCell>
-                  <TableCell className="max-w-[100px] truncate" title={lead.nome_cliente}>
-                    {lead.nome_cliente}
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    {lead.project_id ? (
-                      <ProjectLinkIndicator lead={lead} />
-                    ) : (
-                      <span className="text-gray-400 text-sm">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell max-w-[100px] truncate">
-                    {lead.vendedor || '—'}
-                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">{lead.vendedor || '-'}</TableCell>
                   <TableCell>
                     <Badge 
                       variant="outline" 
@@ -142,10 +133,10 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell sticky right-[128px] bg-background">
+                  <TableCell className="w-[180px] min-w-[180px] max-w-[180px] hidden md:table-cell sticky right-[112px] bg-background z-10">
                     <LeadFormUrlGenerator lead={lead} compact />
                   </TableCell>
-                  <TableCell className="sticky right-0 bg-background">
+                  <TableCell className="w-[112px] min-w-[112px] max-w-[112px] sticky right-0 bg-background z-20">
                     <div className="flex items-center gap-1">
                       <Button
                         variant="outline"
@@ -201,6 +192,7 @@ export default function LeadTableView({ leads, onEdit, onDelete }: LeadTableView
             })}
           </TableBody>
         </Table>
+        </div>
       </div>
     </div>
   );

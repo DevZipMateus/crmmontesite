@@ -35,32 +35,35 @@ export const LeadFormUrlGenerator: React.FC<LeadFormUrlGeneratorProps> = ({
 
   if (compact) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         {isGenerating ? (
-          <Skeleton className="h-9 w-32" />
+          <Skeleton className="h-9 w-20" />
         ) : formUrl ? (
           <>
             <Button
               variant="outline"
               size="sm"
               onClick={copyUrl}
-              className="flex items-center gap-2"
+              className="flex items-center gap-1 px-2"
+              title="Copiar URL"
             >
               <Copy className="h-4 w-4" />
-              Copiar URL
+              <span className="hidden xl:inline">Copiar</span>
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={openForm}
-              className="flex items-center gap-2"
+              className="flex items-center gap-1 px-2"
+              title="Abrir formulário"
             >
               <ExternalLink className="h-4 w-4" />
+              <span className="hidden xl:inline">Abrir</span>
             </Button>
             {isCompleted && (
-              <Badge variant="default" className="bg-green-600">
-                <CheckCircle2 className="h-3 w-3 mr-1" />
-                Preenchido
+              <Badge variant="default" className="bg-green-600 px-2">
+                <CheckCircle2 className="h-3 w-3" />
+                <span className="hidden xl:inline ml-1">Preenchido</span>
               </Badge>
             )}
           </>
@@ -69,10 +72,11 @@ export const LeadFormUrlGenerator: React.FC<LeadFormUrlGeneratorProps> = ({
             variant="outline"
             size="sm"
             onClick={generateUrl}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 px-2"
+            title="Gerar formulário"
           >
             <FileText className="h-4 w-4" />
-            Gerar Formulário
+            <span className="hidden xl:inline">Gerar</span>
           </Button>
         )}
       </div>
