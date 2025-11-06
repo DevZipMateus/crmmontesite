@@ -3,6 +3,7 @@ import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Briefcase, ExternalLink, Calendar } from "lucide-react";
 import { Lead } from "@/types/lead";
 import { Project } from "@/types/project";
@@ -55,76 +56,84 @@ export const ProjectLinkIndicator: React.FC<ProjectLinkIndicatorProps> = ({ lead
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Badge 
-          variant="outline" 
-          className={`cursor-pointer hover:bg-opacity-80 ${getConfidenceColor(lead.link_confidence_score)}`}
-        >
-          <Briefcase className="h-3 w-3 mr-1" />
-          Projeto: {project.client_name}
-        </Badge>
-      </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Briefcase className="h-5 w-5" />
-            Projeto Vinculado
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Cliente</p>
-              <p className="font-medium">{project.client_name}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Status</p>
-              <Badge variant="outline">{project.status}</Badge>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Template</p>
-              <p>{project.template || '—'}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Responsável</p>
-              <p>{project.responsible_name || '—'}</p>
-            </div>
-          </div>
-
-          {project.domain && (
-            <div>
-              <p className="text-sm font-medium text-gray-500">Domínio</p>
-              <p className="font-mono text-sm">{project.domain}</p>
-            </div>
-          )}
-
-          <div>
-            <p className="text-sm font-medium text-gray-500">Data de Criação</p>
-            <p className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              {new Date(project.created_at).toLocaleDateString('pt-BR')}
-            </p>
-          </div>
-
-          <div className="border-t pt-4">
-            <p className="text-sm font-medium text-gray-500 mb-2">Vinculação</p>
-            <div className="flex justify-between">
-              <span className="text-sm">Confiança:</span>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Dialog>
+            <DialogTrigger asChild>
               <Badge 
                 variant="outline" 
-                className={`text-xs ${getConfidenceColor(lead.link_confidence_score)}`}
+                className={`cursor-pointer hover:bg-opacity-80 h-8 w-8 p-0 flex items-center justify-center ${getConfidenceColor(lead.link_confidence_score)}`}
               >
-                {lead.link_confidence_score || 0}%
+                <Briefcase className="h-4 w-4" />
               </Badge>
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Briefcase className="h-5 w-5" />
+                  Projeto Vinculado
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Cliente</p>
+                    <p className="font-medium">{project.client_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Status</p>
+                    <Badge variant="outline">{project.status}</Badge>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Template</p>
+                    <p>{project.template || '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Responsável</p>
+                    <p>{project.responsible_name || '—'}</p>
+                  </div>
+                </div>
+
+                {project.domain && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Domínio</p>
+                    <p className="font-mono text-sm">{project.domain}</p>
+                  </div>
+                )}
+
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Data de Criação</p>
+                  <p className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    {new Date(project.created_at).toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
+
+                <div className="border-t pt-4">
+                  <p className="text-sm font-medium text-gray-500 mb-2">Vinculação</p>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Confiança:</span>
+                    <Badge 
+                      variant="outline" 
+                      className={`text-xs ${getConfidenceColor(lead.link_confidence_score)}`}
+                    >
+                      {lead.link_confidence_score || 0}%
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Projeto: {project.client_name}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
