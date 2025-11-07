@@ -17,6 +17,15 @@ const getImprovedIntroduction = () => {
   return `Crie um site institucional completo com base nas informações da empresa que irei fornecer a seguir.
 
 ⚙️ CONFIGURAÇÕES TÉCNICAS
+
+Idioma e Localização:
+
+O atributo lang da tag <html> deve ser sempre "pt-BR" (português brasileiro).
+
+Exemplo: <html lang="pt-BR">
+
+Este atributo é obrigatório e essencial para SEO, acessibilidade e leitores de tela.
+
 SEO e Metadados:
 
 Estruturar corretamente headings (H1, H2, H3) em ordem hierárquica.
