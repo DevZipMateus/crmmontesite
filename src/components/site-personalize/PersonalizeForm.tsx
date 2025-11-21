@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,6 +13,11 @@ import { useFormSubmission } from "./useFormSubmission";
 import type { FormValues } from "./PersonalizeBasicForm";
 import { CheckCircle } from "lucide-react";
 import { validateCnpjCpf } from "@/utils/documentFormatter";
+import { useFormAutoSave } from "@/hooks/useFormAutoSave";
+import { AutoSaveIndicator } from "@/components/ui/auto-save-indicator";
+import { DraftRecoveryDialog } from "./DraftRecoveryDialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 const formSchema = z.object({
   nome_empresa: z.string().min(2, "Nome da empresa é obrigatório"),
@@ -74,6 +79,9 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
   const [midiaFiles, setMidiaFiles] = useState<File[]>([]);
   const [midiaPreviews, setMidiaPreviews] = useState<string[]>([]);
   const [midiaCaptions, setMidiaCaptions] = useState<string[]>([]);
+  
+  // Draft recovery state
+  const [showDraftDialog, setShowDraftDialog] = useState(false);
 
   // File upload handlers
   const fileHandlers = useFileUploadHandlers({
@@ -114,7 +122,68 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     },
   });
 
-  const { isSubmitting, isSubmitted, onSubmit } = useFormSubmission({
+  // Auto-save configuration
+  const storageKey = projectHash 
+    ? `personalize-form-${projectHash}` 
+    : leadFormHash 
+      ? `personalize-form-lead-${leadFormHash}`
+      : `personalize-form-${modeloSelecionado}`;
+
+  const {
+    hasSavedData,
+    lastSavedAt,
+    isSaving,
+    restoreSavedData,
+    clearSavedData,
+    saveFileMetadata,
+    loadFileMetadata,
+    getSavedTimestamp
+  } = useFormAutoSave(form, {
+    storageKey,
+    excludeFields: [] // No sensitive fields in this form
+  });
+
+  // Check for saved draft on mount
+  useEffect(() => {
+    if (hasSavedData && !leadData) {
+      setShowDraftDialog(true);
+    }
+  }, [hasSavedData, leadData]);
+
+  // Save file metadata when files change
+  useEffect(() => {
+    if (logoPreview || depoimentoPreviews.length > 0 || midiaPreviews.length > 0) {
+      saveFileMetadata({
+        logoPreview,
+        depoimentoPreviews,
+        midiaPreviews,
+        midiaCaptions
+      });
+    }
+  }, [logoPreview, depoimentoPreviews, midiaPreviews, midiaCaptions]);
+
+  // Handle draft restoration
+  const handleRestoreDraft = () => {
+    const restored = restoreSavedData();
+    if (restored) {
+      // Try to restore file metadata
+      const fileMetadata = loadFileMetadata();
+      if (fileMetadata) {
+        if (fileMetadata.logoPreview) setLogoPreview(fileMetadata.logoPreview);
+        if (fileMetadata.depoimentoPreviews) setDepoimentoPreviews(fileMetadata.depoimentoPreviews);
+        if (fileMetadata.midiaPreviews) setMidiaPreviews(fileMetadata.midiaPreviews);
+        if (fileMetadata.midiaCaptions) setMidiaCaptions(fileMetadata.midiaCaptions);
+      }
+    }
+    setShowDraftDialog(false);
+  };
+
+  const handleDiscardDraft = () => {
+    clearSavedData();
+    setShowDraftDialog(false);
+  };
+
+  const { isSubmitting, isSubmitted, onSubmit: originalOnSubmit } = useFormSubmission({
     logoFile,
     depoimentoFiles,
     midiaFiles,
@@ -124,6 +193,15 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     onSuccess,
     leadFormHash
   });
+
+  // Wrap onSubmit to clear draft on success
+  const onSubmit = async (data: FormValues) => {
+    await originalOnSubmit(data);
+    // Clear draft after successful submission
+    if (!isSubmitted) {
+      clearSavedData();
+    }
+  };
 
   // Estado de confirmação MELHORADO
   if (isSubmitted) {
@@ -152,6 +230,29 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
 
   return (
     <div className="space-y-6">
+      <DraftRecoveryDialog
+        open={showDraftDialog}
+        onRestore={handleRestoreDraft}
+        onDiscard={handleDiscardDraft}
+        savedTimestamp={getSavedTimestamp()}
+      />
+
+      {hasSavedData && !showDraftDialog && (
+        <Alert className="border-primary/20 bg-primary/5">
+          <Info className="h-4 w-4 text-primary" />
+          <AlertDescription className="flex items-center justify-between">
+            <span className="text-sm">
+              Você está editando um rascunho salvo automaticamente.
+            </span>
+            <AutoSaveIndicator 
+              isSaving={isSaving} 
+              lastSavedAt={lastSavedAt}
+              className="ml-4"
+            />
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Informações Básicas */}
@@ -198,7 +299,11 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
             />
           </div>
 
-          <div className="flex justify-center pt-6">
+          <div className="flex flex-col items-center gap-3 pt-6">
+            <AutoSaveIndicator 
+              isSaving={isSaving} 
+              lastSavedAt={lastSavedAt}
+            />
             <Button 
               type="submit" 
               size="lg" 
