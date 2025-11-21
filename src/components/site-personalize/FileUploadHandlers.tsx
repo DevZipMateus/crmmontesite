@@ -7,6 +7,7 @@ import { formatFileSize } from "@/lib/sanitize-file";
 export interface FileHandlersProps {
   setLogoFile: React.Dispatch<React.SetStateAction<File | null>>;
   setLogoPreview: React.Dispatch<React.SetStateAction<string | null>>;
+  setLogoFileName: React.Dispatch<React.SetStateAction<string | null>>;
   setDepoimentoFiles: React.Dispatch<React.SetStateAction<File[]>>;
   setDepoimentoPreviews: React.Dispatch<React.SetStateAction<string[]>>;
   setMidiaFiles: React.Dispatch<React.SetStateAction<File[]>>;
@@ -28,6 +29,7 @@ export const useFileUploadHandlers = (props: FileHandlersProps) => {
   const {
     setLogoFile,
     setLogoPreview,
+    setLogoFileName,
     setDepoimentoFiles,
     setDepoimentoPreviews,
     setMidiaFiles,
@@ -56,13 +58,23 @@ export const useFileUploadHandlers = (props: FileHandlersProps) => {
     if (file) {
       if (!validateFile(file)) return;
       
-      // Generate preview
-      const preview = URL.createObjectURL(file);
-      setLogoPreview(preview);
+      // For PDF files, we don't show a preview image
+      const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+      
+      if (isPDF) {
+        setLogoPreview('pdf-placeholder');
+        setLogoFileName(file.name);
+      } else {
+        // Generate preview for images
+        const preview = URL.createObjectURL(file);
+        setLogoPreview(preview);
+        setLogoFileName(file.name);
+      }
+      
       setLogoFile(file);
       
       toast({
-        description: "Logo carregada com sucesso",
+        description: isPDF ? "Arquivo PDF carregado com sucesso" : "Logo carregada com sucesso",
       });
     }
   };
@@ -70,7 +82,7 @@ export const useFileUploadHandlers = (props: FileHandlersProps) => {
   const handleRemoveLogo = () => {
     // Clean up the current preview URL to prevent memory leaks
     setLogoPreview((currentPreview) => {
-      if (currentPreview) {
+      if (currentPreview && currentPreview !== 'pdf-placeholder') {
         URL.revokeObjectURL(currentPreview);
       }
       return null;
@@ -78,6 +90,7 @@ export const useFileUploadHandlers = (props: FileHandlersProps) => {
     
     // Clear the file state
     setLogoFile(null);
+    setLogoFileName(null);
     
     toast({
       description: "Logo removida com sucesso",

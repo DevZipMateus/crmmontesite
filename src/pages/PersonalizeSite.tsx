@@ -24,6 +24,7 @@ export default function PersonalizeSite() {
   // File state management
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoFileName, setLogoFileName] = useState<string | null>(null);
   const [depoimentoFiles, setDepoimentoFiles] = useState<File[]>([]);
   const [depoimentoPreviews, setDepoimentoPreviews] = useState<string[]>([]);
   const [midiaFiles, setMidiaFiles] = useState<File[]>([]);
@@ -38,6 +39,7 @@ export default function PersonalizeSite() {
   const fileHandlers = useFileUploadHandlers({
     setLogoFile,
     setLogoPreview,
+    setLogoFileName,
     setDepoimentoFiles,
     setDepoimentoPreviews,
     setMidiaFiles,

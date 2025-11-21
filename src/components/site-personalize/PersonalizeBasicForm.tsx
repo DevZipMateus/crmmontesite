@@ -35,6 +35,7 @@ export interface FormValues {
 interface PersonalizeBasicFormProps {
   form: UseFormReturn<FormValues>;
   logoPreview: string | null;
+  logoFileName?: string | null;
   handleLogoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveLogo: () => void;
 }
@@ -42,6 +43,7 @@ interface PersonalizeBasicFormProps {
 export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
   form,
   logoPreview,
+  logoFileName,
   handleLogoUpload,
   handleRemoveLogo,
 }) => {
@@ -263,6 +265,7 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
       {/* Logo Upload */}
       <LogoUploader 
         preview={logoPreview}
+        fileName={logoFileName}
         onUpload={handleLogoUpload}
         onRemove={handleRemoveLogo}
       />

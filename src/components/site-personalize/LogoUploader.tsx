@@ -1,7 +1,7 @@
 
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Trash2, Upload, Image, Info, AlertTriangle } from "lucide-react";
+import { Trash2, Upload, Image, Info, AlertTriangle, FileText } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { formatFileSize } from "@/lib/sanitize-file";
@@ -14,12 +14,15 @@ interface LogoUploaderProps {
   preview: string | null;
   onUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onRemove: () => void;
+  fileName?: string | null;
 }
 
-const LogoUploader = ({ preview, onUpload, onRemove }: LogoUploaderProps) => {
+const LogoUploader = ({ preview, onUpload, onRemove, fileName }: LogoUploaderProps) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  
+  const isPDF = fileName && fileName.toLowerCase().endsWith('.pdf');
   
   const handleButtonClick = () => {
     if (fileInputRef.current) {
@@ -58,9 +61,12 @@ const LogoUploader = ({ preview, onUpload, onRemove }: LogoUploaderProps) => {
         });
       }
       
-      // Check file type
-      if (!file.type.startsWith('image/')) {
-        const errorMsg = "Por favor, selecione apenas arquivos de imagem (JPG, PNG, etc)";
+      // Check file type - allow images and PDF
+      const isImage = file.type.startsWith('image/');
+      const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+      
+      if (!isImage && !isPDF) {
+        const errorMsg = "Por favor, selecione apenas arquivos de imagem (JPG, PNG, etc) ou PDF";
         setFileError(errorMsg);
         toast({
           title: "Tipo de arquivo inválido",
@@ -111,7 +117,7 @@ const LogoUploader = ({ preview, onUpload, onRemove }: LogoUploaderProps) => {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,.pdf,application/pdf"
             onChange={handleFileChange}
             className="hidden"
           />
@@ -139,18 +145,32 @@ const LogoUploader = ({ preview, onUpload, onRemove }: LogoUploaderProps) => {
       <Alert className="bg-blue-50 border-blue-200">
         <Info className="h-4 w-4 text-blue-500" />
         <AlertDescription className="text-xs text-blue-700">
-          Tamanho máximo do arquivo: {MAX_FILE_SIZE_MB}MB. Use formatos comuns como JPG ou PNG.
+          Tamanho máximo do arquivo: {MAX_FILE_SIZE_MB}MB. Aceita imagens (JPG, PNG, etc) ou arquivos PDF.
           Para melhores resultados, evite espaços e caracteres especiais no nome do arquivo.
         </AlertDescription>
       </Alert>
       
       {preview ? (
         <div className="relative mt-4 rounded-md overflow-hidden border border-gray-200">
-          <img
-            src={preview}
-            alt="Logo Preview"
-            className="w-full max-h-48 object-contain bg-gray-50 p-2"
-          />
+          {isPDF ? (
+            <div className="flex flex-col items-center justify-center bg-gray-50 p-8 min-h-[192px]">
+              <FileText className="h-16 w-16 text-red-500 mb-3" />
+              <p className="text-sm font-medium text-gray-700">{fileName}</p>
+              <p className="text-xs text-gray-500 mt-1">Arquivo PDF selecionado</p>
+              <Alert className="mt-3 bg-blue-50 border-blue-200">
+                <Info className="h-4 w-4 text-blue-500" />
+                <AlertDescription className="text-xs text-blue-700">
+                  O arquivo PDF será convertido automaticamente para uso no site
+                </AlertDescription>
+              </Alert>
+            </div>
+          ) : (
+            <img
+              src={preview}
+              alt="Logo Preview"
+              className="w-full max-h-48 object-contain bg-gray-50 p-2"
+            />
+          )}
           <Button
             type="button"
             variant="destructive"
@@ -164,8 +184,12 @@ const LogoUploader = ({ preview, onUpload, onRemove }: LogoUploaderProps) => {
       ) : (
         <div className="flex justify-center items-center h-32 bg-gray-50 border border-dashed border-gray-300 rounded-md">
           <div className="text-center">
-            <Image className="mx-auto h-8 w-8 text-gray-400" />
+            <div className="flex justify-center gap-2 mb-2">
+              <Image className="h-8 w-8 text-gray-400" />
+              <FileText className="h-8 w-8 text-gray-400" />
+            </div>
             <span className="mt-1 text-sm text-gray-500 block">Nenhuma logo selecionada</span>
+            <span className="text-xs text-gray-400 block">JPG, PNG ou PDF</span>
           </div>
         </div>
       )}
