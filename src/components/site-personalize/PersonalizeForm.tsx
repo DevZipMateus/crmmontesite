@@ -76,6 +76,7 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
   // File states
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoFileName, setLogoFileName] = useState<string | null>(null);
   const [depoimentoFiles, setDepoimentoFiles] = useState<File[]>([]);
   const [depoimentoPreviews, setDepoimentoPreviews] = useState<string[]>([]);
   const [midiaFiles, setMidiaFiles] = useState<File[]>([]);
@@ -89,6 +90,7 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
   const fileHandlers = useFileUploadHandlers({
     setLogoFile,
     setLogoPreview,
+    setLogoFileName,
     setDepoimentoFiles,
     setDepoimentoPreviews,
     setMidiaFiles,
@@ -154,7 +156,7 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
 
   // Save file metadata when files change
   useEffect(() => {
-    if (logoPreview || depoimentoPreviews.length > 0 || midiaPreviews.length > 0) {
+    if (logoPreview || logoFileName || depoimentoPreviews.length > 0 || midiaPreviews.length > 0) {
       saveFileMetadata({
         logoPreview,
         depoimentoPreviews,
@@ -162,7 +164,7 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
         midiaCaptions
       });
     }
-  }, [logoPreview, depoimentoPreviews, midiaPreviews, midiaCaptions]);
+  }, [logoPreview, logoFileName, depoimentoPreviews, midiaPreviews, midiaCaptions]);
 
   // Handle draft restoration
   const handleRestoreDraft = () => {
@@ -171,7 +173,14 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
       // Try to restore file metadata
       const fileMetadata = loadFileMetadata();
       if (fileMetadata) {
-        if (fileMetadata.logoPreview) setLogoPreview(fileMetadata.logoPreview);
+        if (fileMetadata.logoPreview) {
+          setLogoPreview(fileMetadata.logoPreview);
+          // Extract filename from preview if it's a PDF placeholder
+          if (fileMetadata.logoPreview === 'pdf-placeholder') {
+            // We can't recover the filename perfectly, but we'll show indicator
+            setLogoFileName('arquivo.pdf');
+          }
+        }
         if (fileMetadata.depoimentoPreviews) setDepoimentoPreviews(fileMetadata.depoimentoPreviews);
         if (fileMetadata.midiaPreviews) setMidiaPreviews(fileMetadata.midiaPreviews);
         if (fileMetadata.midiaCaptions) setMidiaCaptions(fileMetadata.midiaCaptions);
@@ -301,6 +310,7 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
             <PersonalizeBasicForm
               form={form}
               logoPreview={logoPreview}
+              logoFileName={logoFileName}
               handleLogoUpload={fileHandlers.handleLogoUpload}
               handleRemoveLogo={fileHandlers.handleRemoveLogo}
             />
