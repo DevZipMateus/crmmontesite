@@ -14,17 +14,53 @@ export interface SiteCommandGeneratorProps {
  * Nova introdução melhorada para todos os comandos
  */
 const getImprovedIntroduction = () => {
-  return `Crie um site institucional completo com base nas informações da empresa que irei fornecer a seguir.
+  return `⚠️ CONFIGURAÇÃO CRÍTICA DE IDIOMA ⚠️
+
+ATENÇÃO: Este é um site em PORTUGUÊS BRASILEIRO.
+
+NUNCA use lang="en" ou qualquer outro idioma.
+SEMPRE use lang="pt-BR" na tag <html>.
+
+Exemplo CORRETO:
+<html lang="pt-BR">
+
+Exemplo INCORRETO (NÃO FAZER):
+<html lang="en">
+
+Esta configuração é OBRIGATÓRIA e não pode ser ignorada.
+
+---
+
+Crie um site institucional completo com base nas informações da empresa que irei fornecer a seguir.
 
 ⚙️ CONFIGURAÇÕES TÉCNICAS
 
-Idioma e Localização:
+🌐 IDIOMA E LOCALIZAÇÃO (OBRIGATÓRIO)
 
-O atributo lang da tag <html> deve ser sempre "pt-BR" (português brasileiro).
+⚠️ IMPORTANTE: O atributo lang da tag <html> DEVE SER SEMPRE "pt-BR" (português brasileiro).
 
-Exemplo: <html lang="pt-BR">
+❌ NUNCA USE: lang="en" ou lang="en-US"
+✅ SEMPRE USE: lang="pt-BR"
 
-Este atributo é obrigatório e essencial para SEO, acessibilidade e leitores de tela.
+Exemplo da estrutura HTML correta:
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    ...
+  </head>
+  <body>
+    ...
+  </body>
+</html>
+
+Motivos desta configuração:
+• SEO: Motores de busca identificam corretamente o idioma português
+• Acessibilidade: Leitores de tela pronunciam corretamente em português brasileiro
+• Corretor ortográfico: Navegadores sugerem palavras em português
+• Compatibilidade: Evita conflitos entre idioma do HTML e conteúdo do site
+
+Esta especificação é OBRIGATÓRIA e CRÍTICA para o funcionamento correto do site.
 
 SEO e Metadados:
 
@@ -191,6 +227,19 @@ Ajustar cores considerando o contexto.
 
 O Lovable deve seguir o padrão brasileiro de escrita, utilizando apenas a primeira letra maiúscula nas frases, e não o padrão americano em que todas as palavras começam com maiúscula.
 
+---
+
+✅ CHECKLIST OBRIGATÓRIO ANTES DE CRIAR O SITE
+
+Antes de gerar o código, verifique:
+
+1. [ ] A tag <html> está usando lang="pt-BR"? (NÃO lang="en")
+2. [ ] Todos os textos estão em português brasileiro?
+3. [ ] As meta tags estão configuradas para português?
+4. [ ] O conteúdo está alinhado com o idioma pt-BR?
+
+⚠️ LEMBRE-SE: Este é um site BRASILEIRO, em PORTUGUÊS BRASILEIRO, com lang="pt-BR"
+
 `;
 };
 
@@ -249,6 +298,9 @@ const generatePartnerCommand = (project: Project) => {
   const observacoesData = parseObservacoes(project.observacoes_cliente);
   
   return `${getImprovedIntroduction()}
+
+⚠️ LEMBRE-SE: Use lang="pt-BR" na tag <html>
+
 ${observacoesData.paletacores ? `Paleta de cores: ${observacoesData.paletacores}` : 'Paleta de cores: use as cores da logo e utilize a regra 60,30,10 para as proporções das cores onde 60% é branco'}
 
 ## INFORMAÇÕES BÁSICAS DA EMPRESA
@@ -306,6 +358,9 @@ export const generateSiteCommand = async ({
       // Se não tiver, gera comando básico com nova introdução
       const basicCommandText = `${getImprovedIntroduction()}
 
+⚠️ IMPORTANTE: Configure lang="pt-BR" na tag <html>
+
+
 Nome da empresa: ${project.client_name || 'Não informado'}
 Responsável: ${project.responsible_name || 'Não informado'}
 Domínio: ${project.domain || 'Não informado'}`;
@@ -320,6 +375,9 @@ Domínio: ${project.domain || 'Não informado'}`;
     if (personalizationData) {
       // Gera um comando completo com todos os dados disponíveis
       const completeCommandText = `${getImprovedIntroduction()}
+
+⚠️ CONFIGURAÇÃO CRÍTICA: lang="pt-BR" na tag <html> (não use lang="en")
+
 ${personalizationData.paletacores ? `Paleta de cores: ${personalizationData.paletacores}` : 'Paleta de cores: use as cores da logo e utilize a regra 60,30,10 para as proporções das cores onde 60% é branco'}
 
 ## INFORMAÇÕES BÁSICAS DA EMPRESA
