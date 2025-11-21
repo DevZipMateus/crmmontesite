@@ -14,7 +14,9 @@ import type { FormValues } from "./PersonalizeBasicForm";
 import { CheckCircle } from "lucide-react";
 import { validateCnpjCpf } from "@/utils/documentFormatter";
 import { useFormAutoSave } from "@/hooks/useFormAutoSave";
+import { useFormProgress } from "@/hooks/useFormProgress";
 import { AutoSaveIndicator } from "@/components/ui/auto-save-indicator";
+import { FormProgressBar } from "@/components/ui/form-progress-bar";
 import { DraftRecoveryDialog } from "./DraftRecoveryDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
@@ -183,6 +185,31 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     setShowDraftDialog(false);
   };
 
+  // Form progress tracking
+  const { progress, filledFields, totalFields, isComplete } = useFormProgress(form, {
+    requiredFields: [
+      'nome_empresa',
+      'email',
+      'telefone',
+      'cnpj_cpf',
+      'visao_missao_valores',
+      'historia_empresa',
+      'endereco',
+      'horario_funcionamento'
+    ],
+    optionalFields: [
+      'mercado_atuacao',
+      'slogan',
+      'servicosOferecidos',
+      'produtos',
+      'redes_sociais',
+      'cores_preferidas',
+      'planos',
+      'depoimentos',
+      'linkMapa'
+    ]
+  });
+
   const { isSubmitting, isSubmitted, onSubmit: originalOnSubmit } = useFormSubmission({
     logoFile,
     depoimentoFiles,
@@ -236,6 +263,16 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
         onDiscard={handleDiscardDraft}
         savedTimestamp={getSavedTimestamp()}
       />
+
+      {/* Progress Bar - Always visible */}
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 rounded-lg border shadow-sm">
+        <FormProgressBar
+          progress={progress}
+          filledFields={filledFields}
+          totalFields={totalFields}
+          showDetails={true}
+        />
+      </div>
 
       {hasSavedData && !showDraftDialog && (
         <Alert className="border-primary/20 bg-primary/5">
