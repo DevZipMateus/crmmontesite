@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { UseFormReturn } from "react-hook-form";
 import { FormValues } from "./PersonalizeBasicForm";
 import MediaUploader from "./MediaUploader";
+import { MapPin, MessageCircle } from "lucide-react";
 
 interface PersonalizeConfigFormProps {
   form: UseFormReturn<FormValues>;
@@ -32,6 +33,8 @@ export const PersonalizeConfigForm: React.FC<PersonalizeConfigFormProps> = ({
   handleRemoveMidia,
   handleUpdateMidiaCaption,
 }) => {
+  const possuiMapa = form.watch("possuiMapa");
+
   return (
     <>
       <div className="space-y-4 pt-4 border-t">
@@ -51,6 +54,79 @@ export const PersonalizeConfigForm: React.FC<PersonalizeConfigFormProps> = ({
         />
       </div>
 
+      <div className="space-y-6 pt-4 border-t">
+        <h3 className="text-lg font-medium">Configurações Adicionais</h3>
+        
+        <FormField
+          control={form.control}
+          name="botaoWhatsapp"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel className="flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4" />
+                  Incluir botão do WhatsApp
+                </FormLabel>
+                <FormDescription>
+                  Adiciona um botão flutuante de WhatsApp no site para contato rápido
+                </FormDescription>
+              </div>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="possuiMapa"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Incluir mapa do Google
+                </FormLabel>
+                <FormDescription>
+                  Adiciona um mapa interativo do Google Maps no seu site
+                </FormDescription>
+              </div>
+            </FormItem>
+          )}
+        />
+
+        {possuiMapa && (
+          <FormField
+            control={form.control}
+            name="linkMapa"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Link do Google Maps</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Cole aqui o link compartilhável do Google Maps" 
+                    {...field} 
+                  />
+                </FormControl>
+                <FormDescription>
+                  Para obter o link: abra o Google Maps, procure seu endereço, clique em "Compartilhar" e copie o link
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+      </div>
     </>
   );
 };
