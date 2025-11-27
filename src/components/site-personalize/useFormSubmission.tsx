@@ -90,13 +90,19 @@ export const useFormSubmission = (props: SubmissionProps) => {
         const leadFormData = {
           form_hash: leadFormHash,
           modelo: modeloSelecionado || "Modelo 1",
-          observacoes: data.historia_empresa || "",
           email: data.email,
           officenome: data.nome_empresa,
           responsavelnome: data.nome_empresa,
           telefone: data.telefone,
           endereco: data.endereco,
-          descricao: data.visao_missao_valores,
+          // Campos separados
+          cnpj_cpf: data.cnpj_cpf || "",
+          visao_missao_valores: data.visao_missao_valores || "",
+          historia_empresa: data.historia_empresa || "",
+          mercado_atuacao: data.mercado_atuacao || "",
+          produtos: data.produtos || "",
+          // Campos existentes
+          descricao: data.visao_missao_valores || "",
           servicos: data.servicosOferecidos || "",
           redessociais: data.redes_sociais,
           slogan: data.slogan,

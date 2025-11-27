@@ -23,13 +23,19 @@ serve(async (req) => {
     const {
       form_hash,
       modelo,
-      observacoes,
       email,
       // Dados do formulário completo
       officenome,
       responsavelnome,
       telefone,
       endereco,
+      // Campos separados
+      cnpj_cpf,
+      visao_missao_valores,
+      historia_empresa,
+      mercado_atuacao,
+      produtos,
+      // Campos existentes
       descricao,
       servicos,
       redessociais,
@@ -94,7 +100,7 @@ serve(async (req) => {
         cnpj: lead.cnpj,
         blaster_link: lead.link_blaster,
         modelo_escolhido: modelo,
-        observacoes_cliente: observacoes,
+        observacoes_cliente: historia_empresa || '',
         formulario_preenchido: true,
         data_formulario: new Date().toISOString(),
         lead_id: lead.id,
@@ -122,7 +128,14 @@ serve(async (req) => {
         email: email,
         telefone: telefone,
         endereco: endereco,
-        descricao: descricao,
+        // Campos separados
+        cnpj_cpf: cnpj_cpf || '',
+        visao_missao_valores: visao_missao_valores || '',
+        historia_empresa: historia_empresa || '',
+        mercado_atuacao: mercado_atuacao || '',
+        produtos: produtos || '',
+        // Campos existentes (mantidos para compatibilidade)
+        descricao: descricao || visao_missao_valores || '',
         servicos: servicos,
         redessociais: redessociais || '',
         slogan: slogan,
