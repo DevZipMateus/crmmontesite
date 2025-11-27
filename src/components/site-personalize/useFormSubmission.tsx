@@ -119,6 +119,29 @@ export const useFormSubmission = (props: SubmissionProps) => {
           throw new Error(response.error.message || 'Erro ao processar formulário');
         }
 
+        const responseData = response.data;
+        
+        // Upload de arquivos se necessário
+        if ((logoFile || depoimentoFiles.length > 0 || midiaFiles.length > 0) && responseData?.personalization_id) {
+          console.log("📤 Fazendo upload de arquivos para lead...");
+          
+          try {
+            await uploadFiles(
+              logoFile,
+              depoimentoFiles,
+              midiaFiles,
+              midiaCaptions,
+              updateProgress,
+              toast,
+              responseData.personalization_id
+            );
+            console.log("✅ Upload de arquivos do lead concluído");
+          } catch (uploadError) {
+            console.error("⚠️ Erro no upload de arquivos:", uploadError);
+            // Não falhar a operação principal se o formulário foi processado
+          }
+        }
+
         toast({
           title: "Formulário enviado com sucesso!",
           description: "Suas informações foram processadas e o projeto foi criado.",

@@ -175,6 +175,7 @@ serve(async (req) => {
         success: true, 
         project_id: newProject.id,
         lead_id: lead.id,
+        personalization_id: personalization?.id || null,
         message: 'Formulário processado com sucesso!' 
       }),
       { 
