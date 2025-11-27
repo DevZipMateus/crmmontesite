@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Edit, ExternalLink, MoreHorizontal } from "lucide-react";
+import { ChevronLeft, Edit, ExternalLink, MoreHorizontal, FileDown } from "lucide-react";
 import DeleteProjectDialog from "@/components/projects/DeleteProjectDialog";
 import {
   DropdownMenu,
@@ -19,6 +19,7 @@ interface ProjectHeaderProps {
   setIsDialogOpen: (open: boolean) => void;
   handleProjectDeleted: () => void;
   personalizationId?: string | null;
+  onExportPDF?: () => void;
 }
 
 export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
@@ -27,7 +28,8 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
   isDialogOpen,
   setIsDialogOpen,
   handleProjectDeleted,
-  personalizationId
+  personalizationId,
+  onExportPDF
 }) => {
   const navigate = useNavigate();
   const { isAdmin, isLoading } = useUserPermissions();
@@ -49,6 +51,17 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
       </div>
       
       <div className="flex flex-wrap items-center gap-3">
+        {onExportPDF && (
+          <Button 
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={onExportPDF}
+          >
+            <FileDown className="h-4 w-4" /> 
+            Exportar PDF
+          </Button>
+        )}
+        
         {personalizationId && (
           <Button 
             variant="outline"

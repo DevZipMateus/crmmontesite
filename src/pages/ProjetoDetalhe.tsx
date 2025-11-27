@@ -12,11 +12,14 @@ import { PersonalizationFiles } from "@/components/projeto/detail/Personalizatio
 import { CustomizationsCard } from "@/components/projeto/detail/CustomizationsCard";
 import { ProjectTabs } from "@/components/projeto/detail/ProjectTabs";
 import { getSignedUrl } from "@/lib/supabase/storage";
+import { exportProjectToPDF } from "@/services/projectExportService";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProjetoDetalhe() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   console.log("ProjetoDetalhe: Componente renderizado com ID:", id);
 
@@ -200,6 +203,31 @@ export default function ProjetoDetalhe() {
     navigate('/projetos');
   };
 
+  const handleExportPDF = async () => {
+    if (!project) return;
+
+    try {
+      toast({
+        title: "Gerando PDF...",
+        description: "Por favor, aguarde enquanto o documento é criado.",
+      });
+
+      await exportProjectToPDF(project as Project, personalization, customizations);
+
+      toast({
+        title: "PDF exportado com sucesso!",
+        description: "O arquivo foi baixado para o seu computador.",
+      });
+    } catch (error) {
+      console.error("Erro ao exportar PDF:", error);
+      toast({
+        title: "Erro ao exportar PDF",
+        description: "Não foi possível gerar o documento. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Loading state
   if (projectLoading) {
     console.log("ProjetoDetalhe: Carregando projeto...");
@@ -245,6 +273,7 @@ export default function ProjetoDetalhe() {
         setIsDialogOpen={setIsDialogOpen}
         handleProjectDeleted={handleProjectDeleted}
         personalizationId={project?.personalization_id}
+        onExportPDF={handleExportPDF}
       />
       
       {/* Project Tabs for detailed information */}
