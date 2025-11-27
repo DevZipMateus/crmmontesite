@@ -30,6 +30,13 @@ export const submitPartnerClient = async (
     redessociais: data.redes_sociais || "",
     fonte: "",
     paletacores: data.cores_preferidas || "",
+    // Campos separados
+    cnpj_cpf: data.cnpj_cpf || "",
+    visao_missao_valores: data.visao_missao_valores || "",
+    historia_empresa: data.historia_empresa || "",
+    mercado_atuacao: data.mercado_atuacao || "",
+    produtos: data.produtos || "",
+    // Manter descricao concatenada para compatibilidade
     descricao: `${data.visao_missao_valores || ""} | ${data.historia_empresa || ""} | ${data.mercado_atuacao || ""}`,
     slogan: data.slogan || "",
     horario_funcionamento: data.horario_funcionamento || "",
