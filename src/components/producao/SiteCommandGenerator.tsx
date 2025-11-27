@@ -384,7 +384,7 @@ ${personalizationData.paletacores ? `Paleta de cores: ${personalizationData.pale
 Nome da empresa: ${project.client_name || personalizationData.officenome || 'Não informado'}
 Responsável: ${project.responsible_name || personalizationData.responsavelnome || 'Não informado'}
 Domínio: ${project.domain || 'Não informado'}
-CNPJ/CPF: ${formatTextField(project.cnpj)}
+CNPJ/CPF: ${formatTextField(personalizationData.cnpj_cpf || project.cnpj)}
 Telefone: ${formatTextField(personalizationData.telefone)}
 Email: ${formatTextField(personalizationData.email)}
 Endereço: ${formatTextField(personalizationData.endereco)}
@@ -393,15 +393,18 @@ Redes Sociais: ${formatTextField(personalizationData.redessociais)}
 
 ## IDENTIDADE VISUAL
 Fonte: ${formatTextField(personalizationData.fonte)}
-Descrição: ${formatTextField(personalizationData.descricao)}
 Slogan: ${formatTextField(personalizationData.slogan)}
 Estilo visual preferido: ${formatTextField(personalizationData.estilo_visual)}
 
-## SERVIÇOS E PLANOS
+## SOBRE A EMPRESA
+${personalizationData.visao_missao_valores ? `Visão, Missão e Valores:\n${formatTextField(personalizationData.visao_missao_valores)}\n\n` : ''}${personalizationData.historia_empresa ? `História da Empresa:\n${formatTextField(personalizationData.historia_empresa)}\n\n` : ''}${personalizationData.mercado_atuacao ? `Mercado de Atuação:\n${formatTextField(personalizationData.mercado_atuacao)}\n\n` : ''}${!personalizationData.visao_missao_valores && !personalizationData.historia_empresa && !personalizationData.mercado_atuacao && personalizationData.descricao ? `Descrição:\n${formatTextField(personalizationData.descricao)}` : ''}
+## PRODUTOS E SERVIÇOS
+${personalizationData.produtos ? `Produtos:\n${formatTextField(personalizationData.produtos)}\n\n` : ''}Serviços: ${formatTextField(personalizationData.servicos)}
+Depoimentos: ${formatTextField(personalizationData.depoimentos)}
+
+## PLANOS
 Possui planos: ${formatBooleanField(personalizationData.possuiplanos)}
 ${personalizationData.possuiplanos ? `Planos:\n${formatTextField(personalizationData.planos)}` : ''}
-Serviços: ${formatTextField(personalizationData.servicos)}
-Depoimentos: ${formatTextField(personalizationData.depoimentos)}
 
 ## CONFIGURAÇÕES ADICIONAIS
 Botão WhatsApp: ${formatBooleanField(personalizationData.botaowhatsapp)}

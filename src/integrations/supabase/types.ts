@@ -646,6 +646,7 @@ export type Database = {
       site_personalizacoes: {
         Row: {
           botaowhatsapp: boolean | null
+          cnpj_cpf: string | null
           created_at: string | null
           depoimento_urls: string[] | null
           depoimentos: string | null
@@ -654,10 +655,12 @@ export type Database = {
           endereco: string
           estilo_visual: string | null
           fonte: string | null
+          historia_empresa: string | null
           horario_funcionamento: string | null
           id: string
           linkmapa: string | null
           logo_url: string | null
+          mercado_atuacao: string | null
           midia_urls: string[] | null
           modelo: string | null
           officenome: string
@@ -665,6 +668,7 @@ export type Database = {
           planos: string | null
           possuimapa: boolean | null
           possuiplanos: boolean | null
+          produtos: string | null
           redessociais: string | null
           responsavelnome: string
           servicos: string
@@ -672,9 +676,11 @@ export type Database = {
           status: string | null
           telefone: string
           updated_at: string | null
+          visao_missao_valores: string | null
         }
         Insert: {
           botaowhatsapp?: boolean | null
+          cnpj_cpf?: string | null
           created_at?: string | null
           depoimento_urls?: string[] | null
           depoimentos?: string | null
@@ -683,10 +689,12 @@ export type Database = {
           endereco: string
           estilo_visual?: string | null
           fonte?: string | null
+          historia_empresa?: string | null
           horario_funcionamento?: string | null
           id?: string
           linkmapa?: string | null
           logo_url?: string | null
+          mercado_atuacao?: string | null
           midia_urls?: string[] | null
           modelo?: string | null
           officenome: string
@@ -694,6 +702,7 @@ export type Database = {
           planos?: string | null
           possuimapa?: boolean | null
           possuiplanos?: boolean | null
+          produtos?: string | null
           redessociais?: string | null
           responsavelnome: string
           servicos: string
@@ -701,9 +710,11 @@ export type Database = {
           status?: string | null
           telefone: string
           updated_at?: string | null
+          visao_missao_valores?: string | null
         }
         Update: {
           botaowhatsapp?: boolean | null
+          cnpj_cpf?: string | null
           created_at?: string | null
           depoimento_urls?: string[] | null
           depoimentos?: string | null
@@ -712,10 +723,12 @@ export type Database = {
           endereco?: string
           estilo_visual?: string | null
           fonte?: string | null
+          historia_empresa?: string | null
           horario_funcionamento?: string | null
           id?: string
           linkmapa?: string | null
           logo_url?: string | null
+          mercado_atuacao?: string | null
           midia_urls?: string[] | null
           modelo?: string | null
           officenome?: string
@@ -723,6 +736,7 @@ export type Database = {
           planos?: string | null
           possuimapa?: boolean | null
           possuiplanos?: boolean | null
+          produtos?: string | null
           redessociais?: string | null
           responsavelnome?: string
           servicos?: string
@@ -730,6 +744,7 @@ export type Database = {
           status?: string | null
           telefone?: string
           updated_at?: string | null
+          visao_missao_valores?: string | null
         }
         Relationships: []
       }

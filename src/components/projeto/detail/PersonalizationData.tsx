@@ -23,9 +23,15 @@ export const PersonalizationData: React.FC<PersonalizationDataProps> = ({ person
               <div className="mt-2 space-y-2">
                 <p><span className="font-medium">Nome da Empresa:</span> {personalization.officenome}</p>
                 <p><span className="font-medium">Responsável:</span> {personalization.responsavelnome}</p>
+                {personalization.cnpj_cpf && (
+                  <p><span className="font-medium">CNPJ/CPF:</span> {personalization.cnpj_cpf}</p>
+                )}
                 <p><span className="font-medium">Telefone:</span> {personalization.telefone}</p>
                 <p><span className="font-medium">Email:</span> {personalization.email}</p>
                 <p><span className="font-medium">Endereço:</span> {personalization.endereco}</p>
+                {personalization.horario_funcionamento && (
+                  <p><span className="font-medium">Horário de Funcionamento:</span> {personalization.horario_funcionamento}</p>
+                )}
                 {personalization.status && (
                   <p><span className="font-medium">Status:</span> {personalization.status}</p>
                 )}
@@ -60,10 +66,33 @@ export const PersonalizationData: React.FC<PersonalizationDataProps> = ({ person
               </div>
             </div>
             
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Descrição</h3>
-              <p className="mt-2">{personalization.descricao}</p>
-            </div>
+            {personalization.visao_missao_valores && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Visão, Missão e Valores</h3>
+                <p className="mt-2 whitespace-pre-line">{personalization.visao_missao_valores}</p>
+              </div>
+            )}
+            
+            {personalization.historia_empresa && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">História da Empresa</h3>
+                <p className="mt-2 whitespace-pre-line">{personalization.historia_empresa}</p>
+              </div>
+            )}
+            
+            {personalization.mercado_atuacao && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Mercado de Atuação</h3>
+                <p className="mt-2 whitespace-pre-line">{personalization.mercado_atuacao}</p>
+              </div>
+            )}
+            
+            {personalization.descricao && !personalization.visao_missao_valores && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Descrição</h3>
+                <p className="mt-2 whitespace-pre-line">{personalization.descricao}</p>
+              </div>
+            )}
             
             {personalization.slogan && (
               <div>
@@ -91,6 +120,13 @@ export const PersonalizationData: React.FC<PersonalizationDataProps> = ({ person
             </div>
           </div>
         </div>
+        
+        {personalization.produtos && (
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h3 className="text-sm font-medium text-gray-500 mb-3">Produtos</h3>
+            <p className="whitespace-pre-line">{personalization.produtos}</p>
+          </div>
+        )}
         
         <div className="mt-6 pt-6 border-t border-gray-200">
           <h3 className="text-sm font-medium text-gray-500 mb-3">Serviços</h3>
