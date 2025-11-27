@@ -21,16 +21,24 @@ export const savePersonalizationData = async (
       redessociais: formData.redes_sociais || "",
       fonte: "",
       paletacores: formData.cores_preferidas || "",
+      // Novos campos separados
+      cnpj_cpf: formData.cnpj_cpf || "",
+      visao_missao_valores: formData.visao_missao_valores || "",
+      historia_empresa: formData.historia_empresa || "",
+      mercado_atuacao: formData.mercado_atuacao || "",
+      produtos: formData.produtos || "",
+      // Manter descricao com concatenação para compatibilidade
       descricao: `${formData.visao_missao_valores || ""} | ${formData.historia_empresa || ""} | ${formData.mercado_atuacao || ""}`,
       slogan: formData.slogan || "",
       horario_funcionamento: formData.horario_funcionamento || "",
       possuiplanos: formData.possuiPlanos || false,
       planos: formData.planos || "",
+      // Manter servicos com concatenação para compatibilidade
       servicos: [
         formData.possuiProdutos && formData.produtos ? `Produtos: ${formData.produtos}` : '',
         formData.servicosOferecidos ? `Serviços: ${formData.servicosOferecidos}` : '',
         formData.possuiPlanos && formData.planos ? `Planos: ${formData.planos}` : ''
-      ].filter(Boolean).join(' | ') || "",
+      ].filter(Boolean).join(' | ') || formData.servicosOferecidos || "",
       depoimentos: formData.depoimentos || "",
       botaowhatsapp: formData.botaoWhatsapp || false,
       possuimapa: formData.possuiMapa || false,
