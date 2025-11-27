@@ -120,7 +120,7 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
       possuiPlanos: false,
       planos: "",
       depoimentos: "",
-      botaoWhatsapp: false,
+      botaoWhatsapp: true,
       possuiMapa: false,
       linkMapa: "",
     },
