@@ -35,6 +35,7 @@ serve(async (req) => {
       historia_empresa,
       mercado_atuacao,
       produtos,
+      depoimentos,
       // Campos existentes
       descricao,
       servicos,
@@ -134,6 +135,7 @@ serve(async (req) => {
         historia_empresa: historia_empresa || '',
         mercado_atuacao: mercado_atuacao || '',
         produtos: produtos || '',
+        depoimentos: depoimentos || '',
         // Campos existentes (mantidos para compatibilidade)
         descricao: descricao || visao_missao_valores || '',
         servicos: servicos,

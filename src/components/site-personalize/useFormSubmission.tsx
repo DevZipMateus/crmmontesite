@@ -101,6 +101,7 @@ export const useFormSubmission = (props: SubmissionProps) => {
           historia_empresa: data.historia_empresa || "",
           mercado_atuacao: data.mercado_atuacao || "",
           produtos: data.produtos || "",
+          depoimentos: data.depoimentos || "",
           // Campos existentes
           descricao: data.visao_missao_valores || "",
           servicos: data.servicosOferecidos || "",
