@@ -50,4 +50,7 @@ export interface Project {
   
   // Campo para marcar projeto como inadimplente
   is_inadimplente?: boolean;
+  
+  // Campo para link do projeto (Lovable/GitHub)
+  project_link?: string;
 }

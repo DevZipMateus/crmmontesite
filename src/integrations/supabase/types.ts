@@ -427,6 +427,7 @@ export type Database = {
           partner_webhook_url: string | null
           payment_date: string | null
           personalization_id: string | null
+          project_link: string | null
           project_source: string | null
           provider_credentials: string | null
           remove_from_hostinger: boolean
@@ -463,6 +464,7 @@ export type Database = {
           partner_webhook_url?: string | null
           payment_date?: string | null
           personalization_id?: string | null
+          project_link?: string | null
           project_source?: string | null
           provider_credentials?: string | null
           remove_from_hostinger?: boolean
@@ -499,6 +501,7 @@ export type Database = {
           partner_webhook_url?: string | null
           payment_date?: string | null
           personalization_id?: string | null
+          project_link?: string | null
           project_source?: string | null
           provider_credentials?: string | null
           remove_from_hostinger?: boolean
@@ -934,6 +937,7 @@ export type Database = {
           partner_webhook_url: string | null
           payment_date: string | null
           personalization_id: string | null
+          project_link: string | null
           project_source: string | null
           provider_credentials: string | null
           remove_from_hostinger: boolean

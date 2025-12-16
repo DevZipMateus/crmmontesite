@@ -263,6 +263,21 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
                 ) : '—'}
               </p>
             </div>
+            {project.project_link && (
+              <div className="col-span-2">
+                <p className="text-sm font-medium text-gray-500">Link do Projeto (Lovable/GitHub)</p>
+                <p className="mt-1">
+                  <a 
+                    href={project.project_link} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-blue-600 hover:underline break-all"
+                  >
+                    {project.project_link}
+                  </a>
+                </p>
+              </div>
+            )}
             {project.client_type === 'parceiro' && project.partner_link && (
               <div className="col-span-2">
                 <p className="text-sm font-medium text-gray-500">Link do Parceiro</p>

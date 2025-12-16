@@ -25,6 +25,7 @@ const formSchema = z.object({
   partner_link: z.string().optional(),
   provider_credentials: z.string().optional(),
   assigned_programmer: z.string().optional(),
+  project_link: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -59,6 +60,7 @@ export function ProjectFormEdit({ initialValues, submitButtonText = "Salvar", mo
       partner_link: initialValues.partner_link || "",
       provider_credentials: initialValues.provider_credentials || "",
       assigned_programmer: initialValues.assigned_programmer || "",
+      project_link: initialValues.project_link || "",
     },
   });
 
@@ -205,6 +207,15 @@ export function ProjectFormEdit({ initialValues, submitButtonText = "Salvar", mo
               id="blaster_link"
               {...register("blaster_link")}
               placeholder="https://blaster.exemplo.com"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="project_link">Link do Projeto (Lovable/GitHub)</Label>
+            <Input
+              id="project_link"
+              {...register("project_link")}
+              placeholder="https://lovable.dev/projects/... ou https://github.com/..."
             />
           </div>
 
