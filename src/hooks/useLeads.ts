@@ -22,7 +22,7 @@ export const useLeads = (filters?: LeadFilters) => {
         .order('data_ultimo_contato', { ascending: false });
 
       if (filters?.empresa) {
-        query = query.ilike('empresa', `%${filters.empresa}%`);
+        query = query.or(`empresa.ilike.%${filters.empresa}%,nome_cliente.ilike.%${filters.empresa}%`);
       }
 
       if (filters?.vendedor) {
