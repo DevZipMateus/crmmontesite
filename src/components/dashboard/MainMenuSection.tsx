@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -10,7 +9,8 @@ import {
   Users,
   ContactRound,
   Globe,
-  AlertCircle
+  AlertCircle,
+  FileCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -113,6 +113,13 @@ const MainMenuSection: React.FC = () => {
           label="Projetos Inadimplentes"
           href="/projetos-inadimplentes"
           description="Gerenciar projetos com pagamentos pendentes"
+        />
+        
+        <MenuItem 
+          icon={<FileCheck size={24} />}
+          label="Termo de Entrega"
+          href="/termos-entrega"
+          description="Gerenciar termos de aceite e entrega de websites"
         />
       </div>
     </section>
