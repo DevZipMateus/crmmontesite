@@ -129,6 +129,53 @@ export type Database = {
           },
         ]
       }
+      delivery_terms: {
+        Row: {
+          comentarios: string | null
+          cpf: string
+          created_at: string | null
+          data_aceite: string
+          id: string
+          ip_address: string | null
+          nome_completo: string
+          nota_atendimento: number
+          project_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          comentarios?: string | null
+          cpf: string
+          created_at?: string | null
+          data_aceite?: string
+          id?: string
+          ip_address?: string | null
+          nome_completo: string
+          nota_atendimento: number
+          project_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          comentarios?: string | null
+          cpf?: string
+          created_at?: string | null
+          data_aceite?: string
+          id?: string
+          ip_address?: string | null
+          nome_completo?: string
+          nota_atendimento?: number
+          project_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_terms_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_agendamentos: {
         Row: {
           completed_at: string | null
@@ -412,6 +459,7 @@ export type Database = {
           created_at: string | null
           customization_deadline: string | null
           data_formulario: string | null
+          delivery_term_hash: string | null
           domain: string | null
           email_complementar: string | null
           formulario_preenchido: boolean | null
@@ -449,6 +497,7 @@ export type Database = {
           created_at?: string | null
           customization_deadline?: string | null
           data_formulario?: string | null
+          delivery_term_hash?: string | null
           domain?: string | null
           email_complementar?: string | null
           formulario_preenchido?: boolean | null
@@ -486,6 +535,7 @@ export type Database = {
           created_at?: string | null
           customization_deadline?: string | null
           data_formulario?: string | null
+          delivery_term_hash?: string | null
           domain?: string | null
           email_complementar?: string | null
           formulario_preenchido?: boolean | null
@@ -922,6 +972,7 @@ export type Database = {
           created_at: string | null
           customization_deadline: string | null
           data_formulario: string | null
+          delivery_term_hash: string | null
           domain: string | null
           email_complementar: string | null
           formulario_preenchido: boolean | null

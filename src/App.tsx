@@ -29,6 +29,8 @@ import ClientSubmissionPage from "./pages/ClientSubmissionPage";
 import PainelVendas from "./pages/PainelVendas";
 import HostingerDNS from "./pages/HostingerDNS";
 import ProjetosInadimplentes from "./pages/ProjetosInadimplentes";
+import TermosEntrega from "./pages/TermosEntrega";
+import TermoEntregaForm from "./pages/TermoEntregaForm";
 
 const queryClient = new QueryClient();
 
@@ -179,6 +181,16 @@ const App = () => {
             
             {/* Client submission form - public route */}
             <Route path="/cliente-images/:hash" element={<ClientSubmissionPage />} />
+            
+            {/* Termos de Entrega - public form */}
+            <Route path="/termo-entrega/:hash" element={<TermoEntregaForm />} />
+            
+            {/* Termos de Entrega - admin page */}
+            <Route path="/termos-entrega" element={
+              <AuthGuard>
+                <TermosEntrega />
+              </AuthGuard>
+            } />
             
             {/* Rota de fallback */}
             <Route path="*" element={<NotFound />} />

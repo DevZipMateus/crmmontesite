@@ -53,4 +53,7 @@ export interface Project {
   
   // Campo para link do projeto (Lovable/GitHub)
   project_link?: string;
+  
+  // Campo para hash do termo de entrega
+  delivery_term_hash?: string;
 }
