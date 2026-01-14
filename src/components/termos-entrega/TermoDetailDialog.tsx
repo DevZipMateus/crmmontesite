@@ -6,10 +6,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ProjectWithTermStatus } from "@/types/deliveryTerm";
-import { Star, User, FileText, Calendar, Globe } from "lucide-react";
+import { Star, User, FileText, Calendar, Globe, Download } from "lucide-react";
+import { exportDeliveryTermToPDF } from "@/services/deliveryTermExportService";
+import { toast } from "sonner";
 
 interface TermoDetailDialogProps {
   project: ProjectWithTermStatus | null;
@@ -21,6 +24,16 @@ const TermoDetailDialog: React.FC<TermoDetailDialogProps> = ({ project, open, on
   if (!project || !project.delivery_term) return null;
 
   const term = project.delivery_term;
+
+  const handleExportPDF = () => {
+    try {
+      exportDeliveryTermToPDF(project);
+      toast.success("PDF gerado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast.error("Erro ao gerar PDF");
+    }
+  };
 
   const renderStars = (nota: number) => {
     return (
@@ -40,9 +53,20 @@ const TermoDetailDialog: React.FC<TermoDetailDialogProps> = ({ project, open, on
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Detalhes do Termo de Entrega
+          <DialogTitle className="flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Detalhes do Termo de Entrega
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportPDF}
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Baixar PDF
+            </Button>
           </DialogTitle>
         </DialogHeader>
 
