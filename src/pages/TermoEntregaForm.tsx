@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { FileCheck, Globe, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
+import { FileCheck, Globe, AlertTriangle, CheckCircle2, Loader2, Mail } from "lucide-react";
 import { getProjectByTermHash, checkTermExists, submitDeliveryTerm } from "@/services/deliveryTermService";
 
 const TermoEntregaForm: React.FC = () => {
@@ -26,6 +26,7 @@ const TermoEntregaForm: React.FC = () => {
   const [comentarios, setComentarios] = useState("");
   const [nomeCompleto, setNomeCompleto] = useState("");
   const [cpf, setCpf] = useState("");
+  const [email, setEmail] = useState("");
   const [accepted, setAccepted] = useState(false);
 
   useEffect(() => {
@@ -95,6 +96,7 @@ const TermoEntregaForm: React.FC = () => {
         comentarios: comentarios || undefined,
         nome_completo: nomeCompleto,
         cpf: cpf,
+        email: email || undefined,
       });
 
       toast.success("Termo de entrega enviado com sucesso!");
@@ -293,6 +295,23 @@ const TermoEntregaForm: React.FC = () => {
                       required
                       className="mt-1"
                     />
+                  </div>
+                  <div>
+                    <Label htmlFor="email" className="flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      E-mail (para receber cópia do termo)
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="seu@email.com"
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Informe seu e-mail para receber uma cópia do termo de entrega em PDF.
+                    </p>
                   </div>
                 </div>
               </section>

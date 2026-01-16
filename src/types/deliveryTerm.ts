@@ -5,6 +5,7 @@ export interface DeliveryTerm {
   comentarios?: string;
   nome_completo: string;
   cpf: string;
+  email?: string;
   data_aceite: string;
   ip_address?: string;
   created_at: string;

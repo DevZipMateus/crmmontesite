@@ -37,6 +37,7 @@ export const submitDeliveryTerm = async (data: {
   comentarios?: string;
   nome_completo: string;
   cpf: string;
+  email?: string;
 }) => {
   const { data: result, error } = await supabase
     .from('delivery_terms')
@@ -46,6 +47,7 @@ export const submitDeliveryTerm = async (data: {
       comentarios: data.comentarios || null,
       nome_completo: data.nome_completo,
       cpf: data.cpf,
+      email: data.email || null,
     })
     .select()
     .single();

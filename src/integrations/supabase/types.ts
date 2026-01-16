@@ -135,6 +135,7 @@ export type Database = {
           cpf: string
           created_at: string | null
           data_aceite: string
+          email: string | null
           id: string
           ip_address: string | null
           nome_completo: string
@@ -147,6 +148,7 @@ export type Database = {
           cpf: string
           created_at?: string | null
           data_aceite?: string
+          email?: string | null
           id?: string
           ip_address?: string | null
           nome_completo: string
@@ -159,6 +161,7 @@ export type Database = {
           cpf?: string
           created_at?: string | null
           data_aceite?: string
+          email?: string | null
           id?: string
           ip_address?: string | null
           nome_completo?: string
