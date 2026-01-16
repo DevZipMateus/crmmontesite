@@ -90,16 +90,16 @@ export const exportDeliveryTermToPDF = (project: ProjectWithTermStatus) => {
   
   addText(`Nota de Atendimento: ${term.nota_atendimento}/10`, margin, 11, true);
   
-  // Visual stars representation
+  // Visual rating bar with ASCII characters (Unicode stars don't render in helvetica)
   yPos += 2;
-  const starFilled = '★';
-  const starEmpty = '☆';
-  let starsText = '';
-  for (let i = 0; i < 10; i++) {
-    starsText += i < term.nota_atendimento ? starFilled : starEmpty;
-  }
+  const filledBlocks = '|'.repeat(term.nota_atendimento);
+  const emptyBlocks = '.'.repeat(10 - term.nota_atendimento);
+  const visualRating = `[${filledBlocks}${emptyBlocks}]`;
+  
+  doc.setFont('courier', 'bold');
   doc.setFontSize(14);
-  doc.text(starsText, margin, yPos);
+  doc.text(visualRating, margin, yPos);
+  doc.setFont('helvetica', 'normal');
   yPos += lineHeight + 3;
 
   if (term.comentarios) {
@@ -135,10 +135,31 @@ export const exportDeliveryTermToPDF = (project: ProjectWithTermStatus) => {
     addText(condition, margin);
   });
 
-  yPos += 3;
+  yPos += 5;
+  
+  // Alert box without emoji (emojis don't render correctly in helvetica font)
+  doc.setFillColor(255, 243, 205); // amber-100
+  doc.rect(margin - 2, yPos - 5, pageWidth - (margin * 2) + 4, 28, 'F');
+  doc.setDrawColor(180, 83, 9); // amber-700 border
+  doc.rect(margin - 2, yPos - 5, pageWidth - (margin * 2) + 4, 28, 'S');
+  
   doc.setTextColor(180, 83, 9); // amber-700
-  addText('⚠️ Cobranças Adicionais: Caso o prazo de 30 dias expire OU o limite de 2 e-mails seja atingido (o que ocorrer primeiro), qualquer nova solicitação de alteração terá uma taxa de serviço de R$ 100,00 (cem reais) por e-mail/solicitação enviada.', margin);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.text('ATENCAO - Cobrancas Adicionais:', margin, yPos);
+  yPos += lineHeight;
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  const alertText = 'Caso o prazo de 30 dias expire OU o limite de 2 e-mails seja atingido (o que ocorrer primeiro), qualquer nova solicitacao de alteracao tera uma taxa de servico de R$ 100,00 (cem reais) por e-mail/solicitacao enviada.';
+  const alertLines = doc.splitTextToSize(alertText, pageWidth - (margin * 2) - 4);
+  alertLines.forEach((line: string) => {
+    doc.text(line, margin, yPos);
+    yPos += 5;
+  });
+  
   doc.setTextColor(0, 0, 0);
+  yPos += 5;
 
   addDivider();
 
