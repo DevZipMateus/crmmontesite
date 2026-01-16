@@ -10,6 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { FileCheck, Globe, AlertTriangle, CheckCircle2, Loader2, Mail } from "lucide-react";
 import { getProjectByTermHash, checkTermExists, submitDeliveryTerm } from "@/services/deliveryTermService";
+import { supabase } from "@/integrations/supabase/client";
 
 const TermoEntregaForm: React.FC = () => {
   const { hash } = useParams<{ hash: string }>();
@@ -90,7 +91,7 @@ const TermoEntregaForm: React.FC = () => {
     setSubmitting(true);
 
     try {
-      await submitDeliveryTerm({
+      const result = await submitDeliveryTerm({
         project_id: project!.id,
         nota_atendimento: notaAtendimento,
         comentarios: comentarios || undefined,
@@ -98,6 +99,19 @@ const TermoEntregaForm: React.FC = () => {
         cpf: cpf,
         email: email || undefined,
       });
+
+      // Send webhook to Make.com (non-blocking)
+      try {
+        await supabase.functions.invoke('send-delivery-term-webhook', {
+          body: {
+            project_id: project!.id,
+            delivery_term_id: result.id
+          }
+        });
+      } catch (webhookError) {
+        console.error('Erro ao enviar webhook:', webhookError);
+        // Don't block - term was saved successfully
+      }
 
       toast.success("Termo de entrega enviado com sucesso!");
       setAlreadyFilled(true);

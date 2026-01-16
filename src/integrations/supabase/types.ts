@@ -179,6 +179,39 @@ export type Database = {
           },
         ]
       }
+      integration_settings: {
+        Row: {
+          active: boolean | null
+          api_key: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          integration_name: string
+          updated_at: string | null
+          webhook_url: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          api_key?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          integration_name: string
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          api_key?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          integration_name?: string
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
       lead_agendamentos: {
         Row: {
           completed_at: string | null

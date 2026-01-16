@@ -26,6 +26,7 @@ import { WebhookDocumentation } from "@/components/webhook/WebhookDocumentation"
 import { WebhookLogs } from "@/components/webhook/WebhookLogs";
 import { ApiManagement } from "@/components/webhook/ApiManagement";
 import { AuthenticationLogs } from "@/components/webhook/AuthenticationLogs";
+import { MakeIntegration } from "@/components/webhook/MakeIntegration";
 import { PartnersTable } from "@/components/partners/PartnersTable";
 import { PartnerDialog } from "@/components/partners/PartnerDialog";
 import { WebhookLogsCard } from "@/components/partners/WebhookLogsCard";
@@ -168,7 +169,7 @@ export default function WebhookManagement() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="config">
               <Settings className="h-4 w-4 mr-2" />
               Configuração
@@ -193,6 +194,10 @@ export default function WebhookManagement() {
               <Users className="h-4 w-4 mr-2" />
               Parceiros
             </TabsTrigger>
+            <TabsTrigger value="make">
+              <Zap className="h-4 w-4 mr-2" />
+              Make.com
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="config" className="space-y-4">
@@ -213,6 +218,10 @@ export default function WebhookManagement() {
 
           <TabsContent value="apis" className="space-y-4">
             <ApiManagement />
+          </TabsContent>
+
+          <TabsContent value="make" className="space-y-4">
+            <MakeIntegration />
           </TabsContent>
 
           <TabsContent value="partners" className="space-y-4">
