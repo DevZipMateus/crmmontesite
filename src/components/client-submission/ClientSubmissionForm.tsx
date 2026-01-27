@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ClientSubmissionService } from "@/services/clientSubmissionService";
-import { Upload, X, DollarSign, Image as ImageIcon, Video, Plus, Folder, FolderOpen, FolderPlus, AlertCircle } from "lucide-react";
+import { Upload, X, DollarSign, Image as ImageIcon, Video, Plus, Folder, FolderOpen, FolderPlus, AlertCircle, FileText } from "lucide-react";
 import { ImageCategory } from "@/types/clientSubmission";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -50,13 +50,15 @@ export function ClientSubmissionForm({ projectId, projectName, onSubmissionCompl
     const allowedTypes = ['image/', 'video/'];
     const validFiles = files.filter(file => 
       allowedTypes.some(type => file.type.startsWith(type)) || 
-      file.name.toLowerCase().endsWith('.gif')
+      file.name.toLowerCase().endsWith('.gif') ||
+      file.type === 'application/pdf' ||
+      file.name.toLowerCase().endsWith('.pdf')
     );
     
     if (validFiles.length !== files.length) {
       toast({
         title: "Aviso",
-        description: "Apenas imagens (JPG, PNG, GIF) e vídeos (MP4) são permitidos.",
+        description: "Apenas imagens (JPG, PNG, GIF), vídeos (MP4) e documentos (PDF) são permitidos.",
         variant: "destructive",
       });
     }
@@ -95,13 +97,15 @@ export function ClientSubmissionForm({ projectId, projectName, onSubmissionCompl
     const allowedTypes = ['image/', 'video/'];
     const validFiles = files.filter(file => 
       allowedTypes.some(type => file.type.startsWith(type)) || 
-      file.name.toLowerCase().endsWith('.gif')
+      file.name.toLowerCase().endsWith('.gif') ||
+      file.type === 'application/pdf' ||
+      file.name.toLowerCase().endsWith('.pdf')
     );
     
     if (validFiles.length !== files.length) {
       toast({
         title: "Aviso",
-        description: "Apenas imagens (JPG, PNG, GIF) e vídeos (MP4) são permitidos.",
+        description: "Apenas imagens (JPG, PNG, GIF), vídeos (MP4) e documentos (PDF) são permitidos.",
         variant: "destructive",
       });
     }
@@ -344,7 +348,7 @@ export function ClientSubmissionForm({ projectId, projectName, onSubmissionCompl
                 <input
                   type="file"
                   multiple
-                  accept="image/*,video/*,.gif"
+                  accept="image/*,video/*,.gif,.pdf,application/pdf"
                   onChange={handleImageSelect}
                   className="hidden"
                   id="media-upload"
@@ -362,7 +366,7 @@ export function ClientSubmissionForm({ projectId, projectName, onSubmissionCompl
                     {isDragOver ? 'Solte os arquivos aqui' : 'Clique para selecionar mídias ou arraste aqui'}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Formatos aceitos: PNG, JPG, JPEG, GIF, MP4
+                    Formatos aceitos: PNG, JPG, JPEG, GIF, MP4, PDF
                   </p>
                 </label>
               </div>
@@ -382,18 +386,29 @@ export function ClientSubmissionForm({ projectId, projectName, onSubmissionCompl
                       {category.images.map((image, imageIndex) => {
                         const isVideo = image.file.type.startsWith('video/');
                         const isGif = image.file.name.toLowerCase().endsWith('.gif');
+                        const isPdf = image.file.type === 'application/pdf' || 
+                                      image.file.name.toLowerCase().endsWith('.pdf');
+                        
+                        const getFileType = () => {
+                          if (isVideo) return 'Vídeo';
+                          if (isPdf) return 'PDF';
+                          if (isGif) return 'GIF';
+                          return 'Imagem';
+                        };
+
+                        const getIcon = () => {
+                          if (isVideo) return <Video className="h-5 w-5 text-blue-500" />;
+                          if (isPdf) return <FileText className="h-5 w-5 text-red-500" />;
+                          return <ImageIcon className="h-5 w-5 text-green-500" />;
+                        };
                         
                         return (
                           <div key={imageIndex} className="border rounded-lg p-4 space-y-3">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                {isVideo ? (
-                                  <Video className="h-5 w-5 text-blue-500" />
-                                ) : (
-                                  <ImageIcon className="h-5 w-5 text-green-500" />
-                                )}
+                                {getIcon()}
                                 <span className="text-sm font-medium">
-                                  {isVideo ? 'Vídeo' : isGif ? 'GIF' : 'Imagem'} {imageIndex + 1}
+                                  {getFileType()} {imageIndex + 1}
                                 </span>
                               </div>
                               <Button
@@ -413,6 +428,16 @@ export function ClientSubmissionForm({ projectId, projectName, onSubmissionCompl
                                   className="max-w-full max-h-full"
                                   controls
                                 />
+                              ) : isPdf ? (
+                                <div className="flex flex-col items-center justify-center text-center p-4">
+                                  <FileText className="h-16 w-16 text-red-500 mb-2" />
+                                  <p className="text-sm font-medium text-muted-foreground truncate max-w-full">
+                                    {image.file.name}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    Documento PDF
+                                  </p>
+                                </div>
                               ) : (
                                 <img
                                   src={URL.createObjectURL(image.file)}
