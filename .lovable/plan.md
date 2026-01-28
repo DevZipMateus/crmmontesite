@@ -1,167 +1,207 @@
 
+## Plano: Permitir Atualização de Dados em Formulários Já Preenchidos
 
-## Plano: Adicionar Suporte a PDF no Formulário de Envio de Mídias
+### Problema Atual
+A Edge Function `receive-lead-form-data` bloqueia o reenvio quando o lead já possui um `project_id` vinculado (linhas 78-88), retornando erro 400.
 
-### Visão Geral
-Modificar o formulário `ClientSubmissionForm.tsx` para aceitar arquivos PDF além de imagens e vídeos, permitindo que clientes enviem documentos PDF organizados em pastas.
+### Solução
+Modificar a lógica para que, quando o lead já tiver projeto vinculado, a função **atualize** os dados existentes (projeto + personalização) em vez de criar novos registros.
 
 ---
 
-### Alterações no Arquivo
+### Alterações na Edge Function
 
-**Arquivo:** `src/components/client-submission/ClientSubmissionForm.tsx`
+**Arquivo:** `supabase/functions/receive-lead-form-data/index.ts`
 
-#### 1. Atualizar Imports
-Adicionar o ícone `FileText` do lucide-react para representar arquivos PDF:
+#### Fluxo Atualizado
 
-```typescript
-import { Upload, X, DollarSign, Image as ImageIcon, Video, Plus, Folder, FolderOpen, FolderPlus, AlertCircle, FileText } from "lucide-react";
+```text
+                    ┌─────────────────┐
+                    │  Receber dados  │
+                    │   do formulário │
+                    └────────┬────────┘
+                             │
+                    ┌────────▼────────┐
+                    │  Buscar lead    │
+                    │  pelo form_hash │
+                    └────────┬────────┘
+                             │
+                    ┌────────▼────────┐
+                    │ Lead tem        │
+                    │ project_id?     │
+                    └────────┬────────┘
+                             │
+              ┌──────────────┼──────────────┐
+              │ NÃO                         │ SIM
+              ▼                             ▼
+    ┌─────────────────┐           ┌─────────────────┐
+    │ CRIAR projeto   │           │ ATUALIZAR proj. │
+    │ CRIAR person.   │           │ ATUALIZAR pers. │
+    │ VINCULAR lead   │           │ Manter vínculos │
+    └─────────────────┘           └─────────────────┘
+              │                             │
+              └──────────────┬──────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │  Retornar       │
+                    │  sucesso        │
+                    └─────────────────┘
 ```
 
-#### 2. Atualizar Atributo `accept` do Input (Linha 347)
-Adicionar `.pdf` à lista de tipos aceitos:
+#### Código Modificado (Linhas 78-167)
+
+Substituir a verificação que bloqueia por lógica de atualização:
 
 ```typescript
-// De:
-accept="image/*,video/*,.gif"
+let projectId: string;
+let personalizationId: string | null = null;
+let isUpdate = false;
 
-// Para:
-accept="image/*,video/*,.gif,.pdf,application/pdf"
-```
+// Verificar se lead já possui projeto vinculado
+if (lead.project_id) {
+  console.log('Lead already has project, updating existing data:', lead.project_id);
+  isUpdate = true;
+  projectId = lead.project_id;
 
-#### 3. Atualizar Validação de Arquivos (Linhas 50-54 e 95-98)
-Modificar as funções `handleImageSelect` e `handleDrop` para aceitar PDFs:
+  // Atualizar projeto existente
+  const { error: projectUpdateError } = await supabase
+    .from('projects')
+    .update({
+      template: modelo || undefined,
+      responsible_name: responsavelnome,
+      telefone: telefone,
+      email_complementar: email,
+      modelo_escolhido: modelo,
+      observacoes_cliente: historia_empresa || undefined,
+      formulario_preenchido: true,
+      data_formulario: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', lead.project_id);
 
-```typescript
-// Na função handleImageSelect:
-const validFiles = files.filter(file => 
-  allowedTypes.some(type => file.type.startsWith(type)) || 
-  file.name.toLowerCase().endsWith('.gif') ||
-  file.type === 'application/pdf' ||
-  file.name.toLowerCase().endsWith('.pdf')
+  if (projectUpdateError) {
+    console.error('Error updating project:', projectUpdateError);
+    return new Response(
+      JSON.stringify({ error: 'Erro ao atualizar projeto: ' + projectUpdateError.message }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  // Buscar personalization_id existente
+  const { data: existingProject } = await supabase
+    .from('projects')
+    .select('personalization_id')
+    .eq('id', lead.project_id)
+    .single();
+
+  if (existingProject?.personalization_id) {
+    personalizationId = existingProject.personalization_id;
+    
+    // Atualizar personalização existente
+    const { error: persUpdateError } = await supabase
+      .from('site_personalizacoes')
+      .update({
+        officenome: officenome,
+        responsavelnome: responsavelnome,
+        email: email,
+        telefone: telefone,
+        endereco: endereco,
+        cnpj_cpf: cnpj_cpf || '',
+        visao_missao_valores: visao_missao_valores || '',
+        historia_empresa: historia_empresa || '',
+        mercado_atuacao: mercado_atuacao || '',
+        produtos: produtos || '',
+        depoimentos: depoimentos || '',
+        descricao: descricao || visao_missao_valores || '',
+        servicos: servicos,
+        redessociais: redessociais || '',
+        slogan: slogan,
+        paletacores: paletacores,
+        fonte: fonte,
+        estilo_visual: estilo_visual,
+        possuiplanos: possuiplanos || false,
+        planos: planos,
+        possuimapa: possuimapa || false,
+        linkmapa: linkmapa,
+        horario_funcionamento: horario_funcionamento,
+        botaowhatsapp: botaowhatsapp !== false,
+        modelo: modelo,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', existingProject.personalization_id);
+
+    if (persUpdateError) {
+      console.error('Error updating personalization:', persUpdateError);
+    }
+  } else {
+    // Criar nova personalização se não existir
+    // ... (código de criação existente)
+  }
+
+} else {
+  // CRIAR novo projeto (código existente das linhas 90-167)
+  // ...
+}
+
+// Atualizar lead com data de último contato
+const { error: leadUpdateError } = await supabase
+  .from('leads')
+  .update({
+    project_id: projectId,
+    link_confidence_score: 100,
+    link_method: 'form_hash',
+    situacao: 'Preenchendo Formulário',
+    data_ultimo_contato: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  })
+  .eq('id', lead.id);
+
+// Retornar resposta com indicação de atualização
+return new Response(
+  JSON.stringify({ 
+    success: true, 
+    project_id: projectId,
+    lead_id: lead.id,
+    personalization_id: personalizationId,
+    updated: isUpdate,
+    message: isUpdate 
+      ? 'Dados atualizados com sucesso!' 
+      : 'Formulário processado com sucesso!' 
+  }),
+  { 
+    status: 200, 
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+  }
 );
-
-// Atualizar mensagem de erro:
-toast({
-  title: "Aviso",
-  description: "Apenas imagens (JPG, PNG, GIF), vídeos (MP4) e documentos (PDF) são permitidos.",
-  variant: "destructive",
-});
-```
-
-#### 4. Atualizar Texto de Formatos Aceitos (Linha 365)
-```typescript
-// De:
-<p className="text-xs text-muted-foreground mt-1">
-  Formatos aceitos: PNG, JPG, JPEG, GIF, MP4
-</p>
-
-// Para:
-<p className="text-xs text-muted-foreground mt-1">
-  Formatos aceitos: PNG, JPG, JPEG, GIF, MP4, PDF
-</p>
-```
-
-#### 5. Atualizar Preview dos Arquivos (Linhas 382-423)
-Adicionar detecção de PDF e renderizar preview apropriado:
-
-```typescript
-{category.images.map((image, imageIndex) => {
-  const isVideo = image.file.type.startsWith('video/');
-  const isGif = image.file.name.toLowerCase().endsWith('.gif');
-  const isPdf = image.file.type === 'application/pdf' || 
-                image.file.name.toLowerCase().endsWith('.pdf');
-  
-  // Determinar tipo para exibição
-  const getFileType = () => {
-    if (isVideo) return 'Vídeo';
-    if (isPdf) return 'PDF';
-    if (isGif) return 'GIF';
-    return 'Imagem';
-  };
-
-  // Ícone apropriado
-  const getIcon = () => {
-    if (isVideo) return <Video className="h-5 w-5 text-blue-500" />;
-    if (isPdf) return <FileText className="h-5 w-5 text-red-500" />;
-    return <ImageIcon className="h-5 w-5 text-green-500" />;
-  };
-
-  return (
-    <div key={imageIndex} className="border rounded-lg p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {getIcon()}
-          <span className="text-sm font-medium">
-            {getFileType()} {imageIndex + 1}
-          </span>
-        </div>
-        {/* ... botão remover ... */}
-      </div>
-      
-      <div className="aspect-video bg-muted rounded-lg flex items-center justify-center overflow-hidden">
-        {isVideo ? (
-          <video src={URL.createObjectURL(image.file)} ... />
-        ) : isPdf ? (
-          // Preview para PDF - ícone grande com nome do arquivo
-          <div className="flex flex-col items-center justify-center text-center p-4">
-            <FileText className="h-16 w-16 text-red-500 mb-2" />
-            <p className="text-sm font-medium text-muted-foreground truncate max-w-full">
-              {image.file.name}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Documento PDF
-            </p>
-          </div>
-        ) : (
-          <img src={URL.createObjectURL(image.file)} ... />
-        )}
-      </div>
-      {/* ... campos de nome, descrição, preço ... */}
-    </div>
-  );
-})}
 ```
 
 ---
 
-### Resumo Visual do Preview de PDF
+### Resumo das Alterações
 
-```
-+----------------------------------------+
-|  📄 PDF 1                          [X] |
-+----------------------------------------+
-|                                        |
-|           📄 (ícone grande)            |
-|         documento.pdf                  |
-|         Documento PDF                  |
-|                                        |
-+----------------------------------------+
-|  Nome do Produto *                     |
-|  [______________________________]      |
-|                                        |
-|  Descrição (opcional)                  |
-|  [______________________________]      |
-|                                        |
-|  💲 Preço (opcional)                   |
-|  [______________________________]      |
-+----------------------------------------+
-```
+| Cenário | Comportamento Atual | Novo Comportamento |
+|---------|--------------------|--------------------|
+| Lead sem projeto | Cria projeto + personalização | Mantido igual |
+| Lead com projeto | Erro 400 "já preenchido" | Atualiza dados existentes |
+
+### Benefícios
+
+1. **Correção de erros**: Cliente pode corrigir informações enviadas anteriormente
+2. **Flexibilidade**: Permite múltiplos envios sem perder dados
+3. **Rastreabilidade**: Campo `updated` na resposta indica se foi criação ou atualização
+4. **Timestamps**: Atualiza `data_formulario` e `updated_at` a cada submissão
 
 ---
 
 ### Seção Técnica
 
-**Arquivo modificado:** `src/components/client-submission/ClientSubmissionForm.tsx`
+**Arquivo modificado:** `supabase/functions/receive-lead-form-data/index.ts`
 
-**Alterações:**
-1. Linha 12: Adicionar `FileText` aos imports
-2. Linhas 50-54: Atualizar validação em `handleImageSelect` para incluir PDF
-3. Linhas 56-61: Atualizar mensagem de erro
-4. Linhas 95-106: Atualizar validação em `handleDrop` para incluir PDF
-5. Linha 347: Adicionar `.pdf,application/pdf` ao atributo `accept`
-6. Linha 365: Atualizar texto "Formatos aceitos" para incluir PDF
-7. Linhas 383-423: Adicionar lógica de detecção e preview de PDF
+**Principais mudanças:**
+1. Remover bloco de erro (linhas 78-88)
+2. Adicionar variáveis `projectId`, `personalizationId`, `isUpdate`
+3. Adicionar branch de atualização com `UPDATE` em vez de `INSERT`
+4. Buscar `personalization_id` do projeto existente para atualizar
+5. Atualizar resposta para incluir campo `updated: boolean`
 
-**Nenhuma alteração necessária no backend:** O serviço `ClientSubmissionService` já suporta qualquer tipo de arquivo, pois trabalha com objetos `File` genéricos.
-
+**Depois de implementar:** Executar deploy da Edge Function
