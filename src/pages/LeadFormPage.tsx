@@ -32,12 +32,8 @@ export default function LeadFormPage() {
           return;
         }
 
-        // Verificar se já foi preenchido
-        if (leadData.project_id) {
-          setError('Este formulário já foi preenchido anteriormente.');
-          setLoading(false);
-          return;
-        }
+        // Permitir atualização mesmo se já preenchido
+        // O backend agora atualiza dados existentes em vez de bloquear
 
         setLead(leadData);
       } catch (err) {
