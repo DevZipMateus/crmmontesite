@@ -12,6 +12,8 @@ import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { formatCnpjCpf } from "@/utils/documentFormatter";
 import { updateProject } from "@/server/project-actions";
 import { useToast } from "@/hooks/use-toast";
+import { useEditedFieldsData } from "@/hooks/useEditedFieldsData";
+import { EditedFieldsIndicator } from "./EditedFieldsIndicator";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,6 +38,9 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
   
   // Use the new hook to get the model name
   const { modelName, isLoading: modelLoading } = useModelDetails(project.template);
+  
+  // Fetch edited fields data
+  const { editData } = useEditedFieldsData(project.personalization_id);
 
   const handleProjectDeleted = () => {
     navigate('/projetos');
@@ -83,6 +88,15 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
 
   return (
     <div className="space-y-4">
+      {/* Indicador de campos editados */}
+      {editData && editData.edited_fields && editData.edited_fields.length > 0 && (
+        <EditedFieldsIndicator
+          editedFields={editData.edited_fields}
+          lastEditedAt={editData.last_edited_at}
+          editCount={editData.edit_count}
+        />
+      )}
+      
       <Card className="border-gray-100 shadow-sm">
         <CardHeader className="bg-gray-50/50 border-b border-gray-100">
           <div className="flex justify-between items-center">
