@@ -113,13 +113,23 @@ export default function LeadFormPage() {
               </CardContent>
             </Card>
 
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Preencha os dados abaixo para personalizar seu site. 
-                Todas as informações fornecidas serão utilizadas para criar seu projeto.
-              </AlertDescription>
-            </Alert>
+            {lead.project_id ? (
+              <Alert className="border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+                <AlertCircle className="h-4 w-4 text-amber-600" />
+                <AlertDescription className="text-amber-800 dark:text-amber-200">
+                  <strong>Você está atualizando dados enviados anteriormente.</strong> 
+                  {' '}As informações serão atualizadas no projeto existente.
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Preencha os dados abaixo para personalizar seu site. 
+                  Todas as informações fornecidas serão utilizadas para criar seu projeto.
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
         </div>
       </div>
