@@ -119,7 +119,77 @@ serve(async (req) => {
       if (existingProject?.personalization_id) {
         personalizationId = existingProject.personalization_id;
         
-        // Atualizar personalização existente
+        // Buscar dados anteriores para comparar e identificar campos editados
+        const { data: previousData } = await supabase
+          .from('site_personalizacoes')
+          .select('*')
+          .eq('id', existingProject.personalization_id)
+          .single();
+
+        // Mapeamento de campos para nomes legíveis
+        const fieldLabels: Record<string, string> = {
+          officenome: 'Nome da Empresa',
+          responsavelnome: 'Nome do Responsável',
+          email: 'Email',
+          telefone: 'Telefone',
+          endereco: 'Endereço',
+          cnpj_cpf: 'CNPJ/CPF',
+          visao_missao_valores: 'Visão, Missão e Valores',
+          historia_empresa: 'História da Empresa',
+          mercado_atuacao: 'Mercado de Atuação',
+          produtos: 'Produtos',
+          depoimentos: 'Depoimentos',
+          servicos: 'Serviços',
+          redessociais: 'Redes Sociais',
+          slogan: 'Slogan',
+          paletacores: 'Paleta de Cores',
+          fonte: 'Fonte',
+          estilo_visual: 'Estilo Visual',
+          planos: 'Planos',
+          linkmapa: 'Link do Mapa',
+          horario_funcionamento: 'Horário de Funcionamento',
+          modelo: 'Modelo'
+        };
+
+        // Comparar campos e identificar quais foram editados
+        const newData: Record<string, any> = {
+          officenome,
+          responsavelnome,
+          email,
+          telefone,
+          endereco,
+          cnpj_cpf: cnpj_cpf || '',
+          visao_missao_valores: visao_missao_valores || '',
+          historia_empresa: historia_empresa || '',
+          mercado_atuacao: mercado_atuacao || '',
+          produtos: produtos || '',
+          depoimentos: depoimentos || '',
+          servicos,
+          redessociais: redessociais || '',
+          slogan,
+          paletacores,
+          fonte,
+          estilo_visual,
+          planos,
+          linkmapa,
+          horario_funcionamento,
+          modelo
+        };
+
+        const editedFields: string[] = [];
+        if (previousData) {
+          for (const [key, label] of Object.entries(fieldLabels)) {
+            const oldValue = previousData[key] || '';
+            const newValue = newData[key] || '';
+            if (String(oldValue).trim() !== String(newValue).trim()) {
+              editedFields.push(label);
+            }
+          }
+        }
+
+        console.log('Campos editados:', editedFields);
+
+        // Atualizar personalização existente com tracking de edições
         const { error: persUpdateError } = await supabase
           .from('site_personalizacoes')
           .update({
@@ -148,6 +218,9 @@ serve(async (req) => {
             horario_funcionamento: horario_funcionamento,
             botaowhatsapp: botaowhatsapp !== false,
             modelo: modelo,
+            edited_fields: editedFields.length > 0 ? editedFields : null,
+            last_edited_at: editedFields.length > 0 ? new Date().toISOString() : previousData?.last_edited_at,
+            edit_count: (previousData?.edit_count || 0) + (editedFields.length > 0 ? 1 : 0),
             updated_at: new Date().toISOString()
           })
           .eq('id', existingProject.personalization_id);

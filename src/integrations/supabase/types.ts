@@ -740,6 +740,8 @@ export type Database = {
           depoimento_urls: string[] | null
           depoimentos: string | null
           descricao: string
+          edit_count: number | null
+          edited_fields: string[] | null
           email: string
           endereco: string
           estilo_visual: string | null
@@ -747,6 +749,7 @@ export type Database = {
           historia_empresa: string | null
           horario_funcionamento: string | null
           id: string
+          last_edited_at: string | null
           linkmapa: string | null
           logo_url: string | null
           mercado_atuacao: string | null
@@ -774,6 +777,8 @@ export type Database = {
           depoimento_urls?: string[] | null
           depoimentos?: string | null
           descricao: string
+          edit_count?: number | null
+          edited_fields?: string[] | null
           email: string
           endereco: string
           estilo_visual?: string | null
@@ -781,6 +786,7 @@ export type Database = {
           historia_empresa?: string | null
           horario_funcionamento?: string | null
           id?: string
+          last_edited_at?: string | null
           linkmapa?: string | null
           logo_url?: string | null
           mercado_atuacao?: string | null
@@ -808,6 +814,8 @@ export type Database = {
           depoimento_urls?: string[] | null
           depoimentos?: string | null
           descricao?: string
+          edit_count?: number | null
+          edited_fields?: string[] | null
           email?: string
           endereco?: string
           estilo_visual?: string | null
@@ -815,6 +823,7 @@ export type Database = {
           historia_empresa?: string | null
           horario_funcionamento?: string | null
           id?: string
+          last_edited_at?: string | null
           linkmapa?: string | null
           logo_url?: string | null
           mercado_atuacao?: string | null

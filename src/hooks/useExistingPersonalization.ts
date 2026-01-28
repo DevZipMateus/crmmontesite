@@ -29,6 +29,10 @@ export interface ExistingPersonalizationData {
   logo_url: string | null;
   midia_urls: Array<{ url: string; caption?: string }>;
   depoimento_urls: string[];
+  // Edit tracking
+  edited_fields: string[] | null;
+  last_edited_at: string | null;
+  edit_count: number;
 }
 
 interface UseExistingPersonalizationResult {
@@ -186,6 +190,10 @@ export function useExistingPersonalization(
           logo_url: signedLogoUrl,
           midia_urls: signedMidiaUrls,
           depoimento_urls: signedDepoimentoUrls,
+          // Edit tracking fields
+          edited_fields: personalization.edited_fields || null,
+          last_edited_at: personalization.last_edited_at || null,
+          edit_count: personalization.edit_count || 0,
         };
 
         setExistingData(result);
