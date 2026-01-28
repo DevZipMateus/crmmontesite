@@ -20,6 +20,7 @@ import { FormProgressBar } from "@/components/ui/form-progress-bar";
 import { DraftRecoveryDialog } from "./DraftRecoveryDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import { ExistingPersonalizationData } from "@/hooks/useExistingPersonalization";
 
 const formSchema = z.object({
   nome_empresa: z.string().min(2, "Nome da empresa é obrigatório"),
@@ -64,6 +65,7 @@ interface PersonalizeFormProps {
     cnpj?: string;
     telefone?: string;
   };
+  existingData?: ExistingPersonalizationData | null;
 }
 
 export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
@@ -71,7 +73,8 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
   projectHash,
   onSuccess,
   leadFormHash,
-  leadData
+  leadData,
+  existingData
 }) => {
   // File states
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -147,12 +150,67 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     excludeFields: [] // No sensitive fields in this form
   });
 
-  // Check for saved draft on mount
+  // Check for saved draft on mount (only if no existing data)
   useEffect(() => {
-    if (hasSavedData && !leadData) {
+    if (hasSavedData && !leadData && !existingData) {
       setShowDraftDialog(true);
     }
-  }, [hasSavedData, leadData]);
+  }, [hasSavedData, leadData, existingData]);
+
+  // Populate form with existing data when available
+  useEffect(() => {
+    if (existingData) {
+      console.log("Populando formulário com dados existentes:", existingData);
+      
+      // Reset form with existing values
+      form.reset({
+        nome_empresa: existingData.officenome || leadData?.empresa || "",
+        email: existingData.email || leadData?.email || "",
+        telefone: existingData.telefone || leadData?.telefone || "",
+        cnpj_cpf: existingData.cnpj_cpf || leadData?.cnpj || "",
+        visao_missao_valores: existingData.visao_missao_valores || "",
+        historia_empresa: existingData.historia_empresa || "",
+        mercado_atuacao: existingData.mercado_atuacao || "",
+        slogan: existingData.slogan || "",
+        possuiServicos: !!existingData.servicos,
+        servicosOferecidos: existingData.servicos || "",
+        possuiProdutos: !!existingData.produtos,
+        produtos: existingData.produtos || "",
+        endereco: existingData.endereco || "",
+        horario_funcionamento: existingData.horario_funcionamento || "",
+        redes_sociais: existingData.redessociais || "",
+        cores_preferidas: existingData.paletacores || "",
+        possuiPlanos: existingData.possuiplanos || false,
+        planos: existingData.planos || "",
+        depoimentos: existingData.depoimentos || "",
+        botaoWhatsapp: existingData.botaowhatsapp !== false,
+        possuiMapa: existingData.possuimapa || false,
+        linkMapa: existingData.linkmapa || "",
+      });
+
+      // Set existing logo preview
+      if (existingData.logo_url) {
+        setLogoPreview(existingData.logo_url);
+        // Check if it's a PDF by URL
+        if (existingData.logo_url.includes('.pdf')) {
+          setLogoFileName('logo.pdf');
+        }
+      }
+
+      // Set existing media previews
+      if (existingData.midia_urls && existingData.midia_urls.length > 0) {
+        const urls = existingData.midia_urls.map(item => item.url);
+        const captions = existingData.midia_urls.map(item => item.caption || "");
+        setMidiaPreviews(urls);
+        setMidiaCaptions(captions);
+      }
+
+      // Set existing depoimento previews
+      if (existingData.depoimento_urls && existingData.depoimento_urls.length > 0) {
+        setDepoimentoPreviews(existingData.depoimento_urls);
+      }
+    }
+  }, [existingData, form, leadData]);
 
   // Save file metadata when files change
   useEffect(() => {

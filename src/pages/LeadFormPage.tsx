@@ -7,6 +7,7 @@ import { Building2, User, AlertCircle, CheckCircle2, Loader2 } from 'lucide-reac
 import { getLeadByFormHash } from '@/services/leadFormService';
 import { Lead } from '@/types/lead';
 import { PersonalizeForm } from '@/components/site-personalize/PersonalizeForm';
+import { useExistingPersonalization } from '@/hooks/useExistingPersonalization';
 
 export default function LeadFormPage() {
   const { form_hash } = useParams<{ form_hash: string }>();
@@ -14,6 +15,11 @@ export default function LeadFormPage() {
   const [lead, setLead] = useState<Lead | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Fetch existing personalization data if lead has a project
+  const { existingData, isLoading: isLoadingPersonalization } = useExistingPersonalization(
+    lead?.project_id
+  );
 
   useEffect(() => {
     const loadLead = async () => {
@@ -47,14 +53,16 @@ export default function LeadFormPage() {
     loadLead();
   }, [form_hash]);
 
-  if (loading) {
+  if (loading || isLoadingPersonalization) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center gap-4 text-center">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-muted-foreground">Carregando formulário...</p>
+              <p className="text-muted-foreground">
+                {isLoadingPersonalization ? 'Carregando dados existentes...' : 'Carregando formulário...'}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -145,6 +153,7 @@ export default function LeadFormPage() {
             cnpj: lead.cnpj,
             telefone: lead.empresa // Pode ajustar conforme necessário
           }}
+          existingData={existingData}
         />
       </div>
     </div>
