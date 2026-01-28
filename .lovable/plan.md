@@ -1,207 +1,187 @@
 
-## Plano: Permitir Atualização de Dados em Formulários Já Preenchidos
+## Pré-carregar Dados Existentes no Formulário de Lead
 
-### Problema Atual
-A Edge Function `receive-lead-form-data` bloqueia o reenvio quando o lead já possui um `project_id` vinculado (linhas 78-88), retornando erro 400.
+### Objetivo
+Quando um cliente reabrir um formulário já preenchido, os dados anteriores (textos, logo e mídias) devem ser exibidos para visualização e edição.
 
-### Solução
-Modificar a lógica para que, quando o lead já tiver projeto vinculado, a função **atualize** os dados existentes (projeto + personalização) em vez de criar novos registros.
-
----
-
-### Alterações na Edge Function
-
-**Arquivo:** `supabase/functions/receive-lead-form-data/index.ts`
-
-#### Fluxo Atualizado
+### Arquitetura da Solução
 
 ```text
-                    ┌─────────────────┐
-                    │  Receber dados  │
-                    │   do formulário │
-                    └────────┬────────┘
-                             │
-                    ┌────────▼────────┐
-                    │  Buscar lead    │
-                    │  pelo form_hash │
-                    └────────┬────────┘
-                             │
-                    ┌────────▼────────┐
-                    │ Lead tem        │
-                    │ project_id?     │
-                    └────────┬────────┘
-                             │
-              ┌──────────────┼──────────────┐
-              │ NÃO                         │ SIM
-              ▼                             ▼
-    ┌─────────────────┐           ┌─────────────────┐
-    │ CRIAR projeto   │           │ ATUALIZAR proj. │
-    │ CRIAR person.   │           │ ATUALIZAR pers. │
-    │ VINCULAR lead   │           │ Manter vínculos │
-    └─────────────────┘           └─────────────────┘
-              │                             │
-              └──────────────┬──────────────┘
-                             │
-                    ┌────────▼────────┐
-                    │  Retornar       │
-                    │  sucesso        │
-                    └─────────────────┘
-```
-
-#### Código Modificado (Linhas 78-167)
-
-Substituir a verificação que bloqueia por lógica de atualização:
-
-```typescript
-let projectId: string;
-let personalizationId: string | null = null;
-let isUpdate = false;
-
-// Verificar se lead já possui projeto vinculado
-if (lead.project_id) {
-  console.log('Lead already has project, updating existing data:', lead.project_id);
-  isUpdate = true;
-  projectId = lead.project_id;
-
-  // Atualizar projeto existente
-  const { error: projectUpdateError } = await supabase
-    .from('projects')
-    .update({
-      template: modelo || undefined,
-      responsible_name: responsavelnome,
-      telefone: telefone,
-      email_complementar: email,
-      modelo_escolhido: modelo,
-      observacoes_cliente: historia_empresa || undefined,
-      formulario_preenchido: true,
-      data_formulario: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', lead.project_id);
-
-  if (projectUpdateError) {
-    console.error('Error updating project:', projectUpdateError);
-    return new Response(
-      JSON.stringify({ error: 'Erro ao atualizar projeto: ' + projectUpdateError.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  }
-
-  // Buscar personalization_id existente
-  const { data: existingProject } = await supabase
-    .from('projects')
-    .select('personalization_id')
-    .eq('id', lead.project_id)
-    .single();
-
-  if (existingProject?.personalization_id) {
-    personalizationId = existingProject.personalization_id;
-    
-    // Atualizar personalização existente
-    const { error: persUpdateError } = await supabase
-      .from('site_personalizacoes')
-      .update({
-        officenome: officenome,
-        responsavelnome: responsavelnome,
-        email: email,
-        telefone: telefone,
-        endereco: endereco,
-        cnpj_cpf: cnpj_cpf || '',
-        visao_missao_valores: visao_missao_valores || '',
-        historia_empresa: historia_empresa || '',
-        mercado_atuacao: mercado_atuacao || '',
-        produtos: produtos || '',
-        depoimentos: depoimentos || '',
-        descricao: descricao || visao_missao_valores || '',
-        servicos: servicos,
-        redessociais: redessociais || '',
-        slogan: slogan,
-        paletacores: paletacores,
-        fonte: fonte,
-        estilo_visual: estilo_visual,
-        possuiplanos: possuiplanos || false,
-        planos: planos,
-        possuimapa: possuimapa || false,
-        linkmapa: linkmapa,
-        horario_funcionamento: horario_funcionamento,
-        botaowhatsapp: botaowhatsapp !== false,
-        modelo: modelo,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', existingProject.personalization_id);
-
-    if (persUpdateError) {
-      console.error('Error updating personalization:', persUpdateError);
-    }
-  } else {
-    // Criar nova personalização se não existir
-    // ... (código de criação existente)
-  }
-
-} else {
-  // CRIAR novo projeto (código existente das linhas 90-167)
-  // ...
-}
-
-// Atualizar lead com data de último contato
-const { error: leadUpdateError } = await supabase
-  .from('leads')
-  .update({
-    project_id: projectId,
-    link_confidence_score: 100,
-    link_method: 'form_hash',
-    situacao: 'Preenchendo Formulário',
-    data_ultimo_contato: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  })
-  .eq('id', lead.id);
-
-// Retornar resposta com indicação de atualização
-return new Response(
-  JSON.stringify({ 
-    success: true, 
-    project_id: projectId,
-    lead_id: lead.id,
-    personalization_id: personalizationId,
-    updated: isUpdate,
-    message: isUpdate 
-      ? 'Dados atualizados com sucesso!' 
-      : 'Formulário processado com sucesso!' 
-  }),
-  { 
-    status: 200, 
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-  }
-);
+┌────────────────────────────────────┐
+│    LeadFormPage.tsx                │
+│  ┌─────────────────────────────┐   │
+│  │ 1. Buscar lead (form_hash)  │   │
+│  │ 2. Se project_id existir:   │   │
+│  │    → Buscar personalization │   │
+│  │    → Passar dados existentes│   │
+│  └───────────────┬─────────────┘   │
+│                  │                 │
+│  ┌───────────────▼─────────────┐   │
+│  │    PersonalizeForm.tsx      │   │
+│  │  - Receber existingData     │   │
+│  │  - Pré-popular campos       │   │
+│  │  - Exibir imagens salvas    │   │
+│  │  - Permitir substituir      │   │
+│  └─────────────────────────────┘   │
+└────────────────────────────────────┘
 ```
 
 ---
 
-### Resumo das Alterações
+### Alterações Necessárias
 
-| Cenário | Comportamento Atual | Novo Comportamento |
-|---------|--------------------|--------------------|
-| Lead sem projeto | Cria projeto + personalização | Mantido igual |
-| Lead com projeto | Erro 400 "já preenchido" | Atualiza dados existentes |
+#### 1. LeadFormPage.tsx
+**O que muda:** Buscar dados de personalização existentes quando o lead já tem projeto vinculado.
 
-### Benefícios
+- Após carregar o lead, verificar se `lead.project_id` existe
+- Buscar o projeto e seu `personalization_id`
+- Buscar dados completos de `site_personalizacoes` incluindo `logo_url`, `midia_urls`, `depoimento_urls`
+- Passar os dados existentes para o `PersonalizeForm`
 
-1. **Correção de erros**: Cliente pode corrigir informações enviadas anteriormente
-2. **Flexibilidade**: Permite múltiplos envios sem perder dados
-3. **Rastreabilidade**: Campo `updated` na resposta indica se foi criação ou atualização
-4. **Timestamps**: Atualiza `data_formulario` e `updated_at` a cada submissão
+#### 2. PersonalizeForm.tsx
+**O que muda:** Aceitar dados existentes e pré-popular o formulário.
+
+**Nova prop:**
+```typescript
+existingData?: {
+  // Campos de texto
+  officenome: string;
+  email: string;
+  telefone: string;
+  cnpj_cpf: string;
+  visao_missao_valores: string;
+  historia_empresa: string;
+  mercado_atuacao: string;
+  endereco: string;
+  horario_funcionamento: string;
+  slogan: string;
+  servicos: string;
+  produtos: string;
+  redessociais: string;
+  paletacores: string;
+  depoimentos: string;
+  planos: string;
+  possuiplanos: boolean;
+  possuimapa: boolean;
+  linkmapa: string;
+  botaowhatsapp: boolean;
+  modelo: string;
+  // URLs dos arquivos salvos
+  logo_url: string | null;
+  midia_urls: Array<{url: string, caption: string}>;
+  depoimento_urls: string[];
+}
+```
+
+**Comportamento:**
+- Usar `useEffect` para popular `form.reset()` com os dados existentes
+- Gerar URLs assinadas para exibir arquivos salvos (logo, mídias, depoimentos)
+- Exibir imagens existentes nos componentes de upload
+- Permitir substituição: novo upload substitui arquivo existente
+- Se usuário não fizer novo upload, manter arquivos anteriores
+
+#### 3. Componentes de Upload (LogoUploader, MediaUploader)
+**O que muda:** Exibir imagens existentes do servidor.
+
+**LogoUploader:**
+- Nova prop `existingLogoUrl?: string` para exibir logo já salva
+- Se não houver novo upload, mostrar a imagem existente
+- Botão "Remover" deve marcar para exclusão (não deletar imediatamente)
+
+**MediaUploader / PersonalizeConfigForm:**
+- Nova prop `existingMidias?: Array<{url: string, caption: string}>`
+- Exibir mídias existentes com suas legendas
+- Permitir remover individualmente ou adicionar novas
+- Mesclar uploads novos com existentes na submissão
+
+#### 4. useFormSubmission.tsx
+**O que muda:** Lidar com arquivos existentes + novos.
+
+- Receber lista de arquivos existentes que devem ser mantidos
+- Na atualização, só fazer upload de arquivos **novos**
+- Arquivos existentes mantêm suas URLs originais
+- Arquivos marcados para exclusão são removidos
+
+---
+
+### Novo Hook: useExistingPersonalization
+
+Criar hook para buscar e processar dados existentes:
+
+```typescript
+// src/hooks/useExistingPersonalization.ts
+export function useExistingPersonalization(projectId: string | null) {
+  // Buscar personalização do projeto
+  // Gerar URLs assinadas para arquivos
+  // Retornar dados formatados para o formulário
+}
+```
+
+---
+
+### Fluxo de Dados
+
+| Etapa | Descrição |
+|-------|-----------|
+| 1 | LeadFormPage carrega lead via form_hash |
+| 2 | Se lead.project_id existe, buscar projeto e personalização |
+| 3 | Gerar URLs assinadas para logo_url, midia_urls, depoimento_urls |
+| 4 | Passar existingData para PersonalizeForm |
+| 5 | PersonalizeForm popula campos com form.reset() |
+| 6 | Componentes de upload exibem imagens existentes |
+| 7 | Usuário edita textos e/ou substitui arquivos |
+| 8 | Submissão: atualiza textos + mantém/substitui arquivos |
+
+---
+
+### Mapeamento de Campos
+
+| Campo no Banco | Campo no Formulário |
+|----------------|---------------------|
+| officenome | nome_empresa |
+| email | email |
+| telefone | telefone |
+| cnpj_cpf | cnpj_cpf |
+| visao_missao_valores | visao_missao_valores |
+| historia_empresa | historia_empresa |
+| mercado_atuacao | mercado_atuacao |
+| endereco | endereco |
+| horario_funcionamento | horario_funcionamento |
+| slogan | slogan |
+| servicos | servicosOferecidos |
+| produtos | produtos |
+| redessociais | redes_sociais |
+| paletacores | cores_preferidas |
+| depoimentos | depoimentos |
+| planos | planos |
+| possuiplanos | possuiPlanos |
+| possuimapa | possuiMapa |
+| linkmapa | linkMapa |
+| botaowhatsapp | botaoWhatsapp |
+| logo_url | logoPreview (URL assinada) |
+| midia_urls | midiaPreviews (URLs assinadas) |
+| depoimento_urls | depoimentoPreviews (URLs assinadas) |
 
 ---
 
 ### Seção Técnica
 
-**Arquivo modificado:** `supabase/functions/receive-lead-form-data/index.ts`
+**Arquivos a modificar:**
+1. `src/pages/LeadFormPage.tsx` - Buscar dados existentes
+2. `src/components/site-personalize/PersonalizeForm.tsx` - Aceitar e popular dados
+3. `src/components/site-personalize/LogoUploader.tsx` - Exibir logo existente
+4. `src/components/site-personalize/PersonalizeConfigForm.tsx` - Exibir mídias existentes
+5. `src/components/site-personalize/PersonalizeServicosForm.tsx` - Exibir depoimentos existentes
+6. `src/components/site-personalize/useFormSubmission.tsx` - Lidar com arquivos existentes
 
-**Principais mudanças:**
-1. Remover bloco de erro (linhas 78-88)
-2. Adicionar variáveis `projectId`, `personalizationId`, `isUpdate`
-3. Adicionar branch de atualização com `UPDATE` em vez de `INSERT`
-4. Buscar `personalization_id` do projeto existente para atualizar
-5. Atualizar resposta para incluir campo `updated: boolean`
+**Novo arquivo:**
+- `src/hooks/useExistingPersonalization.ts` - Hook para buscar personalização
 
-**Depois de implementar:** Executar deploy da Edge Function
+**Dependências:**
+- Usar `getSignedUrl` de `src/lib/supabase/storage.ts` para gerar URLs de arquivos
+- Bucket `site_personalizacoes` para os arquivos
+
+**Considerações:**
+- URLs assinadas expiram em 1 hora - regenerar se necessário
+- Bucket não é público, então sempre usar signed URLs
+- Validar que arquivos existem antes de exibir (usar `checkFileExists`)
