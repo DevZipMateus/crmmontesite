@@ -10,7 +10,8 @@ import {
   ContactRound,
   Globe,
   AlertCircle,
-  FileCheck
+  FileCheck,
+  Sheet
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -19,18 +20,46 @@ interface MenuItemProps {
   label: string;
   href: string;
   description: string;
+  isExternal?: boolean;
+  variant?: "default" | "green";
 }
 
-const MenuItem: React.FC<MenuItemProps> = ({ icon, label, href, description }) => {
+const MenuItem: React.FC<MenuItemProps> = ({ icon, label, href, description, isExternal, variant = "default" }) => {
+  const baseClasses = "flex flex-col items-center justify-center gap-2 p-4 rounded-lg border transition-all duration-200 hover:shadow-sm";
+  
+  const variantClasses = {
+    default: "bg-white border-gray-200 hover:border-blue-400",
+    green: "bg-emerald-50 border-emerald-200 hover:border-emerald-400"
+  };
+  
+  const iconClasses = {
+    default: "w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600",
+    green: "w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600"
+  };
+
+  if (isExternal) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cn(baseClasses, variantClasses[variant])}
+      >
+        <div className={iconClasses[variant]}>
+          {icon}
+        </div>
+        <h3 className="font-medium text-center">{label}</h3>
+        <p className="text-xs text-center text-gray-500">{description}</p>
+      </a>
+    );
+  }
+
   return (
     <Link
       to={href}
-      className={cn(
-        "flex flex-col items-center justify-center gap-2 p-4 rounded-lg bg-white border border-gray-200",
-        "transition-all duration-200 hover:border-blue-400 hover:shadow-sm"
-      )}
+      className={cn(baseClasses, variantClasses[variant])}
     >
-      <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
+      <div className={iconClasses[variant]}>
         {icon}
       </div>
       <h3 className="font-medium text-center">{label}</h3>
@@ -120,6 +149,15 @@ const MainMenuSection: React.FC = () => {
           label="Termo de Entrega"
           href="/termos-entrega"
           description="Gerenciar termos de aceite e entrega de websites"
+        />
+        
+        <MenuItem 
+          icon={<Sheet size={24} />}
+          label="Gestão de Layouts"
+          href="https://layouts-importacoes.netlify.app/"
+          description="Layouts e importação via Google Sheets"
+          isExternal
+          variant="green"
         />
       </div>
     </section>
