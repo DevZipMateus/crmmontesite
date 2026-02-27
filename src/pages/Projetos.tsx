@@ -2,7 +2,9 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, Archive } from "lucide-react";
+import { Plus, Archive, Download } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import KanbanBoard from "@/components/projects/KanbanBoard";
 import ProjectListView from "@/components/projects/ProjectListView";
 import ViewToggle from "@/components/projects/ViewToggle";
@@ -54,8 +56,58 @@ export default function Projetos() {
   };
 
   const handleLinkingComplete = () => {
-    // Refresh projects after linking
     fetchProjects();
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const { data: allProjects, error } = await supabase
+        .from('projects')
+        .select('client_name, telefone, lead_id')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Buscar leads associados
+      const leadIds = allProjects?.filter(p => p.lead_id).map(p => p.lead_id!) || [];
+      let leadsMap: Record<string, { empresa: string; nome_cliente: string }> = {};
+
+      if (leadIds.length > 0) {
+        const { data: leads } = await supabase
+          .from('leads')
+          .select('id, empresa, nome_cliente')
+          .in('id', leadIds);
+        
+        leads?.forEach(l => {
+          leadsMap[l.id] = { empresa: l.empresa, nome_cliente: l.nome_cliente };
+        });
+      }
+
+      const csvRows = [
+        ['Nome do Cliente', 'Telefone', 'Lead Associado (Empresa)', 'Lead Associado (Cliente)'].join(','),
+        ...(allProjects || []).map(p => {
+          const lead = p.lead_id ? leadsMap[p.lead_id] : null;
+          return [
+            `"${(p.client_name || '').replace(/"/g, '""')}"`,
+            `"${(p.telefone || '').replace(/"/g, '""')}"`,
+            `"${(lead?.empresa || '').replace(/"/g, '""')}"`,
+            `"${(lead?.nome_cliente || '').replace(/"/g, '""')}"`,
+          ].join(',');
+        })
+      ];
+
+      const blob = new Blob(['\uFEFF' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `projetos_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('CSV exportado com sucesso!');
+    } catch (err) {
+      console.error('Erro ao exportar CSV:', err);
+      toast.error('Erro ao exportar CSV');
+    }
   };
 
   const handleFilterChange = (filter: string, value: string | null | Date) => {
@@ -95,6 +147,14 @@ export default function Projetos() {
               <Archive className="h-4 w-4" />
               <span className="hidden sm:inline">{showArchived ? "Ver Ativos" : "Ver Arquivados"}</span>
               <span className="sm:hidden">{showArchived ? "Ativos" : "Arquivo"}</span>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleExportCSV}
+              className="flex items-center gap-2 px-3 lg:px-4 text-sm lg:text-base"
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Exportar CSV</span>
             </Button>
             <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
             <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
