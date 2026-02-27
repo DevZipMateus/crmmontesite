@@ -63,7 +63,7 @@ export default function Projetos() {
     try {
       const { data: allProjects, error } = await supabase
         .from('projects')
-        .select('client_name, telefone, lead_id')
+        .select('client_name, telefone, lead_id, blaster_link')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -84,12 +84,13 @@ export default function Projetos() {
       }
 
       const csvRows = [
-        ['Nome do Cliente', 'Telefone', 'Lead Associado (Empresa)', 'Lead Associado (Cliente)'].join(','),
+        ['Nome do Cliente', 'Telefone', 'Link Blaster', 'Lead Associado (Empresa)', 'Lead Associado (Cliente)'].join(','),
         ...(allProjects || []).map(p => {
           const lead = p.lead_id ? leadsMap[p.lead_id] : null;
           return [
             `"${(p.client_name || '').replace(/"/g, '""')}"`,
             `"${(p.telefone || '').replace(/"/g, '""')}"`,
+            `"${(p.blaster_link || '').replace(/"/g, '""')}"`,
             `"${(lead?.empresa || '').replace(/"/g, '""')}"`,
             `"${(lead?.nome_cliente || '').replace(/"/g, '""')}"`,
           ].join(',');
