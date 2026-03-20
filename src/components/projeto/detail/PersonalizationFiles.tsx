@@ -1,9 +1,13 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MediaFileDisplay } from "./MediaFileDisplay";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 import { MediaSelectionProvider, MediaBulkDownloader } from "./media-bulk/MediaBulkDownloader";
+import { useToast } from "@/hooks/use-toast";
+import JSZip from "jszip";
 
 interface PersonalizationFilesProps {
   personalization: any;
@@ -14,30 +18,92 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
   personalization,
   getFileUrl
 }) => {
+  const [isDownloadingDepoimentos, setIsDownloadingDepoimentos] = useState(false);
+  const { toast } = useToast();
+
   if (!personalization) return null;
   
   const hasLogo = !!personalization.logo_url;
   
-  // Handle depoimento_urls (can be array of strings)
   const depoimentoUrls = Array.isArray(personalization.depoimento_urls) 
     ? personalization.depoimento_urls 
     : [];
   const hasDepoimentos = depoimentoUrls.length > 0;
   
-  // Parse midia_urls (could be array of serialized JSON strings)
   let midiaUrls: any[] = [];
-  
   if (Array.isArray(personalization.midia_urls)) {
     midiaUrls = personalization.midia_urls;
   }
-  
   const hasMidia = midiaUrls.length > 0;
   
-  console.log("Personalização - Logo:", personalization.logo_url);
-  console.log("Personalização - Depoimentos:", depoimentoUrls);
-  console.log("Personalização - Mídias:", midiaUrls);
-  
   if (!hasLogo && !hasDepoimentos && !hasMidia) return null;
+
+  const handleDownloadAllDepoimentos = async () => {
+    if (depoimentoUrls.length === 0) return;
+    
+    setIsDownloadingDepoimentos(true);
+    try {
+      const zip = new JSZip();
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (let i = 0; i < depoimentoUrls.length; i++) {
+        try {
+          const filePath = depoimentoUrls[i];
+          const signedUrl = await getFileUrl(filePath);
+          if (!signedUrl) { errorCount++; continue; }
+
+          const response = await fetch(signedUrl);
+          if (!response.ok) { errorCount++; continue; }
+
+          const blob = await response.blob();
+          
+          let extension = '';
+          const extMatch = (typeof filePath === 'string' ? filePath : '').match(/\.([^.]+)$/);
+          if (extMatch) {
+            extension = `.${extMatch[1]}`;
+          } else if (blob.type) {
+            const typeMap: Record<string, string> = {
+              'image/jpeg': '.jpg', 'image/png': '.png', 'image/gif': '.gif',
+              'image/webp': '.webp', 'video/mp4': '.mp4', 'application/pdf': '.pdf',
+            };
+            extension = typeMap[blob.type] || '';
+          }
+
+          zip.file(`depoimento_${i + 1}${extension}`, blob);
+          successCount++;
+        } catch (err) {
+          console.error(`Erro ao processar depoimento ${i}:`, err);
+          errorCount++;
+        }
+      }
+
+      if (successCount === 0) {
+        toast({ title: "Erro no download", description: "Não foi possível baixar nenhum depoimento.", variant: "destructive" });
+        return;
+      }
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(zipBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      const projectName = (personalization.officenome || 'Projeto').replace(/[^a-zA-Z0-9\s\-_]/g, '').substring(0, 30);
+      link.download = `${projectName}_depoimentos.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      let desc = `${successCount} depoimento(s) baixado(s) com sucesso`;
+      if (errorCount > 0) desc += `. ${errorCount} arquivo(s) falharam`;
+      toast({ title: "Download concluído", description: desc + '.' });
+    } catch (error) {
+      console.error('Erro ao criar ZIP de depoimentos:', error);
+      toast({ title: "Erro no download", description: "Ocorreu um erro ao criar o arquivo ZIP.", variant: "destructive" });
+    } finally {
+      setIsDownloadingDepoimentos(false);
+    }
+  };
   
   return (
     <Card className="border-gray-100 shadow-sm">
@@ -53,7 +119,6 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
       </CardHeader>
       <CardContent className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Logo Section */}
           {hasLogo && (
             <div className="space-y-2">
               <h3 className="text-sm font-medium text-gray-500">Logo</h3>
@@ -67,10 +132,20 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
             </div>
           )}
 
-          {/* Depoimento Files Section */}
           {hasDepoimentos && (
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-gray-500">Arquivos de Depoimentos</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-gray-500">Arquivos de Depoimentos</h3>
+                <Button
+                  onClick={handleDownloadAllDepoimentos}
+                  disabled={isDownloadingDepoimentos}
+                  size="sm"
+                  variant="outline"
+                >
+                  <Download className="h-4 w-4 mr-1" />
+                  {isDownloadingDepoimentos ? "Gerando ZIP..." : "Baixar Todos"}
+                </Button>
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {depoimentoUrls.map((filePath: string, index: number) => (
                   <MediaFileDisplay 
@@ -86,7 +161,6 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
           )}
         </div>
 
-        {/* Midia Files Section */}
         {hasMidia && (
           <MediaSelectionProvider totalMediaCount={midiaUrls.length}>
             <div className="mt-6 pt-6 border-t border-gray-200">
