@@ -84,6 +84,7 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
           const digitsOnlyQuery = actualSearchQuery.replace(/\D/g, '');
           filteredProjects = filteredProjects.filter(project => {
             const projectCnpjDigits = project.cnpj?.replace(/\D/g, '') || '';
+            const blasterDigits = project.blaster_link?.replace(/\D/g, '') || '';
             return (
               project.client_name?.toLowerCase().includes(lowercaseQuery) ||
               project.template?.toLowerCase().includes(lowercaseQuery) ||
@@ -93,7 +94,8 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
               project.blaster_link?.toLowerCase().includes(lowercaseQuery) ||
               project.domain?.toLowerCase().includes(lowercaseQuery) ||
               project.cnpj?.toLowerCase().includes(lowercaseQuery) ||
-              (digitsOnlyQuery.length > 0 && projectCnpjDigits.includes(digitsOnlyQuery))
+              (digitsOnlyQuery.length > 0 && projectCnpjDigits.includes(digitsOnlyQuery)) ||
+              (digitsOnlyQuery.length > 0 && blasterDigits.includes(digitsOnlyQuery))
             );
           });
         }
