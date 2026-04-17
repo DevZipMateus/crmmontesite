@@ -81,16 +81,21 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
         // Aplicar filtro de texto de busca cliente-side
         if (actualSearchQuery.trim()) {
           const lowercaseQuery = actualSearchQuery.toLowerCase();
-          filteredProjects = filteredProjects.filter(project => 
-            project.client_name?.toLowerCase().includes(lowercaseQuery) || 
-            project.template?.toLowerCase().includes(lowercaseQuery) ||
-            project.responsible_name?.toLowerCase().includes(lowercaseQuery) ||
-            project.email_complementar?.toLowerCase().includes(lowercaseQuery) ||
-            project.site_personalizacoes?.email?.toLowerCase().includes(lowercaseQuery) ||
-            project.blaster_link?.toLowerCase().includes(lowercaseQuery) ||
-            project.domain?.toLowerCase().includes(lowercaseQuery) ||
-            project.cnpj?.toLowerCase().includes(lowercaseQuery)
-          );
+          const digitsOnlyQuery = actualSearchQuery.replace(/\D/g, '');
+          filteredProjects = filteredProjects.filter(project => {
+            const projectCnpjDigits = project.cnpj?.replace(/\D/g, '') || '';
+            return (
+              project.client_name?.toLowerCase().includes(lowercaseQuery) ||
+              project.template?.toLowerCase().includes(lowercaseQuery) ||
+              project.responsible_name?.toLowerCase().includes(lowercaseQuery) ||
+              project.email_complementar?.toLowerCase().includes(lowercaseQuery) ||
+              project.site_personalizacoes?.email?.toLowerCase().includes(lowercaseQuery) ||
+              project.blaster_link?.toLowerCase().includes(lowercaseQuery) ||
+              project.domain?.toLowerCase().includes(lowercaseQuery) ||
+              project.cnpj?.toLowerCase().includes(lowercaseQuery) ||
+              (digitsOnlyQuery.length > 0 && projectCnpjDigits.includes(digitsOnlyQuery))
+            );
+          });
         }
         
         // Adicionar flag de arquivamento aos projetos
