@@ -88,7 +88,8 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
             project.email_complementar?.toLowerCase().includes(lowercaseQuery) ||
             project.site_personalizacoes?.email?.toLowerCase().includes(lowercaseQuery) ||
             project.blaster_link?.toLowerCase().includes(lowercaseQuery) ||
-            project.domain?.toLowerCase().includes(lowercaseQuery)
+            project.domain?.toLowerCase().includes(lowercaseQuery) ||
+            project.cnpj?.toLowerCase().includes(lowercaseQuery)
           );
         }
         

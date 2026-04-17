@@ -176,7 +176,7 @@ export default function Projetos() {
             <SearchInput 
               value={searchQuery} 
               onChange={setSearchQuery} 
-              placeholder="Buscar por nome do cliente, modelo ou responsável..."
+              placeholder="Buscar por nome, modelo, responsável, email, CNPJ ou domínio..."
               className="rounded-xl shadow-sm w-full"
             />
           </div>
