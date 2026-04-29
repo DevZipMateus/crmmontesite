@@ -9,15 +9,28 @@ interface AutoSaveOptions {
   expirationDays?: number;
 }
 
+export interface SavedFile {
+  name: string;
+  type: string;
+  size: number;
+  dataUrl: string; // base64 data URL
+}
+
 interface SavedFormData<T> {
   formData: T;
   timestamp: string;
   version: string;
   fileMetadata?: {
     logoPreview?: string | null;
+    logoFileName?: string | null;
     depoimentoPreviews?: string[];
     midiaPreviews?: string[];
     midiaCaptions?: string[];
+  };
+  files?: {
+    logo?: SavedFile | null;
+    depoimentos?: SavedFile[];
+    midias?: SavedFile[];
   };
 }
 
