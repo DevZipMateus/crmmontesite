@@ -144,18 +144,54 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     clearSavedData,
     saveFileMetadata,
     loadFileMetadata,
+    saveFiles,
+    loadFiles,
+    savedFileToFile,
     getSavedTimestamp
   } = useFormAutoSave(form, {
     storageKey,
     excludeFields: [] // No sensitive fields in this form
   });
 
-  // Check for saved draft on mount (only if no existing data)
+  // Silent draft restoration on mount — restore form fields + files automatically
+  // (only when there's no fresher existingData from server)
+  const didRestoreRef = React.useRef(false);
   useEffect(() => {
-    if (hasSavedData && !leadData && !existingData) {
-      setShowDraftDialog(true);
+    if (didRestoreRef.current) return;
+    if (!hasSavedData) return;
+    if (existingData) return; // server data takes precedence
+
+    didRestoreRef.current = true;
+    const restored = restoreSavedData();
+    if (!restored) return;
+
+    // Restore previews/captions metadata
+    const meta = loadFileMetadata();
+    if (meta) {
+      if (meta.logoPreview) setLogoPreview(meta.logoPreview);
+      if (meta.logoFileName) setLogoFileName(meta.logoFileName);
+      if (meta.depoimentoPreviews) setDepoimentoPreviews(meta.depoimentoPreviews);
+      if (meta.midiaPreviews) setMidiaPreviews(meta.midiaPreviews);
+      if (meta.midiaCaptions) setMidiaCaptions(meta.midiaCaptions);
     }
-  }, [hasSavedData, leadData, existingData]);
+
+    // Restore actual file blobs (so submit reuploads them)
+    const files = loadFiles();
+    if (files) {
+      if (files.logo) {
+        const f = savedFileToFile(files.logo);
+        if (f) setLogoFile(f);
+      }
+      if (files.depoimentos?.length) {
+        const fs = files.depoimentos.map(savedFileToFile).filter(Boolean) as File[];
+        if (fs.length) setDepoimentoFiles(fs);
+      }
+      if (files.midias?.length) {
+        const fs = files.midias.map(savedFileToFile).filter(Boolean) as File[];
+        if (fs.length) setMidiaFiles(fs);
+      }
+    }
+  }, [hasSavedData, existingData, restoreSavedData, loadFileMetadata, loadFiles, savedFileToFile]);
 
   // Populate form with existing data when available
   useEffect(() => {
@@ -217,12 +253,23 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     if (logoPreview || logoFileName || depoimentoPreviews.length > 0 || midiaPreviews.length > 0) {
       saveFileMetadata({
         logoPreview,
+        logoFileName,
         depoimentoPreviews,
         midiaPreviews,
         midiaCaptions
       });
     }
   }, [logoPreview, logoFileName, depoimentoPreviews, midiaPreviews, midiaCaptions]);
+
+  // Persist file blobs as base64 so they survive page reload
+  useEffect(() => {
+    if (!logoFile && depoimentoFiles.length === 0 && midiaFiles.length === 0) return;
+    saveFiles({
+      logo: logoFile,
+      depoimentos: depoimentoFiles,
+      midias: midiaFiles,
+    });
+  }, [logoFile, depoimentoFiles, midiaFiles]);
 
   // Handle draft restoration
   const handleRestoreDraft = () => {
