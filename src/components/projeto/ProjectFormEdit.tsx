@@ -23,6 +23,7 @@ const formSchema = z.object({
   client_type: z.string().optional(),
   blaster_link: z.string().optional(),
   partner_link: z.string().optional(),
+  showcase_link: z.string().optional(),
   provider_credentials: z.string().optional(),
   assigned_programmer: z.string().optional(),
   project_link: z.string().optional(),
@@ -58,6 +59,7 @@ export function ProjectFormEdit({ initialValues, submitButtonText = "Salvar", mo
       client_type: initialValues.client_type || "",
       blaster_link: initialValues.blaster_link || "",
       partner_link: initialValues.partner_link || "",
+      showcase_link: initialValues.showcase_link || "",
       provider_credentials: initialValues.provider_credentials || "",
       assigned_programmer: initialValues.assigned_programmer || "",
       project_link: initialValues.project_link || "",
@@ -216,6 +218,15 @@ export function ProjectFormEdit({ initialValues, submitButtonText = "Salvar", mo
               id="project_link"
               {...register("project_link")}
               placeholder="https://lovable.dev/projects/... ou https://github.com/..."
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="showcase_link">Link da Vitrine</Label>
+            <Input
+              id="showcase_link"
+              {...register("showcase_link")}
+              placeholder="https://vitrine.exemplo.com"
             />
           </div>
 

@@ -56,4 +56,7 @@ export interface Project {
   
   // Campo para hash do termo de entrega
   delivery_term_hash?: string;
+  
+  // Campo para link da vitrine
+  showcase_link?: string;
 }
