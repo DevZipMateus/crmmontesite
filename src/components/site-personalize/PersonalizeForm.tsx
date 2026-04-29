@@ -195,6 +195,50 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     }
   }, [hasSavedData, existingData, restoreSavedData, loadFileMetadata, loadFiles, savedFileToFile]);
 
+  // ===== Cloud sync (texts only) — sincroniza rascunho entre dispositivos via banco =====
+  const cloudRestoredRef = React.useRef(false);
+  const [cloudSyncing, setCloudSyncing] = useState(false);
+
+  // Restaura rascunho da nuvem ao carregar (se não houver dados do servidor já enviados)
+  useEffect(() => {
+    if (cloudRestoredRef.current) return;
+    if (!leadFormHash) return;
+    if (existingData) return; // dados já enviados têm prioridade
+    cloudRestoredRef.current = true;
+
+    (async () => {
+      const cloud = await getCloudDraft(leadFormHash);
+      if (!cloud?.draft_data) return;
+
+      // Compara com timestamp local: usa o mais recente
+      const localTs = getSavedTimestamp();
+      const cloudTs = cloud.updated_at;
+      const cloudIsNewer = !localTs || new Date(cloudTs) > new Date(localTs);
+      if (!cloudIsNewer) return;
+
+      // Aplica os campos do rascunho da nuvem ao formulário
+      Object.entries(cloud.draft_data).forEach(([k, v]) => {
+        form.setValue(k as any, v as any, { shouldDirty: false });
+      });
+    })();
+  }, [leadFormHash, existingData, form, getSavedTimestamp]);
+
+  // Salva rascunho na nuvem com debounce (apenas textos — não envia arquivos)
+  const debouncedCloudSave = useDebounce((data: FormValues) => {
+    if (!leadFormHash) return;
+    setCloudSyncing(true);
+    saveCloudDraft(leadFormHash, data).finally(() => setCloudSyncing(false));
+  }, 1500);
+
+  useEffect(() => {
+    if (!leadFormHash) return;
+    const sub = form.watch((data) => {
+      debouncedCloudSave(data as FormValues);
+    });
+    return () => sub.unsubscribe();
+  }, [leadFormHash, form.watch]);
+
+
   // Populate form with existing data when available
   useEffect(() => {
     if (existingData) {
