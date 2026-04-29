@@ -388,12 +388,25 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
         />
       </div>
 
+      {/* Aviso de privacidade sobre o auto-save no dispositivo */}
+      <Alert className="border-amber-500/40 bg-amber-50 dark:bg-amber-950/20">
+        <Info className="h-4 w-4 text-amber-600" />
+        <AlertDescription className="text-sm text-amber-900 dark:text-amber-100">
+          <strong>Salvamento automático no seu dispositivo:</strong> para evitar perda de dados,
+          os campos preenchidos e os arquivos enviados (logo, mídias, depoimentos) ficam
+          armazenados temporariamente neste navegador (localStorage) até você concluir o envio.
+          Evite usar um computador público ou compartilhado se preferir não deixar essas
+          informações salvas localmente. Os dados são apagados automaticamente após o envio do
+          formulário.
+        </AlertDescription>
+      </Alert>
+
       {hasSavedData && !showDraftDialog && (
         <Alert className="border-primary/20 bg-primary/5">
           <Info className="h-4 w-4 text-primary" />
           <AlertDescription className="flex items-center justify-between">
             <span className="text-sm">
-              Você está editando um rascunho salvo automaticamente.
+              Você está editando um rascunho salvo automaticamente neste navegador.
             </span>
             <AutoSaveIndicator 
               isSaving={isSaving} 
