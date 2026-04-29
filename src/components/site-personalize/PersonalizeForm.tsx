@@ -387,6 +387,9 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     // Clear draft after successful submission
     if (!isSubmitted) {
       clearSavedData();
+      if (leadFormHash) {
+        clearCloudDraft(leadFormHash);
+      }
     }
   };
 
