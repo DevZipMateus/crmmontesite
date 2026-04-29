@@ -253,12 +253,23 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     if (logoPreview || logoFileName || depoimentoPreviews.length > 0 || midiaPreviews.length > 0) {
       saveFileMetadata({
         logoPreview,
+        logoFileName,
         depoimentoPreviews,
         midiaPreviews,
         midiaCaptions
       });
     }
   }, [logoPreview, logoFileName, depoimentoPreviews, midiaPreviews, midiaCaptions]);
+
+  // Persist file blobs as base64 so they survive page reload
+  useEffect(() => {
+    if (!logoFile && depoimentoFiles.length === 0 && midiaFiles.length === 0) return;
+    saveFiles({
+      logo: logoFile,
+      depoimentos: depoimentoFiles,
+      midias: midiaFiles,
+    });
+  }, [logoFile, depoimentoFiles, midiaFiles]);
 
   // Handle draft restoration
   const handleRestoreDraft = () => {
