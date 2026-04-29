@@ -172,6 +172,85 @@ export function useFormAutoSave<T extends Record<string, any>>(
     return saved?.fileMetadata || null;
   }
 
+  // Save files (as base64) — silently skips files >4MB and logs quota errors
+  async function saveFiles(payload: {
+    logo?: File | null;
+    depoimentos?: File[];
+    midias?: File[];
+  }) {
+    try {
+      const MAX_FILE_BYTES = 4 * 1024 * 1024; // ~4MB per file
+
+      const fileToSaved = (f: File): Promise<SavedFile | null> =>
+        new Promise((resolve) => {
+          if (f.size > MAX_FILE_BYTES) {
+            resolve(null);
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = () =>
+            resolve({
+              name: f.name,
+              type: f.type,
+              size: f.size,
+              dataUrl: reader.result as string,
+            });
+          reader.onerror = () => resolve(null);
+          reader.readAsDataURL(f);
+        });
+
+      const logo = payload.logo ? await fileToSaved(payload.logo) : null;
+      const depoimentos = payload.depoimentos
+        ? (await Promise.all(payload.depoimentos.map(fileToSaved))).filter(Boolean) as SavedFile[]
+        : [];
+      const midias = payload.midias
+        ? (await Promise.all(payload.midias.map(fileToSaved))).filter(Boolean) as SavedFile[]
+        : [];
+
+      const saved = loadSavedData() || {
+        formData: {} as T,
+        timestamp: new Date().toISOString(),
+        version: '1.0',
+      };
+      saved.files = { logo, depoimentos, midias };
+
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(saved));
+      } catch (e) {
+        // Quota exceeded — drop files from storage but keep form data
+        console.warn('Quota do localStorage excedida ao salvar arquivos. Arquivos não foram persistidos.');
+        delete saved.files;
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(saved));
+        } catch {}
+      }
+    } catch (error) {
+      console.error('Erro ao salvar arquivos:', error);
+    }
+  }
+
+  // Load files
+  function loadFiles(): SavedFormData<T>['files'] | null {
+    const saved = loadSavedData();
+    return saved?.files || null;
+  }
+
+  // Convert SavedFile back to a File object
+  function savedFileToFile(sf: SavedFile): File | null {
+    try {
+      const arr = sf.dataUrl.split(',');
+      const mimeMatch = arr[0].match(/:(.*?);/);
+      const mime = mimeMatch ? mimeMatch[1] : sf.type || 'application/octet-stream';
+      const bstr = atob(arr[1]);
+      const u8 = new Uint8Array(bstr.length);
+      for (let i = 0; i < bstr.length; i++) u8[i] = bstr.charCodeAt(i);
+      return new File([u8], sf.name, { type: mime });
+    } catch (e) {
+      console.error('Erro ao reconstruir arquivo:', e);
+      return null;
+    }
+  }
+
   return {
     hasSavedData,
     lastSavedAt,
@@ -180,6 +259,9 @@ export function useFormAutoSave<T extends Record<string, any>>(
     clearSavedData,
     saveFileMetadata,
     loadFileMetadata,
+    saveFiles,
+    loadFiles,
+    savedFileToFile,
     getSavedTimestamp: () => loadSavedData()?.timestamp
   };
 }
