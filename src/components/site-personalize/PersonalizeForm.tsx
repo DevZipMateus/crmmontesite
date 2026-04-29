@@ -437,34 +437,37 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
         />
       </div>
 
-      {/* Aviso de privacidade sobre o auto-save no dispositivo */}
+      {/* Aviso de privacidade e sincronização */}
       <Alert className="border-amber-500/40 bg-amber-50 dark:bg-amber-950/20">
         <Info className="h-4 w-4 text-amber-600" />
         <AlertDescription className="text-sm text-amber-900 dark:text-amber-100">
-          <strong>Salvamento automático no seu dispositivo:</strong> para evitar perda de dados,
-          os campos preenchidos e os arquivos enviados (logo, mídias, depoimentos) ficam
-          armazenados temporariamente neste navegador (localStorage) até você concluir o envio.
-          Evite usar um computador público ou compartilhado se preferir não deixar essas
-          informações salvas localmente. Os dados são apagados automaticamente após o envio do
-          formulário.
+          <strong>Salvamento automático:</strong> os campos de <strong>texto</strong> são salvos
+          na nuvem e sincronizam entre seus dispositivos
+          {leadFormHash ? " (você pode começar no celular e finalizar no computador, ou vice-versa)" : ""}.
+          Já os <strong>arquivos enviados</strong> (logo, mídias, depoimentos) ficam armazenados
+          apenas neste navegador — se trocar de aparelho, será preciso enviá-los novamente.
+          Tudo é apagado automaticamente após o envio do formulário.
         </AlertDescription>
       </Alert>
 
-      {hasSavedData && !showDraftDialog && (
+      {(hasSavedData || cloudSyncing) && !showDraftDialog && (
         <Alert className="border-primary/20 bg-primary/5">
           <Info className="h-4 w-4 text-primary" />
           <AlertDescription className="flex items-center justify-between">
             <span className="text-sm">
-              Você está editando um rascunho salvo automaticamente neste navegador.
+              {leadFormHash
+                ? "Rascunho sincronizado automaticamente entre seus dispositivos."
+                : "Você está editando um rascunho salvo automaticamente neste navegador."}
             </span>
-            <AutoSaveIndicator 
-              isSaving={isSaving} 
+            <AutoSaveIndicator
+              isSaving={isSaving || cloudSyncing}
               lastSavedAt={lastSavedAt}
               className="ml-4"
             />
           </AlertDescription>
         </Alert>
       )}
+
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
