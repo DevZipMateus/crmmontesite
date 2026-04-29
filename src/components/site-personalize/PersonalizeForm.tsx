@@ -21,6 +21,8 @@ import { DraftRecoveryDialog } from "./DraftRecoveryDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import { ExistingPersonalizationData } from "@/hooks/useExistingPersonalization";
+import { getCloudDraft, saveCloudDraft, clearCloudDraft } from "@/services/leadFormDraftService";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const formSchema = z.object({
   nome_empresa: z.string().min(2, "Nome da empresa é obrigatório"),
