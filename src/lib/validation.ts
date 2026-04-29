@@ -11,6 +11,7 @@ export const projectSchema = z.object({
   domain: z.string().optional().nullable(),
   blaster_link: z.string().optional().nullable(),
   partner_link: z.string().optional().nullable(), // Added partner_link field
+  showcase_link: z.string().optional().nullable(),
   provider_credentials: z.string().optional().nullable(),
 });
 

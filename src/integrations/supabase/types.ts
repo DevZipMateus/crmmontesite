@@ -517,6 +517,7 @@ export type Database = {
           remove_from_hostinger: boolean
           requires_paid_customization: boolean | null
           responsible_name: string | null
+          showcase_link: string | null
           site_ready_date: string | null
           status: string | null
           telefone: string | null
@@ -555,6 +556,7 @@ export type Database = {
           remove_from_hostinger?: boolean
           requires_paid_customization?: boolean | null
           responsible_name?: string | null
+          showcase_link?: string | null
           site_ready_date?: string | null
           status?: string | null
           telefone?: string | null
@@ -593,6 +595,7 @@ export type Database = {
           remove_from_hostinger?: boolean
           requires_paid_customization?: boolean | null
           responsible_name?: string | null
+          showcase_link?: string | null
           site_ready_date?: string | null
           status?: string | null
           telefone?: string | null
@@ -1039,6 +1042,7 @@ export type Database = {
           remove_from_hostinger: boolean
           requires_paid_customization: boolean | null
           responsible_name: string | null
+          showcase_link: string | null
           site_ready_date: string | null
           status: string | null
           telefone: string | null

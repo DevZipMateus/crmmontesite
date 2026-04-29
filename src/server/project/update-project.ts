@@ -29,6 +29,7 @@ export async function updateProject(id: string, values: Partial<Project>) {
     if (values.assigned_programmer !== undefined) updateData.assigned_programmer = values.assigned_programmer;
     if (values.is_inadimplente !== undefined) updateData.is_inadimplente = values.is_inadimplente;
     if (values.project_link !== undefined) updateData.project_link = values.project_link;
+    if (values.showcase_link !== undefined) updateData.showcase_link = values.showcase_link;
     
     // Handle partner_link only if client_type is being updated
     if (values.client_type !== undefined) {
