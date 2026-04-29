@@ -17,6 +17,7 @@ import { useFormAutoSave } from "@/hooks/useFormAutoSave";
 import { useFormProgress } from "@/hooks/useFormProgress";
 import { AutoSaveIndicator } from "@/components/ui/auto-save-indicator";
 import { FormProgressBar } from "@/components/ui/form-progress-bar";
+import { CloudSyncIndicator } from "@/components/ui/cloud-sync-indicator";
 import { DraftRecoveryDialog } from "./DraftRecoveryDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
@@ -198,6 +199,8 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
   // ===== Cloud sync (texts only) — sincroniza rascunho entre dispositivos via banco =====
   const cloudRestoredRef = React.useRef(false);
   const [cloudSyncing, setCloudSyncing] = useState(false);
+  const [lastCloudSyncedAt, setLastCloudSyncedAt] = useState<Date | null>(null);
+  const [cloudSyncError, setCloudSyncError] = useState(false);
 
   // Restaura rascunho da nuvem ao carregar (se não houver dados do servidor já enviados)
   useEffect(() => {
@@ -209,6 +212,9 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     (async () => {
       const cloud = await getCloudDraft(leadFormHash);
       if (!cloud?.draft_data) return;
+
+      // Marca como já sincronizado (timestamp da nuvem)
+      setLastCloudSyncedAt(new Date(cloud.updated_at));
 
       // Compara com timestamp local: usa o mais recente
       const localTs = getSavedTimestamp();
@@ -227,7 +233,16 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
   const debouncedCloudSave = useDebounce((data: FormValues) => {
     if (!leadFormHash) return;
     setCloudSyncing(true);
-    saveCloudDraft(leadFormHash, data).finally(() => setCloudSyncing(false));
+    saveCloudDraft(leadFormHash, data)
+      .then((ok) => {
+        if (ok) {
+          setLastCloudSyncedAt(new Date());
+          setCloudSyncError(false);
+        } else {
+          setCloudSyncError(true);
+        }
+      })
+      .finally(() => setCloudSyncing(false));
   }, 1500);
 
   useEffect(() => {
@@ -428,13 +443,22 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
       />
 
       {/* Progress Bar - Always visible */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 rounded-lg border shadow-sm">
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 rounded-lg border shadow-sm space-y-2">
         <FormProgressBar
           progress={progress}
           filledFields={filledFields}
           totalFields={totalFields}
           showDetails={true}
         />
+        {leadFormHash && (
+          <div className="flex justify-end">
+            <CloudSyncIndicator
+              isSyncing={cloudSyncing}
+              lastSyncedAt={lastCloudSyncedAt}
+              hasError={cloudSyncError}
+            />
+          </div>
+        )}
       </div>
 
       {/* Aviso de privacidade e sincronização */}
@@ -450,23 +474,32 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
         </AlertDescription>
       </Alert>
 
-      {(hasSavedData || cloudSyncing) && !showDraftDialog && (
+      {(hasSavedData || cloudSyncing || lastCloudSyncedAt) && !showDraftDialog && (
         <Alert className="border-primary/20 bg-primary/5">
           <Info className="h-4 w-4 text-primary" />
-          <AlertDescription className="flex items-center justify-between">
+          <AlertDescription className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-sm">
               {leadFormHash
                 ? "Rascunho sincronizado automaticamente entre seus dispositivos."
                 : "Você está editando um rascunho salvo automaticamente neste navegador."}
             </span>
-            <AutoSaveIndicator
-              isSaving={isSaving || cloudSyncing}
-              lastSavedAt={lastSavedAt}
-              className="ml-4"
-            />
+            <div className="flex flex-wrap items-center gap-3">
+              {leadFormHash && (
+                <CloudSyncIndicator
+                  isSyncing={cloudSyncing}
+                  lastSyncedAt={lastCloudSyncedAt}
+                  hasError={cloudSyncError}
+                />
+              )}
+              <AutoSaveIndicator
+                isSaving={isSaving}
+                lastSavedAt={lastSavedAt}
+              />
+            </div>
           </AlertDescription>
         </Alert>
       )}
+
 
 
       <Form {...form}>
