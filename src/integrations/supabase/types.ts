@@ -265,6 +265,30 @@ export type Database = {
           },
         ]
       }
+      lead_form_drafts: {
+        Row: {
+          created_at: string
+          draft_data: Json
+          form_hash: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          draft_data?: Json
+          form_hash: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          draft_data?: Json
+          form_hash?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lead_notes: {
         Row: {
           created_at: string

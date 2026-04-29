@@ -21,6 +21,8 @@ import { DraftRecoveryDialog } from "./DraftRecoveryDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import { ExistingPersonalizationData } from "@/hooks/useExistingPersonalization";
+import { getCloudDraft, saveCloudDraft, clearCloudDraft } from "@/services/leadFormDraftService";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const formSchema = z.object({
   nome_empresa: z.string().min(2, "Nome da empresa é obrigatório"),
@@ -193,6 +195,50 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     }
   }, [hasSavedData, existingData, restoreSavedData, loadFileMetadata, loadFiles, savedFileToFile]);
 
+  // ===== Cloud sync (texts only) — sincroniza rascunho entre dispositivos via banco =====
+  const cloudRestoredRef = React.useRef(false);
+  const [cloudSyncing, setCloudSyncing] = useState(false);
+
+  // Restaura rascunho da nuvem ao carregar (se não houver dados do servidor já enviados)
+  useEffect(() => {
+    if (cloudRestoredRef.current) return;
+    if (!leadFormHash) return;
+    if (existingData) return; // dados já enviados têm prioridade
+    cloudRestoredRef.current = true;
+
+    (async () => {
+      const cloud = await getCloudDraft(leadFormHash);
+      if (!cloud?.draft_data) return;
+
+      // Compara com timestamp local: usa o mais recente
+      const localTs = getSavedTimestamp();
+      const cloudTs = cloud.updated_at;
+      const cloudIsNewer = !localTs || new Date(cloudTs) > new Date(localTs);
+      if (!cloudIsNewer) return;
+
+      // Aplica os campos do rascunho da nuvem ao formulário
+      Object.entries(cloud.draft_data).forEach(([k, v]) => {
+        form.setValue(k as any, v as any, { shouldDirty: false });
+      });
+    })();
+  }, [leadFormHash, existingData, form, getSavedTimestamp]);
+
+  // Salva rascunho na nuvem com debounce (apenas textos — não envia arquivos)
+  const debouncedCloudSave = useDebounce((data: FormValues) => {
+    if (!leadFormHash) return;
+    setCloudSyncing(true);
+    saveCloudDraft(leadFormHash, data).finally(() => setCloudSyncing(false));
+  }, 1500);
+
+  useEffect(() => {
+    if (!leadFormHash) return;
+    const sub = form.watch((data) => {
+      debouncedCloudSave(data as FormValues);
+    });
+    return () => sub.unsubscribe();
+  }, [leadFormHash, form.watch]);
+
+
   // Populate form with existing data when available
   useEffect(() => {
     if (existingData) {
@@ -341,6 +387,9 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     // Clear draft after successful submission
     if (!isSubmitted) {
       clearSavedData();
+      if (leadFormHash) {
+        clearCloudDraft(leadFormHash);
+      }
     }
   };
 
@@ -388,34 +437,37 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
         />
       </div>
 
-      {/* Aviso de privacidade sobre o auto-save no dispositivo */}
+      {/* Aviso de privacidade e sincronização */}
       <Alert className="border-amber-500/40 bg-amber-50 dark:bg-amber-950/20">
         <Info className="h-4 w-4 text-amber-600" />
         <AlertDescription className="text-sm text-amber-900 dark:text-amber-100">
-          <strong>Salvamento automático no seu dispositivo:</strong> para evitar perda de dados,
-          os campos preenchidos e os arquivos enviados (logo, mídias, depoimentos) ficam
-          armazenados temporariamente neste navegador (localStorage) até você concluir o envio.
-          Evite usar um computador público ou compartilhado se preferir não deixar essas
-          informações salvas localmente. Os dados são apagados automaticamente após o envio do
-          formulário.
+          <strong>Salvamento automático:</strong> os campos de <strong>texto</strong> são salvos
+          na nuvem e sincronizam entre seus dispositivos
+          {leadFormHash ? " (você pode começar no celular e finalizar no computador, ou vice-versa)" : ""}.
+          Já os <strong>arquivos enviados</strong> (logo, mídias, depoimentos) ficam armazenados
+          apenas neste navegador — se trocar de aparelho, será preciso enviá-los novamente.
+          Tudo é apagado automaticamente após o envio do formulário.
         </AlertDescription>
       </Alert>
 
-      {hasSavedData && !showDraftDialog && (
+      {(hasSavedData || cloudSyncing) && !showDraftDialog && (
         <Alert className="border-primary/20 bg-primary/5">
           <Info className="h-4 w-4 text-primary" />
           <AlertDescription className="flex items-center justify-between">
             <span className="text-sm">
-              Você está editando um rascunho salvo automaticamente neste navegador.
+              {leadFormHash
+                ? "Rascunho sincronizado automaticamente entre seus dispositivos."
+                : "Você está editando um rascunho salvo automaticamente neste navegador."}
             </span>
-            <AutoSaveIndicator 
-              isSaving={isSaving} 
+            <AutoSaveIndicator
+              isSaving={isSaving || cloudSyncing}
               lastSavedAt={lastSavedAt}
               className="ml-4"
             />
           </AlertDescription>
         </Alert>
       )}
+
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
