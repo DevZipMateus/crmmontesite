@@ -17,6 +17,7 @@ import { useFormAutoSave } from "@/hooks/useFormAutoSave";
 import { useFormProgress } from "@/hooks/useFormProgress";
 import { AutoSaveIndicator } from "@/components/ui/auto-save-indicator";
 import { FormProgressBar } from "@/components/ui/form-progress-bar";
+import { CloudSyncIndicator } from "@/components/ui/cloud-sync-indicator";
 import { DraftRecoveryDialog } from "./DraftRecoveryDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
