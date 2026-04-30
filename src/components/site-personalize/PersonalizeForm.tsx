@@ -399,14 +399,13 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
   // Wrap onSubmit to clear draft on success
   const onSubmit = async (data: FormValues) => {
     await originalOnSubmit(data);
-    // Clear draft after successful submission
-    if (!isSubmitted) {
-      clearSavedData();
-      if (leadFormHash) {
-        clearCloudDraft(leadFormHash);
-      }
+    // Always clear the saved draft after submission to free up DB space
+    clearSavedData();
+    if (leadFormHash) {
+      clearCloudDraft(leadFormHash);
     }
   };
+
 
   // Estado de confirmação MELHORADO
   if (isSubmitted) {
