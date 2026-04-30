@@ -14,19 +14,23 @@ export function setupNotificationRealtime(
   dismissedIds: string[]
 ) {
   console.log('[notificationRealtimeService] Setting up realtime subscription for project status changes');
-  
-  // First, check if the channel already exists and remove it to prevent duplicates
+
+  // Remove any pre-existing channels whose topic starts with our prefix to prevent duplicates
   const existingChannels = supabase.getChannels();
   existingChannels.forEach(ch => {
-    if (ch.topic === 'notification-status-changes') {
-      console.log('[notificationRealtimeService] Removing existing notification-status-changes channel');
+    // ch.topic is like "realtime:notification-status-changes-..."
+    if (typeof ch.topic === 'string' && ch.topic.includes('notification-status-changes')) {
+      console.log('[notificationRealtimeService] Removing existing channel:', ch.topic);
       supabase.removeChannel(ch);
     }
   });
-  
-  // Set up a dedicated channel just for notification status updates with a unique name
+
+  // Use a UNIQUE channel name per subscription to avoid reusing an already-subscribed channel
+  // (which would cause: "cannot add `postgres_changes` callbacks ... after `subscribe()`")
+  const uniqueChannelName = `notification-status-changes-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
   const channel = supabase
-    .channel('notification-status-changes')
+    .channel(uniqueChannelName)
     .on(
       'postgres_changes',
       {
