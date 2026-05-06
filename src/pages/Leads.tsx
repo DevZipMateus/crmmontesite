@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo } from "react";
-import { Plus } from "lucide-react";
+import { Plus, FileText } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PageLayout } from "@/components/layout/PageLayout";
 import LeadCard from "@/components/leads/LeadCard";
@@ -17,6 +18,7 @@ import { useLeads, useDeleteLead } from "@/hooks/useLeads";
 import { Lead, LeadFilters as LeadFiltersType, SITUACOES_PADRONIZADAS } from "@/types/lead";
 
 const Leads: React.FC = () => {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<LeadFiltersType>({});
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -74,6 +76,10 @@ const Leads: React.FC = () => {
       ]}
       actions={
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => navigate('/personalize-site')}>
+            <FileText className="h-4 w-4 mr-1.5" />
+            Formulário Avulso
+          </Button>
           <NotificationTestButton />
           <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
           <LeadViewToggle view={view} onViewChange={setView} />
