@@ -6,7 +6,6 @@ import {
   Terminal,
   Settings,
   ContactRound,
-  AlertCircle,
   FileCheck,
   Sheet
 } from "lucide-react";
@@ -106,12 +105,6 @@ const MainMenuSection: React.FC = () => {
            description="Webhooks, APIs e parceiros"
          />
         
-        <MenuItem 
-          icon={<AlertCircle size={24} />}
-          label="Projetos Inadimplentes"
-          href="/projetos-inadimplentes"
-          description="Gerenciar projetos com pagamentos pendentes"
-        />
         
         <MenuItem 
           icon={<FileCheck size={24} />}

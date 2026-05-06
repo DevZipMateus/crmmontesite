@@ -1,13 +1,11 @@
-
 import React, { useState, useEffect } from "react";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import DashboardFooter from "@/components/dashboard/DashboardFooter";
 import MainMenuSection from "@/components/dashboard/MainMenuSection";
 import StatsSection from "@/components/dashboard/StatsSection";
 import { useProjects } from "@/hooks/use-projects";
 import { AnalyticsSection } from "@/components/dashboard/AnalyticsSection";
 import { InfoCardsSection } from "@/components/dashboard/InfoCardsSection";
 import { cleanupRealtimeSubscriptions } from "@/lib/supabase/realtime";
+import { TopBar } from "@/components/layout/TopBar";
 
 const Index: React.FC = () => {
   const { projects, loading } = useProjects();
@@ -34,19 +32,27 @@ const Index: React.FC = () => {
   }
   
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <DashboardHeader />
-
-      <main className="flex-1 container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-4 sm:py-6 lg:py-8 mt-12 sm:mt-16 lg:mt-20 pb-12 sm:pb-16 lg:pb-20">
-        <div className="space-y-6 sm:space-y-8 lg:space-y-12">
-          <MainMenuSection />
+    <div className="flex flex-col flex-1">
+      <TopBar breadcrumbs={[
+        { label: "MonteSite CRM", href: "/home" },
+        { label: "Início" }
+      ]} />
+      
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
+        <div className="max-w-[1400px] mx-auto space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Bom dia, Victor 👋</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Gerencie seus projetos, leads e produção em um só lugar.
+            </p>
+          </div>
+          
           <StatsSection />
+          <MainMenuSection />
           <AnalyticsSection projects={projects} />
           <InfoCardsSection projects={projects} />
         </div>
       </main>
-
-      <DashboardFooter />
     </div>
   );
 }
