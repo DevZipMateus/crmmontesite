@@ -5,13 +5,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { Card, CardContent } from "@/components/ui/card";
 import { PersonalizeBasicForm } from "./PersonalizeBasicForm";
 import { PersonalizeServicosForm } from "./PersonalizeServicosForm";
 import { PersonalizeConfigForm } from "./PersonalizeConfigForm";
 import { useFileUploadHandlers } from "./FileUploadHandlers";
 import { useFormSubmission } from "./useFormSubmission";
 import type { FormValues } from "./PersonalizeBasicForm";
-import { CheckCircle } from "lucide-react";
+import { UseFormReturn } from "react-hook-form";
+import { CheckCircle, ArrowLeft, ArrowRight, Check, Building2, ShoppingBag, Image, Settings } from "lucide-react";
 import { validateCnpjCpf } from "@/utils/documentFormatter";
 import { useFormAutoSave } from "@/hooks/useFormAutoSave";
 import { useFormProgress } from "@/hooks/useFormProgress";
@@ -56,6 +58,97 @@ const formSchema = z.object({
   linkMapa: z.string().optional(),
 });
 
+const WIZARD_STEPS = [
+  { label: "Dados básicos", icon: Building2 },
+  { label: "Serviços", icon: ShoppingBag },
+  { label: "Mídias", icon: Image },
+  { label: "Configurações", icon: Settings },
+];
+
+const FormWizardSteps: React.FC<{ currentStep: number; onStepClick: (step: number) => void }> = ({ currentStep, onStepClick }) => (
+  <div className="flex items-center justify-between gap-2 mb-2">
+    {WIZARD_STEPS.map((step, i) => {
+      const StepIcon = step.icon;
+      const isDone = i < currentStep;
+      const isActive = i === currentStep;
+      return (
+        <React.Fragment key={i}>
+          {i > 0 && (
+            <div className={`flex-1 h-0.5 ${isDone ? 'bg-primary' : 'bg-border'}`} />
+          )}
+          <button
+            type="button"
+            onClick={() => onStepClick(i)}
+            className={`flex flex-col items-center gap-1.5 group ${isActive ? 'text-primary' : isDone ? 'text-primary/70' : 'text-muted-foreground'}`}
+          >
+            <div className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-semibold transition-colors
+              ${isActive ? 'bg-primary text-primary-foreground ring-2 ring-primary/20' : isDone ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground group-hover:bg-muted/80'}`}>
+              {isDone ? <Check className="h-4 w-4" /> : <StepIcon className="h-4 w-4" />}
+            </div>
+            <span className="text-xs font-medium whitespace-nowrap hidden sm:block">{step.label}</span>
+          </button>
+        </React.Fragment>
+      );
+    })}
+  </div>
+);
+
+const FormWizardReview: React.FC<{
+  form: UseFormReturn<any>;
+  logoPreview: string | null;
+  midiaCount: number;
+  depoimentoCount: number;
+}> = ({ form, logoPreview, midiaCount, depoimentoCount }) => {
+  const values = form.getValues();
+  const sections = [
+    { title: "Empresa", items: [
+      { label: "Nome", value: values.nome_empresa },
+      { label: "E-mail", value: values.email },
+      { label: "Telefone", value: values.telefone },
+      { label: "CNPJ/CPF", value: values.cnpj_cpf },
+      { label: "Endereço", value: values.endereco },
+    ]},
+    { title: "Identidade", items: [
+      { label: "Slogan", value: values.slogan },
+      { label: "Cores preferidas", value: values.cores_preferidas },
+      { label: "Logo", value: logoPreview ? "Enviado" : "Não enviado" },
+    ]},
+    { title: "Conteúdo", items: [
+      { label: "Serviços", value: values.servicosOferecidos ? "Informados" : "Não informado" },
+      { label: "Produtos", value: values.produtos ? "Informados" : "Não informado" },
+      { label: "Mídias", value: midiaCount > 0 ? `${midiaCount} arquivo(s)` : "Nenhum" },
+      { label: "Depoimentos", value: depoimentoCount > 0 ? `${depoimentoCount} arquivo(s)` : "Nenhum" },
+    ]},
+    { title: "Configurações", items: [
+      { label: "WhatsApp", value: values.botaoWhatsapp ? "Ativado" : "Desativado" },
+      { label: "Mapa", value: values.possuiMapa ? "Ativado" : "Desativado" },
+      { label: "Horário", value: values.horario_funcionamento || "Não informado" },
+    ]},
+  ];
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {sections.map((section) => (
+        <Card key={section.title}>
+          <CardContent className="p-4">
+            <h4 className="text-sm font-semibold text-foreground mb-3">{section.title}</h4>
+            <div className="space-y-2">
+              {section.items.map((item) => (
+                <div key={item.label} className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">{item.label}</span>
+                  <span className={`font-medium truncate ml-2 max-w-[60%] text-right ${item.value && item.value !== "Não enviado" && item.value !== "Não informado" && item.value !== "Nenhum" && item.value !== "Desativado" ? 'text-foreground' : 'text-muted-foreground/60'}`}>
+                    {item.value || "—"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
 interface PersonalizeFormProps {
   modeloSelecionado?: string;
   projectHash?: string;
@@ -91,6 +184,8 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
   
   // Draft recovery state
   const [showDraftDialog, setShowDraftDialog] = useState(false);
+  // Wizard step state
+  const [currentStep, setCurrentStep] = useState(0);
 
   // File upload handlers
   const fileHandlers = useFileUploadHandlers({
@@ -502,65 +597,104 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
 
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* Informações Básicas */}
-          <div className="space-y-6">
-            <div className="border-b pb-4">
-              <h3 className="text-lg font-medium text-gray-900">Informações Básicas</h3>
-              <p className="text-sm text-gray-500 mt-1">Dados principais da sua empresa</p>
-            </div>
-            <PersonalizeBasicForm
-              form={form}
-              logoPreview={logoPreview}
-              logoFileName={logoFileName}
-              handleLogoUpload={fileHandlers.handleLogoUpload}
-              handleRemoveLogo={fileHandlers.handleRemoveLogo}
-            />
-          </div>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormWizardSteps currentStep={currentStep} onStepClick={setCurrentStep} />
 
-          {/* Produtos, Serviços & Avaliações */}
-          <div className="space-y-6">
-            <div className="border-b pb-4">
-              <h3 className="text-lg font-medium text-gray-900">Produtos, Serviços e Planos</h3>
-              <p className="text-sm text-gray-500 mt-1">Detalhes sobre seus produtos, serviços e avaliações de clientes</p>
+          {/* Step 1: Dados básicos */}
+          {currentStep === 0 && (
+            <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="border-b pb-4">
+                <h3 className="text-lg font-semibold text-foreground">Dados Básicos</h3>
+                <p className="text-sm text-muted-foreground mt-1">Informações principais da sua empresa</p>
+              </div>
+              <PersonalizeBasicForm
+                form={form}
+                logoPreview={logoPreview}
+                logoFileName={logoFileName}
+                handleLogoUpload={fileHandlers.handleLogoUpload}
+                handleRemoveLogo={fileHandlers.handleRemoveLogo}
+              />
             </div>
-            <PersonalizeServicosForm 
-              form={form}
-              depoimentoPreviews={depoimentoPreviews}
-              handleDepoimentoUpload={fileHandlers.handleDepoimentoUpload}
-              handleRemoveDepoimento={fileHandlers.handleRemoveDepoimento}
-            />
-          </div>
+          )}
 
-          {/* Mídias do Site */}
-          <div className="space-y-6">
-            <div className="border-b pb-4">
-              <h3 className="text-lg font-medium text-gray-900">Mídias do Site</h3>
-              <p className="text-sm text-gray-500 mt-1">Imagens e vídeos para o seu site</p>
+          {/* Step 2: Serviços & Produtos */}
+          {currentStep === 1 && (
+            <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="border-b pb-4">
+                <h3 className="text-lg font-semibold text-foreground">Produtos, Serviços e Planos</h3>
+                <p className="text-sm text-muted-foreground mt-1">Detalhes sobre seus produtos, serviços e avaliações de clientes</p>
+              </div>
+              <PersonalizeServicosForm 
+                form={form}
+                depoimentoPreviews={depoimentoPreviews}
+                handleDepoimentoUpload={fileHandlers.handleDepoimentoUpload}
+                handleRemoveDepoimento={fileHandlers.handleRemoveDepoimento}
+              />
             </div>
-            <PersonalizeConfigForm 
-              form={form}
-              midiaPreviews={midiaPreviews}
-              midiaCaptions={midiaCaptions}
-              handleMidiaUpload={fileHandlers.handleMidiaUpload}
-              handleRemoveMidia={fileHandlers.handleRemoveMidia}
-              handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
-            />
-          </div>
+          )}
 
-          <div className="flex flex-col items-center gap-3 pt-6">
-            <AutoSaveIndicator 
-              isSaving={isSaving} 
-              lastSavedAt={lastSavedAt}
-            />
-            <Button 
-              type="submit" 
-              size="lg" 
-              disabled={isSubmitting || isSubmitted}
-              className="min-w-[200px]"
+          {/* Step 3: Mídias */}
+          {currentStep === 2 && (
+            <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="border-b pb-4">
+                <h3 className="text-lg font-semibold text-foreground">Mídias do Site</h3>
+                <p className="text-sm text-muted-foreground mt-1">Imagens e vídeos para o seu site</p>
+              </div>
+              <PersonalizeConfigForm 
+                form={form}
+                midiaPreviews={midiaPreviews}
+                midiaCaptions={midiaCaptions}
+                handleMidiaUpload={fileHandlers.handleMidiaUpload}
+                handleRemoveMidia={fileHandlers.handleRemoveMidia}
+                handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
+              />
+            </div>
+          )}
+
+          {/* Step 4: Configurações finais */}
+          {currentStep === 3 && (
+            <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="border-b pb-4">
+                <h3 className="text-lg font-semibold text-foreground">Configurações Finais</h3>
+                <p className="text-sm text-muted-foreground mt-1">Revise as opções e envie o formulário</p>
+              </div>
+              <FormWizardReview form={form} logoPreview={logoPreview} midiaCount={midiaPreviews.length} depoimentoCount={depoimentoPreviews.length} />
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between pt-6 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+              disabled={currentStep === 0}
+              className="gap-1.5"
             >
-              {isSubmitting ? "Enviando..." : isSubmitted ? "Formulário Enviado" : "Enviar Personalização"}
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
             </Button>
+            <span className="text-sm text-muted-foreground">
+              Etapa {currentStep + 1} de 4
+            </span>
+            {currentStep < 3 ? (
+              <Button
+                type="button"
+                onClick={() => setCurrentStep(Math.min(3, currentStep + 1))}
+                className="gap-1.5"
+              >
+                Continuar
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                disabled={isSubmitting || isSubmitted}
+                className="gap-1.5 min-w-[180px]"
+              >
+                {isSubmitting ? "Enviando..." : isSubmitted ? "Enviado!" : "Enviar Personalização"}
+              </Button>
+            )}
           </div>
         </form>
       </Form>
