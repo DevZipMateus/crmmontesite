@@ -54,7 +54,6 @@ export default function ProjectCard({
   const navigate = useNavigate();
   const clientTypeInfo = getClientTypeInfo(project);
   const { toast } = useToast();
-  const { modelName, isLoading: modelLoading } = useModelDetails(project.template);
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const { archiveProject, unarchiveProject, isArchiving } = useProjectArchiving();
 
