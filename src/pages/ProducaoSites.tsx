@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { TopBar } from "@/components/layout/TopBar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useProjects } from "@/hooks/use-projects";
 import { useToast } from "@/hooks/use-toast";
@@ -34,15 +33,14 @@ export default function ProducaoSites() {
   ];
 
   return (
-    <PageLayout title="Produção de Sites">
-      <TopBar
-        breadcrumbs={[
-          { label: "MonteSite CRM", href: "/home" },
-          { label: "Produção de Sites" },
-        ]}
-      />
-
-      <div className="p-4 sm:p-6 space-y-5">
+    <PageLayout
+      title="Produção de Sites"
+      breadcrumbs={[
+        { label: "Início", href: "/home" },
+        { label: "Produção de Sites" },
+      ]}
+    >
+      <div className="space-y-5">
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {stats.map((s, i) => (
