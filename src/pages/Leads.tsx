@@ -3,7 +3,6 @@ import React, { useState, useMemo } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { TopBar } from "@/components/layout/TopBar";
 import LeadCard from "@/components/leads/LeadCard";
 import LeadFilters from "@/components/leads/LeadFilters";
 import LeadMetrics from "@/components/leads/LeadMetrics";
@@ -61,32 +60,31 @@ const Leads: React.FC = () => {
   if (error) {
     return (
       <PageLayout title="Gestão de Leads">
-        <div className="p-6 text-center text-destructive">Erro ao carregar leads. Tente novamente.</div>
+        <div className="text-center text-destructive">Erro ao carregar leads. Tente novamente.</div>
       </PageLayout>
     );
   }
 
   return (
-    <PageLayout title="Gestão de Leads">
-      <TopBar
-        breadcrumbs={[
-          { label: "Início", href: "/home" },
-          { label: "Leads" },
-        ]}
-        actions={
-          <div className="flex items-center gap-2">
-            <NotificationTestButton />
-            <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
-            <LeadViewToggle view={view} onViewChange={setView} />
-            <Button onClick={handleCreateLead} size="sm">
-              <Plus className="h-4 w-4 mr-1.5" />
-              Novo lead
-            </Button>
-          </div>
-        }
-      />
-
-      <div className="p-4 sm:p-6 space-y-5">
+    <PageLayout
+      title="Gestão de Leads"
+      breadcrumbs={[
+        { label: "Início", href: "/home" },
+        { label: "Leads" },
+      ]}
+      actions={
+        <div className="flex items-center gap-2">
+          <NotificationTestButton />
+          <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
+          <LeadViewToggle view={view} onViewChange={setView} />
+          <Button onClick={handleCreateLead} size="sm">
+            <Plus className="h-4 w-4 mr-1.5" />
+            Novo lead
+          </Button>
+        </div>
+      }
+    >
+      <div className="space-y-5">
         {/* Title */}
         <h1 className="text-2xl font-bold">Gestão de Leads</h1>
 
