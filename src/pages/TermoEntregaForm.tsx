@@ -246,9 +246,9 @@ const TermoEntregaForm: React.FC = () => {
 
                 <div className="bg-gray-100 rounded-lg p-4 space-y-3 text-sm">
                   <p>
-                    Ao preencher seus dados de identificacao (Nome Completo e CPF) abaixo, voce declara que revisou a
-                    versao atual do seu site e registra sua avaliacao. A partir desta data, passam a valer as
-                    seguintes regras de manutencao e ajustes:
+                    Ao preencher seus dados de identificação (Nome Completo e CPF) abaixo, você declara que revisou a
+                    versão atual do seu site e registra sua avaliação. A partir desta data, passam a valer as
+                    seguintes regras de manutenção e ajustes:
                   </p>
 
                   <ul className="space-y-2 ml-4">
