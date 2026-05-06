@@ -120,7 +120,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { projects } = useProjects();
-  const { leads } = useLeads();
+  const { data: leads } = useLeads();
 
   // Dynamic badges
   const activeProjects = projects?.filter(
