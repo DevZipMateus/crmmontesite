@@ -64,7 +64,7 @@ const TermosTable: React.FC<TermosTableProps> = ({ projects, onRefresh, onViewDe
   };
 
   const handleCopyLink = async (hash: string) => {
-    const link = `${window.location.origin}/termo-entrega/${hash}`;
+    const link = `${window.location.origin}/revisao/${hash}`;
     await navigator.clipboard.writeText(link);
     toast.success("Link copiado para a área de transferência!");
   };
