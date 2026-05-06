@@ -1,5 +1,4 @@
-
-import { useState, ChangeEvent } from "react";
+import { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,35 +17,25 @@ export default function SearchInput({
   placeholder = "Buscar projetos...",
   className 
 }: SearchInputProps) {
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
-  };
-
-  const clearSearch = () => {
-    onChange("");
-  };
-
   return (
-    <div className={cn("relative w-full max-w-lg", className)}>
-      <div className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground">
-        <Search className="h-4 w-4" />
-      </div>
+    <div className={cn("relative", className)}>
+      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         type="text"
         placeholder={placeholder}
-        className="pl-10 pr-10 rounded-full border-border/40 bg-white shadow-subtle h-12 focus-visible:ring-primary/20"
+        className="pl-9 pr-9 h-9 bg-card border-border/60 text-sm"
         value={value}
-        onChange={handleChange}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
       />
       {value && (
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full hover:bg-secondary/80"
-          onClick={clearSearch}
+          className="absolute right-0.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-md hover:bg-muted"
+          onClick={() => onChange("")}
         >
-          <X className="h-4 w-4" />
-          <span className="sr-only">Clear search</span>
+          <X className="h-3.5 w-3.5" />
+          <span className="sr-only">Limpar busca</span>
         </Button>
       )}
     </div>

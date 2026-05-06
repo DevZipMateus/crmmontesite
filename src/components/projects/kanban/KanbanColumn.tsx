@@ -1,5 +1,4 @@
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Code, Globe, Clock, CheckCircle2, Inbox, PhoneOff } from "lucide-react";
 import ProjectCard from "./ProjectCard";
@@ -23,6 +22,14 @@ interface KanbanColumnProps {
   onProjectUpdated?: () => void;
 }
 
+const statusColorMap: Record<string, { bg: string; text: string; dot: string; border: string }> = {
+  "Recebido": { bg: "bg-violet-50", text: "text-violet-700", dot: "bg-violet-500", border: "border-violet-200" },
+  "Victor": { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500", border: "border-blue-200" },
+  "Davi": { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", border: "border-amber-200" },
+  "Sem retorno": { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", border: "border-red-200" },
+  "Site pronto": { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-200" },
+};
+
 export default function KanbanColumn({
   statusType,
   projects,
@@ -39,18 +46,8 @@ export default function KanbanColumn({
   const filteredProjects = projects.filter(
     (project) => project.status === statusType.value
   );
-  
-  // Determine icon component based on status
-  let StatusIcon;
-  switch(statusType.icon) {
-    case 'Inbox': StatusIcon = Inbox; break;
-    case 'Code': StatusIcon = Code; break;
-    case 'Globe': StatusIcon = Globe; break;
-    case 'Clock': StatusIcon = Clock; break;
-    case 'CheckCircle2': StatusIcon = CheckCircle2; break;
-    case 'PhoneOff': StatusIcon = PhoneOff; break;
-    default: StatusIcon = Inbox;
-  }
+
+  const colors = statusColorMap[statusType.value] || { bg: "bg-muted", text: "text-muted-foreground", dot: "bg-muted-foreground", border: "border-border" };
 
   return (
     <div
@@ -60,25 +57,22 @@ export default function KanbanColumn({
       role="region"
       aria-label={`Coluna ${statusType.value}`}
     >
-      <div className="mb-3">
-        <Card className={`p-2 ${statusType.color.replace('bg-', 'bg-opacity-10 border-l-4 border-').replace('-500', '-400')} shadow-sm`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className={`rounded-full p-1 ${statusType.color} text-white`} aria-hidden="true">
-                <StatusIcon className="h-4 w-4" />
-              </div>
-              <span className="font-medium">{statusType.value}</span>
-            </div>
-            <Badge variant="outline" className="bg-gray-50">
-              {filteredProjects.length}
-            </Badge>
+      {/* Column header */}
+      <div className={`mb-3 px-3 py-2.5 rounded-lg ${colors.bg} border ${colors.border}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className={`h-2.5 w-2.5 rounded-full ${colors.dot}`} />
+            <span className={`text-sm font-semibold ${colors.text}`}>{statusType.value}</span>
           </div>
-        </Card>
+          <Badge variant="secondary" className="text-xs font-medium h-5 min-w-[20px] justify-center">
+            {filteredProjects.length}
+          </Badge>
+        </div>
       </div>
       
       {filteredProjects.length > 0 ? (
-        <ScrollArea className="flex-grow pr-3">
-          <div className="flex flex-col space-y-3" role="list" aria-label={`Projetos com status ${statusType.value}`}>
+        <ScrollArea className="flex-grow pr-1">
+          <div className="flex flex-col gap-2.5" role="list" aria-label={`Projetos com status ${statusType.value}`}>
             {filteredProjects.map((project) => (
               <ProjectCard
                 key={project.id}
@@ -95,11 +89,11 @@ export default function KanbanColumn({
         </ScrollArea>
       ) : (
         <div 
-          className="flex-grow flex items-center justify-center border border-dashed rounded-md bg-gray-50 p-4"
+          className="flex-grow flex items-center justify-center border border-dashed border-border/60 rounded-lg bg-muted/30 p-6 min-h-[100px]"
           role="region"
           aria-label={`Nenhum projeto com status ${statusType.value}`}
         >
-          <p className="text-gray-400 text-sm">Sem projetos</p>
+          <p className="text-muted-foreground text-xs">Sem projetos</p>
         </div>
       )}
     </div>
