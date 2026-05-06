@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { Card, CardContent } from "@/components/ui/card";
 import { PersonalizeBasicForm } from "./PersonalizeBasicForm";
 import { PersonalizeServicosForm } from "./PersonalizeServicosForm";
 import { PersonalizeConfigForm } from "./PersonalizeConfigForm";
