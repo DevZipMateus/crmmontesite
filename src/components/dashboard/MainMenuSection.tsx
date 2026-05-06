@@ -6,7 +6,6 @@ import {
   Terminal,
   Settings,
   ContactRound,
-  AlertCircle,
   FileCheck,
   Sheet
 } from "lucide-react";
