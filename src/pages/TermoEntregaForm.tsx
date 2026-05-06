@@ -342,8 +342,8 @@ const TermoEntregaForm: React.FC = () => {
                     onCheckedChange={(checked) => setAccepted(checked === true)}
                   />
                   <Label htmlFor="aceite" className="text-sm leading-relaxed cursor-pointer">
-                    Li e aceito os termos acima descritos. Confirmo que recebi a versão funcional do meu site e 
-                    estou ciente das condições de suporte e manutenção.
+                    Li e estou ciente das condicoes acima descritas. Confirmo que revisei a versao atual do meu site e
+                    estou ciente das condicoes de suporte e manutencao.
                   </Label>
                 </div>
               </section>
