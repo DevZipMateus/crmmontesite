@@ -138,14 +138,8 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border">
-      <div className="flex items-center gap-2 px-4 py-4 border-b border-sidebar-border">
+      <div className="flex items-center justify-center px-4 py-4 border-b border-sidebar-border">
         <Logo size="sm" />
-        {!collapsed && (
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-foreground">MonteSite</span>
-            <span className="text-[11px] text-muted-foreground uppercase tracking-wider">CRM</span>
-          </div>
-        )}
       </div>
 
       <SidebarContent className="px-2 py-2">
