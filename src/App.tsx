@@ -182,11 +182,11 @@ const App = () => {
             {/* Client submission form - public route */}
             <Route path="/cliente-images/:hash" element={<ClientSubmissionPage />} />
             
-            {/* Termos de Entrega - public form */}
-            <Route path="/termo-entrega/:hash" element={<TermoEntregaForm />} />
+            {/* Etapa de Revisão - public form */}
+            <Route path="/revisao/:hash" element={<TermoEntregaForm />} />
             
-            {/* Termos de Entrega - admin page */}
-            <Route path="/termos-entrega" element={
+            {/* Etapa de Revisão - admin page */}
+            <Route path="/revisoes" element={
               <AuthGuard>
                 <TermosEntrega />
               </AuthGuard>
