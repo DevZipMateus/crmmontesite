@@ -18,16 +18,11 @@ import ProducaoSites from "./pages/ProducaoSites";
 import Login from "./pages/Login";
 import AuthGuard from "./components/auth/AuthGuard";
 import PublicPersonalizeForm from "./pages/PublicPersonalizeForm";
-import CustomUrlAdmin from "./pages/CustomUrlAdmin";
 import PersonalizacaoDetalhe from "@/pages/PersonalizacaoDetalhe";
 import WebhookManagement from "./pages/WebhookManagement";
 import CriarProjetos from "./pages/CriarProjetos";
-import LandingPagesVendedores from "./pages/LandingPagesVendedores";
-import VendedorLandingForm from "./pages/VendedorLandingForm";
 import Leads from "./pages/Leads";
 import ClientSubmissionPage from "./pages/ClientSubmissionPage";
-import PainelVendas from "./pages/PainelVendas";
-import HostingerDNS from "./pages/HostingerDNS";
 import ProjetosInadimplentes from "./pages/ProjetosInadimplentes";
 import TermosEntrega from "./pages/TermosEntrega";
 import TermoEntregaForm from "./pages/TermoEntregaForm";
@@ -71,16 +66,6 @@ const App = () => {
               </AuthGuard>
             } />
             
-            {/* Landing Pages para Vendedores */}
-            <Route path="/landing-pages-vendedores" element={
-              <AuthGuard>
-                <LandingPagesVendedores />
-              </AuthGuard>
-            } />
-            
-            {/* Formulário público para vendedores */}
-            <Route path="/formulario-vendedor" element={<VendedorLandingForm />} />
-            
             {/* Nova rota unificada para criar projetos */}
             <Route path="/criar-projetos" element={
               <AuthGuard>
@@ -92,20 +77,6 @@ const App = () => {
             <Route path="/leads" element={
               <AuthGuard>
                 <Leads />
-              </AuthGuard>
-            } />
-            
-            {/* Painel de Vendas - Rota adicionada */}
-            <Route path="/painel-vendas" element={
-              <AuthGuard>
-                <PainelVendas />
-              </AuthGuard>
-            } />
-            
-            {/* DNS Hostinger - Nova rota */}
-            <Route path="/hostinger-dns" element={
-              <AuthGuard>
-                <HostingerDNS />
               </AuthGuard>
             } />
             
@@ -162,12 +133,7 @@ const App = () => {
               </AuthGuard>
             } />
             
-            {/* Rota para gerenciamento de modelos e URLs personalizadas */}
-            <Route path="/custom-urls" element={
-              <AuthGuard>
-                <CustomUrlAdmin />
-              </AuthGuard>
-            } />
+            
             
             {/* Rota para gerenciamento de webhooks e configurações */}
             <Route path="/webhooks" element={

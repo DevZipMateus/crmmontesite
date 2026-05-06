@@ -4,11 +4,8 @@ import {
   LayoutGrid, 
   Plus, 
   Terminal,
-  Link as LinkIcon,
   Settings,
-  Users,
   ContactRound,
-  Globe,
   AlertCircle,
   FileCheck,
   Sheet
@@ -103,39 +100,11 @@ const MainMenuSection: React.FC = () => {
         />
         
         <MenuItem 
-          icon={<LinkIcon size={24} />}
-          label="Modelos & URLs"
-          href="/custom-urls"
-          description="Gerenciar modelos e URLs para formulários"
-        />
-        
-        <MenuItem 
-          icon={<Globe size={24} />}
-          label="DNS Hostinger"
-          href="/hostinger-dns"
-          description="Gerenciar registros DNS da Hostinger"
-        />
-        
-        <MenuItem 
-          icon={<Settings size={24} />}
-          label="Configurações"
-          href="/webhooks"
-          description="Webhooks, APIs e parceiros"
-        />
-        
-        <MenuItem 
-          icon={<Users size={24} />}
-          label="Painel de Vendas"
-          href="/painel-vendas"
-          description="Visualizar projetos (somente leitura)"
-        />
-        
-        <MenuItem 
-          icon={<Users size={24} />}
-          label="Landing Pages Vendedores"
-          href="/landing-pages-vendedores"
-          description="Gerenciar formulários e gerar comandos para landing pages"
-        />
+           icon={<Settings size={24} />}
+           label="Configurações"
+           href="/webhooks"
+           description="Webhooks, APIs e parceiros"
+         />
         
         <MenuItem 
           icon={<AlertCircle size={24} />}
