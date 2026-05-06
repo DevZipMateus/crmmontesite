@@ -241,7 +241,7 @@ const TermoEntregaForm: React.FC = () => {
               <section>
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">2</span>
-                  Condições de Entrega e Suporte
+                  Condições Após Revisão
                 </h3>
 
                 <div className="bg-gray-100 rounded-lg p-4 space-y-3 text-sm">
