@@ -56,7 +56,7 @@ export const SiteDetailsSection = ({ form }: SiteDetailsSectionProps) => {
               </FormControl>
               <SelectContent>
                 <SelectItem value="Recebido">Recebido</SelectItem>
-                <SelectItem value="Criando site">Criando site</SelectItem>
+                <SelectItem value="Victor">Victor</SelectItem>
                 <SelectItem value="Configurando Domínio">Configurando Domínio</SelectItem>
                 <SelectItem value="Site pronto">Site pronto</SelectItem>
                 <SelectItem value="Em Customização">Em Customização</SelectItem>
