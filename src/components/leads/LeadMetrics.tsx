@@ -1,7 +1,7 @@
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Clock, CheckCircle, AlertTriangle, TrendingUp, UserCheck } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Users, CheckCircle, AlertTriangle, UserCheck, XCircle } from "lucide-react";
 import { Lead } from "@/types/lead";
 
 interface LeadMetricsProps {
@@ -18,10 +18,7 @@ const LeadMetrics: React.FC<LeadMetricsProps> = ({ leads }) => {
   ).length;
   
   const leadsAtrasados = leads.filter(lead => {
-    // Não contar leads com "Site Pronto" como atrasados
-    if (lead.situacao.toLowerCase().includes('site pronto')) {
-      return false;
-    }
+    if (lead.situacao.toLowerCase().includes('site pronto')) return false;
     const dias = Math.ceil((Date.now() - new Date(lead.data_ultimo_contato).getTime()) / (1000 * 60 * 60 * 24));
     return dias > 7;
   }).length;
@@ -33,77 +30,66 @@ const LeadMetrics: React.FC<LeadMetricsProps> = ({ leads }) => {
   ).length;
 
   const leadsComVendedor = leads.filter(lead => lead.vendedor && lead.vendedor.trim() !== '').length;
-  
-  const leadsAtivos = leads.filter(lead => !lead.situacao.toLowerCase().includes('site pronto'));
-  const tempoMedioResposta = leadsAtivos.length > 0 
-    ? Math.round(leadsAtivos.reduce((acc, lead) => {
-        const dias = Math.ceil((Date.now() - new Date(lead.data_ultimo_contato).getTime()) / (1000 * 60 * 60 * 24));
-        return acc + dias;
-      }, 0) / leadsAtivos.length)
-    : 0;
+
+  const pctProntos = totalLeads > 0 ? ((leadsProntos / totalLeads) * 100).toFixed(0) : '0';
+  const pctVendedor = totalLeads > 0 ? ((leadsComVendedor / totalLeads) * 100).toFixed(0) : '0';
 
   const metrics = [
     {
-      title: "Total de Leads",
+      label: "Total de Leads",
       value: totalLeads,
       icon: Users,
-      color: "text-blue-600",
-      description: "Total de leads no sistema"
+      color: "text-primary",
+      bgColor: "bg-primary/10",
     },
     {
-      title: "Sites Prontos",
+      label: "Sites Prontos",
       value: leadsProntos,
+      sub: `${pctProntos}%`,
       icon: CheckCircle,
-      color: "text-green-600",
-      description: `${((leadsProntos / totalLeads) * 100).toFixed(1)}% concluídos`
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-50",
     },
     {
-      title: "Leads Atrasados",
-      value: leadsAtrasados,
-      icon: AlertTriangle,
-      color: "text-red-600",
-      description: "Sem resposta há mais de 7 dias"
-    },
-    {
-      title: "Com Vendedor",
+      label: "Com Vendedor",
       value: leadsComVendedor,
+      sub: `${pctVendedor}%`,
       icon: UserCheck,
-      color: "text-purple-600",
-      description: `${((leadsComVendedor / totalLeads) * 100).toFixed(1)}% atribuídos`
+      color: "text-violet-600",
+      bgColor: "bg-violet-50",
     },
     {
-      title: "Cancelados",
+      label: "Atrasados",
+      value: leadsAtrasados,
+      sub: "> 7 dias",
+      icon: AlertTriangle,
+      color: "text-amber-600",
+      bgColor: "bg-amber-50",
+    },
+    {
+      label: "Cancelados",
       value: leadsCancelados,
-      icon: TrendingUp,
-      color: "text-gray-600",
-      description: "Leads cancelados ou perdidos"
+      icon: XCircle,
+      color: "text-red-600",
+      bgColor: "bg-red-50",
     },
-    {
-      title: "Tempo Médio (dias)",
-      value: tempoMedioResposta,
-      icon: Clock,
-      color: "text-orange-600",
-      description: "Desde o último contato"
-    }
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
-      {metrics.map((metric, index) => (
-        <Card key={index} className="hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              {metric.title}
-            </CardTitle>
-            <metric.icon className={`h-4 w-4 ${metric.color}`} />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${metric.color}`}>
-              {metric.value}
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      {metrics.map((m, i) => (
+        <Card key={i} className="border-border/60 shadow-sm hover:shadow-md transition-shadow">
+          <CardContent className="p-4 flex items-start gap-3">
+            <div className={`rounded-lg p-2 ${m.bgColor}`}>
+              <m.icon className={`h-4 w-4 ${m.color}`} />
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {metric.description}
-            </p>
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground truncate">{m.label}</p>
+              <div className="flex items-baseline gap-1.5">
+                <span className={`text-xl font-bold ${m.color}`}>{m.value}</span>
+                {m.sub && <span className="text-xs text-muted-foreground">{m.sub}</span>}
+              </div>
+            </div>
           </CardContent>
         </Card>
       ))}

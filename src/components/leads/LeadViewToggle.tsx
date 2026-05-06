@@ -1,7 +1,7 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Grid, List } from "lucide-react";
+import { LayoutGrid, List } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface LeadViewToggleProps {
   view: 'cards' | 'table';
@@ -10,25 +10,31 @@ interface LeadViewToggleProps {
 
 const LeadViewToggle: React.FC<LeadViewToggleProps> = ({ view, onViewChange }) => {
   return (
-    <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-      <Button
-        variant={view === 'cards' ? 'default' : 'ghost'}
-        size="sm"
+    <div className="flex items-center rounded-lg border border-border p-0.5 bg-muted/40">
+      <button
         onClick={() => onViewChange('cards')}
-        className="h-8"
+        className={cn(
+          "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+          view === 'cards'
+            ? "bg-background text-foreground shadow-sm"
+            : "text-muted-foreground hover:text-foreground"
+        )}
       >
-        <Grid size={16} className="mr-1" />
+        <LayoutGrid className="h-3.5 w-3.5" />
         Cards
-      </Button>
-      <Button
-        variant={view === 'table' ? 'default' : 'ghost'}
-        size="sm"
+      </button>
+      <button
         onClick={() => onViewChange('table')}
-        className="h-8"
+        className={cn(
+          "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+          view === 'table'
+            ? "bg-background text-foreground shadow-sm"
+            : "text-muted-foreground hover:text-foreground"
+        )}
       >
-        <List size={16} className="mr-1" />
+        <List className="h-3.5 w-3.5" />
         Tabela
-      </Button>
+      </button>
     </div>
   );
 };
