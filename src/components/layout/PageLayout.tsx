@@ -28,7 +28,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="bg-white/80 backdrop-blur-md border-b border-border/40 shadow-sm sticky top-0 z-10">
-        <div className="container py-2 sm:py-3 lg:py-4 max-w-[1920px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16">
+        <div className="container py-2 sm:py-3 lg:py-3 max-w-[1920px] mx-auto px-3 sm:px-4 md:px-6 lg:px-6 xl:px-12 2xl:px-16">
           <div className="flex items-center justify-between gap-2 sm:gap-3 md:gap-4 lg:gap-6">
             <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 min-w-0 flex-1">
               <Logo size={isMobile ? "sm" : "md"} />
@@ -54,8 +54,8 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
         </div>
       </header>
       
-      <main className={cn("flex-1 py-4 sm:py-6 lg:py-8", contentClass)}>
-        <div className="container max-w-[1920px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16">
+      <main className={cn("flex-1 py-3 sm:py-4 lg:py-6", contentClass)}>
+        <div className="container max-w-[1920px] mx-auto px-3 sm:px-4 md:px-6 lg:px-6 xl:px-12 2xl:px-16">
           {children}
         </div>
       </main>
