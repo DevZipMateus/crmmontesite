@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Code, Globe, Inbox } from "lucide-react";
+import { CheckCircle2, Code, Inbox, PhoneOff } from "lucide-react";
 
 interface StatusButtonProps {
   status: { value: string; color: string };
