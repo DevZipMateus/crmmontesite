@@ -11,6 +11,7 @@ interface PageLayoutProps {
   children: React.ReactNode;
   title: string;
   showHomeButton?: boolean;
+  showFooter?: boolean;
   actions?: React.ReactNode;
   contentClass?: string;
 }
@@ -19,6 +20,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   children,
   title,
   showHomeButton = true,
+  showFooter = true,
   actions,
   contentClass
 }) => {
@@ -60,11 +62,13 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
         </div>
       </main>
       
-      <footer className="bg-white border-t border-border/40 py-4 sm:py-6 text-center text-xs sm:text-sm text-muted-foreground">
-        <div className="container mx-auto max-w-[1920px] px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16">
-          MonteSite CRM © {new Date().getFullYear()} - Gerenciamento de projetos
-        </div>
-      </footer>
+      {showFooter && (
+        <footer className="bg-white border-t border-border/40 py-4 sm:py-6 text-center text-xs sm:text-sm text-muted-foreground">
+          <div className="container mx-auto max-w-[1920px] px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16">
+            MonteSite CRM © {new Date().getFullYear()} - Gerenciamento de projetos
+          </div>
+        </footer>
+      )}
     </div>
   );
 };
