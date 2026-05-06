@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, Archive, Download, Link2 } from "lucide-react";
+import { Plus, Archive, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import KanbanBoard from "@/components/projects/KanbanBoard";
@@ -103,27 +103,28 @@ export default function Projetos() {
     <div className="flex flex-col flex-1">
       <TopBar
         breadcrumbs={[
-          { label: "Início", href: "/home" },
+          { label: "Inicio", href: "/home" },
           { label: "Projetos" },
         ]}
         actions={
           <div className="flex items-center gap-2">
+            <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
             <Button
-              variant={showArchived ? "default" : "outline"}
+              variant={showArchived ? "secondary" : "outline"}
               size="sm"
               onClick={() => setShowArchived(!showArchived)}
+              className="h-8 text-xs"
             >
-              <Archive className="h-4 w-4 mr-1" />
+              <Archive className="h-3.5 w-3.5 mr-1.5" />
               {showArchived ? "Ativos" : "Arquivados"}
             </Button>
-            <Button variant="outline" size="sm" onClick={handleExportCSV}>
-              <Download className="h-4 w-4 mr-1" />
+            <Button variant="outline" size="sm" onClick={handleExportCSV} className="h-8 text-xs">
+              <Download className="h-3.5 w-3.5 mr-1.5" />
               CSV
             </Button>
             <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
-            <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-            <Button size="sm" onClick={debouncedHandleNewProject}>
-              <Plus className="h-4 w-4 mr-1" />
+            <Button size="sm" onClick={debouncedHandleNewProject} className="h-8 text-xs">
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
               Novo projeto
             </Button>
           </div>
@@ -131,22 +132,25 @@ export default function Projetos() {
       />
 
       <main className="flex-1 p-4 sm:p-6 overflow-auto">
-        <div className="max-w-[1400px] mx-auto space-y-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Projetos</h1>
-            <p className="text-sm text-muted-foreground">
-              {activeCount} projetos ativos · {viewMode === "kanban" ? "6 colunas" : `mostrando ${projects.length}`}
-            </p>
+        <div className="max-w-[1600px] mx-auto space-y-4">
+          {/* Header + search row */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <h1 className="text-xl font-bold text-foreground">Projetos</h1>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {activeCount} projetos ativos · {viewMode === "kanban" ? "Visualizacao Kanban" : `${projects.length} exibidos`}
+              </p>
+            </div>
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Buscar por cliente, dominio, modelo..."
+              className="w-full sm:w-80"
+            />
           </div>
 
-          <SearchInput
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Buscar por cliente, domínio, modelo..."
-            className="w-full"
-          />
-
-          <div className="w-full overflow-hidden">
+          {/* Content */}
+          <div className="w-full">
             {viewMode === "kanban" ? (
               <KanbanBoard
                 projects={projects}

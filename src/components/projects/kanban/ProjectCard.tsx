@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -67,7 +66,6 @@ export default function ProjectCard({
           description: `Programador ${programmer ? `atribuído para ${programmer}` : 'removido'} com sucesso.`,
         });
         
-        // Refresh the project data
         if (onProjectUpdated) {
           onProjectUpdated();
         }
@@ -86,15 +84,15 @@ export default function ProjectCard({
     }
   };
 
-
   return (
-    <Card className={`p-3 sm:p-4 lg:p-5 cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow border-l-4 ${clientTypeInfo.borderColor} ${clientTypeInfo.cardBgColor}`}
+    <Card 
+      className={`p-3 cursor-grab active:cursor-grabbing transition-all duration-150 hover:shadow-md border-l-[3px] ${clientTypeInfo.borderColor} ${clientTypeInfo.cardBgColor} group`}
       draggable
       onDragStart={() => onDragStart(project.id)}
     >
-      <div className="space-y-2 sm:space-y-3">
-        {/* Top row with programmer assignment and client type badge */}
-        <div className="flex justify-between items-start">
+      <div className="space-y-2">
+        {/* Top row: programmer + client type */}
+        <div className="flex justify-between items-start gap-2">
           <EditableAssignedProgrammer
             assignedProgrammer={project.assigned_programmer}
             onAssignedProgrammerChange={handleAssignedProgrammerChange}
@@ -109,14 +107,12 @@ export default function ProjectCard({
           createdAt={project.created_at}
         />
         
-        {/* Indicador de Lead Vinculado */}
+        {/* Lead link */}
         {project.lead_id && (
-          <div className="pt-1 sm:pt-2">
-            <LeadLinkIndicator project={project} />
-          </div>
+          <LeadLinkIndicator project={project} />
         )}
 
-        {/* Indicador de Imagens Pendentes */}
+        {/* Pending submissions */}
         <PendingSubmissionsIndicator projectId={project.id} />
         
         {project.partner_hash && (
@@ -146,7 +142,6 @@ export default function ProjectCard({
           isUpdating={isUpdating}
         />
 
-        
         <ProjectCardActions 
           projectId={project.id}
           projectName={project.client_name}
