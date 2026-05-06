@@ -316,7 +316,7 @@ const TermoEntregaForm: React.FC = () => {
                   <div>
                     <Label htmlFor="email" className="flex items-center gap-2">
                       <Mail className="h-4 w-4" />
-                      E-mail (para receber cópia do termo)
+                      E-mail (para receber cópia da revisão)
                     </Label>
                     <Input
                       id="email"
