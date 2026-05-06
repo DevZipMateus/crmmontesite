@@ -1,8 +1,7 @@
-
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, Archive, Download } from "lucide-react";
+import { Plus, Archive, Download, Link2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import KanbanBoard from "@/components/projects/KanbanBoard";
@@ -11,7 +10,7 @@ import ViewToggle from "@/components/projects/ViewToggle";
 import SearchInput from "@/components/projects/SearchInput";
 import { AutoLinkingButton } from "@/components/projects/AutoLinkingButton";
 import { useProjects } from "@/hooks/use-projects";
-import { PageLayout } from "@/components/layout/PageLayout";
+import { TopBar } from "@/components/layout/TopBar";
 import { useDebounce } from "@/hooks/useDebounce";
 
 export default function Projetos() {
@@ -26,7 +25,6 @@ export default function Projetos() {
   
   const navigate = useNavigate();
   
-  // Atualização dos filtros para o hook
   const filters = {
     statusFilter,
     responsibleFilter,
@@ -45,19 +43,9 @@ export default function Projetos() {
   
   const debouncedHandleNewProject = useDebounce(handleNewProject, 1000);
 
-  const handleProjectDeleted = () => {
-    // Refresh projects after deletion
-    fetchProjects();
-  };
-
-  const handleProjectUpdated = () => {
-    // Refresh projects after update
-    fetchProjects();
-  };
-
-  const handleLinkingComplete = () => {
-    fetchProjects();
-  };
+  const handleProjectDeleted = () => fetchProjects();
+  const handleProjectUpdated = () => fetchProjects();
+  const handleLinkingComplete = () => fetchProjects();
 
   const handleExportCSV = async () => {
     try {
@@ -68,7 +56,6 @@ export default function Projetos() {
 
       if (error) throw error;
 
-      // Buscar leads associados
       const leadIds = allProjects?.filter(p => p.lead_id).map(p => p.lead_id!) || [];
       let leadsMap: Record<string, { empresa: string; nome_cliente: string }> = {};
 
@@ -77,14 +64,13 @@ export default function Projetos() {
           .from('leads')
           .select('id, empresa, nome_cliente')
           .in('id', leadIds);
-        
         leads?.forEach(l => {
           leadsMap[l.id] = { empresa: l.empresa, nome_cliente: l.nome_cliente };
         });
       }
 
       const csvRows = [
-        ['Nome do Cliente', 'Telefone', 'Link Blaster', 'Lead Associado (Empresa)', 'Lead Associado (Cliente)'].join(','),
+        ['Nome do Cliente', 'Telefone', 'Link Blaster', 'Lead (Empresa)', 'Lead (Cliente)'].join(','),
         ...(allProjects || []).map(p => {
           const lead = p.lead_id ? leadsMap[p.lead_id] : null;
           return [
@@ -111,88 +97,66 @@ export default function Projetos() {
     }
   };
 
-  const handleFilterChange = (filter: string, value: string | null | Date) => {
-    switch (filter) {
-      case 'status':
-        setStatusFilter(value as string | null);
-        break;
-      case 'responsible':
-        setResponsibleFilter(value as string);
-        break;
-      case 'domain':
-        setDomainFilter(value as string);
-        break;
-      case 'dateFrom':
-        setDateFromFilter(value as Date);
-        break;
-      case 'dateTo':
-        setDateToFilter(value as Date);
-        break;
-      default:
-        break;
-    }
-  };
+  const activeCount = projects?.filter(p => p.status !== "Arquivado").length || 0;
 
   return (
-    <div className="min-h-screen bg-background">
-      <PageLayout 
-        title="Projetos"
-        showFooter={false}
+    <div className="flex flex-col flex-1">
+      <TopBar
+        breadcrumbs={[
+          { label: "Início", href: "/home" },
+          { label: "Projetos" },
+        ]}
         actions={
-          <div className="flex flex-wrap items-center gap-2 lg:gap-3">
+          <div className="flex items-center gap-2">
             <Button
               variant={showArchived ? "default" : "outline"}
+              size="sm"
               onClick={() => setShowArchived(!showArchived)}
-              className="flex items-center gap-2 px-3 lg:px-4 text-sm lg:text-base"
-              aria-label={showArchived ? "Mostrar projetos ativos" : "Mostrar projetos arquivados"}
             >
-              <Archive className="h-4 w-4" />
-              <span className="hidden sm:inline">{showArchived ? "Ver Ativos" : "Ver Arquivados"}</span>
-              <span className="sm:hidden">{showArchived ? "Ativos" : "Arquivo"}</span>
+              <Archive className="h-4 w-4 mr-1" />
+              {showArchived ? "Ativos" : "Arquivados"}
             </Button>
-            <Button
-              variant="outline"
-              onClick={handleExportCSV}
-              className="flex items-center gap-2 px-3 lg:px-4 text-sm lg:text-base"
-            >
-              <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">Exportar CSV</span>
+            <Button variant="outline" size="sm" onClick={handleExportCSV}>
+              <Download className="h-4 w-4 mr-1" />
+              CSV
             </Button>
             <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
             <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-            <Button 
-              onClick={debouncedHandleNewProject} 
-              className="bg-primary shadow-sm flex items-center gap-2 px-3 lg:px-4 text-sm lg:text-base"
-              aria-label="Criar novo site"
-            >
-              <Plus className="h-4 w-4" /> 
-              <span className="hidden sm:inline">Novo site</span>
-              <span className="sm:hidden">Novo</span>
+            <Button size="sm" onClick={debouncedHandleNewProject}>
+              <Plus className="h-4 w-4 mr-1" />
+              Novo projeto
             </Button>
           </div>
         }
-      >
-        <div className="space-y-3 md:space-y-4 lg:space-y-6">
-          <div className="w-full">
-            <SearchInput 
-              value={searchQuery} 
-              onChange={setSearchQuery} 
-              placeholder="Buscar por nome, modelo, responsável, email, CNPJ ou domínio..."
-              className="rounded-xl shadow-sm w-full"
-            />
+      />
+
+      <main className="flex-1 p-4 sm:p-6 overflow-auto">
+        <div className="max-w-[1400px] mx-auto space-y-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Projetos</h1>
+            <p className="text-sm text-muted-foreground">
+              {activeCount} projetos ativos · {viewMode === "kanban" ? "6 colunas" : `mostrando ${projects.length}`}
+            </p>
           </div>
+
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Buscar por cliente, domínio, modelo..."
+            className="w-full"
+          />
 
           <div className="w-full overflow-hidden">
             {viewMode === "kanban" ? (
-              <KanbanBoard 
-                projects={projects} 
-                setProjects={setProjects} 
+              <KanbanBoard
+                projects={projects}
+                setProjects={setProjects}
                 onProjectDeleted={handleProjectDeleted}
                 onProjectUpdated={handleProjectUpdated}
                 searchQuery={searchQuery}
               />
             ) : (
-              <ProjectListView 
+              <ProjectListView
                 projects={projects}
                 loading={loading}
                 statusFilter={statusFilter}
@@ -202,7 +166,7 @@ export default function Projetos() {
             )}
           </div>
         </div>
-      </PageLayout>
+      </main>
     </div>
   );
 }
