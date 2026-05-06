@@ -41,7 +41,7 @@ const Index: React.FC = () => {
       <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
         <div className="max-w-[1400px] mx-auto space-y-6">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Bom dia, Victor 👋</h1>
+            <h1 className="text-2xl font-bold text-foreground">Bem-vindo ao CRM 👋</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Gerencie seus projetos, leads e produção em um só lugar.
             </p>
