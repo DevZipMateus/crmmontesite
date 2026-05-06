@@ -502,65 +502,104 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
 
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* Informações Básicas */}
-          <div className="space-y-6">
-            <div className="border-b pb-4">
-              <h3 className="text-lg font-medium text-gray-900">Informações Básicas</h3>
-              <p className="text-sm text-gray-500 mt-1">Dados principais da sua empresa</p>
-            </div>
-            <PersonalizeBasicForm
-              form={form}
-              logoPreview={logoPreview}
-              logoFileName={logoFileName}
-              handleLogoUpload={fileHandlers.handleLogoUpload}
-              handleRemoveLogo={fileHandlers.handleRemoveLogo}
-            />
-          </div>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormWizardSteps currentStep={currentStep} onStepClick={setCurrentStep} />
 
-          {/* Produtos, Serviços & Avaliações */}
-          <div className="space-y-6">
-            <div className="border-b pb-4">
-              <h3 className="text-lg font-medium text-gray-900">Produtos, Serviços e Planos</h3>
-              <p className="text-sm text-gray-500 mt-1">Detalhes sobre seus produtos, serviços e avaliações de clientes</p>
+          {/* Step 1: Dados básicos */}
+          {currentStep === 0 && (
+            <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="border-b pb-4">
+                <h3 className="text-lg font-semibold text-foreground">Dados Básicos</h3>
+                <p className="text-sm text-muted-foreground mt-1">Informações principais da sua empresa</p>
+              </div>
+              <PersonalizeBasicForm
+                form={form}
+                logoPreview={logoPreview}
+                logoFileName={logoFileName}
+                handleLogoUpload={fileHandlers.handleLogoUpload}
+                handleRemoveLogo={fileHandlers.handleRemoveLogo}
+              />
             </div>
-            <PersonalizeServicosForm 
-              form={form}
-              depoimentoPreviews={depoimentoPreviews}
-              handleDepoimentoUpload={fileHandlers.handleDepoimentoUpload}
-              handleRemoveDepoimento={fileHandlers.handleRemoveDepoimento}
-            />
-          </div>
+          )}
 
-          {/* Mídias do Site */}
-          <div className="space-y-6">
-            <div className="border-b pb-4">
-              <h3 className="text-lg font-medium text-gray-900">Mídias do Site</h3>
-              <p className="text-sm text-gray-500 mt-1">Imagens e vídeos para o seu site</p>
+          {/* Step 2: Serviços & Produtos */}
+          {currentStep === 1 && (
+            <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="border-b pb-4">
+                <h3 className="text-lg font-semibold text-foreground">Produtos, Serviços e Planos</h3>
+                <p className="text-sm text-muted-foreground mt-1">Detalhes sobre seus produtos, serviços e avaliações de clientes</p>
+              </div>
+              <PersonalizeServicosForm 
+                form={form}
+                depoimentoPreviews={depoimentoPreviews}
+                handleDepoimentoUpload={fileHandlers.handleDepoimentoUpload}
+                handleRemoveDepoimento={fileHandlers.handleRemoveDepoimento}
+              />
             </div>
-            <PersonalizeConfigForm 
-              form={form}
-              midiaPreviews={midiaPreviews}
-              midiaCaptions={midiaCaptions}
-              handleMidiaUpload={fileHandlers.handleMidiaUpload}
-              handleRemoveMidia={fileHandlers.handleRemoveMidia}
-              handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
-            />
-          </div>
+          )}
 
-          <div className="flex flex-col items-center gap-3 pt-6">
-            <AutoSaveIndicator 
-              isSaving={isSaving} 
-              lastSavedAt={lastSavedAt}
-            />
-            <Button 
-              type="submit" 
-              size="lg" 
-              disabled={isSubmitting || isSubmitted}
-              className="min-w-[200px]"
+          {/* Step 3: Mídias */}
+          {currentStep === 2 && (
+            <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="border-b pb-4">
+                <h3 className="text-lg font-semibold text-foreground">Mídias do Site</h3>
+                <p className="text-sm text-muted-foreground mt-1">Imagens e vídeos para o seu site</p>
+              </div>
+              <PersonalizeConfigForm 
+                form={form}
+                midiaPreviews={midiaPreviews}
+                midiaCaptions={midiaCaptions}
+                handleMidiaUpload={fileHandlers.handleMidiaUpload}
+                handleRemoveMidia={fileHandlers.handleRemoveMidia}
+                handleUpdateMidiaCaption={fileHandlers.handleUpdateMidiaCaption}
+              />
+            </div>
+          )}
+
+          {/* Step 4: Configurações finais */}
+          {currentStep === 3 && (
+            <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="border-b pb-4">
+                <h3 className="text-lg font-semibold text-foreground">Configurações Finais</h3>
+                <p className="text-sm text-muted-foreground mt-1">Revise as opções e envie o formulário</p>
+              </div>
+              <FormWizardReview form={form} logoPreview={logoPreview} midiaCount={midiaPreviews.length} depoimentoCount={depoimentoPreviews.length} />
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between pt-6 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+              disabled={currentStep === 0}
+              className="gap-1.5"
             >
-              {isSubmitting ? "Enviando..." : isSubmitted ? "Formulário Enviado" : "Enviar Personalização"}
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
             </Button>
+            <span className="text-sm text-muted-foreground">
+              Etapa {currentStep + 1} de 4
+            </span>
+            {currentStep < 3 ? (
+              <Button
+                type="button"
+                onClick={() => setCurrentStep(Math.min(3, currentStep + 1))}
+                className="gap-1.5"
+              >
+                Continuar
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                disabled={isSubmitting || isSubmitted}
+                className="gap-1.5 min-w-[180px]"
+              >
+                {isSubmitting ? "Enviando..." : isSubmitted ? "Enviado!" : "Enviar Personalização"}
+              </Button>
+            )}
           </div>
         </form>
       </Form>
