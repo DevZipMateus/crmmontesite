@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Code, Globe, Clock, CheckCircle2, Inbox } from "lucide-react";
+import { Code, Globe, Clock, CheckCircle2, Inbox, PhoneOff } from "lucide-react";
 import ProjectCard from "./ProjectCard";
 import { Project } from "@/types/project";
 
@@ -48,6 +48,7 @@ export default function KanbanColumn({
     case 'Globe': StatusIcon = Globe; break;
     case 'Clock': StatusIcon = Clock; break;
     case 'CheckCircle2': StatusIcon = CheckCircle2; break;
+    case 'PhoneOff': StatusIcon = PhoneOff; break;
     default: StatusIcon = Inbox;
   }
 

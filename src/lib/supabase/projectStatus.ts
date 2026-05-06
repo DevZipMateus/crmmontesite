@@ -3,8 +3,9 @@ import { supabase } from './client';
 // Function to ensure consistent status values
 export const PROJECT_STATUS_TYPES = [
   { value: "Recebido", icon: "Inbox", color: "bg-purple-500" },
-  { value: "Criando site", icon: "Code", color: "bg-blue-500" },
-  { value: "Aguardando Alterações", icon: "Globe", color: "bg-amber-500" },
+  { value: "Victor", icon: "Code", color: "bg-blue-500" },
+  { value: "Davi", icon: "Code", color: "bg-amber-500" },
+  { value: "Sem retorno", icon: "PhoneOff", color: "bg-red-500" },
   { value: "Site pronto", icon: "CheckCircle2", color: "bg-green-500" }
 ];
 

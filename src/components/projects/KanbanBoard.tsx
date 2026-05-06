@@ -195,7 +195,7 @@ export default function KanbanBoard({
   return (
     <div className="w-full">
       <ScrollArea className="w-full h-[calc(100vh-280px)] lg:h-[calc(100vh-240px)]">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 p-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4 p-1">
           {PROJECT_STATUS_TYPES.map((statusType) => (
             <div key={statusType.value} className="min-w-[240px] md:min-w-[260px] lg:min-w-[280px] xl:min-w-[300px] 2xl:min-w-[320px]">
               <KanbanColumn
