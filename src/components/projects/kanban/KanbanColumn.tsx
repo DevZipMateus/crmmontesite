@@ -48,6 +48,7 @@ export default function KanbanColumn({
     case 'Globe': StatusIcon = Globe; break;
     case 'Clock': StatusIcon = Clock; break;
     case 'CheckCircle2': StatusIcon = CheckCircle2; break;
+    case 'PhoneOff': StatusIcon = PhoneOff; break;
     default: StatusIcon = Inbox;
   }
 
