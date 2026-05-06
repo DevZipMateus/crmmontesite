@@ -327,7 +327,7 @@ const TermoEntregaForm: React.FC = () => {
                       className="mt-1"
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      Informe seu e-mail para receber uma cópia do termo de entrega em PDF.
+                      Informe seu e-mail para receber uma copia da revisao em PDF.
                     </p>
                   </div>
                 </div>
