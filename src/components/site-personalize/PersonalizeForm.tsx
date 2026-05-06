@@ -12,7 +12,7 @@ import { PersonalizeConfigForm } from "./PersonalizeConfigForm";
 import { useFileUploadHandlers } from "./FileUploadHandlers";
 import { useFormSubmission } from "./useFormSubmission";
 import type { FormValues } from "./PersonalizeBasicForm";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, ArrowLeft, ArrowRight, Check, Building2, ShoppingBag, Image, Settings } from "lucide-react";
 import { validateCnpjCpf } from "@/utils/documentFormatter";
 import { useFormAutoSave } from "@/hooks/useFormAutoSave";
 import { useFormProgress } from "@/hooks/useFormProgress";
