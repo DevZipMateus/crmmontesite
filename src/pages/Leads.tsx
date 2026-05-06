@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo } from "react";
-import { Plus } from "lucide-react";
+import { Plus, FileText } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PageLayout } from "@/components/layout/PageLayout";
 import LeadCard from "@/components/leads/LeadCard";
