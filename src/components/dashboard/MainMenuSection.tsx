@@ -4,11 +4,8 @@ import {
   LayoutGrid, 
   Plus, 
   Terminal,
-  Link as LinkIcon,
   Settings,
-  Users,
   ContactRound,
-  Globe,
   AlertCircle,
   FileCheck,
   Sheet
