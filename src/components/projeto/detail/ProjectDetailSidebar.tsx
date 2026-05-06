@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Project } from "@/types/project";
 import { Terminal, Copy, AlertTriangle, Clock } from "lucide-react";
+import DeleteProjectDialog from "@/components/projects/DeleteProjectDialog";
 import { updateProject } from "@/server/project-actions";
 import { useToast } from "@/hooks/use-toast";
 import {
