@@ -66,16 +66,6 @@ const App = () => {
               </AuthGuard>
             } />
             
-            {/* Landing Pages para Vendedores */}
-            <Route path="/landing-pages-vendedores" element={
-              <AuthGuard>
-                <LandingPagesVendedores />
-              </AuthGuard>
-            } />
-            
-            {/* Formulário público para vendedores */}
-            <Route path="/formulario-vendedor" element={<VendedorLandingForm />} />
-            
             {/* Nova rota unificada para criar projetos */}
             <Route path="/criar-projetos" element={
               <AuthGuard>
@@ -87,20 +77,6 @@ const App = () => {
             <Route path="/leads" element={
               <AuthGuard>
                 <Leads />
-              </AuthGuard>
-            } />
-            
-            {/* Painel de Vendas - Rota adicionada */}
-            <Route path="/painel-vendas" element={
-              <AuthGuard>
-                <PainelVendas />
-              </AuthGuard>
-            } />
-            
-            {/* DNS Hostinger - Nova rota */}
-            <Route path="/hostinger-dns" element={
-              <AuthGuard>
-                <HostingerDNS />
               </AuthGuard>
             } />
             
@@ -157,12 +133,7 @@ const App = () => {
               </AuthGuard>
             } />
             
-            {/* Rota para gerenciamento de modelos e URLs personalizadas */}
-            <Route path="/custom-urls" element={
-              <AuthGuard>
-                <CustomUrlAdmin />
-              </AuthGuard>
-            } />
+            
             
             {/* Rota para gerenciamento de webhooks e configurações */}
             <Route path="/webhooks" element={
