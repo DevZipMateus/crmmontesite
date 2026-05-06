@@ -93,7 +93,7 @@ const FormWizardSteps: React.FC<{ currentStep: number; onStepClick: (step: numbe
 );
 
 const FormWizardReview: React.FC<{
-  form: UseFormReturn<FormValues>;
+  form: UseFormReturn<any>;
   logoPreview: string | null;
   midiaCount: number;
   depoimentoCount: number;
