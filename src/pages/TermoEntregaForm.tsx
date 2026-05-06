@@ -184,12 +184,12 @@ const TermoEntregaForm: React.FC = () => {
             <div className="flex justify-center mb-4">
               <FileCheck className="h-12 w-12 text-blue-600" />
             </div>
-            <CardTitle className="text-2xl">Etapa de Revisao do Seu Site</CardTitle>
+            <CardTitle className="text-2xl">Etapa de Revisão do Seu Site</CardTitle>
             <CardDescription className="text-base">
               Projeto: <strong>{project?.client_name}</strong>
             </CardDescription>
             <p className="text-sm text-muted-foreground mt-2">
-              Seu site ainda nao esta 100% pronto. Revise a construcao, valide e aponte os ajustes necessarios.
+              Seu site ainda não está 100% pronto. Revise a construção, valide e aponte os ajustes necessários.
             </p>
           </CardHeader>
 
