@@ -21,6 +21,17 @@ jobs:
           node-version: "22"
           cache: "npm"
 
+      - name: 🔒 Verificar sincronização do lock file
+        run: |
+          cp package-lock.json package-lock.json.bak
+          npm install --legacy-peer-deps --package-lock-only
+          if ! diff -q package-lock.json package-lock.json.bak > /dev/null 2>&1; then
+            echo "❌ package-lock.json está desatualizado em relação ao package.json!"
+            echo "Execute 'npm install' localmente e faça commit do package-lock.json atualizado."
+            exit 1
+          fi
+          mv package-lock.json.bak package-lock.json
+
       - name: 📦 Instalar dependências
         run: npm ci --legacy-peer-deps
 
