@@ -113,11 +113,11 @@ const TermoEntregaForm: React.FC = () => {
         // Don't block - term was saved successfully
       }
 
-      toast.success("Revisao enviada com sucesso!");
+      toast.success("Revisão enviada com sucesso!");
       setAlreadyFilled(true);
     } catch (err) {
-      console.error("Erro ao enviar revisao:", err);
-      toast.error("Erro ao enviar revisao. Tente novamente.");
+      console.error("Erro ao enviar revisão:", err);
+      toast.error("Erro ao enviar revisão. Tente novamente.");
     } finally {
       setSubmitting(false);
     }
