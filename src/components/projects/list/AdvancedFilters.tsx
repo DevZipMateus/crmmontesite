@@ -1,8 +1,7 @@
-
 import React, { useState } from "react";
-import { Filter } from "lucide-react";
+import { Filter, X, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -16,14 +15,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
-interface FiltersState {
-  status: string | null;
-  responsible: string;
-  domain: string;
-  dateFrom: Date | null;
-  dateTo: Date | null;
-}
 
 interface AdvancedFiltersProps {
   statusFilter: string | null;
@@ -55,148 +46,150 @@ export default function AdvancedFilters({
   const [openFromDate, setOpenFromDate] = useState(false);
   const [openToDate, setOpenToDate] = useState(false);
 
+  const hasActiveFilters = statusFilter || responsibleFilter || domainFilter || dateFromFilter || dateToFilter;
+
   return (
-    <Card className="mb-4 lg:mb-6">
-      <CardContent className="pt-4 lg:pt-6">
-        <div className="flex items-center gap-2 mb-3 lg:mb-4">
-          <Filter className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground" />
-          <div className="text-sm lg:text-base font-medium">Filtros</div>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 lg:gap-4">
-          {/* Status Filter */}
-          <div className="space-y-2">
-            <label htmlFor="status-filter" className="text-xs lg:text-sm font-medium text-gray-700">
-              Status
-            </label>
-            <Select
-              value={statusFilter || "all"}
-              onValueChange={(value) => setStatusFilter(value === "all" ? null : value)}
-            >
-              <SelectTrigger id="status-filter" className="w-full h-9 lg:h-10 text-sm" aria-label="Filtrar por status">
-                <SelectValue placeholder="Todos" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                {PROJECT_STATUS_TYPES.map(status => (
-                  <SelectItem key={status.value} value={status.value}>{status.value}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          {/* Responsible Filter */}
-          <div className="space-y-2">
-            <label htmlFor="responsible-filter" className="text-xs lg:text-sm font-medium text-gray-700">
-              Responsável
-            </label>
-            <Input 
-              id="responsible-filter"
-              placeholder="Nome do responsável" 
-              value={responsibleFilter}
-              onChange={(e) => setResponsibleFilter(e.target.value)}
-              aria-label="Filtrar por responsável"
-              className="h-9 lg:h-10 text-sm"
-            />
-          </div>
-          
-          {/* Domain Filter */}
-          <div className="space-y-2">
-            <label htmlFor="domain-filter" className="text-xs lg:text-sm font-medium text-gray-700">
-              Domínio
-            </label>
-            <Input 
-              id="domain-filter"
-              placeholder="Domínio" 
-              value={domainFilter}
-              onChange={(e) => setDomainFilter(e.target.value)}
-              aria-label="Filtrar por domínio"
-              className="h-9 lg:h-10 text-sm"
-            />
-          </div>
-          
-          {/* Date From Filter */}
-          <div className="space-y-2">
-            <label htmlFor="date-from" className="text-xs lg:text-sm font-medium text-gray-700">
-              Data (de)
-            </label>
-            <Popover open={openFromDate} onOpenChange={setOpenFromDate}>
-              <PopoverTrigger asChild>
-                <Button
-                  id="date-from"
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal h-9 lg:h-10 text-sm"
-                  aria-label="Filtrar pela data inicial"
-                >
-                  {dateFromFilter ? (
-                    format(dateFromFilter, "dd/MM/yyyy")
-                  ) : (
-                    <span className="text-muted-foreground">Selecione</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={dateFromFilter || undefined}
-                  onSelect={(date) => {
-                    setDateFromFilter(date);
-                    setOpenFromDate(false);
-                  }}
-                  locale={ptBR}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          
-          {/* Date To Filter */}
-          <div className="space-y-2">
-            <label htmlFor="date-to" className="text-xs lg:text-sm font-medium text-gray-700">
-              Data (até)
-            </label>
-            <Popover open={openToDate} onOpenChange={setOpenToDate}>
-              <PopoverTrigger asChild>
-                <Button
-                  id="date-to"
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal h-9 lg:h-10 text-sm"
-                  aria-label="Filtrar pela data final"
-                >
-                  {dateToFilter ? (
-                    format(dateToFilter, "dd/MM/yyyy")
-                  ) : (
-                    <span className="text-muted-foreground">Selecione</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={dateToFilter || undefined}
-                  onSelect={(date) => {
-                    setDateToFilter(date);
-                    setOpenToDate(false);
-                  }}
-                  locale={ptBR}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-        
-        <div className="flex justify-end mt-3 lg:mt-4">
-          <Button 
-            variant="outline" 
-            onClick={onResetFilters}
-            className="text-xs lg:text-sm h-8 lg:h-9 px-3 lg:px-4"
-            aria-label="Limpar todos os filtros"
+    <div className="space-y-3">
+      {/* Filter controls row */}
+      <div className="flex flex-wrap items-end gap-3">
+        {/* Status */}
+        <div className="space-y-1.5 min-w-[140px]">
+          <label className="text-xs font-medium text-muted-foreground">Status</label>
+          <Select
+            value={statusFilter || "all"}
+            onValueChange={(value) => setStatusFilter(value === "all" ? null : value)}
           >
-            Limpar filtros
-          </Button>
+            <SelectTrigger className="h-8 text-xs border-border/60">
+              <SelectValue placeholder="Todos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              {PROJECT_STATUS_TYPES.map(status => (
+                <SelectItem key={status.value} value={status.value}>{status.value}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Responsible */}
+        <div className="space-y-1.5 min-w-[140px]">
+          <label className="text-xs font-medium text-muted-foreground">Responsavel</label>
+          <Input 
+            placeholder="Nome" 
+            value={responsibleFilter}
+            onChange={(e) => setResponsibleFilter(e.target.value)}
+            className="h-8 text-xs border-border/60"
+          />
+        </div>
+
+        {/* Domain */}
+        <div className="space-y-1.5 min-w-[140px]">
+          <label className="text-xs font-medium text-muted-foreground">Dominio</label>
+          <Input 
+            placeholder="Dominio" 
+            value={domainFilter}
+            onChange={(e) => setDomainFilter(e.target.value)}
+            className="h-8 text-xs border-border/60"
+          />
+        </div>
+
+        {/* Date From */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-muted-foreground">De</label>
+          <Popover open={openFromDate} onOpenChange={setOpenFromDate}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="h-8 text-xs font-normal w-[120px] justify-start border-border/60">
+                <CalendarDays className="h-3 w-3 mr-1.5 text-muted-foreground" />
+                {dateFromFilter ? format(dateFromFilter, "dd/MM/yy") : "Selecione"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dateFromFilter || undefined}
+                onSelect={(date) => { setDateFromFilter(date); setOpenFromDate(false); }}
+                locale={ptBR}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* Date To */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-muted-foreground">Ate</label>
+          <Popover open={openToDate} onOpenChange={setOpenToDate}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="h-8 text-xs font-normal w-[120px] justify-start border-border/60">
+                <CalendarDays className="h-3 w-3 mr-1.5 text-muted-foreground" />
+                {dateToFilter ? format(dateToFilter, "dd/MM/yy") : "Selecione"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dateToFilter || undefined}
+                onSelect={(date) => { setDateToFilter(date); setOpenToDate(false); }}
+                locale={ptBR}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {hasActiveFilters && (
+          <Button variant="ghost" size="sm" onClick={onResetFilters} className="h-8 text-xs text-muted-foreground">
+            <X className="h-3 w-3 mr-1" />
+            Limpar
+          </Button>
+        )}
+      </div>
+
+      {/* Active filter chips */}
+      {hasActiveFilters && (
+        <div className="flex flex-wrap gap-1.5">
+          {statusFilter && (
+            <Badge variant="secondary" className="text-xs gap-1 pr-1">
+              Status: {statusFilter}
+              <button onClick={() => setStatusFilter(null)} className="ml-0.5 hover:bg-muted rounded-full p-0.5">
+                <X className="h-2.5 w-2.5" />
+              </button>
+            </Badge>
+          )}
+          {responsibleFilter && (
+            <Badge variant="secondary" className="text-xs gap-1 pr-1">
+              Responsavel: {responsibleFilter}
+              <button onClick={() => setResponsibleFilter("")} className="ml-0.5 hover:bg-muted rounded-full p-0.5">
+                <X className="h-2.5 w-2.5" />
+              </button>
+            </Badge>
+          )}
+          {domainFilter && (
+            <Badge variant="secondary" className="text-xs gap-1 pr-1">
+              Dominio: {domainFilter}
+              <button onClick={() => setDomainFilter("")} className="ml-0.5 hover:bg-muted rounded-full p-0.5">
+                <X className="h-2.5 w-2.5" />
+              </button>
+            </Badge>
+          )}
+          {dateFromFilter && (
+            <Badge variant="secondary" className="text-xs gap-1 pr-1">
+              De: {format(dateFromFilter, "dd/MM/yy")}
+              <button onClick={() => setDateFromFilter(null)} className="ml-0.5 hover:bg-muted rounded-full p-0.5">
+                <X className="h-2.5 w-2.5" />
+              </button>
+            </Badge>
+          )}
+          {dateToFilter && (
+            <Badge variant="secondary" className="text-xs gap-1 pr-1">
+              Ate: {format(dateToFilter, "dd/MM/yy")}
+              <button onClick={() => setDateToFilter(null)} className="ml-0.5 hover:bg-muted rounded-full p-0.5">
+                <X className="h-2.5 w-2.5" />
+              </button>
+            </Badge>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
