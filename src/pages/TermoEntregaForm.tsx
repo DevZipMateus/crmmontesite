@@ -155,9 +155,9 @@ const TermoEntregaForm: React.FC = () => {
         <Card className="w-full max-w-2xl">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <CheckCircle2 className="h-12 w-12 text-green-500 mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Revisao Ja Enviada</h2>
+            <h2 className="text-xl font-semibold mb-2">Revisão Já Enviada</h2>
             <p className="text-muted-foreground mb-6">
-              A etapa de revisao para o projeto <strong>{project?.client_name}</strong> ja foi preenchida e enviada.
+              A etapa de revisão para o projeto <strong>{project?.client_name}</strong> já foi preenchida e enviada.
             </p>
             {project?.domain && (
               <a
