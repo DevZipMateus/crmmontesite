@@ -2,23 +2,17 @@ import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Project } from "@/types/project";
-import { 
-  ProjectCardHeader,
-  ProjectCardActions,
-  ProjectCardDomain,
-  StatusButtonsGrid,
-  PartnerIndicator,
-  FormStatusIndicator,
-  CustomizationDeadlineIndicator,
-  EditableAssignedProgrammer,
-  PendingSubmissionsIndicator
-} from "./ProjectCardComponents";
+import { useModelDetails } from "@/utils/modelUtils";
 import { LeadLinkIndicator } from "../LeadLinkIndicator";
-import { ClientTypeBadge } from "../ClientTypeBadge";
 import { getClientTypeInfo } from "@/utils/clientTypeUtils";
 import { useNavigate } from "react-router-dom";
 import { updateProject } from "@/server/project-actions";
 import { useToast } from "@/hooks/use-toast";
+import { Eye, PenSquare, Archive, ArchiveRestore, Clock, CheckCircle2, Loader2, Link2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useProjectArchiving } from "@/hooks/use-project-archiving";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ArchiveDialog } from "./ProjectCardComponents/ArchiveDialog";
 
 interface ProjectCardProps {
   project: Project;
@@ -30,6 +24,25 @@ interface ProjectCardProps {
   onProjectUpdated?: () => void;
 }
 
+const programmerColors: Record<string, string> = {
+  "Victor": "bg-blue-500",
+  "Davi": "bg-purple-500",
+  "Erica": "bg-emerald-500",
+  "Érica": "bg-emerald-500",
+};
+
+function getTimeAgo(dateString: string): string {
+  const now = new Date();
+  const date = new Date(dateString);
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 60) return `ha ${diffMin} min`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return `ha ${diffHours} h`;
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} dia${diffDays > 1 ? 's' : ''}`;
+}
+
 export default function ProjectCard({
   project,
   statusOptions,
@@ -39,117 +52,116 @@ export default function ProjectCard({
   onProjectDeleted,
   onProjectUpdated,
 }: ProjectCardProps) {
-  const isUpdating = updatingStatus === project.id;
   const navigate = useNavigate();
   const clientTypeInfo = getClientTypeInfo(project);
   const { toast } = useToast();
-  const [isUpdatingProgrammer, setIsUpdatingProgrammer] = useState(false);
+  const { modelName, isLoading: modelLoading } = useModelDetails(project.template);
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const { archiveProject, unarchiveProject, isArchiving } = useProjectArchiving();
 
-  const handleViewEdit = (projectId: string, action: 'view' | 'edit') => {
-    if (action === 'view') {
-      navigate(`/projeto/${projectId}`);
-    } else {
-      navigate(`/projeto/${projectId}/editar`);
-    }
+  const programmer = project.assigned_programmer || project.responsible_name;
+  const programmerInitials = programmer ? programmer.substring(0, 2).toUpperCase() : "?";
+  const programmerColor = programmer ? (programmerColors[programmer] || "bg-muted-foreground") : "bg-orange-400";
+
+  const handleArchiveConfirm = async () => {
+    const success = project.isArchived
+      ? await unarchiveProject(project.id)
+      : await archiveProject(project.id);
+    if (success && onProjectDeleted) onProjectDeleted();
+    setShowArchiveDialog(false);
   };
 
-  const handleAssignedProgrammerChange = async (programmer: string | null) => {
-    setIsUpdatingProgrammer(true);
-    try {
-      const result = await updateProject(project.id, {
-        assigned_programmer: programmer
-      });
-
-      if (result.success) {
-        toast({
-          title: "Programador atualizado",
-          description: `Programador ${programmer ? `atribuído para ${programmer}` : 'removido'} com sucesso.`,
-        });
-        
-        if (onProjectUpdated) {
-          onProjectUpdated();
-        }
-      } else {
-        throw new Error(result.message || "Erro ao atualizar programador");
-      }
-    } catch (error) {
-      console.error("Erro ao atualizar programador:", error);
-      toast({
-        title: "Erro ao atualizar programador",
-        description: error instanceof Error ? error.message : "Erro desconhecido",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUpdatingProgrammer(false);
-    }
-  };
+  // Form status
+  const hasForm = project.formulario_preenchido;
 
   return (
     <Card 
-      className={`p-3 cursor-grab active:cursor-grabbing transition-all duration-150 hover:shadow-md border-l-[3px] ${clientTypeInfo.borderColor} ${clientTypeInfo.cardBgColor} group`}
+      className={`p-3.5 cursor-grab active:cursor-grabbing transition-all duration-150 hover:shadow-md border-l-[3px] ${clientTypeInfo.borderColor} bg-card group`}
       draggable
       onDragStart={() => onDragStart(project.id)}
     >
       <div className="space-y-2">
-        {/* Top row: programmer + client type */}
-        <div className="flex justify-between items-start gap-2">
-          <EditableAssignedProgrammer
-            assignedProgrammer={project.assigned_programmer}
-            onAssignedProgrammerChange={handleAssignedProgrammerChange}
-          />
-          <ClientTypeBadge project={project} variant="badge" />
+        {/* Row 1: Client name + Form badge */}
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-semibold text-sm text-foreground leading-tight">{project.client_name}</h3>
+          {hasForm ? (
+            <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] font-medium shrink-0 gap-1 px-1.5 py-0.5">
+              <CheckCircle2 className="h-3 w-3" />
+              Form
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-[10px] font-medium shrink-0 gap-1 px-1.5 py-0.5 text-muted-foreground">
+              <Clock className="h-3 w-3" />
+              Aguard.
+            </Badge>
+          )}
         </div>
-        
-        <ProjectCardHeader 
-          clientName={project.client_name}
-          template={project.template || ''}
-          hasPendingCustomizations={project.hasPendingCustomizations || false}
-          createdAt={project.created_at}
-        />
-        
-        {/* Lead link */}
+
+        {/* Row 2: Model + Client type */}
+        <p className="text-xs text-muted-foreground">
+          {modelLoading ? "Carregando..." : (modelName || "Sem modelo")} · {project.client_type === 'parceiro' ? 'Parceiro' : 'Cliente final'}
+        </p>
+
+        {/* Row 3: Lead link (if exists) */}
         {project.lead_id && (
-          <LeadLinkIndicator project={project} />
+          <div className="flex items-center gap-1.5 text-xs">
+            <Link2 className="h-3 w-3 text-primary" />
+            <LeadLinkIndicator project={project} />
+          </div>
         )}
 
-        {/* Pending submissions */}
-        <PendingSubmissionsIndicator projectId={project.id} />
-        
-        {project.partner_hash && (
-          <PartnerIndicator partnerHash={project.partner_hash} />
-        )}
-        
-        <FormStatusIndicator 
-          formularioPreenchido={project.formulario_preenchido || false}
-          partnerHash={project.partner_hash}
-          modeloEscolhido={project.modelo_escolhido}
-          dataFormulario={project.data_formulario}
-        />
-        
-        <CustomizationDeadlineIndicator 
-          status={project.status || ''}
-          siteReadyDate={project.site_ready_date}
-          customizationDeadline={project.customization_deadline}
-          requiresPaidCustomization={project.requires_paid_customization}
-        />
-        
-        <ProjectCardDomain domain={project.domain} />
-        
-        <StatusButtonsGrid
-          project={project}
-          statusOptions={statusOptions}
-          onStatusChange={onStatusChange}
-          isUpdating={isUpdating}
-        />
+        {/* Row 4: Footer - Avatar + Time + Actions */}
+        <div className="flex items-center justify-between pt-1.5 border-t border-border/40">
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6">
+              <AvatarFallback className={`text-[10px] text-white font-semibold ${programmerColor}`}>
+                {programmerInitials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <Clock className="h-3 w-3" />
+              <span className="text-[11px]">{getTimeAgo(project.created_at)}</span>
+            </div>
+          </div>
 
-        <ProjectCardActions 
-          projectId={project.id}
-          projectName={project.client_name}
-          isArchived={!!project.isArchived}
-          onViewEdit={handleViewEdit}
-          onProjectDeleted={onProjectDeleted}
-        />
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-muted-foreground hover:text-foreground"
+              onClick={(e) => { e.stopPropagation(); navigate(`/projeto/${project.id}`); }}
+            >
+              <Eye className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-muted-foreground hover:text-foreground"
+              onClick={(e) => { e.stopPropagation(); navigate(`/projeto/${project.id}/editar`); }}
+            >
+              <PenSquare className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-muted-foreground hover:text-foreground"
+              onClick={(e) => { e.stopPropagation(); setShowArchiveDialog(true); }}
+              disabled={isArchiving}
+            >
+              {project.isArchived ? <ArchiveRestore className="h-3.5 w-3.5" /> : <Archive className="h-3.5 w-3.5" />}
+            </Button>
+          </div>
+        </div>
       </div>
+
+      <ArchiveDialog
+        isOpen={showArchiveDialog}
+        onClose={() => setShowArchiveDialog(false)}
+        onConfirm={handleArchiveConfirm}
+        isArchiving={isArchiving}
+        projectName={project.client_name}
+        isArchived={!!project.isArchived}
+      />
     </Card>
   );
 }

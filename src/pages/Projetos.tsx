@@ -1,7 +1,8 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, Archive, Download } from "lucide-react";
+import { Plus, Archive, Download, Link2, Filter } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import KanbanBoard from "@/components/projects/KanbanBoard";
@@ -12,6 +13,15 @@ import { AutoLinkingButton } from "@/components/projects/AutoLinkingButton";
 import { useProjects } from "@/hooks/use-projects";
 import { TopBar } from "@/components/layout/TopBar";
 import { useDebounce } from "@/hooks/useDebounce";
+import { PROJECT_STATUS_TYPES } from "@/lib/supabase/projectStatus";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { X } from "lucide-react";
 
 export default function Projetos() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
@@ -108,23 +118,23 @@ export default function Projetos() {
         ]}
         actions={
           <div className="flex items-center gap-2">
-            <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
             <Button
               variant={showArchived ? "secondary" : "outline"}
               size="sm"
               onClick={() => setShowArchived(!showArchived)}
-              className="h-8 text-xs"
+              className="h-8 text-xs gap-1.5"
             >
-              <Archive className="h-3.5 w-3.5 mr-1.5" />
-              {showArchived ? "Ativos" : "Arquivados"}
+              <Archive className="h-3.5 w-3.5" />
+              Arquivados
             </Button>
-            <Button variant="outline" size="sm" onClick={handleExportCSV} className="h-8 text-xs">
-              <Download className="h-3.5 w-3.5 mr-1.5" />
+            <Button variant="outline" size="sm" onClick={handleExportCSV} className="h-8 text-xs gap-1.5">
+              <Download className="h-3.5 w-3.5" />
               CSV
             </Button>
             <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
-            <Button size="sm" onClick={debouncedHandleNewProject} className="h-8 text-xs">
-              <Plus className="h-3.5 w-3.5 mr-1.5" />
+            <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+            <Button size="sm" onClick={debouncedHandleNewProject} className="h-8 text-xs gap-1.5">
+              <Plus className="h-3.5 w-3.5" />
               Novo projeto
             </Button>
           </div>
@@ -132,21 +142,61 @@ export default function Projetos() {
       />
 
       <main className="flex-1 p-4 sm:p-6 overflow-auto">
-        <div className="max-w-[1600px] mx-auto space-y-4">
-          {/* Header + search row */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <h1 className="text-xl font-bold text-foreground">Projetos</h1>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {activeCount} projetos ativos · {viewMode === "kanban" ? "Visualizacao Kanban" : `${projects.length} exibidos`}
-              </p>
-            </div>
+        <div className="max-w-[1600px] mx-auto space-y-5">
+          {/* Page title */}
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Projetos</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {activeCount} projetos ativos · {viewMode === "kanban" ? `${PROJECT_STATUS_TYPES.length} colunas` : `mostrando ${projects.length}`}
+            </p>
+          </div>
+
+          {/* Search + filter chips row */}
+          <div className="flex flex-wrap items-center gap-3 bg-card border border-border/60 rounded-xl px-4 py-3">
             <SearchInput
               value={searchQuery}
               onChange={setSearchQuery}
-              placeholder="Buscar por cliente, dominio, modelo..."
-              className="w-full sm:w-80"
+              placeholder="Buscar por nome, dominio..."
+              className="flex-1 min-w-[200px]"
             />
+
+            {/* Inline filter chips */}
+            {statusFilter && (
+              <Badge variant="secondary" className="text-xs gap-1.5 pl-2 pr-1 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                <Filter className="h-3 w-3" />
+                Status: {statusFilter}
+                <button onClick={() => setStatusFilter(null)} className="ml-0.5 hover:bg-primary/20 rounded-full p-0.5">
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
+
+            {responsibleFilter && (
+              <Badge variant="secondary" className="text-xs gap-1.5 pl-2 pr-1 py-1 rounded-full">
+                Responsavel: {responsibleFilter}
+                <button onClick={() => setResponsibleFilter("")} className="ml-0.5 hover:bg-muted rounded-full p-0.5">
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
+
+            {/* Quick filter buttons */}
+            <div className="flex items-center gap-2 ml-auto">
+              <Select
+                value={statusFilter || "all"}
+                onValueChange={(v) => setStatusFilter(v === "all" ? null : v)}
+              >
+                <SelectTrigger className="h-8 text-xs w-auto min-w-[120px] border-border/60">
+                  <span className="text-primary font-medium">Status: {statusFilter || "Todos"}</span>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {PROJECT_STATUS_TYPES.map(s => (
+                    <SelectItem key={s.value} value={s.value}>{s.value}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Content */}
