@@ -76,6 +76,10 @@ const Leads: React.FC = () => {
       ]}
       actions={
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => navigate('/personalize-site')}>
+            <FileText className="h-4 w-4 mr-1.5" />
+            Formulário Avulso
+          </Button>
           <NotificationTestButton />
           <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
           <LeadViewToggle view={view} onViewChange={setView} />
