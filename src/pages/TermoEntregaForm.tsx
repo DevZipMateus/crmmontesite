@@ -363,7 +363,7 @@ const TermoEntregaForm: React.FC = () => {
                 ) : (
                   <>
                     <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Confirmar Aceite
+                    Enviar Revisao
                   </>
                 )}
               </Button>
