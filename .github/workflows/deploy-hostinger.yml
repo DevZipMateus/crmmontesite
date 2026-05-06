@@ -86,17 +86,8 @@ jobs:
     needs: build-and-deploy
     if: failure()
     steps:
-      - name: 📧 Notificar falha via Slack (se configurado)
-        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
-        run: |
-          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
-            -H 'Content-Type: application/json' \
-            -d '{
-              "text": "❌ *Deploy falhou!*\n*Repo:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Commit:* `${{ github.sha }}`\n*Autor:* ${{ github.actor }}\n*Link:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-            }'
-
       - name: 📧 Resumo da falha
         run: |
-          echo "## 🔔 Notificação de falha enviada" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔔 Deploy falhou" >> $GITHUB_STEP_SUMMARY
           echo "O workflow de deploy falhou. Verifique os logs do job anterior." >> $GITHUB_STEP_SUMMARY
           echo "[Ver logs completos](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
