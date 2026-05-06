@@ -1,16 +1,14 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { 
   ExternalLink, 
   MessageCircle, 
-  Calendar, 
   User,
-  Building2,
   Clock,
   Trash,
-  AlertTriangle
+  Pencil
 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Lead } from "@/types/lead";
@@ -24,37 +22,46 @@ interface LeadCardProps {
   onDelete: (lead: Lead) => void;
 }
 
-const getStatusColor = (situacao: string) => {
-  const situacaoLower = situacao.toLowerCase();
-  
-  if (situacaoLower.includes('pronto') || situacaoLower.includes('finalizado')) {
-    return 'bg-green-100 text-green-800 border-green-200';
-  }
-  
-  if (situacaoLower.includes('aguardando') || situacaoLower.includes('esperando')) {
-    return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-  }
-  
-  if (situacaoLower.includes('cancelou') || situacaoLower.includes('cancelado')) {
-    return 'bg-gray-100 text-gray-800 border-gray-200';
-  }
-  
-  return 'bg-blue-100 text-blue-800 border-blue-200';
+const getStatusStyle = (situacao: string) => {
+  const s = situacao.toLowerCase();
+  if (s.includes('pronto') || s.includes('finalizado')) return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+  if (s.includes('aguardando') || s.includes('esperando')) return 'bg-amber-100 text-amber-700 border-amber-200';
+  if (s.includes('cancelou') || s.includes('cancelado')) return 'bg-red-100 text-red-700 border-red-200';
+  if (s.includes('negociando')) return 'bg-violet-100 text-violet-700 border-violet-200';
+  return 'bg-blue-100 text-blue-700 border-blue-200';
+};
+
+const getBorderColor = (situacao: string) => {
+  const s = situacao.toLowerCase();
+  if (s.includes('pronto') || s.includes('finalizado')) return 'border-l-emerald-500';
+  if (s.includes('aguardando') || s.includes('esperando') || s.includes('sem retorno')) return 'border-l-amber-500';
+  if (s.includes('cancelou') || s.includes('cancelado')) return 'border-l-red-500';
+  return 'border-l-primary';
 };
 
 const getDaysWithoutResponse = (dataContato: string) => {
-  const today = new Date();
-  const contactDate = new Date(dataContato);
-  const diffTime = Math.abs(today.getTime() - contactDate.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays;
+  const diffTime = Math.abs(Date.now() - new Date(dataContato).getTime());
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
 const getDaysColor = (days: number) => {
-  if (days <= 3) return 'text-green-600';
-  if (days <= 7) return 'text-yellow-600';
-  if (days <= 14) return 'text-orange-600';
+  if (days <= 3) return 'text-emerald-600';
+  if (days <= 7) return 'text-amber-600';
   return 'text-red-600';
+};
+
+const getInitials = (name: string) => {
+  return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+};
+
+const getAvatarColor = (name: string) => {
+  const colors = [
+    'bg-blue-500', 'bg-violet-500', 'bg-emerald-500', 'bg-amber-500',
+    'bg-rose-500', 'bg-cyan-500', 'bg-indigo-500', 'bg-teal-500',
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
 };
 
 const LeadCard: React.FC<LeadCardProps> = ({ lead, onEdit, onDelete }) => {
@@ -65,135 +72,103 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onEdit, onDelete }) => {
   });
 
   return (
-    <Card className="hover:shadow-md transition-shadow h-full flex flex-col">
-      <CardHeader className="pb-3">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-          <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2 break-words min-w-0">
-            <Building2 size={18} className="flex-shrink-0" />
-            <span className="truncate">{lead.empresa}</span>
-          </CardTitle>
-          <Badge className={`${getStatusColor(lead.situacao)} text-xs whitespace-nowrap flex-shrink-0`}>
-            {lead.situacao}
-          </Badge>
-        </div>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2 min-w-0">
-            <User size={14} className="flex-shrink-0" />
-            <span className="truncate">{lead.nome_cliente}</span>
+    <Card className={`border-l-4 ${getBorderColor(lead.situacao)} hover:shadow-md transition-all h-full flex flex-col`}>
+      <CardContent className="p-4 flex flex-col gap-3 flex-1">
+        {/* Header: Avatar + Name + Status */}
+        <div className="flex items-start gap-3">
+          <div className={`h-9 w-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ${getAvatarColor(lead.empresa)}`}>
+            {getInitials(lead.empresa)}
           </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="font-semibold text-sm truncate">{lead.empresa}</h3>
+              <Badge className={`${getStatusStyle(lead.situacao)} text-[10px] px-1.5 py-0 flex-shrink-0`}>
+                {lead.situacao}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+              <User className="h-3 w-3" />
+              <span className="truncate">{lead.nome_cliente}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Info row */}
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-1.5">
+            <Clock className={`h-3 w-3 ${getDaysColor(diasSemResposta)}`} />
+            <span className={getDaysColor(diasSemResposta)}>
+              {diasSemResposta}d sem resposta
+            </span>
+          </div>
+          <span className="text-muted-foreground">{dataFormatada}</span>
+        </div>
+
+        {/* Vendedor + email */}
+        <div className="space-y-1 text-xs text-muted-foreground">
           {lead.vendedor && (
-            <div className="flex items-center gap-2 text-xs sm:text-sm min-w-0">
-              <span className="hidden sm:inline text-muted-foreground">•</span>
-              <span className="truncate">Vendedor: {lead.vendedor}</span>
+            <div className="flex items-center gap-1.5">
+              <div className={`h-4 w-4 rounded-full flex items-center justify-center text-white text-[8px] font-bold ${getAvatarColor(lead.vendedor)}`}>
+                {getInitials(lead.vendedor)}
+              </div>
+              <span className="truncate">{lead.vendedor}</span>
             </div>
           )}
-        </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-3 flex-1 flex flex-col">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm">
-          <div className="flex items-center gap-2">
-            <Clock size={14} className={getDaysColor(diasSemResposta)} />
-            <span className={getDaysColor(diasSemResposta)}>
-              {diasSemResposta} dias sem resposta
-            </span>
-          </div>
-          <span className="text-muted-foreground text-xs sm:text-sm">({dataFormatada})</span>
+          {lead.email && <p className="truncate">{lead.email}</p>}
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <Calendar size={14} className="flex-shrink-0" />
-            <span className="break-words">
-              Último contato: {new Date(lead.data_ultimo_contato).toLocaleDateString('pt-BR')}
-            </span>
-          </div>
+        {/* Badges */}
+        <div className="flex flex-wrap gap-1">
+          {lead.form_hash && (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-emerald-50 text-emerald-700 border-emerald-200">
+              Form preenchido
+            </Badge>
+          )}
+          {lead.project_id && (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-blue-50 text-blue-700 border-blue-200">
+              Projeto vinculado
+            </Badge>
+          )}
         </div>
 
-        {lead.email && (
-          <div className="text-sm text-muted-foreground">
-            <strong>E-mail:</strong> {lead.email}
-          </div>
-        )}
-
-        {lead.cnpj && (
-          <div className="text-sm text-muted-foreground">
-            <strong>CNPJ/CPF:</strong> {lead.cnpj}
-          </div>
-        )}
-
-        {lead.observacoes && (
-          <div className="text-sm text-muted-foreground bg-muted/50 p-2 rounded break-words flex-1">
-            <strong>Observações:</strong> {lead.observacoes}
-          </div>
-        )}
-
-        <div className="flex flex-col gap-3 pt-2 mt-auto">
-          {/* Gerador de URL do Formulário */}
-          <div className="pt-2 border-t">
-            <LeadFormUrlGenerator lead={lead} compact />
-          </div>
-          
-          <div className="flex flex-wrap gap-2">
-            {lead.link_blaster && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => window.open(lead.link_blaster, '_blank')}
-                className="flex-1 sm:flex-none min-w-0"
-              >
-                <ExternalLink size={14} className="mr-1 flex-shrink-0" />
-                <span className="truncate">Blaster</span>
-              </Button>
-            )}
-            
-            {lead.link_chat && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => window.open(lead.link_chat, '_blank')}
-                className="flex-1 sm:flex-none min-w-0"
-              >
-                <MessageCircle size={14} className="mr-1 flex-shrink-0" />
-                <span className="truncate">Chat</span>
-              </Button>
-            )}
-          </div>
-          
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => onEdit(lead)}
-              className="flex-1"
-            >
-              Editar
+        {/* Actions */}
+        <div className="flex items-center gap-1.5 mt-auto pt-2 border-t border-border/50">
+          <LeadFormUrlGenerator lead={lead} compact />
+          <div className="flex-1" />
+          {lead.link_blaster && (
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => window.open(lead.link_blaster, '_blank')}>
+              <ExternalLink className="h-3.5 w-3.5" />
             </Button>
-
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm" className="flex-1">
-                  <Trash size={14} className="mr-1" />
-                  <span className="hidden sm:inline">Excluir</span>
-                  <span className="sm:hidden">Del</span>
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Excluir lead?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Esta ação não pode ser desfeita. Isso irá remover o lead "{lead.empresa}".
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => onDelete(lead)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                    Confirmar
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
+          )}
+          {lead.link_chat && (
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => window.open(lead.link_chat, '_blank')}>
+              <MessageCircle className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(lead)}>
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive">
+                <Trash className="h-3.5 w-3.5" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Excluir lead?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta ação não pode ser desfeita. Isso irá remover o lead "{lead.empresa}".
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={() => onDelete(lead)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Confirmar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </CardContent>
     </Card>
