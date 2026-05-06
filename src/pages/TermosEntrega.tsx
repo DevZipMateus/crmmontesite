@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { TopBar } from "@/components/layout/TopBar";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileCheck, RefreshCw } from "lucide-react";
+import { FileCheck, RefreshCw, Send, Clock, CheckCircle, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import TermosTable from "@/components/termos-entrega/TermosTable";
 import TermoDetailDialog from "@/components/termos-entrega/TermoDetailDialog";
 import { getAllProjectsWithTermStatus } from "@/services/deliveryTermService";
 import { ProjectWithTermStatus } from "@/types/deliveryTerm";
+import { cn } from "@/lib/utils";
 
 const TermosEntrega: React.FC = () => {
-  const navigate = useNavigate();
   const [projects, setProjects] = useState<ProjectWithTermStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<ProjectWithTermStatus | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [filterTab, setFilterTab] = useState<'all' | 'pending' | 'filled'>('all');
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -30,9 +32,7 @@ const TermosEntrega: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
+  useEffect(() => { fetchProjects(); }, []);
 
   const handleViewDetails = (project: ProjectWithTermStatus) => {
     setSelectedProject(project);
@@ -45,82 +45,105 @@ const TermosEntrega: React.FC = () => {
     pending: projects.filter(p => !p.delivery_term).length,
   };
 
+  const filteredProjects = projects.filter(p => {
+    if (filterTab === 'pending') return !p.delivery_term;
+    if (filterTab === 'filled') return !!p.delivery_term;
+    return true;
+  });
+
+  const statCards = [
+    { label: "Total Enviados", value: stats.total, icon: Send, color: "text-primary", bg: "bg-primary/10" },
+    { label: "Preenchidos", value: stats.filled, icon: CheckCircle, color: "text-emerald-600", bg: "bg-emerald-50" },
+    { label: "Pendentes", value: stats.pending, icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
+  ];
+
+  const tabs = [
+    { key: 'all' as const, label: 'Todos', count: stats.total },
+    { key: 'pending' as const, label: 'Pendentes', count: stats.pending },
+    { key: 'filled' as const, label: 'Preenchidos', count: stats.filled },
+  ];
+
   return (
     <PageLayout title="Termos de Entrega" showHomeButton={false}>
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/home")}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
-                <FileCheck className="h-6 w-6" />
-                Termos de Entrega
-              </h1>
-              <p className="text-muted-foreground">
-                Gerenciar termos de aceite e entrega de websites
-              </p>
-            </div>
-          </div>
-          <Button variant="outline" onClick={fetchProjects} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+      <TopBar
+        breadcrumbs={[
+          { label: "MonteSite CRM", href: "/home" },
+          { label: "Revisões / Termos de Entrega" },
+        ]}
+        actions={
+          <Button variant="outline" size="sm" onClick={fetchProjects} disabled={loading}>
+            <RefreshCw className={cn("h-3.5 w-3.5 mr-1.5", loading && "animate-spin")} />
             Atualizar
           </Button>
+        }
+      />
+
+      <div className="p-4 sm:p-6 space-y-5">
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3">
+          {statCards.map((s, i) => (
+            <Card key={i} className="border-border/60 shadow-sm">
+              <CardContent className="p-4 flex items-start gap-3">
+                <div className={`rounded-lg p-2 ${s.bg}`}>
+                  <s.icon className={`h-4 w-4 ${s.color}`} />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">{s.label}</p>
+                  <span className={`text-xl font-bold ${s.color}`}>{s.value}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Total de Projetos</CardDescription>
-              <CardTitle className="text-3xl">{stats.total}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Termos Preenchidos</CardDescription>
-              <CardTitle className="text-3xl text-green-600">{stats.filled}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Pendentes</CardDescription>
-              <CardTitle className="text-3xl text-yellow-600">{stats.pending}</CardTitle>
-            </CardHeader>
-          </Card>
+        {/* Filter tabs */}
+        <div className="flex items-center gap-1 border-b border-border">
+          {tabs.map(t => (
+            <button
+              key={t.key}
+              onClick={() => setFilterTab(t.key)}
+              className={cn(
+                "px-3 py-2 text-sm font-medium border-b-2 transition-colors",
+                filterTab === t.key
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {t.label}
+              <Badge variant="secondary" className="ml-1.5 text-[10px] px-1.5 py-0">{t.count}</Badge>
+            </button>
+          ))}
         </div>
 
         {/* Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Projetos</CardTitle>
-            <CardDescription>
-              Gere links para os clientes preencherem o termo de aceite
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <Card className="border-border/60 shadow-sm">
+          <CardContent className="p-0">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : filteredProjects.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16">
+                <FileCheck className="h-12 w-12 text-muted-foreground/30 mb-3" />
+                <p className="text-muted-foreground font-medium">Tudo em dia por aqui</p>
+                <p className="text-xs text-muted-foreground mt-1">Nenhum termo encontrado nesta categoria.</p>
               </div>
             ) : (
               <TermosTable 
-                projects={projects} 
+                projects={filteredProjects} 
                 onRefresh={fetchProjects}
                 onViewDetails={handleViewDetails}
               />
             )}
           </CardContent>
         </Card>
-
-        {/* Detail Dialog */}
-        <TermoDetailDialog
-          project={selectedProject}
-          open={detailDialogOpen}
-          onOpenChange={setDetailDialogOpen}
-        />
       </div>
+
+      <TermoDetailDialog
+        project={selectedProject}
+        open={detailDialogOpen}
+        onOpenChange={setDetailDialogOpen}
+      />
     </PageLayout>
   );
 };
