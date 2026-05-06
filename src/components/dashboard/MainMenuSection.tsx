@@ -146,9 +146,9 @@ const MainMenuSection: React.FC = () => {
         
         <MenuItem 
           icon={<FileCheck size={24} />}
-          label="Termo de Entrega"
-          href="/termos-entrega"
-          description="Gerenciar termos de aceite e entrega de websites"
+          label="Etapa de Revisão"
+          href="/revisoes"
+          description="Gerenciar etapas de revisão de websites"
         />
         
         <MenuItem 
