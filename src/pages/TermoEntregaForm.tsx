@@ -113,11 +113,11 @@ const TermoEntregaForm: React.FC = () => {
         // Don't block - term was saved successfully
       }
 
-      toast.success("Termo de entrega enviado com sucesso!");
+      toast.success("Revisão enviada com sucesso!");
       setAlreadyFilled(true);
     } catch (err) {
-      console.error("Erro ao enviar termo:", err);
-      toast.error("Erro ao enviar termo. Tente novamente.");
+      console.error("Erro ao enviar revisão:", err);
+      toast.error("Erro ao enviar revisão. Tente novamente.");
     } finally {
       setSubmitting(false);
     }
@@ -155,9 +155,9 @@ const TermoEntregaForm: React.FC = () => {
         <Card className="w-full max-w-2xl">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <CheckCircle2 className="h-12 w-12 text-green-500 mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Termo Já Preenchido</h2>
+            <h2 className="text-xl font-semibold mb-2">Revisão Já Enviada</h2>
             <p className="text-muted-foreground mb-6">
-              O termo de entrega para o projeto <strong>{project?.client_name}</strong> já foi preenchido e aceito.
+              A etapa de revisão para o projeto <strong>{project?.client_name}</strong> já foi preenchida e enviada.
             </p>
             {project?.domain && (
               <a
@@ -184,10 +184,13 @@ const TermoEntregaForm: React.FC = () => {
             <div className="flex justify-center mb-4">
               <FileCheck className="h-12 w-12 text-blue-600" />
             </div>
-            <CardTitle className="text-2xl">Termo de Aceite e Entrega Definitiva de Website</CardTitle>
+            <CardTitle className="text-2xl">Etapa de Revisão do Seu Site</CardTitle>
             <CardDescription className="text-base">
               Projeto: <strong>{project?.client_name}</strong>
             </CardDescription>
+            <p className="text-sm text-muted-foreground mt-2">
+              Seu site ainda não está 100% pronto. Revise a construção, valide e aponte os ajustes necessários.
+            </p>
           </CardHeader>
 
           <form onSubmit={handleSubmit}>
@@ -243,15 +246,15 @@ const TermoEntregaForm: React.FC = () => {
 
                 <div className="bg-gray-100 rounded-lg p-4 space-y-3 text-sm">
                   <p>
-                    Ao preencher seus dados de identificação (Nome Completo e CPF) abaixo, você declara que recebeu a 
-                    versão funcional do seu site e dá o aceite no projeto. A partir desta data, passam a valer as 
+                    Ao preencher seus dados de identificação (Nome Completo e CPF) abaixo, você declara que revisou a
+                    versão atual do seu site e registra sua avaliação. A partir desta data, passam a valer as
                     seguintes regras de manutenção e ajustes:
                   </p>
 
                   <ul className="space-y-2 ml-4">
                     <li className="flex gap-2">
                       <span className="font-semibold">•</span>
-                      <span><strong>Início da Vigência:</strong> O prazo de suporte inicia-se imediatamente após o preenchimento deste termo.</span>
+                      <span><strong>Início da Vigência:</strong> O prazo de suporte inicia-se imediatamente após o envio desta revisão.</span>
                     </li>
                     <li className="flex gap-2">
                       <span className="font-semibold">•</span>
@@ -313,7 +316,7 @@ const TermoEntregaForm: React.FC = () => {
                   <div>
                     <Label htmlFor="email" className="flex items-center gap-2">
                       <Mail className="h-4 w-4" />
-                      E-mail (para receber cópia do termo)
+                      E-mail (para receber cópia da revisão)
                     </Label>
                     <Input
                       id="email"
@@ -324,7 +327,7 @@ const TermoEntregaForm: React.FC = () => {
                       className="mt-1"
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      Informe seu e-mail para receber uma cópia do termo de entrega em PDF.
+                      Informe seu e-mail para receber uma cópia da revisão em PDF.
                     </p>
                   </div>
                 </div>
@@ -339,7 +342,7 @@ const TermoEntregaForm: React.FC = () => {
                     onCheckedChange={(checked) => setAccepted(checked === true)}
                   />
                   <Label htmlFor="aceite" className="text-sm leading-relaxed cursor-pointer">
-                    Li e aceito os termos acima descritos. Confirmo que recebi a versão funcional do meu site e 
+                    Li e estou ciente das condições acima descritas. Confirmo que revisei a versão atual do meu site e
                     estou ciente das condições de suporte e manutenção.
                   </Label>
                 </div>
@@ -360,7 +363,7 @@ const TermoEntregaForm: React.FC = () => {
                 ) : (
                   <>
                     <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Confirmar Aceite
+                    Enviar Revisao
                   </>
                 )}
               </Button>
