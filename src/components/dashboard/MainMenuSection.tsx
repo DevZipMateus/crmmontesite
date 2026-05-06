@@ -1,126 +1,154 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { 
-  LayoutGrid, 
-  Plus, 
+import {
+  LayoutGrid,
+  Users,
   Terminal,
-  Settings,
-  ContactRound,
+  FileText,
   FileCheck,
-  Sheet
+  Plug,
+  ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useProjects } from "@/hooks/use-projects";
+import { useLeads } from "@/hooks/useLeads";
 
-interface MenuItemProps {
-  icon: React.ReactNode;
+interface QuickAccessItem {
+  icon: React.ElementType;
   label: string;
   href: string;
-  description: string;
+  subtitle: string;
+  stat?: string;
+  statLabel?: string;
   isExternal?: boolean;
   variant?: "default" | "green";
 }
 
-const MenuItem: React.FC<MenuItemProps> = ({ icon, label, href, description, isExternal, variant = "default" }) => {
-  const baseClasses = "flex flex-col items-center justify-center gap-2 p-4 rounded-lg border transition-all duration-200 hover:shadow-sm";
-  
-  const variantClasses = {
-    default: "bg-white border-gray-200 hover:border-blue-400",
-    green: "bg-emerald-50 border-emerald-200 hover:border-emerald-400"
-  };
-  
-  const iconClasses = {
-    default: "w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600",
-    green: "w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600"
-  };
-
-  if (isExternal) {
-    return (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={cn(baseClasses, variantClasses[variant])}
-      >
-        <div className={iconClasses[variant]}>
-          {icon}
-        </div>
-        <h3 className="font-medium text-center">{label}</h3>
-        <p className="text-xs text-center text-gray-500">{description}</p>
-      </a>
-    );
-  }
-
-  return (
-    <Link
-      to={href}
-      className={cn(baseClasses, variantClasses[variant])}
-    >
-      <div className={iconClasses[variant]}>
-        {icon}
-      </div>
-      <h3 className="font-medium text-center">{label}</h3>
-      <p className="text-xs text-center text-gray-500">{description}</p>
-    </Link>
-  );
-};
-
 const MainMenuSection: React.FC = () => {
+  const { projects } = useProjects();
+  const { data: leads } = useLeads();
+
+  const activeProjects = projects?.filter(
+    (p) => p.status !== "Arquivado" && p.status !== "Concluído"
+  ).length || 0;
+
+  const inProduction = projects?.filter((p) => p.status === "Recebido").length || 0;
+
+  const items: QuickAccessItem[] = [
+    {
+      icon: LayoutGrid,
+      label: "Ver Projetos",
+      href: "/projetos",
+      stat: String(activeProjects),
+      statLabel: "EM PRODUÇÃO",
+      subtitle: `${activeProjects} ativos`,
+    },
+    {
+      icon: Users,
+      label: "Gestão de Leads",
+      href: "/leads",
+      stat: String(leads?.length || 0),
+      statLabel: "LEADS ATIVOS",
+      subtitle: `${leads?.length || 0} leads`,
+    },
+    {
+      icon: Terminal,
+      label: "Gerar Comandos",
+      href: "/producao-sites",
+      stat: String(inProduction),
+      statLabel: "NA FILA",
+      subtitle: `${inProduction} prontos para produção`,
+    },
+    {
+      icon: FileText,
+      label: "Formulário Avulso",
+      href: "/criar-projetos",
+      subtitle: "Personalização sem cliente",
+    },
+    {
+      icon: FileCheck,
+      label: "Etapa de Revisão",
+      href: "/revisoes",
+      subtitle: "Termos de entrega",
+    },
+    {
+      icon: Plug,
+      label: "Integrações",
+      href: "/webhooks",
+      subtitle: "eGestor · Blaster · Hostinger",
+    },
+    {
+      icon: ExternalLink,
+      label: "Gestão de Layouts",
+      href: "https://layouts-importacoes.netlify.app/",
+      subtitle: "Google Sheets",
+      isExternal: true,
+      variant: "green",
+    },
+  ];
+
   return (
-    <section className="mb-8">
-      <h2 className="text-2xl font-bold mb-4">Menu Principal</h2>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <MenuItem 
-          icon={<LayoutGrid size={24} />}
-          label="Ver Projetos"
-          href="/projetos"
-          description="Gerenciar projetos existentes"
-        />
-        
-        <MenuItem 
-          icon={<Plus size={24} />}
-          label="Formulário Avulso"
-          href="/criar-projetos"
-          description="Preencher formulário de personalização avulso"
-        />
-        
-        <MenuItem 
-          icon={<ContactRound size={24} />}
-          label="Gestão de Leads"
-          href="/leads"
-          description="Acompanhar clientes potenciais pré-venda"
-        />
-        
-        <MenuItem 
-          icon={<Terminal size={24} />}
-          label="Gerar Comandos"
-          href="/producao-sites"
-          description="Gerar comandos de produção"
-        />
-        
-        <MenuItem 
-           icon={<Settings size={24} />}
-           label="Configurações"
-           href="/webhooks"
-           description="Webhooks, APIs e parceiros"
-         />
-        
-        
-        <MenuItem 
-          icon={<FileCheck size={24} />}
-          label="Etapa de Revisão"
-          href="/revisoes"
-          description="Gerenciar etapas de revisão de websites"
-        />
-        
-        <MenuItem 
-          icon={<Sheet size={24} />}
-          label="Gestão de Layouts"
-          href="https://layouts-importacoes.netlify.app/"
-          description="Layouts e importação via Google Sheets"
-          isExternal
-          variant="green"
-        />
+    <section>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-foreground">Acesso rápido</h2>
+        <span className="text-xs text-muted-foreground">{items.length} áreas</span>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        {items.map((item) => {
+          const content = (
+            <div
+              className={cn(
+                "bg-white rounded-lg border p-4 transition-all hover:shadow-md hover:border-primary/30 cursor-pointer group",
+                item.variant === "green"
+                  ? "border-emerald-200 hover:border-emerald-400"
+                  : "border-border"
+              )}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div
+                  className={cn(
+                    "flex h-10 w-10 items-center justify-center rounded-lg",
+                    item.variant === "green"
+                      ? "bg-emerald-50 text-emerald-600"
+                      : "bg-primary/5 text-primary"
+                  )}
+                >
+                  <item.icon className="h-5 w-5" />
+                </div>
+                {item.stat && (
+                  <div className="text-right">
+                    <p className="text-xl font-bold text-foreground">{item.stat}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                      {item.statLabel}
+                    </p>
+                  </div>
+                )}
+              </div>
+              <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                {item.label}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">{item.subtitle}</p>
+              {item.isExternal && (
+                <ExternalLink className="h-3 w-3 text-muted-foreground mt-1" />
+              )}
+            </div>
+          );
+
+          if (item.isExternal) {
+            return (
+              <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">
+                {content}
+              </a>
+            );
+          }
+
+          return (
+            <Link key={item.label} to={item.href}>
+              {content}
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

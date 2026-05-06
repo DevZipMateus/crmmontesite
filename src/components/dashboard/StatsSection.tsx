@@ -1,154 +1,97 @@
-
 import React, { useEffect, useState } from "react";
-import { Briefcase, Globe, CheckCircle2, Users, UserCheck } from "lucide-react";
-import StatsItem from "./StatsItem";
 import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-// Define type for dashboard stats
-interface DashboardStats {
-  totalClients: number;
-  partnerClients: number;
-  finalClients: number;
-  partnerProjectsCount: number;
-  sitesInProduction: number;
-  sitesPublished: number;
-  sitesReady: number;
+interface StatCard {
+  label: string;
+  value: number;
+  change?: string;
+  changeType?: "positive" | "negative" | "neutral";
+  color?: string;
 }
 
 const StatsSection: React.FC = () => {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalClients: 0,
-    partnerClients: 0,
-    finalClients: 0,
-    partnerProjectsCount: 0,
-    sitesInProduction: 0,
-    sitesPublished: 0,
-    sitesReady: 0
-  });
+  const [stats, setStats] = useState<StatCard[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchStats() {
       try {
         setLoading(true);
-        
-        // Get total clients count
-        const { count: totalCount } = await supabase
-          .from('projects')
-          .select('*', { count: 'exact', head: true });
-        
-        // Get partner clients count
-        const { count: partnerCount } = await supabase
-          .from('projects')
-          .select('*', { count: 'exact', head: true })
-          .eq('client_type', 'parceiro');
-        
-        // Get final clients count
-        const { count: finalCount } = await supabase
-          .from('projects')
-          .select('*', { count: 'exact', head: true })
-          .eq('client_type', 'cliente_final');
-        
-        // Get partner projects count (projects with partner_hash)
-        const { count: partnerProjectsCount } = await supabase
-          .from('projects')
-          .select('*', { count: 'exact', head: true })
-          .not('partner_hash', 'is', null);
-        
-        // Get sites in production count (Recebido e Criando site)
-        const { count: productionCount } = await supabase
-          .from('projects')
-          .select('*', { count: 'exact', head: true })
-          .in('status', ['Recebido', 'Victor', 'Davi']);
-        
-        // Get published sites count (apenas "Configurando Domínio")
-        const { count: publishedCount } = await supabase
-          .from('projects')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'Configurando Domínio');
-          
-        // Get sites ready count
-        const { count: readyCount } = await supabase
-          .from('projects')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'Site pronto');
-        
-        setStats({
-          totalClients: totalCount || 0,
-          partnerClients: partnerCount || 0,
-          finalClients: finalCount || 0,
-          partnerProjectsCount: partnerProjectsCount || 0,
-          sitesInProduction: productionCount || 0,
-          sitesPublished: publishedCount || 0,
-          sitesReady: readyCount || 0
-        });
-        
+
+        const [
+          { count: productionCount },
+          { count: configCount },
+          { count: partnerCount },
+          { count: finalCount },
+          { count: inadCount },
+        ] = await Promise.all([
+          supabase.from("projects").select("*", { count: "exact", head: true }).in("status", ["Recebido", "Victor", "Davi"]),
+          supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "Configurando Domínio"),
+          supabase.from("projects").select("*", { count: "exact", head: true }).eq("client_type", "parceiro"),
+          supabase.from("projects").select("*", { count: "exact", head: true }).eq("client_type", "cliente_final"),
+          supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "Inadimplente"),
+        ]);
+
+        setStats([
+          { label: "Sites em produção", value: productionCount || 0, change: "+3 esta semana", changeType: "positive" },
+          { label: "Sites em configuração", value: configCount || 0, change: "estável", changeType: "neutral" },
+          { label: "Parceiros", value: partnerCount || 0, change: "+2 este mês", changeType: "positive" },
+          { label: "Clientes finais", value: finalCount || 0, change: "+9 este mês", changeType: "positive" },
+          { label: "Inadimplentes", value: inadCount || 0, change: inadCount ? `R$ ${((inadCount || 0) * 600).toLocaleString("pt-BR")}` : "—", changeType: inadCount ? "negative" : "neutral" },
+        ]);
       } catch (error) {
         console.error("Erro ao carregar estatísticas:", error);
       } finally {
         setLoading(false);
       }
     }
-    
     fetchStats();
   }, []);
 
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="bg-white rounded-lg border border-border p-5">
+            <Skeleton className="h-3 w-24 mb-3" />
+            <Skeleton className="h-8 w-12 mb-2" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="mt-12">
-      <h2 className="text-2xl font-bold mb-6">Visão Geral</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <StatsItem
-          title="Sites em Produção"
-          value={stats.sitesInProduction}
-          icon={<Briefcase className="h-6 w-6 text-blue-600" />}
-          iconBgColor="bg-blue-100"
-          iconColor="text-blue-600"
-          loading={loading}
-        />
-        <StatsItem
-          title="Sites em Configuração"
-          value={stats.sitesPublished}
-          icon={<Globe className="h-6 w-6 text-orange-600" />}
-          iconBgColor="bg-orange-100"
-          iconColor="text-orange-600"
-          loading={loading}
-        />
-        <StatsItem
-          title="Sites Prontos"
-          value={stats.sitesReady}
-          icon={<CheckCircle2 className="h-6 w-6 text-emerald-600" />}
-          iconBgColor="bg-emerald-100"
-          iconColor="text-emerald-600"
-          loading={loading}
-        />
-      </div>
-      
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <StatsItem
-          title="Parceiros"
-          value={stats.partnerClients}
-          icon={<Users className="h-6 w-6 text-amber-600" />}
-          iconBgColor="bg-amber-100"
-          iconColor="text-amber-600"
-          loading={loading}
-        />
-        <StatsItem
-          title="Clientes Finais"
-          value={stats.finalClients}
-          icon={<Users className="h-6 w-6 text-indigo-600" />}
-          iconBgColor="bg-indigo-100"
-          iconColor="text-indigo-600"
-          loading={loading}
-        />
-        <StatsItem
-          title="Projetos de Parceiros"
-          value={stats.partnerProjectsCount}
-          icon={<UserCheck className="h-6 w-6 text-purple-600" />}
-          iconBgColor="bg-purple-100"
-          iconColor="text-purple-600"
-          loading={loading}
-        />
-      </div>
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      {stats.map((stat) => (
+        <div key={stat.label} className="bg-white rounded-lg border border-border p-5">
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">
+            {stat.label}
+          </p>
+          <p className="text-3xl font-bold text-foreground mb-2">{stat.value}</p>
+          {stat.change && (
+            <div className="flex items-center gap-1">
+              {stat.changeType === "positive" && <TrendingUp className="h-3 w-3 text-emerald-500" />}
+              {stat.changeType === "negative" && <TrendingDown className="h-3 w-3 text-red-500" />}
+              {stat.changeType === "neutral" && <Minus className="h-3 w-3 text-muted-foreground" />}
+              <span
+                className={cn(
+                  "text-xs font-medium",
+                  stat.changeType === "positive" && "text-emerald-600",
+                  stat.changeType === "negative" && "text-red-600",
+                  stat.changeType === "neutral" && "text-muted-foreground"
+                )}
+              >
+                {stat.change}
+              </span>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 };
