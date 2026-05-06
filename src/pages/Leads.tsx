@@ -18,6 +18,7 @@ import { useLeads, useDeleteLead } from "@/hooks/useLeads";
 import { Lead, LeadFilters as LeadFiltersType, SITUACOES_PADRONIZADAS } from "@/types/lead";
 
 const Leads: React.FC = () => {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<LeadFiltersType>({});
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
