@@ -87,17 +87,9 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onEdit, onDelete }) => {
               {lead.email && <> · {lead.email}</>}
             </p>
           </div>
-          <div className="flex items-center gap-0.5 flex-shrink-0">
-            <LeadFormUrlGenerator lead={lead} compact />
-            {lead.link_chat && (
-              <Button variant="ghost" size="icon" className="h-7 w-7 text-blue-500 hover:text-blue-600" onClick={() => window.open(lead.link_chat, '_blank')}>
-                <MessageSquare className="h-3.5 w-3.5" />
-              </Button>
-            )}
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(lead)}>
-              <Pencil className="h-3.5 w-3.5" />
-            </Button>
-          </div>
+          <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => onEdit(lead)}>
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
         </div>
 
         {/* Row 2: Vendedor + Time + Badges */}
@@ -141,11 +133,17 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onEdit, onDelete }) => {
           )}
         </div>
 
-        {/* Three-dot menu */}
-        <div className="flex justify-end">
+        {/* Row 4: Actions row */}
+        <div className="flex items-center justify-end gap-1 pt-1 border-t border-border/50">
+          <LeadFormUrlGenerator lead={lead} compact />
+          {lead.link_chat && (
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-blue-500 hover:text-blue-600" onClick={() => window.open(lead.link_chat, '_blank')}>
+              <MessageSquare className="h-3.5 w-3.5" />
+            </Button>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6">
+              <Button variant="ghost" size="icon" className="h-7 w-7">
                 <MoreVertical className="h-3.5 w-3.5" />
               </Button>
             </DropdownMenuTrigger>
