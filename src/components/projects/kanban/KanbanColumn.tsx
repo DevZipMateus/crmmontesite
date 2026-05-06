@@ -28,7 +28,7 @@ const statusDotColors: Record<string, string> = {
   "Recebido": "bg-blue-500",
   "Victor": "bg-blue-600",
   "Davi": "bg-purple-500",
-  "Sem retorno": "bg-amber-500",
+  "Sem retorno": "bg-red-500",
   "Site pronto": "bg-emerald-500",
 };
 

@@ -193,28 +193,26 @@ export default function KanbanBoard({
   }
 
   return (
-    <div className="w-full">
-      <ScrollArea className="w-full h-[calc(100vh-220px)] lg:h-[calc(100vh-200px)]">
-        <div className="flex gap-2 lg:gap-3 xl:gap-4 p-1 min-w-0">
-          {PROJECT_STATUS_TYPES.map((statusType) => (
-            <div key={statusType.value} className="flex-1 min-w-[220px] lg:min-w-[240px] xl:min-w-[280px] 2xl:min-w-[300px]">
-              <KanbanColumn
-                statusType={statusType}
-                projects={displayProjects}
-                draggingId={draggingId}
-                updatingStatus={updatingStatus || (isUpdating ? pendingStatusChange?.projectId || null : null)}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                onDragStart={handleDragStart}
-                onStatusChange={handleUnifiedStatusChange}
-                statusOptions={PROJECT_STATUS_TYPES}
-                onProjectDeleted={handleProjectDeleted}
-                onProjectUpdated={handleProjectUpdated}
-              />
-            </div>
-          ))}
-        </div>
-      </ScrollArea>
+    <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+      <div className="flex gap-2 lg:gap-3 xl:gap-4 p-1 min-w-[1100px] h-[calc(100vh-220px)] lg:h-[calc(100vh-200px)]">
+        {PROJECT_STATUS_TYPES.map((statusType) => (
+          <div key={statusType.value} className="flex-1 min-w-[200px]">
+            <KanbanColumn
+              statusType={statusType}
+              projects={displayProjects}
+              draggingId={draggingId}
+              updatingStatus={updatingStatus || (isUpdating ? pendingStatusChange?.projectId || null : null)}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onDragStart={handleDragStart}
+              onStatusChange={handleUnifiedStatusChange}
+              statusOptions={PROJECT_STATUS_TYPES}
+              onProjectDeleted={handleProjectDeleted}
+              onProjectUpdated={handleProjectUpdated}
+            />
+          </div>
+        ))}
+      </div>
 
       <DomainRequiredDialog
         open={domainDialogOpen}
