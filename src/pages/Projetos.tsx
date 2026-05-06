@@ -137,6 +137,7 @@ export default function Projetos() {
     <div className="min-h-screen bg-background">
       <PageLayout 
         title="Projetos"
+        showFooter={false}
         actions={
           <div className="flex flex-wrap items-center gap-2 lg:gap-3">
             <Button
