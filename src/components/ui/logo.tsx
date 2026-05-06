@@ -10,10 +10,10 @@ interface LogoProps {
 
 export const Logo: React.FC<LogoProps> = ({ className, size = "md" }) => {
   const sizeClasses = {
-    sm: "h-10 w-10",
-    md: "h-14 w-14",
-    lg: "h-16 w-16",
-    xl: "h-[180px] w-[240px]"
+    sm: "h-12 w-auto",
+    md: "h-16 w-auto",
+    lg: "h-20 w-auto",
+    xl: "h-[200px] w-auto"
   };
 
   return (
