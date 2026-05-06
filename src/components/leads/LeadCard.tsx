@@ -116,9 +116,14 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onEdit, onDelete }) => {
 
         {/* Row 3: Badges */}
         <div className="flex items-center gap-1.5 flex-wrap">
-          {lead.form_hash && (
+          {lead.form_hash && lead.project_id && (
             <Badge variant="outline" className="text-[10px] px-2 py-0 bg-blue-50 text-blue-700 border-blue-200 font-normal">
               Form preenchido
+            </Badge>
+          )}
+          {lead.form_hash && !lead.project_id && (
+            <Badge variant="outline" className="text-[10px] px-2 py-0 bg-orange-50 text-orange-700 border-orange-200 font-normal">
+              Form pendente
             </Badge>
           )}
           {lead.situacao.toLowerCase().includes('site pronto') && (
