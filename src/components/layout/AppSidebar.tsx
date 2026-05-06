@@ -193,10 +193,10 @@ export function AppSidebar() {
         {!collapsed && (
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-medium">
-              VM
+              AD
             </div>
             <div className="flex flex-col flex-1 min-w-0">
-              <span className="text-sm font-medium text-foreground truncate">Victor Monte</span>
+              <span className="text-sm font-medium text-foreground truncate">Admin</span>
               <span className="text-[11px] text-muted-foreground">Administrador</span>
             </div>
             <ChevronDown className="h-4 w-4 text-muted-foreground" />
