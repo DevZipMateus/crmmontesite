@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { TopBar } from "@/components/layout/TopBar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FileCheck, RefreshCw, Send, Clock, CheckCircle, AlertTriangle } from "lucide-react";
+import { FileCheck, RefreshCw, Send, Clock, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import TermosTable from "@/components/termos-entrega/TermosTable";
 import TermoDetailDialog from "@/components/termos-entrega/TermoDetailDialog";
@@ -64,21 +63,21 @@ const TermosEntrega: React.FC = () => {
   ];
 
   return (
-    <PageLayout title="Termos de Entrega" showHomeButton={false}>
-      <TopBar
-        breadcrumbs={[
-          { label: "MonteSite CRM", href: "/home" },
-          { label: "Revisões / Termos de Entrega" },
-        ]}
-        actions={
-          <Button variant="outline" size="sm" onClick={fetchProjects} disabled={loading}>
-            <RefreshCw className={cn("h-3.5 w-3.5 mr-1.5", loading && "animate-spin")} />
-            Atualizar
-          </Button>
-        }
-      />
-
-      <div className="p-4 sm:p-6 space-y-5">
+    <PageLayout
+      title="Revisões / Termos de Entrega"
+      showHomeButton={false}
+      breadcrumbs={[
+        { label: "Início", href: "/home" },
+        { label: "Revisões / Termos de Entrega" },
+      ]}
+      actions={
+        <Button variant="outline" size="sm" onClick={fetchProjects} disabled={loading}>
+          <RefreshCw className={cn("h-3.5 w-3.5 mr-1.5", loading && "animate-spin")} />
+          Atualizar
+        </Button>
+      }
+    >
+      <div className="space-y-5">
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3">
           {statCards.map((s, i) => (
