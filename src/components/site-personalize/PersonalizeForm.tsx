@@ -92,6 +92,8 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
   
   // Draft recovery state
   const [showDraftDialog, setShowDraftDialog] = useState(false);
+  // Wizard step state
+  const [currentStep, setCurrentStep] = useState(0);
 
   // File upload handlers
   const fileHandlers = useFileUploadHandlers({
