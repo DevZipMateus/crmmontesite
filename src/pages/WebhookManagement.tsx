@@ -2,24 +2,22 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { 
-  Webhook, 
-  Send, 
-  Download as ReceiveIcon, 
   Settings, 
   Plus,
   ExternalLink,
   Code,
   Book,
-  AlertCircle,
   Shield,
   Zap,
   CheckCircle,
-  Users
+  Users,
+  Activity
 } from "lucide-react";
 import { WebhookConfiguration } from "@/components/webhook/WebhookConfiguration";
 import { WebhookDocumentation } from "@/components/webhook/WebhookDocumentation";
@@ -35,21 +33,26 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Partner } from "@/types/webhook";
 
+const tabs = [
+  { key: "config", label: "eGestor", icon: Activity },
+  { key: "make", label: "Make.com", icon: Zap },
+  { key: "partners", label: "Parceiros", icon: Users },
+  { key: "logs", label: "Logs", icon: Code },
+  { key: "apis", label: "API", icon: ExternalLink },
+  { key: "docs", label: "Documentação", icon: Book },
+  { key: "auth", label: "Autenticação", icon: Shield },
+] as const;
+
 export default function WebhookManagement() {
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "config");
   const [isPartnerDialogOpen, setIsPartnerDialogOpen] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
 
-  // Partners data
   const { data: partners, isLoading: partnersLoading, refetch: refetchPartners } = useQuery({
     queryKey: ['partners'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('partners')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
+      const { data, error } = await supabase.from('partners').select('*').order('created_at', { ascending: false });
       if (error) throw error;
       return data as Partner[];
     }
@@ -57,192 +60,146 @@ export default function WebhookManagement() {
 
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab) {
-      setActiveTab(tab);
-    }
+    if (tab) setActiveTab(tab);
   }, [searchParams]);
 
-  const handleEditPartner = (partner: Partner) => {
-    setSelectedPartner(partner);
-    setIsPartnerDialogOpen(true);
-  };
+  const handleEditPartner = (partner: Partner) => { setSelectedPartner(partner); setIsPartnerDialogOpen(true); };
+  const handleNewPartner = () => { setSelectedPartner(null); setIsPartnerDialogOpen(true); };
+  const handleClosePartnerDialog = () => { setIsPartnerDialogOpen(false); setSelectedPartner(null); refetchPartners(); };
 
-  const handleNewPartner = () => {
-    setSelectedPartner(null);
-    setIsPartnerDialogOpen(true);
-  };
-
-  const handleClosePartnerDialog = () => {
-    setIsPartnerDialogOpen(false);
-    setSelectedPartner(null);
-    refetchPartners();
-  };
+  // Integration status items
+  const integrations = [
+    { name: "eGestor", status: "Conectado", ok: true },
+    { name: "Blaster", status: "Ativo", ok: true },
+    { name: "Make.com", status: "Configurado", ok: true },
+    { name: "Supabase", status: "Ativo", ok: true },
+  ];
 
   return (
-    <PageLayout 
-      title="Configurações e Integrações"
-      actions={
-        <div className="flex items-center gap-2">
-          {activeTab === "partners" && (
-            <Button onClick={handleNewPartner} className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Novo Parceiro
-            </Button>
-          )}
-          <Badge variant="outline" className="bg-green-100 text-green-700">
-            <Zap className="h-3 w-3 mr-1" />
-            Processamento Automático
-          </Badge>
-          <Badge variant="outline" className="bg-blue-100 text-blue-700">
-            <Webhook className="h-3 w-3 mr-1" />
-            Sistema Ativo
-          </Badge>
-        </div>
-      }
-    >
-      <div className="space-y-6">
-        {/* eGestor Integration Card */}
-        <EGestorIntegrationCard />
+    <PageLayout title="Integrações">
+      <TopBar
+        breadcrumbs={[
+          { label: "MonteSite CRM", href: "/home" },
+          { label: "Integrações & Webhooks" },
+        ]}
+        actions={
+          <div className="flex items-center gap-2">
+            {activeTab === "partners" && (
+              <Button onClick={handleNewPartner} size="sm">
+                <Plus className="h-4 w-4 mr-1.5" />
+                Novo Parceiro
+              </Button>
+            )}
+            <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Sistema Ativo
+            </Badge>
+          </div>
+        }
+      />
 
-        {/* Automation Status Card */}
-        <Card className="border-green-200 bg-green-50">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-green-800">
-              <CheckCircle className="h-5 w-5" />
-              Processamento Automático Ativado
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="text-sm text-green-700 space-y-1">
-              <p>✅ Webhooks são processados automaticamente quando criados</p>
-              <p>✅ Notificações instantâneas para parceiros</p>
-              <p>✅ Falhas são registradas automaticamente</p>
-              <p>✅ Integração com eGestor configurada</p>
-              <p className="text-xs text-green-600 mt-2">
-                O sistema agora processa webhooks em tempo real usando triggers do banco de dados.
-              </p>
+      <div className="p-4 sm:p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-5">
+          {/* Main content */}
+          <div className="space-y-5">
+            {/* Tab navigation */}
+            <div className="flex items-center gap-1 border-b border-border overflow-x-auto">
+              {tabs.map(t => (
+                <button
+                  key={t.key}
+                  onClick={() => setActiveTab(t.key)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
+                    activeTab === t.key
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <t.icon className="h-3.5 w-3.5" />
+                  {t.label}
+                </button>
+              ))}
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">URLs Configuradas</CardTitle>
-              <Settings className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">3</div>
-              <p className="text-xs text-muted-foreground">
-                Endpoints ativos (incluindo eGestor)
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Dados Recebidos</CardTitle>
-              <ReceiveIcon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">156</div>
-              <p className="text-xs text-muted-foreground">
-                Webhooks processados hoje
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Dados Enviados</CardTitle>
-              <Send className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">89</div>
-              <p className="text-xs text-muted-foreground">
-                Notificações enviadas hoje
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="config">
-              <Settings className="h-4 w-4 mr-2" />
-              Configuração
-            </TabsTrigger>
-            <TabsTrigger value="docs">
-              <Book className="h-4 w-4 mr-2" />
-              Documentação
-            </TabsTrigger>
-            <TabsTrigger value="logs">
-              <Code className="h-4 w-4 mr-2" />
-              Logs
-            </TabsTrigger>
-            <TabsTrigger value="auth">
-              <Shield className="h-4 w-4 mr-2" />
-              Autenticação
-            </TabsTrigger>
-            <TabsTrigger value="apis">
-              <ExternalLink className="h-4 w-4 mr-2" />
-              APIs
-            </TabsTrigger>
-            <TabsTrigger value="partners">
-              <Users className="h-4 w-4 mr-2" />
-              Parceiros
-            </TabsTrigger>
-            <TabsTrigger value="make">
-              <Zap className="h-4 w-4 mr-2" />
-              Make.com
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="config" className="space-y-4">
-            <WebhookConfiguration />
-          </TabsContent>
-
-          <TabsContent value="docs" className="space-y-4">
-            <WebhookDocumentation />
-          </TabsContent>
-
-          <TabsContent value="logs" className="space-y-4">
-            <WebhookLogs />
-          </TabsContent>
-
-          <TabsContent value="auth" className="space-y-4">
-            <AuthenticationLogs />
-          </TabsContent>
-
-          <TabsContent value="apis" className="space-y-4">
-            <ApiManagement />
-          </TabsContent>
-
-          <TabsContent value="make" className="space-y-4">
-            <MakeIntegration />
-          </TabsContent>
-
-          <TabsContent value="partners" className="space-y-4">
-            <div className="space-y-6">
-              <PartnersTable 
-                partners={partners || []}
-                loading={partnersLoading}
-                onEdit={handleEditPartner}
-                onRefresh={refetchPartners}
-              />
-              
-              <WebhookLogsCard />
-              
-              <PartnerDialog
-                open={isPartnerDialogOpen}
-                onClose={handleClosePartnerDialog}
-                partner={selectedPartner}
-              />
+            {/* Tab content */}
+            <div>
+              {activeTab === "config" && (
+                <div className="space-y-4">
+                  <EGestorIntegrationCard />
+                  <WebhookConfiguration />
+                </div>
+              )}
+              {activeTab === "docs" && <WebhookDocumentation />}
+              {activeTab === "logs" && <WebhookLogs />}
+              {activeTab === "auth" && <AuthenticationLogs />}
+              {activeTab === "apis" && <ApiManagement />}
+              {activeTab === "make" && <MakeIntegration />}
+              {activeTab === "partners" && (
+                <div className="space-y-4">
+                  <PartnersTable partners={partners || []} loading={partnersLoading} onEdit={handleEditPartner} onRefresh={refetchPartners} />
+                  <WebhookLogsCard />
+                  <PartnerDialog open={isPartnerDialogOpen} onClose={handleClosePartnerDialog} partner={selectedPartner} />
+                </div>
+              )}
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-4">
+            {/* Integration statuses */}
+            <Card className="border-border/60 shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Status das Integrações</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2.5">
+                {integrations.map((int, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <span className="text-sm">{int.name}</span>
+                    <Badge variant="outline" className={cn("text-[10px]", int.ok ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-red-50 text-red-700 border-red-200")}>
+                      {int.status}
+                    </Badge>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Quick actions */}
+            <Card className="border-border/60 shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Ações Rápidas</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button variant="outline" size="sm" className="w-full justify-start text-xs" onClick={handleNewPartner}>
+                  <Users className="h-3.5 w-3.5 mr-2" />
+                  Configurar parceiro
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start text-xs" onClick={() => setActiveTab("docs")}>
+                  <Book className="h-3.5 w-3.5 mr-2" />
+                  Ver documentação
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start text-xs" onClick={() => setActiveTab("logs")}>
+                  <Code className="h-3.5 w-3.5 mr-2" />
+                  Ver logs recentes
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Automation status */}
+            <Card className="border-emerald-200 bg-emerald-50/50 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 text-emerald-700 mb-2">
+                  <CheckCircle className="h-4 w-4" />
+                  <span className="text-sm font-medium">Processamento Automático</span>
+                </div>
+                <div className="text-xs text-emerald-600 space-y-1">
+                  <p>Webhooks processados em tempo real</p>
+                  <p>Notificações instantâneas</p>
+                  <p>Falhas registradas automaticamente</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </PageLayout>
   );
