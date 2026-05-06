@@ -16,8 +16,9 @@ export const StatusButton = ({
   size = "sm"
 }: StatusButtonProps) => {
   const StatusIcon = status.value === "Recebido" ? Inbox : 
-                    status.value === "Criando site" ? Code : 
-                    status.value === "Configurando Domínio" ? Globe :
+                    status.value === "Victor" ? Code : 
+                    status.value === "Davi" ? Code :
+                    status.value === "Sem retorno" ? PhoneOff :
                     CheckCircle2;
 
   // Truncate text more aggressively for better mobile display
