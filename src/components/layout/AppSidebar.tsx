@@ -137,7 +137,7 @@ export function AppSidebar() {
   });
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+    <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border">
       <div className="flex items-center gap-2 px-4 py-4 border-b border-sidebar-border">
         <Logo size="sm" />
         {!collapsed && (
