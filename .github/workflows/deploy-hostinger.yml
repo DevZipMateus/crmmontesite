@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE20: true
+  NODE_OPTIONS: "--max-old-space-size=4096"
 
 jobs:
   build-and-deploy:
@@ -34,7 +35,7 @@ jobs:
 
       - name: 📤 Deploy via FTP para Hostinger
         id: deploy
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.HOSTINGER_FTP_HOST }}
           username: ${{ secrets.HOSTINGER_FTP_USER }}
