@@ -254,7 +254,7 @@ const TermoEntregaForm: React.FC = () => {
                   <ul className="space-y-2 ml-4">
                     <li className="flex gap-2">
                       <span className="font-semibold">•</span>
-                      <span><strong>Início da Vigência:</strong> O prazo de suporte inicia-se imediatamente após o preenchimento deste termo.</span>
+                      <span><strong>Início da Vigência:</strong> O prazo de suporte inicia-se imediatamente após o envio desta revisão.</span>
                     </li>
                     <li className="flex gap-2">
                       <span className="font-semibold">•</span>
