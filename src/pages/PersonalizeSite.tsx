@@ -51,7 +51,7 @@ export default function PersonalizeSite() {
     <div className="container py-6 md:py-10 max-w-4xl mx-auto">
       <Card>
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl md:text-3xl font-bold">Personalize Seu Site</CardTitle>
+          <CardTitle className="text-2xl md:text-3xl font-bold">Formulário de Cliente Avulso</CardTitle>
           <CardDescription>
             Preencha o formulário abaixo com as informações da sua empresa/escritório para personalizar seu site.
           </CardDescription>
