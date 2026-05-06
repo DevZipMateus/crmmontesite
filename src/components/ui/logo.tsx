@@ -10,17 +10,17 @@ interface LogoProps {
 
 export const Logo: React.FC<LogoProps> = ({ className, size = "md" }) => {
   const sizeClasses = {
-    sm: "h-8 w-8",
-    md: "h-10 w-10",
-    lg: "h-12 w-12",
-    xl: "h-[150px] w-[200px]"
+    sm: "h-10 w-10",
+    md: "h-14 w-14",
+    lg: "h-16 w-16",
+    xl: "h-[180px] w-[240px]"
   };
 
   return (
     <div className={cn("flex items-center", className)}>
       <Link to="/home">
         <img 
-          src="/logocrm.png" 
+          src="/logo.png" 
           alt="MonteSite CRM Logo" 
           className={cn(
             "object-contain max-w-full max-h-full cursor-pointer hover:opacity-80 transition-opacity",
