@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from "react";
-import { Plus, Download, Link2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { TopBar } from "@/components/layout/TopBar";
@@ -22,7 +22,7 @@ const Leads: React.FC = () => {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [view, setView] = useState<'cards' | 'table'>('table');
+  const [view, setView] = useState<'cards' | 'table'>('cards');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
 
@@ -70,23 +70,26 @@ const Leads: React.FC = () => {
     <PageLayout title="Gestão de Leads">
       <TopBar
         breadcrumbs={[
-          { label: "MonteSite CRM", href: "/home" },
-          { label: "Gestão de Leads" },
+          { label: "Início", href: "/home" },
+          { label: "Leads" },
         ]}
         actions={
           <div className="flex items-center gap-2">
-            <LeadViewToggle view={view} onViewChange={setView} />
             <NotificationTestButton />
             <AutoLinkingButton onLinkingComplete={handleLinkingComplete} />
+            <LeadViewToggle view={view} onViewChange={setView} />
             <Button onClick={handleCreateLead} size="sm">
               <Plus className="h-4 w-4 mr-1.5" />
-              Novo Lead
+              Novo lead
             </Button>
           </div>
         }
       />
 
       <div className="p-4 sm:p-6 space-y-5">
+        {/* Title */}
+        <h1 className="text-2xl font-bold">Gestão de Leads</h1>
+
         {/* Metrics */}
         <LeadMetrics leads={leads} />
 
@@ -107,14 +110,10 @@ const Leads: React.FC = () => {
           </div>
         ) : leads.length > 0 ? (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">{leads.length}</span> lead(s)
-                {leads.length !== paginatedLeads.length && (
-                  <span> · mostrando {paginatedLeads.length}</span>
-                )}
-              </span>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              Mostrando <span className="font-semibold text-foreground">{paginatedLeads.length}</span> de{' '}
+              <span className="font-semibold text-foreground">{leads.length}</span> leads
+            </p>
             
             {view === 'table' ? (
               <div className="overflow-x-auto rounded-lg border border-border">
@@ -125,7 +124,7 @@ const Leads: React.FC = () => {
                 />
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {paginatedLeads.map((lead) => (
                   <LeadCard
                     key={lead.id}
