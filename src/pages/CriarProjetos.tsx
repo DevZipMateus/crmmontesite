@@ -7,7 +7,7 @@ import PersonalizeSite from "./PersonalizeSite";
 export default function CriarProjetos() {
   return (
     <PageLayout 
-      title="Criar Projetos"
+      title="Formulário Avulso"
       contentClass="bg-gray-50/50"
     >
       <div className="max-w-6xl mx-auto">

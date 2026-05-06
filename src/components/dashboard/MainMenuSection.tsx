@@ -80,9 +80,9 @@ const MainMenuSection: React.FC = () => {
         
         <MenuItem 
           icon={<Plus size={24} />}
-          label="Criar Projetos"
+          label="Formulário Avulso"
           href="/criar-projetos"
-          description="Criar novos projetos e personalizar sites"
+          description="Preencher formulário de personalização avulso"
         />
         
         <MenuItem 
