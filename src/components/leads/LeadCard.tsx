@@ -9,6 +9,7 @@ import {
   AlertTriangle,
   MessageSquare
 } from "lucide-react";
+import { LeadFormUrlGenerator } from "./LeadFormUrlGenerator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Lead } from "@/types/lead";
@@ -87,6 +88,7 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onEdit, onDelete }) => {
             </p>
           </div>
           <div className="flex items-center gap-0.5 flex-shrink-0">
+            <LeadFormUrlGenerator lead={lead} compact />
             {lead.link_chat && (
               <Button variant="ghost" size="icon" className="h-7 w-7 text-blue-500 hover:text-blue-600" onClick={() => window.open(lead.link_chat, '_blank')}>
                 <MessageSquare className="h-3.5 w-3.5" />
