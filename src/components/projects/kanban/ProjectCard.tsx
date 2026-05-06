@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Project } from "@/types/project";
-import { useModelDetails } from "@/utils/modelUtils";
 import { LeadLinkIndicator } from "../LeadLinkIndicator";
 import { getClientTypeInfo } from "@/utils/clientTypeUtils";
 import { useNavigate } from "react-router-dom";
@@ -55,7 +54,6 @@ export default function ProjectCard({
   const navigate = useNavigate();
   const clientTypeInfo = getClientTypeInfo(project);
   const { toast } = useToast();
-  const { modelName, isLoading: modelLoading } = useModelDetails(project.template);
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const { archiveProject, unarchiveProject, isArchiving } = useProjectArchiving();
 
@@ -97,12 +95,7 @@ export default function ProjectCard({
           )}
         </div>
 
-        {/* Row 2: Model + Client type */}
-        <p className="text-xs text-muted-foreground">
-          {modelLoading ? "Carregando..." : (modelName || "Sem modelo")} · {project.client_type === 'parceiro' ? 'Parceiro' : 'Cliente final'}
-        </p>
-
-        {/* Row 3: Lead link (if exists) */}
+        {/* Row 2: Lead link (if exists) */}
         {project.lead_id && (
           <div className="flex items-center gap-1.5 text-xs">
             <Link2 className="h-3 w-3 text-primary" />
@@ -110,7 +103,7 @@ export default function ProjectCard({
           </div>
         )}
 
-        {/* Row 4: Footer - Avatar + Time + Actions */}
+        {/* Row 3: Footer - Avatar + Time + Actions */}
         <div className="flex items-center justify-between pt-1.5 border-t border-border/40">
           <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
