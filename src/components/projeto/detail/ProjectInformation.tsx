@@ -92,6 +92,7 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
              />
             <InfoField label="ULTIMA ATUALIZACAO" value={formattedDateTime(project.updated_at)} />
             <InfoField label="CRIADO EM" value={formattedDate(project.created_at)} />
+            <InfoField label="OBSERVACOES" value={project.provider_credentials || '--'} />
           </div>
         </CardContent>
       </Card>

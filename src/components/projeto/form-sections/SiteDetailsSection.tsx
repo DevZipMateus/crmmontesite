@@ -111,10 +111,10 @@ export const SiteDetailsSection = ({ form }: SiteDetailsSectionProps) => {
         name="provider_credentials"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-gray-700">Credenciais do Provedor</FormLabel>
+            <FormLabel className="text-gray-700">Observações</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="Credenciais de acesso ao provedor de hospedagem"
+                placeholder="Observações sobre o projeto"
                 {...field}
                 value={field.value || ""}
                 className="rounded-md shadow-sm border-gray-200 focus:border-primary focus:ring-primary min-h-24"
