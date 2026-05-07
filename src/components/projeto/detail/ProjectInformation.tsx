@@ -81,7 +81,12 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
               isLink={!!project.blaster_link}
               href={project.blaster_link || undefined}
             />
-            <InfoField label="ID DE PERSONALIZACAO" value={project.personalization_id || '--'} mono />
+             <InfoField 
+               label="LINK DA VITRINE" 
+               value={project.showcase_link || '--'} 
+               isLink={!!project.showcase_link}
+               href={project.showcase_link || undefined}
+             />
             <InfoField label="ULTIMA ATUALIZACAO" value={formattedDateTime(project.updated_at)} />
             <InfoField label="CRIADO EM" value={formattedDate(project.created_at)} />
           </div>
