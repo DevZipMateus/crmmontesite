@@ -124,6 +124,11 @@ Deno.serve(async (req) => {
         leads: undefined
       };
 
+      // Remove campos desnecessários
+      delete (transformedProject as Record<string, unknown>).modelo_escolhido;
+      delete (transformedProject as Record<string, unknown>).template;
+      delete (transformedProject as Record<string, unknown>).is_inadimplente;
+
       // Log successful access
       await supabase
         .from('auth_logs')
@@ -227,7 +232,7 @@ Deno.serve(async (req) => {
     // Transform leads array to enriched fields for all projects
     const transformedProjects = (projects || []).map(project => {
       const leadData = project.leads?.[0] || null;
-      return {
+      const transformedProject = {
         ...project,
         situacao_lead: leadData?.situacao || null,
         lead_cnpj: leadData?.cnpj || null,
@@ -237,6 +242,13 @@ Deno.serve(async (req) => {
         lead_nome_cliente: leadData?.nome_cliente || null,
         leads: undefined
       };
+
+      // Remove campos desnecessários
+      delete (transformedProject as Record<string, unknown>).modelo_escolhido;
+      delete (transformedProject as Record<string, unknown>).template;
+      delete (transformedProject as Record<string, unknown>).is_inadimplente;
+
+      return transformedProject;
     });
 
     // Log successful access
