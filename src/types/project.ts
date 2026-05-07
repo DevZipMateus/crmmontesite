@@ -59,4 +59,7 @@ export interface Project {
   
   // Campo para link da vitrine
   showcase_link?: string;
+  
+  // Tipo de serviço (Site ou Site + Vitrine)
+  tipo_servico?: string;
 }

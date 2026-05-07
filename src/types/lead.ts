@@ -19,6 +19,8 @@ export interface Lead {
   link_method?: string;
   // Campo para formulário de lead
   form_hash?: string;
+  // Tipo de serviço
+  tipo_servico?: string;
 }
 
 export interface LeadNote {

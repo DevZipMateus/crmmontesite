@@ -1,0 +1,1 @@
+ALTER TABLE public.projects ADD COLUMN tipo_servico text NOT NULL DEFAULT 'Site';
