@@ -235,11 +235,11 @@ export function ProjectFormEdit({ initialValues, submitButtonText = "Salvar", mo
           )}
 
           <div>
-            <Label htmlFor="provider_credentials">Credenciais do Provedor</Label>
+            <Label htmlFor="provider_credentials">Observações</Label>
             <Textarea
               id="provider_credentials"
               {...register("provider_credentials")}
-              placeholder="Credenciais de acesso ao provedor"
+              placeholder="Observações sobre o projeto"
               rows={3}
             />
           </div>
