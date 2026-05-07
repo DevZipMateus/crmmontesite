@@ -111,10 +111,16 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Transform leads array to situacao_lead field
+      // Transform leads array to enriched fields
+      const leadData = project.leads?.[0] || null;
       const transformedProject = {
         ...project,
-        situacao_lead: project.leads?.[0]?.situacao || null,
+        situacao_lead: leadData?.situacao || null,
+        lead_cnpj: leadData?.cnpj || null,
+        lead_email: leadData?.email || null,
+        lead_link_chat: leadData?.link_chat || null,
+        lead_data_ultimo_contato: leadData?.data_ultimo_contato || null,
+        lead_nome_cliente: leadData?.nome_cliente || null,
         leads: undefined
       };
 
