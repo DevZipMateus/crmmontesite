@@ -73,11 +73,16 @@ Deno.serve(async (req) => {
     if (projectId) {
       selectFields = `
         *,
-        site_personalizacoes!inner(
+        site_personalizacoes!left(
           email
         ),
-        leads(
-          situacao
+        leads!left(
+          situacao,
+          cnpj,
+          email,
+          link_chat,
+          data_ultimo_contato,
+          nome_cliente
         )
       `;
       
