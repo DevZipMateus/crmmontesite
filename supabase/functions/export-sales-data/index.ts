@@ -170,7 +170,7 @@ Deno.serve(async (req) => {
         site_personalizacoes!left(
           email
         ),
-        leads!left(
+        leads!leads_project_id_fkey(
           situacao,
           cnpj,
           email,
