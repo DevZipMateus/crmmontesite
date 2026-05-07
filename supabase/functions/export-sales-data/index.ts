@@ -82,8 +82,7 @@ Deno.serve(async (req) => {
           email,
           link_chat,
           data_ultimo_contato,
-          nome_cliente,
-          telefone
+          nome_cliente
         )
       `;
       
