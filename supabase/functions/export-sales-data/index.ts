@@ -121,7 +121,6 @@ Deno.serve(async (req) => {
         lead_link_chat: leadData?.link_chat || null,
         lead_data_ultimo_contato: leadData?.data_ultimo_contato || null,
         lead_nome_cliente: leadData?.nome_cliente || null,
-        lead_telefone: leadData?.telefone || null,
         leads: undefined
       };
 
