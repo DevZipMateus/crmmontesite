@@ -73,11 +73,16 @@ Deno.serve(async (req) => {
     if (projectId) {
       selectFields = `
         *,
-        site_personalizacoes!inner(
+        site_personalizacoes!left(
           email
         ),
-        leads(
-          situacao
+        leads!left(
+          situacao,
+          cnpj,
+          email,
+          link_chat,
+          data_ultimo_contato,
+          nome_cliente
         )
       `;
       
@@ -106,10 +111,16 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Transform leads array to situacao_lead field
+      // Transform leads array to enriched fields
+      const leadData = project.leads?.[0] || null;
       const transformedProject = {
         ...project,
-        situacao_lead: project.leads?.[0]?.situacao || null,
+        situacao_lead: leadData?.situacao || null,
+        lead_cnpj: leadData?.cnpj || null,
+        lead_email: leadData?.email || null,
+        lead_link_chat: leadData?.link_chat || null,
+        lead_data_ultimo_contato: leadData?.data_ultimo_contato || null,
+        lead_nome_cliente: leadData?.nome_cliente || null,
         leads: undefined
       };
 
@@ -154,11 +165,16 @@ Deno.serve(async (req) => {
       // Default full query with site_personalizacoes and leads
       selectFields = `
         *,
-        site_personalizacoes!inner(
+        site_personalizacoes!left(
           email
         ),
-        leads(
-          situacao
+        leads!left(
+          situacao,
+          cnpj,
+          email,
+          link_chat,
+          data_ultimo_contato,
+          nome_cliente
         )
       `;
     }
@@ -208,12 +224,20 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Transform leads array to situacao_lead field for all projects
-    const transformedProjects = (projects || []).map(project => ({
-      ...project,
-      situacao_lead: project.leads?.[0]?.situacao || null,
-      leads: undefined
-    }));
+    // Transform leads array to enriched fields for all projects
+    const transformedProjects = (projects || []).map(project => {
+      const leadData = project.leads?.[0] || null;
+      return {
+        ...project,
+        situacao_lead: leadData?.situacao || null,
+        lead_cnpj: leadData?.cnpj || null,
+        lead_email: leadData?.email || null,
+        lead_link_chat: leadData?.link_chat || null,
+        lead_data_ultimo_contato: leadData?.data_ultimo_contato || null,
+        lead_nome_cliente: leadData?.nome_cliente || null,
+        leads: undefined
+      };
+    });
 
     // Log successful access
     await supabase
