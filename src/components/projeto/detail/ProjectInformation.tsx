@@ -1,7 +1,6 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Project } from "@/types/project";
-import { useModelDetails } from "@/utils/modelUtils";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Globe } from "lucide-react";
 import { formatCnpjCpf } from "@/utils/documentFormatter";
@@ -13,7 +12,6 @@ interface ProjectInformationProps {
 }
 
 export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project }) => {
-  const { modelName, isLoading: modelLoading } = useModelDetails(project.template);
   const { editData } = useEditedFieldsData(project.personalization_id);
 
   const formattedDate = (dateStr?: string) => {
@@ -74,7 +72,12 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
               isLink={!!project.domain}
               href={project.domain ? `https://${project.domain}` : undefined}
             />
-            <InfoField label="TEMPLATE" value={modelLoading ? 'Carregando...' : (modelName || '--')} />
+            <InfoField 
+              label="LINK DO PROJETO (LOVABLE/GITHUB)" 
+              value={project.project_link || '--'} 
+              isLink={!!project.project_link}
+              href={project.project_link || undefined}
+            />
             <InfoField 
               label="LINK DO BLASTER" 
               value={project.blaster_link || '--'} 
