@@ -121,14 +121,7 @@ export function ProjectFormEdit({ initialValues, submitButtonText = "Salvar", mo
             )}
           </div>
 
-          <div>
-            <Label htmlFor="template">Template</Label>
-            <Input
-              id="template"
-              {...register("template")}
-              placeholder="Template utilizado"
-            />
-          </div>
+
 
           <div>
             <Label htmlFor="status">Status</Label>
