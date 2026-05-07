@@ -30,7 +30,8 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
     link_blaster: '',
     link_chat: '',
     data_ultimo_contato: new Date().toISOString().split('T')[0],
-    observacoes: ''
+    observacoes: '',
+    tipo_servico: 'Site'
   });
 
   const createLead = useCreateLead();
@@ -56,7 +57,8 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
           link_blaster: '',
           link_chat: '',
           data_ultimo_contato: new Date().toISOString().split('T')[0],
-          observacoes: ''
+          observacoes: '',
+          tipo_servico: 'Site'
         });
         onClose();
       }
