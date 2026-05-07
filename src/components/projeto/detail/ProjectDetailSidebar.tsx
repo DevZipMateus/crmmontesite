@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -7,6 +7,7 @@ import { Project } from "@/types/project";
 import { Terminal, Copy, AlertTriangle, Clock } from "lucide-react";
 import DeleteProjectDialog from "@/components/projects/DeleteProjectDialog";
 import { updateProject } from "@/server/project-actions";
+import { generateSiteCommand } from "@/components/producao/SiteCommandGenerator";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -27,6 +28,25 @@ interface ProjectDetailSidebarProps {
 export const ProjectDetailSidebar: React.FC<ProjectDetailSidebarProps> = ({ project }) => {
   const { toast } = useToast();
   const [isUpdatingInadimplente, setIsUpdatingInadimplente] = useState(false);
+  const [isGeneratingCommand, setIsGeneratingCommand] = useState(false);
+
+  const isRecebido = project.status === 'Recebido';
+
+  const handleGenerateCommand = useCallback(async () => {
+    if (!isRecebido) return;
+    setIsGeneratingCommand(true);
+    let commandText = '';
+    await generateSiteCommand({
+      project,
+      setIsGenerating: setIsGeneratingCommand,
+      setGeneratedText: (text) => { commandText = text; },
+    });
+    if (commandText) {
+      await navigator.clipboard.writeText(commandText);
+      toast({ title: "Comando copiado!", description: "Comando completo copiado para a área de transferência." });
+    }
+    setIsGeneratingCommand(false);
+  }, [project, isRecebido, toast]);
 
   const responsible = project.responsible_name || project.assigned_programmer || "Nao atribuido";
   const initials = responsible.substring(0, 2).toUpperCase();
@@ -106,9 +126,16 @@ export const ProjectDetailSidebar: React.FC<ProjectDetailSidebarProps> = ({ proj
       {/* Actions */}
       <Card>
         <CardContent className="p-3 space-y-1.5">
-          <Button variant="outline" className="w-full justify-start gap-2 h-9 text-xs" size="sm">
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-2 h-9 text-xs"
+            size="sm"
+            disabled={!isRecebido || isGeneratingCommand}
+            onClick={handleGenerateCommand}
+            title={!isRecebido ? "Disponível apenas para projetos com status 'Recebido'" : "Gerar e copiar comando"}
+          >
             <Terminal className="h-3.5 w-3.5" />
-            Gerar comando
+            {isGeneratingCommand ? 'Gerando...' : 'Gerar comando'}
           </Button>
           <Button variant="outline" className="w-full justify-start gap-2 h-9 text-xs" size="sm" onClick={handleCopyPublicLink}>
             <Copy className="h-3.5 w-3.5" />
