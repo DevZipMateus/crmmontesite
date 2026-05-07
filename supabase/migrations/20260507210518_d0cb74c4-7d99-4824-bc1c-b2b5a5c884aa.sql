@@ -1,0 +1,1 @@
+ALTER TABLE public.leads ADD COLUMN tipo_servico text NOT NULL DEFAULT 'Site';

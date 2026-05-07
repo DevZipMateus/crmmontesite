@@ -338,6 +338,7 @@ export type Database = {
           observacoes: string | null
           project_id: string | null
           situacao: string
+          tipo_servico: string
           updated_at: string
           vendedor: string | null
         }
@@ -357,6 +358,7 @@ export type Database = {
           observacoes?: string | null
           project_id?: string | null
           situacao?: string
+          tipo_servico?: string
           updated_at?: string
           vendedor?: string | null
         }
@@ -376,6 +378,7 @@ export type Database = {
           observacoes?: string | null
           project_id?: string | null
           situacao?: string
+          tipo_servico?: string
           updated_at?: string
           vendedor?: string | null
         }
