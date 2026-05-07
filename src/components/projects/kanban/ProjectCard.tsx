@@ -99,6 +99,7 @@ export default function ProjectCard({
               Vitrine
             </Badge>
           )}
+        </div>
 
         {/* Row 2: Lead link (if exists) */}
         {project.lead_id && (
