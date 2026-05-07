@@ -188,7 +188,23 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="tipo_servico">Tipo de Serviço</Label>
+                  <Select
+                    value={formData.tipo_servico}
+                    onValueChange={(value) => handleInputChange("tipo_servico", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecionar tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Site">Site</SelectItem>
+                      <SelectItem value="Site + Vitrine">Site + Vitrine</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
                 <Label htmlFor="link_blaster">Link Blaster</Label>
                 <Input
                   id="link_blaster"
