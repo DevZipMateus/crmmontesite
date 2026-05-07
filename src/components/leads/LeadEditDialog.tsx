@@ -205,6 +205,8 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
                   </Select>
                 </div>
               </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="link_blaster">Link Blaster</Label>
                 <Input
                   id="link_blaster"
