@@ -93,7 +93,12 @@ export default function ProjectCard({
               Aguard.
             </Badge>
           )}
-        </div>
+          {project.tipo_servico && project.tipo_servico !== 'Site' && (
+            <Badge className="bg-violet-50 text-violet-700 border-violet-200 text-[10px] font-medium shrink-0 gap-1 px-1.5 py-0.5">
+              <Store className="h-3 w-3" />
+              Vitrine
+            </Badge>
+          )}
 
         {/* Row 2: Lead link (if exists) */}
         {project.lead_id && (
