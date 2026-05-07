@@ -7,7 +7,7 @@ import { getClientTypeInfo } from "@/utils/clientTypeUtils";
 import { useNavigate } from "react-router-dom";
 import { updateProject } from "@/server/project-actions";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, PenSquare, Archive, ArchiveRestore, Clock, CheckCircle2, Loader2, Link2 } from "lucide-react";
+import { Eye, PenSquare, Archive, ArchiveRestore, Clock, CheckCircle2, Loader2, Link2, Globe, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProjectArchiving } from "@/hooks/use-project-archiving";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -91,6 +91,12 @@ export default function ProjectCard({
             <Badge variant="outline" className="text-[10px] font-medium shrink-0 gap-1 px-1.5 py-0.5 text-muted-foreground">
               <Clock className="h-3 w-3" />
               Aguard.
+            </Badge>
+          )}
+          {project.tipo_servico && project.tipo_servico !== 'Site' && (
+            <Badge className="bg-violet-50 text-violet-700 border-violet-200 text-[10px] font-medium shrink-0 gap-1 px-1.5 py-0.5">
+              <Store className="h-3 w-3" />
+              Vitrine
             </Badge>
           )}
         </div>

@@ -44,6 +44,7 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
     link_blaster: "",
     link_chat: "",
     observacoes: "",
+    tipo_servico: "Site",
   });
 
   const updateLead = useUpdateLead();
@@ -60,6 +61,7 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
         link_blaster: lead.link_blaster || "",
         link_chat: lead.link_chat || "",
         observacoes: lead.observacoes || "",
+        tipo_servico: lead.tipo_servico || "Site",
       });
     }
   }, [lead]);
@@ -181,6 +183,24 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
                           {situacao}
                         </SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="tipo_servico">Tipo de Serviço</Label>
+                  <Select
+                    value={formData.tipo_servico}
+                    onValueChange={(value) => handleInputChange("tipo_servico", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecionar tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Site">Site</SelectItem>
+                      <SelectItem value="Site + Vitrine">Site + Vitrine</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

@@ -549,6 +549,7 @@ export type Database = {
           status: string | null
           telefone: string | null
           template: string | null
+          tipo_servico: string
           updated_at: string | null
         }
         Insert: {
@@ -588,6 +589,7 @@ export type Database = {
           status?: string | null
           telefone?: string | null
           template?: string | null
+          tipo_servico?: string
           updated_at?: string | null
         }
         Update: {
@@ -627,6 +629,7 @@ export type Database = {
           status?: string | null
           telefone?: string | null
           template?: string | null
+          tipo_servico?: string
           updated_at?: string | null
         }
         Relationships: [
@@ -1074,6 +1077,7 @@ export type Database = {
           status: string | null
           telefone: string | null
           template: string | null
+          tipo_servico: string
           updated_at: string | null
         }
         SetofOptions: {

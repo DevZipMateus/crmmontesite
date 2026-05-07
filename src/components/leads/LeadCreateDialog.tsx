@@ -30,7 +30,8 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
     link_blaster: '',
     link_chat: '',
     data_ultimo_contato: new Date().toISOString().split('T')[0],
-    observacoes: ''
+    observacoes: '',
+    tipo_servico: 'Site'
   });
 
   const createLead = useCreateLead();
@@ -56,7 +57,8 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
           link_blaster: '',
           link_chat: '',
           data_ultimo_contato: new Date().toISOString().split('T')[0],
-          observacoes: ''
+          observacoes: '',
+          tipo_servico: 'Site'
         });
         onClose();
       }
@@ -151,6 +153,33 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="tipo_servico">Tipo de Serviço</Label>
+              <Select
+                value={formData.tipo_servico}
+                onValueChange={(value) => setFormData({ ...formData, tipo_servico: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecionar tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Site">Site</SelectItem>
+                  <SelectItem value="Site + Vitrine">Site + Vitrine</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="link_blaster">Link Blaster</Label>
+              <Input
+                id="link_blaster"
+                value={formData.link_blaster}
+                onChange={(e) => setFormData({ ...formData, link_blaster: e.target.value })}
+                placeholder="https://..."
+              />
             </div>
           </div>
 
