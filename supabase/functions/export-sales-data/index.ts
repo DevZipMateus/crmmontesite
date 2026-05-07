@@ -165,11 +165,16 @@ Deno.serve(async (req) => {
       // Default full query with site_personalizacoes and leads
       selectFields = `
         *,
-        site_personalizacoes!inner(
+        site_personalizacoes!left(
           email
         ),
-        leads(
-          situacao
+        leads!left(
+          situacao,
+          cnpj,
+          email,
+          link_chat,
+          data_ultimo_contato,
+          nome_cliente
         )
       `;
     }
