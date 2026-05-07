@@ -1,7 +1,6 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Project } from "@/types/project";
-import { useModelDetails } from "@/utils/modelUtils";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Globe } from "lucide-react";
 import { formatCnpjCpf } from "@/utils/documentFormatter";
