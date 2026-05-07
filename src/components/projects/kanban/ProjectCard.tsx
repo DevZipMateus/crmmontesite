@@ -7,7 +7,7 @@ import { getClientTypeInfo } from "@/utils/clientTypeUtils";
 import { useNavigate } from "react-router-dom";
 import { updateProject } from "@/server/project-actions";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, PenSquare, Archive, ArchiveRestore, Clock, CheckCircle2, Loader2, Link2 } from "lucide-react";
+import { Eye, PenSquare, Archive, ArchiveRestore, Clock, CheckCircle2, Loader2, Link2, Globe, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProjectArchiving } from "@/hooks/use-project-archiving";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
