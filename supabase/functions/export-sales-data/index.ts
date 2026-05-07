@@ -124,6 +124,11 @@ Deno.serve(async (req) => {
         leads: undefined
       };
 
+      // Remove campos desnecessários
+      delete (transformedProject as Record<string, unknown>).modelo_escolhido;
+      delete (transformedProject as Record<string, unknown>).template;
+      delete (transformedProject as Record<string, unknown>).is_inadimplente;
+
       // Log successful access
       await supabase
         .from('auth_logs')
