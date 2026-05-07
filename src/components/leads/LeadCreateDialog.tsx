@@ -172,6 +172,16 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Label htmlFor="link_blaster">Link Blaster</Label>
+              <Input
+                id="link_blaster"
+                value={formData.link_blaster}
+                onChange={(e) => setFormData({ ...formData, link_blaster: e.target.value })}
+                placeholder="https://..."
+              />
+            </div>
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
