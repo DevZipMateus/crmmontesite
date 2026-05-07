@@ -44,6 +44,7 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
     link_blaster: "",
     link_chat: "",
     observacoes: "",
+    tipo_servico: "Site",
   });
 
   const updateLead = useUpdateLead();
@@ -60,6 +61,7 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
         link_blaster: lead.link_blaster || "",
         link_chat: lead.link_chat || "",
         observacoes: lead.observacoes || "",
+        tipo_servico: lead.tipo_servico || "Site",
       });
     }
   }, [lead]);
