@@ -81,12 +81,10 @@ export default function ProjectCard({
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold text-sm text-foreground leading-tight">{project.client_name}</h3>
           <div className="flex items-center gap-1.5 shrink-0">
-            {project.tipo_servico && (
-              <Badge className={`text-[10px] font-medium gap-1 px-1.5 py-0.5 ${project.tipo_servico === 'Site' ? 'bg-slate-50 text-slate-700 border-slate-200' : 'bg-violet-50 text-violet-700 border-violet-200'}`}>
-                <Store className="h-3 w-3" />
-                {project.tipo_servico === 'Site' ? 'Site' : 'Site + Vitrine'}
-              </Badge>
-            )}
+            <Badge className={`text-[10px] font-medium gap-1 px-1.5 py-0.5 ${(project.tipo_servico || 'Site') === 'Site' ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-violet-100 text-violet-700 border-violet-300'}`}>
+              <Store className="h-3 w-3" />
+              {(project.tipo_servico || 'Site') === 'Site' ? 'Site' : 'Site + Vitrine'}
+            </Badge>
             {hasForm ? (
               <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] font-medium shrink-0 gap-1 px-1.5 py-0.5">
                 <CheckCircle2 className="h-3 w-3" />
