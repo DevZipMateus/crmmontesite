@@ -1,11 +1,11 @@
-import { Eye, PenSquare, MoreHorizontal } from "lucide-react";
+import { Eye, PenSquare, MoreHorizontal, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 import StatusBadge from "./StatusBadge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import DeleteProjectDialog from "../DeleteProjectDialog";
 import { ClientTypeBadge } from "@/components/projects/ClientTypeBadge";
-import { LeadLinkIndicator } from "../LeadLinkIndicator";
 import { Project } from "@/types/project";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
