@@ -1,11 +1,11 @@
-import { Eye, PenSquare, MoreHorizontal } from "lucide-react";
+import { Eye, PenSquare, MoreHorizontal, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 import StatusBadge from "./StatusBadge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import DeleteProjectDialog from "../DeleteProjectDialog";
 import { ClientTypeBadge } from "@/components/projects/ClientTypeBadge";
-import { LeadLinkIndicator } from "../LeadLinkIndicator";
 import { Project } from "@/types/project";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -65,7 +65,7 @@ export default function ProjectTable({
         <TableHeader>
           <TableRow className="hover:bg-transparent border-border/60">
             <TableHead className="text-xs font-medium text-muted-foreground">Cliente</TableHead>
-            <TableHead className="text-xs font-medium text-muted-foreground">Lead</TableHead>
+            <TableHead className="text-xs font-medium text-muted-foreground">Servico</TableHead>
             <TableHead className="text-xs font-medium text-muted-foreground">Tipo</TableHead>
             <TableHead className="text-xs font-medium text-muted-foreground">Modelo</TableHead>
             <TableHead className="text-xs font-medium text-muted-foreground">Status</TableHead>
@@ -83,8 +83,11 @@ export default function ProjectTable({
             >
               <TableCell className="font-medium text-sm text-foreground">{project.client_name}</TableCell>
               <TableCell>
-                {project.lead_id ? (
-                  <LeadLinkIndicator project={project} />
+                {project.tipo_servico ? (
+                  <Badge className={`text-[10px] font-medium gap-1 px-1.5 py-0.5 ${project.tipo_servico === 'Site' ? 'bg-slate-50 text-slate-700 border-slate-200' : 'bg-violet-50 text-violet-700 border-violet-200'}`}>
+                    <Store className="h-3 w-3" />
+                    {project.tipo_servico === 'Site' ? 'Site' : 'Site + Vitrine'}
+                  </Badge>
                 ) : (
                   <span className="text-muted-foreground text-xs">--</span>
                 )}

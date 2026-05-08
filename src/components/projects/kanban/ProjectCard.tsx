@@ -2,12 +2,10 @@ import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Project } from "@/types/project";
-import { LeadLinkIndicator } from "../LeadLinkIndicator";
 import { getClientTypeInfo } from "@/utils/clientTypeUtils";
 import { useNavigate } from "react-router-dom";
-import { updateProject } from "@/server/project-actions";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, PenSquare, Archive, ArchiveRestore, Clock, CheckCircle2, Loader2, Link2, Globe, Store } from "lucide-react";
+import { Eye, PenSquare, Archive, ArchiveRestore, Clock, CheckCircle2, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProjectArchiving } from "@/hooks/use-project-archiving";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -79,35 +77,29 @@ export default function ProjectCard({
       onDragStart={() => onDragStart(project.id)}
     >
       <div className="space-y-2">
-        {/* Row 1: Client name + Form badge */}
+        {/* Row 1: Client name + Form badge + Service type */}
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold text-sm text-foreground leading-tight">{project.client_name}</h3>
-          {hasForm ? (
-            <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] font-medium shrink-0 gap-1 px-1.5 py-0.5">
-              <CheckCircle2 className="h-3 w-3" />
-              Form
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="text-[10px] font-medium shrink-0 gap-1 px-1.5 py-0.5 text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              Aguard.
-            </Badge>
-          )}
-          {project.tipo_servico && project.tipo_servico !== 'Site' && (
-            <Badge className="bg-violet-50 text-violet-700 border-violet-200 text-[10px] font-medium shrink-0 gap-1 px-1.5 py-0.5">
-              <Store className="h-3 w-3" />
-              Vitrine
-            </Badge>
-          )}
-        </div>
-
-        {/* Row 2: Lead link (if exists) */}
-        {project.lead_id && (
-          <div className="flex items-center gap-1.5 text-xs">
-            <Link2 className="h-3 w-3 text-primary" />
-            <LeadLinkIndicator project={project} />
+          <div className="flex items-center gap-1.5 shrink-0">
+            {project.tipo_servico && (
+              <Badge className={`text-[10px] font-medium gap-1 px-1.5 py-0.5 ${project.tipo_servico === 'Site' ? 'bg-slate-50 text-slate-700 border-slate-200' : 'bg-violet-50 text-violet-700 border-violet-200'}`}>
+                <Store className="h-3 w-3" />
+                {project.tipo_servico === 'Site' ? 'Site' : 'Site + Vitrine'}
+              </Badge>
+            )}
+            {hasForm ? (
+              <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] font-medium shrink-0 gap-1 px-1.5 py-0.5">
+                <CheckCircle2 className="h-3 w-3" />
+                Form
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-[10px] font-medium shrink-0 gap-1 px-1.5 py-0.5 text-muted-foreground">
+                <Clock className="h-3 w-3" />
+                Aguard.
+              </Badge>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Row 3: Footer - Avatar + Time + Actions */}
         <div className="flex items-center justify-between pt-1.5 border-t border-border/40">
