@@ -136,7 +136,7 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
 
   useEffect(() => {
     fetchProjects();
-  }, [statusFilter, responsibleFilter, domainFilter, dateFromFilter, dateToFilter, actualSearchQuery, showArchived]);
+  }, [statusFilter, responsibleFilter, domainFilter, dateFromFilter, dateToFilter, actualSearchQuery, showArchived, tipoServicoFilter]);
 
   return { projects, setProjects, loading, fetchProjects };
 }
