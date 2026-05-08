@@ -32,6 +32,7 @@ export default function Projetos() {
   const [dateFromFilter, setDateFromFilter] = useState<Date | null>(null);
   const [dateToFilter, setDateToFilter] = useState<Date | null>(null);
   const [showArchived, setShowArchived] = useState(false);
+  const [tipoServicoFilter, setTipoServicoFilter] = useState<string | null>(null);
   
   const navigate = useNavigate();
   
@@ -42,7 +43,8 @@ export default function Projetos() {
     dateFromFilter,
     dateToFilter,
     searchQuery,
-    showArchived
+    showArchived,
+    tipoServicoFilter
   };
   
   const { projects, setProjects, loading, fetchProjects } = useProjects(filters);
