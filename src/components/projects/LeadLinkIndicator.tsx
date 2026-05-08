@@ -192,11 +192,6 @@ export const LeadLinkIndicator: React.FC<LeadLinkIndicatorProps> = ({ project })
 
       {/* Informações rápidas do lead */}
       <div className="flex flex-wrap gap-1">
-        {/* Situação atual */}
-        <Badge variant="outline" className={`text-xs ${getSituationColor(lead.situacao)}`}>
-          {lead.situacao}
-        </Badge>
-
         {/* Dias desde último contato */}
         <Badge variant="outline" className={`text-xs ${daysSinceContact > 7 ? 'bg-red-100 text-red-700 border-red-200' : daysSinceContact > 3 ? 'bg-yellow-100 text-yellow-700 border-yellow-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
           <Clock className="h-3 w-3 mr-1" />
