@@ -5,12 +5,13 @@ import { Project } from "@/types/project";
 import { getClientTypeInfo } from "@/utils/clientTypeUtils";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, PenSquare, Archive, ArchiveRestore, Clock, CheckCircle2, Store } from "lucide-react";
+import { Eye, PenSquare, Archive, ArchiveRestore, Clock, CheckCircle2, Store, MessageSquareText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProjectArchiving } from "@/hooks/use-project-archiving";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArchiveDialog } from "./ProjectCardComponents/ArchiveDialog";
 import { ChatButton } from "./ProjectCardComponents/ChatButton";
+import { ObservationsDialog } from "./ProjectCardComponents/ObservationsDialog";
 import { LeadLinkIndicator } from "@/components/projects/LeadLinkIndicator";
 
 interface ProjectCardProps {
@@ -55,6 +56,7 @@ export default function ProjectCard({
   const clientTypeInfo = getClientTypeInfo(project);
   const { toast } = useToast();
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const [showObsDialog, setShowObsDialog] = useState(false);
   const { archiveProject, unarchiveProject, isArchiving } = useProjectArchiving();
 
   const programmer = project.assigned_programmer || project.responsible_name;
@@ -133,6 +135,15 @@ export default function ProjectCard({
             <Button
               variant="ghost"
               size="icon"
+              className={`h-7 w-7 ${project.observacoes_cliente ? 'text-amber-600 hover:text-amber-700' : 'text-muted-foreground hover:text-foreground'}`}
+              onClick={(e) => { e.stopPropagation(); setShowObsDialog(true); }}
+              title="Observações"
+            >
+              <MessageSquareText className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               className="h-7 w-7 text-muted-foreground hover:text-foreground"
               onClick={(e) => { e.stopPropagation(); navigate(`/projeto/${project.id}`); }}
             >
@@ -158,6 +169,15 @@ export default function ProjectCard({
           </div>
         </div>
       </div>
+
+      <ObservationsDialog
+        isOpen={showObsDialog}
+        onClose={() => setShowObsDialog(false)}
+        projectId={project.id}
+        projectName={project.client_name}
+        initialObservations={project.observacoes_cliente}
+        onSaved={onProjectUpdated}
+      />
 
       <ArchiveDialog
         isOpen={showArchiveDialog}
