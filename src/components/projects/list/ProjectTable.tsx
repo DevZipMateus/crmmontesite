@@ -83,8 +83,11 @@ export default function ProjectTable({
             >
               <TableCell className="font-medium text-sm text-foreground">{project.client_name}</TableCell>
               <TableCell>
-                {project.lead_id ? (
-                  <LeadLinkIndicator project={project} />
+                {project.tipo_servico ? (
+                  <Badge className={`text-[10px] font-medium gap-1 px-1.5 py-0.5 ${project.tipo_servico === 'Site' ? 'bg-slate-50 text-slate-700 border-slate-200' : 'bg-violet-50 text-violet-700 border-violet-200'}`}>
+                    <Store className="h-3 w-3" />
+                    {project.tipo_servico === 'Site' ? 'Site' : 'Site + Vitrine'}
+                  </Badge>
                 ) : (
                   <span className="text-muted-foreground text-xs">--</span>
                 )}
