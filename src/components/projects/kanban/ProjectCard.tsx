@@ -56,6 +56,7 @@ export default function ProjectCard({
   const clientTypeInfo = getClientTypeInfo(project);
   const { toast } = useToast();
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const [showObsDialog, setShowObsDialog] = useState(false);
   const { archiveProject, unarchiveProject, isArchiving } = useProjectArchiving();
 
   const programmer = project.assigned_programmer || project.responsible_name;
