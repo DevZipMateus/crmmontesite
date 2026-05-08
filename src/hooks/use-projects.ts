@@ -13,6 +13,7 @@ interface ProjectFilters {
   dateToFilter?: Date | null;
   searchQuery?: string;
   showArchived?: boolean;
+  tipoServicoFilter?: string | null;
 }
 
 export function useProjects(filters: ProjectFilters | string | null = null, searchQuery: string = "") {
@@ -23,7 +24,7 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
     filters = { statusFilter: null };
   }
 
-  const { statusFilter, responsibleFilter = '', domainFilter = '', dateFromFilter = null, dateToFilter = null, showArchived = false } = 
+  const { statusFilter, responsibleFilter = '', domainFilter = '', dateFromFilter = null, dateToFilter = null, showArchived = false, tipoServicoFilter = null } = 
     (filters as ProjectFilters);
     
   const actualSearchQuery = (filters as ProjectFilters).searchQuery || searchQuery;
@@ -47,6 +48,10 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
         // Aplicar filtros ao query
         if (statusFilter) {
           query = query.eq('status', statusFilter);
+        }
+
+        if (tipoServicoFilter) {
+          query = query.eq('tipo_servico', tipoServicoFilter);
         }
         
         if (responsibleFilter) {
@@ -131,7 +136,7 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
 
   useEffect(() => {
     fetchProjects();
-  }, [statusFilter, responsibleFilter, domainFilter, dateFromFilter, dateToFilter, actualSearchQuery, showArchived]);
+  }, [statusFilter, responsibleFilter, domainFilter, dateFromFilter, dateToFilter, actualSearchQuery, showArchived, tipoServicoFilter]);
 
   return { projects, setProjects, loading, fetchProjects };
 }

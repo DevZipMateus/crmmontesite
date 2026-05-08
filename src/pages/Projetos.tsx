@@ -32,6 +32,7 @@ export default function Projetos() {
   const [dateFromFilter, setDateFromFilter] = useState<Date | null>(null);
   const [dateToFilter, setDateToFilter] = useState<Date | null>(null);
   const [showArchived, setShowArchived] = useState(false);
+  const [tipoServicoFilter, setTipoServicoFilter] = useState<string | null>(null);
   
   const navigate = useNavigate();
   
@@ -42,7 +43,8 @@ export default function Projetos() {
     dateFromFilter,
     dateToFilter,
     searchQuery,
-    showArchived
+    showArchived,
+    tipoServicoFilter
   };
   
   const { projects, setProjects, loading, fetchProjects } = useProjects(filters);
@@ -194,6 +196,20 @@ export default function Projetos() {
                   {PROJECT_STATUS_TYPES.map(s => (
                     <SelectItem key={s.value} value={s.value}>{s.value}</SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={tipoServicoFilter || "all"}
+                onValueChange={(v) => setTipoServicoFilter(v === "all" ? null : v)}
+              >
+                <SelectTrigger className="h-8 text-xs w-auto min-w-[140px] border-border/60">
+                  <span className="text-primary font-medium">Servico: {tipoServicoFilter || "Todos"}</span>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="Site">Site</SelectItem>
+                  <SelectItem value="Site + Vitrine">Site + Vitrine</SelectItem>
                 </SelectContent>
               </Select>
             </div>
