@@ -43,7 +43,8 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
         let query = supabase.from('projects').select(`
           *,
           tipo_servico,
-          site_personalizacoes:personalization_id(email)
+          site_personalizacoes:personalization_id(email),
+          leads:lead_id(tipo_servico)
         `);
         
         // Aplicar filtros ao query
