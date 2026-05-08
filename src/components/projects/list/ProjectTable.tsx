@@ -65,7 +65,7 @@ export default function ProjectTable({
         <TableHeader>
           <TableRow className="hover:bg-transparent border-border/60">
             <TableHead className="text-xs font-medium text-muted-foreground">Cliente</TableHead>
-            <TableHead className="text-xs font-medium text-muted-foreground">Lead</TableHead>
+            <TableHead className="text-xs font-medium text-muted-foreground">Servico</TableHead>
             <TableHead className="text-xs font-medium text-muted-foreground">Tipo</TableHead>
             <TableHead className="text-xs font-medium text-muted-foreground">Modelo</TableHead>
             <TableHead className="text-xs font-medium text-muted-foreground">Status</TableHead>
