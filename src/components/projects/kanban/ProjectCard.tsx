@@ -5,12 +5,13 @@ import { Project } from "@/types/project";
 import { getClientTypeInfo } from "@/utils/clientTypeUtils";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, PenSquare, Archive, ArchiveRestore, Clock, CheckCircle2, Store } from "lucide-react";
+import { Eye, PenSquare, Archive, ArchiveRestore, Clock, CheckCircle2, Store, MessageSquareText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProjectArchiving } from "@/hooks/use-project-archiving";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArchiveDialog } from "./ProjectCardComponents/ArchiveDialog";
 import { ChatButton } from "./ProjectCardComponents/ChatButton";
+import { ObservationsDialog } from "./ProjectCardComponents/ObservationsDialog";
 import { LeadLinkIndicator } from "@/components/projects/LeadLinkIndicator";
 
 interface ProjectCardProps {
