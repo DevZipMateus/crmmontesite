@@ -43,7 +43,8 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
         let query = supabase.from('projects').select(`
           *,
           tipo_servico,
-          site_personalizacoes:personalization_id(email)
+          site_personalizacoes:personalization_id(email),
+          leads:lead_id(tipo_servico)
         `);
         
         // Aplicar filtros ao query
@@ -106,9 +107,10 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
           });
         }
         
-        // Adicionar flag de arquivamento aos projetos
+        // Adicionar flag de arquivamento e sobrescrever tipo_servico com o do lead vinculado (fonte da verdade)
         const projectsWithArchiveFlag = filteredProjects.map(project => ({
           ...project,
+          tipo_servico: project.leads?.tipo_servico || project.tipo_servico,
           isArchived: shouldArchiveProject(project)
         })) as Project[];
         
