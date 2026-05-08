@@ -170,6 +170,15 @@ export default function ProjectCard({
         </div>
       </div>
 
+      <ObservationsDialog
+        isOpen={showObsDialog}
+        onClose={() => setShowObsDialog(false)}
+        projectId={project.id}
+        projectName={project.client_name}
+        initialObservations={project.observacoes_cliente}
+        onSaved={onProjectUpdated}
+      />
+
       <ArchiveDialog
         isOpen={showArchiveDialog}
         onClose={() => setShowArchiveDialog(false)}
