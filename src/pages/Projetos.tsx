@@ -198,6 +198,20 @@ export default function Projetos() {
                   ))}
                 </SelectContent>
               </Select>
+
+              <Select
+                value={tipoServicoFilter || "all"}
+                onValueChange={(v) => setTipoServicoFilter(v === "all" ? null : v)}
+              >
+                <SelectTrigger className="h-8 text-xs w-auto min-w-[140px] border-border/60">
+                  <span className="text-primary font-medium">Servico: {tipoServicoFilter || "Todos"}</span>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="Site">Site</SelectItem>
+                  <SelectItem value="Site + Vitrine">Site + Vitrine</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
