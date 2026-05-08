@@ -107,9 +107,10 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
           });
         }
         
-        // Adicionar flag de arquivamento aos projetos
+        // Adicionar flag de arquivamento e sobrescrever tipo_servico com o do lead vinculado (fonte da verdade)
         const projectsWithArchiveFlag = filteredProjects.map(project => ({
           ...project,
+          tipo_servico: project.leads?.tipo_servico || project.tipo_servico,
           isArchived: shouldArchiveProject(project)
         })) as Project[];
         
