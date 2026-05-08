@@ -5,6 +5,7 @@ import { CustomizationTab } from "@/components/projeto/CustomizationTab";
 import { Project } from "@/types/project";
 import { ProjectInformation } from "./ProjectInformation";
 import { PersonalizationFiles } from "./PersonalizationFiles";
+import { PersonalizationData } from "./PersonalizationData";
 import { ClientSubmissionsCard } from "./ClientSubmissionsCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -101,8 +102,9 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({ project }) => {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-      <TabsList className="grid grid-cols-4 mb-4">
+      <TabsList className="grid grid-cols-5 mb-4">
         <TabsTrigger value="info">Informações</TabsTrigger>
+        <TabsTrigger value="form">Formulário do Cliente</TabsTrigger>
         <TabsTrigger value="customization">Personalizações</TabsTrigger>
         <TabsTrigger value="upload">Uploads</TabsTrigger>
         <TabsTrigger value="submissions">Envios do Cliente</TabsTrigger>
@@ -110,6 +112,16 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({ project }) => {
 
       <TabsContent value="info" className="space-y-4">
         {project && <ProjectInformation project={project} />}
+      </TabsContent>
+
+      <TabsContent value="form" className="space-y-4">
+        {personalization ? (
+          <PersonalizationData personalization={personalization} />
+        ) : (
+          <div className="flex items-center justify-center h-64">
+            <p className="text-muted-foreground">Nenhum formulário preenchido encontrado para este projeto.</p>
+          </div>
+        )}
       </TabsContent>
 
       <TabsContent value="customization" className="space-y-4">
