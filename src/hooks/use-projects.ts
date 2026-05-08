@@ -13,6 +13,7 @@ interface ProjectFilters {
   dateToFilter?: Date | null;
   searchQuery?: string;
   showArchived?: boolean;
+  tipoServicoFilter?: string | null;
 }
 
 export function useProjects(filters: ProjectFilters | string | null = null, searchQuery: string = "") {
@@ -23,7 +24,7 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
     filters = { statusFilter: null };
   }
 
-  const { statusFilter, responsibleFilter = '', domainFilter = '', dateFromFilter = null, dateToFilter = null, showArchived = false } = 
+  const { statusFilter, responsibleFilter = '', domainFilter = '', dateFromFilter = null, dateToFilter = null, showArchived = false, tipoServicoFilter = null } = 
     (filters as ProjectFilters);
     
   const actualSearchQuery = (filters as ProjectFilters).searchQuery || searchQuery;
