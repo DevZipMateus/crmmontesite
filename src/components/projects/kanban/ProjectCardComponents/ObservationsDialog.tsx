@@ -27,14 +27,14 @@ export const ObservationsDialog = ({ isOpen, onClose, projectId, projectName, in
     setSaving(true);
     const { error } = await supabase
       .from("projects")
-      .update({ observacoes_cliente: value, updated_at: new Date().toISOString() })
+      .update({ provider_credentials: value, updated_at: new Date().toISOString() })
       .eq("id", projectId);
     setSaving(false);
     if (error) {
       toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Observações salvas" });
+    toast({ title: "Observacoes salvas" });
     onSaved?.();
     onClose();
   };
