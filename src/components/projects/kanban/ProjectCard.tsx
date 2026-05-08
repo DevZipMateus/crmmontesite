@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { useProjectArchiving } from "@/hooks/use-project-archiving";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArchiveDialog } from "./ProjectCardComponents/ArchiveDialog";
+import { ChatButton } from "./ProjectCardComponents/ChatButton";
+import { LeadLinkIndicator } from "@/components/projects/LeadLinkIndicator";
 
 interface ProjectCardProps {
   project: Project;
@@ -98,6 +100,20 @@ export default function ProjectCard({
             )}
           </div>
         </div>
+
+        {/* Row 2: Lead link + Chat */}
+        {(project.lead_id || project.partner_hash) && (
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            {project.lead_id && <LeadLinkIndicator project={project} />}
+            {project.partner_hash && (
+              <ChatButton
+                projectId={project.id}
+                projectName={project.client_name}
+                partnerHash={project.partner_hash}
+              />
+            )}
+          </div>
+        )}
 
         {/* Row 3: Footer - Avatar + Time + Actions */}
         <div className="flex items-center justify-between pt-1.5 border-t border-border/40">
