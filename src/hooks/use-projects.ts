@@ -49,6 +49,10 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
         if (statusFilter) {
           query = query.eq('status', statusFilter);
         }
+
+        if (tipoServicoFilter) {
+          query = query.eq('tipo_servico', tipoServicoFilter);
+        }
         
         if (responsibleFilter) {
           query = query.ilike('responsible_name', `%${responsibleFilter}%`);
