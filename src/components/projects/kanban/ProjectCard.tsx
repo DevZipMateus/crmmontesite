@@ -135,9 +135,9 @@ export default function ProjectCard({
             <Button
               variant="ghost"
               size="icon"
-              className={`h-7 w-7 ${project.observacoes_cliente ? 'text-amber-600 hover:text-amber-700' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`h-7 w-7 ${project.provider_credentials ? 'text-amber-600 hover:text-amber-700' : 'text-muted-foreground hover:text-foreground'}`}
               onClick={(e) => { e.stopPropagation(); setShowObsDialog(true); }}
-              title="Observações"
+              title="Observacoes"
             >
               <MessageSquareText className="h-3.5 w-3.5" />
             </Button>
