@@ -175,7 +175,7 @@ export default function ProjectCard({
         onClose={() => setShowObsDialog(false)}
         projectId={project.id}
         projectName={project.client_name}
-        initialObservations={project.observacoes_cliente}
+        initialObservations={project.provider_credentials}
         onSaved={onProjectUpdated}
       />
 
