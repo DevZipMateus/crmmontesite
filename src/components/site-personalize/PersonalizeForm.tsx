@@ -618,7 +618,7 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
 
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-6">
           <FormWizardSteps currentStep={currentStep} onStepClick={setCurrentStep} />
 
           {/* Step 1: Dados básicos */}
