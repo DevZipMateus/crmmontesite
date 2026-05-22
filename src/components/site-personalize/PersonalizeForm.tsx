@@ -492,6 +492,8 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     leadFormHash
   });
 
+  const { toast } = useToast();
+
   // Wrap onSubmit to clear draft on success
   const onSubmit = async (data: FormValues) => {
     await originalOnSubmit(data);
@@ -500,6 +502,24 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     if (leadFormHash) {
       clearCloudDraft(leadFormHash);
     }
+  };
+
+  // Called when react-hook-form validation fails — surface the problem to the user
+  const onInvalid = (errors: any) => {
+    const fieldToStep: Record<string, number> = {
+      nome_empresa: 0, email: 0, telefone: 0, cnpj_cpf: 0,
+      visao_missao_valores: 0, historia_empresa: 0,
+      endereco: 0, horario_funcionamento: 0,
+    };
+    const firstField = Object.keys(errors)[0];
+    const stepWithError = fieldToStep[firstField] ?? 0;
+    setCurrentStep(stepWithError);
+    const missing = Object.keys(errors).join(", ");
+    toast({
+      title: "Preencha os campos obrigatórios",
+      description: `Faltam preencher: ${missing}. Verifique a etapa destacada.`,
+      variant: "destructive",
+    });
   };
 
 
