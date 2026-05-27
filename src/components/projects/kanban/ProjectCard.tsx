@@ -78,7 +78,7 @@ export default function ProjectCard({
     <Card 
       className={`p-3.5 cursor-grab active:cursor-grabbing transition-all duration-150 hover:shadow-md border-l-[3px] ${clientTypeInfo.borderColor} bg-card group`}
       draggable
-      onDragStart={() => onDragStart(project.id)}
+      onDragStart={(e) => onDragStart(project.id, e)}
     >
       <div className="space-y-2">
         {/* Row 1: Client name + Form badge + Service type */}
