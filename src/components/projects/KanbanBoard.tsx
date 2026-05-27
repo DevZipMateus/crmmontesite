@@ -60,6 +60,9 @@ export default function KanbanBoard({
       return;
     }
 
+    // Avoid re-sorting/re-rendering during an active drag gesture
+    if (draggingId) return;
+
     const checkCustomizations = async () => {
       try {
         const { data: customizations, error } = await supabase
@@ -101,7 +104,7 @@ export default function KanbanBoard({
     };
 
     checkCustomizations();
-  }, [projects, searchQuery]);
+  }, [projects, searchQuery, draggingId]);
   
   const displayProjects = projectsWithCustomizationStatus.length > 0 
     ? projectsWithCustomizationStatus 
