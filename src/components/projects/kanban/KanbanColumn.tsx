@@ -17,7 +17,7 @@ interface KanbanColumnProps {
   updatingStatus: string | null;
   onDragOver: (e: React.DragEvent, status: string) => void;
   onDrop: (e: React.DragEvent, status: string) => void;
-  onDragStart: (id: string) => void;
+  onDragStart: (id: string, e?: React.DragEvent) => void;
   onStatusChange: (projectId: string, newStatus: string) => void;
   statusOptions: Array<{value: string; color: string}>;
   onProjectDeleted?: () => void;
