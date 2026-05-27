@@ -25,12 +25,19 @@ export function useDragAndDrop({ projects, setProjects, onDomainRequired }: UseD
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const handleDragStart = (projectId: string) => {
+  const handleDragStart = (projectId: string, e?: React.DragEvent) => {
     setDraggingId(projectId);
+    if (e?.dataTransfer) {
+      try {
+        e.dataTransfer.setData('text/plain', projectId);
+        e.dataTransfer.effectAllowed = 'move';
+      } catch {}
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
   };
 
