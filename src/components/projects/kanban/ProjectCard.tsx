@@ -17,7 +17,7 @@ import { LeadLinkIndicator } from "@/components/projects/LeadLinkIndicator";
 interface ProjectCardProps {
   project: Project;
   statusOptions: Array<{ value: string; color: string }>;
-  onDragStart: (id: string) => void;
+  onDragStart: (id: string, e?: React.DragEvent) => void;
   onStatusChange: (projectId: string, newStatus: string) => void;
   updatingStatus: string | null;
   onProjectDeleted?: () => void;
