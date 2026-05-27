@@ -43,7 +43,11 @@ export function useDragAndDrop({ projects, setProjects, onDomainRequired }: UseD
 
   const handleDrop = async (e: React.DragEvent, newStatus: string) => {
     e.preventDefault();
-    const projectId = draggingId;
+    e.stopPropagation();
+    const transferId = (() => {
+      try { return e.dataTransfer.getData('text/plain') || null; } catch { return null; }
+    })();
+    const projectId = transferId || draggingId;
     
     if (!projectId) return;
     
