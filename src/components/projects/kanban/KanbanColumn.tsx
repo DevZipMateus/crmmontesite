@@ -50,12 +50,34 @@ export default function KanbanColumn({
   );
   const navigate = useNavigate();
   const dotColor = statusDotColors[statusType.value] || "bg-muted-foreground";
+  const [isOver, setIsOver] = useState(false);
+
+  const isDragActive = !!draggingId;
+
+  const handleColumnDragOver = (e: React.DragEvent) => {
+    onDragOver(e, statusType.value);
+    if (isDragActive && !isOver) setIsOver(true);
+  };
+
+  const handleColumnDragLeave = (e: React.DragEvent) => {
+    // Only clear when leaving the column boundary
+    const related = e.relatedTarget as Node | null;
+    if (!related || !e.currentTarget.contains(related)) {
+      setIsOver(false);
+    }
+  };
+
+  const handleColumnDrop = (e: React.DragEvent) => {
+    setIsOver(false);
+    onDrop(e, statusType.value);
+  };
 
   return (
     <div
-      onDragOver={(e) => onDragOver(e, statusType.value)}
-      onDrop={(e) => onDrop(e, statusType.value)}
-      className="flex flex-col h-full"
+      onDragOver={handleColumnDragOver}
+      onDragLeave={handleColumnDragLeave}
+      onDrop={handleColumnDrop}
+      className={`flex flex-col h-full rounded-lg transition-colors ${isOver ? 'bg-primary/5 ring-2 ring-primary/40' : ''}`}
       role="region"
       aria-label={`Coluna ${statusType.value}`}
     >
@@ -75,8 +97,15 @@ export default function KanbanColumn({
       </div>
       
       {filteredProjects.length > 0 ? (
-        <ScrollArea className="flex-grow pr-1">
-          <div className="flex flex-col gap-2.5" role="list">
+        <ScrollArea
+          className="flex-grow pr-1"
+          onDragOver={(e) => { e.preventDefault(); }}
+        >
+          <div
+            className="flex flex-col gap-2.5"
+            role="list"
+            onDragOver={(e) => { e.preventDefault(); }}
+          >
             {filteredProjects.map((project) => (
               <ProjectCard
                 key={project.id}
@@ -94,8 +123,9 @@ export default function KanbanColumn({
       ) : (
         <div 
           className="flex-grow flex items-center justify-center border border-dashed border-border/50 rounded-lg bg-muted/20 p-6 min-h-[120px]"
+          onDragOver={(e) => { e.preventDefault(); }}
         >
-          <p className="text-muted-foreground text-xs">Sem projetos</p>
+          <p className="text-muted-foreground text-xs pointer-events-none">Sem projetos</p>
         </div>
       )}
     </div>
