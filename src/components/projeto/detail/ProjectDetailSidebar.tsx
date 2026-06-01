@@ -30,10 +30,10 @@ export const ProjectDetailSidebar: React.FC<ProjectDetailSidebarProps> = ({ proj
   const [isUpdatingInadimplente, setIsUpdatingInadimplente] = useState(false);
   const [isGeneratingCommand, setIsGeneratingCommand] = useState(false);
 
-  const isRecebido = project.status === 'Recebido';
+  const canGenerateCommand = project.status === 'Recebido' || project.status === 'Victor' || project.status === 'Davi';
 
   const handleGenerateCommand = useCallback(async () => {
-    if (!isRecebido) return;
+    if (!canGenerateCommand) return;
     setIsGeneratingCommand(true);
     let commandText = '';
     await generateSiteCommand({
@@ -46,7 +46,7 @@ export const ProjectDetailSidebar: React.FC<ProjectDetailSidebarProps> = ({ proj
       toast({ title: "Comando copiado!", description: "Comando completo copiado para a área de transferência." });
     }
     setIsGeneratingCommand(false);
-  }, [project, isRecebido, toast]);
+  }, [project, canGenerateCommand, toast]);
 
   const responsible = project.responsible_name || project.assigned_programmer || "Nao atribuido";
   const initials = responsible.substring(0, 2).toUpperCase();
@@ -130,9 +130,9 @@ export const ProjectDetailSidebar: React.FC<ProjectDetailSidebarProps> = ({ proj
             variant="outline"
             className="w-full justify-start gap-2 h-9 text-xs"
             size="sm"
-            disabled={!isRecebido || isGeneratingCommand}
+            disabled={!canGenerateCommand || isGeneratingCommand}
             onClick={handleGenerateCommand}
-            title={!isRecebido ? "Disponível apenas para projetos com status 'Recebido'" : "Gerar e copiar comando"}
+            title={!canGenerateCommand ? "Disponível apenas para projetos com status 'Recebido', 'Victor' ou 'Davi'" : "Gerar e copiar comando"}
           >
             <Terminal className="h-3.5 w-3.5" />
             {isGeneratingCommand ? 'Gerando...' : 'Gerar comando'}
