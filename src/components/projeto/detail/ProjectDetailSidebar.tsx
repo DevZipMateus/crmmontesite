@@ -130,9 +130,9 @@ export const ProjectDetailSidebar: React.FC<ProjectDetailSidebarProps> = ({ proj
             variant="outline"
             className="w-full justify-start gap-2 h-9 text-xs"
             size="sm"
-            disabled={!isRecebido || isGeneratingCommand}
+            disabled={!canGenerateCommand || isGeneratingCommand}
             onClick={handleGenerateCommand}
-            title={!isRecebido ? "Disponível apenas para projetos com status 'Recebido'" : "Gerar e copiar comando"}
+            title={!canGenerateCommand ? "Disponível apenas para projetos com status 'Recebido', 'Victor' ou 'Davi'" : "Gerar e copiar comando"}
           >
             <Terminal className="h-3.5 w-3.5" />
             {isGeneratingCommand ? 'Gerando...' : 'Gerar comando'}
