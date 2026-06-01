@@ -141,5 +141,32 @@ export function useProjects(filters: ProjectFilters | string | null = null, sear
     fetchProjects();
   }, [statusFilter, responsibleFilter, domainFilter, dateFromFilter, dateToFilter, actualSearchQuery, showArchived, tipoServicoFilter]);
 
+  // Realtime: refetch quando qualquer usuário alterar projetos
+  useEffect(() => {
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    const supabase = getSupabaseClient();
+
+    const channel = supabase
+      .channel(`projects-sync-${Math.random().toString(36).slice(2)}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'projects' },
+        (payload) => {
+          console.log('[use-projects] Realtime change:', payload.eventType);
+          if (debounceTimer) clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
+            fetchProjects();
+          }, 300);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter, responsibleFilter, domainFilter, dateFromFilter, dateToFilter, actualSearchQuery, showArchived, tipoServicoFilter]);
+
   return { projects, setProjects, loading, fetchProjects };
 }
