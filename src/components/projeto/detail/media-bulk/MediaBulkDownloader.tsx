@@ -134,6 +134,25 @@ export const MediaBulkDownloader: React.FC<MediaBulkDownloaderProps> = ({
       let successCount = 0;
       let errorCount = 0;
       let convertedCount = 0;
+      const usedNames = new Set<string>();
+
+      const ensureUnique = (name: string): string => {
+        if (!usedNames.has(name)) {
+          usedNames.add(name);
+          return name;
+        }
+        const dot = name.lastIndexOf('.');
+        const base = dot > 0 ? name.slice(0, dot) : name;
+        const ext = dot > 0 ? name.slice(dot) : '';
+        let i = 2;
+        let candidate = `${base}_${i}${ext}`;
+        while (usedNames.has(candidate)) {
+          i++;
+          candidate = `${base}_${i}${ext}`;
+        }
+        usedNames.add(candidate);
+        return candidate;
+      };
 
       for (const index of mediaIndices) {
         try {
@@ -157,17 +176,17 @@ export const MediaBulkDownloader: React.FC<MediaBulkDownloaderProps> = ({
           }
 
           let blob = await response.blob();
-          
+
           // Try to get file extension from URL or blob type
           let extension = '';
-          if (typeof media === 'object' && media.url) {
-            const urlPath = media.url;
-            const extensionMatch = urlPath.match(/\.([^.]+)$/);
-            if (extensionMatch) {
-              extension = `.${extensionMatch[1]}`;
-            }
+          if (typeof media === 'object' && media?.url) {
+            const extensionMatch = media.url.match(/\.([^.]+)$/);
+            if (extensionMatch) extension = `.${extensionMatch[1]}`;
+          } else if (typeof media === 'string') {
+            const extensionMatch = media.match(/\.([^.]+)$/);
+            if (extensionMatch) extension = `.${extensionMatch[1]}`;
           }
-          
+
           if (!extension && blob.type) {
             const typeMap: { [key: string]: string } = {
               'image/jpeg': '.jpg',
@@ -180,36 +199,33 @@ export const MediaBulkDownloader: React.FC<MediaBulkDownloaderProps> = ({
             extension = typeMap[blob.type] || '';
           }
 
-          // Generate filename - use the same displayName logic as shown in UI
+          // Always prefix with index to avoid name collisions overwriting ZIP entries
           const fileInfo = processFilePath(media, 'midia', index);
-          console.log('DEBUG MediaBulkDownloader - FileInfo:', fileInfo);
-          
-          let filename = sanitizeFileName(fileInfo.displayName) || `midia_${index + 1}`;
-          console.log('DEBUG MediaBulkDownloader - Final filename:', filename);
-
-          filename += extension;
+          const baseName = sanitizeFileName(fileInfo.displayName) || `midia_${index + 1}`;
+          const prefix = String(index + 1).padStart(3, '0');
+          let filename = `${prefix}_${baseName}${extension}`;
 
           // Convert image if needed and enabled
           if (convertImages && blob.type.startsWith('image/')) {
             try {
               const conversionResult = await ImageConversionService.convertImage(
-                blob, 
-                filename, 
+                blob,
+                filename,
                 conversionOptions
               );
-              
+
               blob = conversionResult.blob;
               filename = conversionResult.newFileName;
-              
+
               if (conversionResult.converted) {
                 convertedCount++;
               }
             } catch (conversionError) {
               console.error(`Failed to convert image ${index}:`, conversionError);
-              // Continue with original file
             }
           }
-          
+
+          filename = ensureUnique(filename);
           zip.file(filename, blob);
           successCount++;
         } catch (error) {
