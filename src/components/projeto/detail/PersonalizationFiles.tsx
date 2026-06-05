@@ -46,6 +46,7 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
       const zip = new JSZip();
       let successCount = 0;
       let errorCount = 0;
+      const usedNames = new Set<string>();
 
       for (let i = 0; i < depoimentoUrls.length; i++) {
         try {
@@ -59,7 +60,7 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
           const blob = await response.blob();
           
           let extension = '';
-          const extMatch = (typeof filePath === 'string' ? filePath : '').match(/\.([^.]+)$/);
+          const extMatch = (typeof filePath === 'string' ? filePath : (filePath as any)?.url || '').match(/\.([^.]+)$/);
           if (extMatch) {
             extension = `.${extMatch[1]}`;
           } else if (blob.type) {
@@ -70,7 +71,12 @@ export const PersonalizationFiles: React.FC<PersonalizationFilesProps> = ({
             extension = typeMap[blob.type] || '';
           }
 
-          zip.file(`depoimento_${i + 1}${extension}`, blob);
+          let name = `depoimento_${String(i + 1).padStart(3, '0')}${extension}`;
+          while (usedNames.has(name)) {
+            name = `depoimento_${String(i + 1).padStart(3, '0')}_${Math.random().toString(36).slice(2, 6)}${extension}`;
+          }
+          usedNames.add(name);
+          zip.file(name, blob);
           successCount++;
         } catch (err) {
           console.error(`Erro ao processar depoimento ${i}:`, err);
