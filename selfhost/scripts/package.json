@@ -1,0 +1,12 @@
+{
+  "name": "supabase-selfhost-migration",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "migrate-storage": "bun run migrate-storage.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^16.4.5"
+  }
+}
