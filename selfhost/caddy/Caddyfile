@@ -1,0 +1,63 @@
+# Caddyfile — reverse proxy para Supabase self-hosted
+# Substituir: suaempresa.com, e-mail, e o hash do basic auth do Studio.
+# Gerar hash: caddy hash-password
+
+{
+    email seu-email@suaempresa.com
+}
+
+# ─── API pública (PostgREST, Auth, Storage, Realtime, Edge Functions) ───
+api.suaempresa.com {
+    encode zstd gzip
+
+    # CORS para os frontends Hostinger
+    @cors_preflight method OPTIONS
+    header {
+        Access-Control-Allow-Origin "https://crm.suaempresa.com"
+        Access-Control-Allow-Credentials "true"
+        Access-Control-Allow-Headers "authorization, x-client-info, apikey, content-type, x-supabase-api-version"
+        Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+        Access-Control-Max-Age "86400"
+    }
+    respond @cors_preflight 204
+
+    reverse_proxy localhost:8000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    # Upload de arquivos grandes (storage)
+    request_body {
+        max_size 100MB
+    }
+
+    log {
+        output file /var/log/caddy/api.log
+        format json
+    }
+}
+
+# ─── Supabase Studio (admin) ───
+studio.suaempresa.com {
+    encode zstd gzip
+
+    # Basic auth — gerar hash: caddy hash-password
+    basicauth {
+        admin SUBSTITUIR_PELO_HASH_GERADO
+    }
+
+    reverse_proxy localhost:3000
+
+    log {
+        output file /var/log/caddy/studio.log
+        format json
+    }
+}
+
+# ─── Exemplos para projetos futuros ───
+# api2.suaempresa.com {
+#     reverse_proxy localhost:8000
+#     header Access-Control-Allow-Origin "https://projeto2.suaempresa.com"
+# }
