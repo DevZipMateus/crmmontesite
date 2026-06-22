@@ -79,11 +79,13 @@ serve(async (req) => {
       validationErrors.push('Email deve ter um formato válido');
     }
 
-    // CNPJ validation (if provided) - basic format check
+    // CNPJ/CPF validation (if provided) — aceita CNPJ Alfanumérico (12 alfa + 2 dígitos) e CPF (11 dígitos)
     if (data.cnpj) {
-      const cnpjClean = data.cnpj.replace(/[^\d]/g, '');
-      if (cnpjClean.length !== 11 && cnpjClean.length !== 14) {
-        validationErrors.push('CNPJ/CPF deve ter 11 ou 14 dígitos');
+      const clean = data.cnpj.toUpperCase().replace(/[^0-9A-Z]/g, '');
+      const isCpf = /^[0-9]{11}$/.test(clean);
+      const isCnpj = /^[0-9A-Z]{12}[0-9]{2}$/.test(clean);
+      if (!isCpf && !isCnpj) {
+        validationErrors.push('CNPJ/CPF inválido. CPF deve ter 11 dígitos; CNPJ deve ter 14 caracteres (12 alfanuméricos + 2 dígitos verificadores).');
       }
     }
 
