@@ -16,21 +16,21 @@ export const CommandDisplay: React.FC<CommandDisplayProps> = ({
   if (!generatedText) return null;
 
   return (
-    <div className="mt-6 p-6 border-t border-gray-200">
+    <div className="p-6 bg-black text-slate-100">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium">Comando Gerado</h3>
+        <h3 className="text-lg font-medium text-slate-100">Comando Gerado</h3>
         <Button 
           variant="outline" 
           size="sm" 
           onClick={onCopy}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800 hover:text-slate-100"
         >
           <Copy className="h-4 w-4" />
           Copiar
         </Button>
       </div>
-      <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-        <pre className="whitespace-pre-wrap text-sm">
+      <div className="bg-slate-950 p-4 rounded-md border border-slate-800">
+        <pre className="whitespace-pre-wrap text-sm font-mono text-slate-100">
           {generatedText}
         </pre>
       </div>
