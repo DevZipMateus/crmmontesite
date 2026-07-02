@@ -85,7 +85,7 @@ export default function ProducaoSites() {
 
         {/* Command Display */}
         {generatedText && (
-          <Card className="border-border/60 bg-slate-950 text-slate-100 overflow-hidden shadow-lg">
+          <Card className="border-border/60 bg-black text-slate-100 overflow-hidden shadow-lg">
             <CommandDisplay 
               generatedText={generatedText} 
               onCopy={copyToClipboard} 
