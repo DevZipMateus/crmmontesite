@@ -53,7 +53,7 @@ export const ProjectDetailSidebar: React.FC<ProjectDetailSidebarProps> = ({ proj
 
   const handleCopyPublicLink = () => {
     if (project.client_submission_hash) {
-      const link = `${window.location.origin}/envio/${project.client_submission_hash}`;
+      const link = `${window.location.origin}/cliente-images/${project.client_submission_hash}`;
       navigator.clipboard.writeText(link);
       toast({ title: "Link copiado!", description: "Link publico copiado para a area de transferencia." });
     }
