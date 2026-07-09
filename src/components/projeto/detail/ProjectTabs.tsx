@@ -102,11 +102,50 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({ project }) => {
     return getSignedUrl(filePath);
   };
 
+  const personalizationId =
+    personalization && !String(personalization.id).startsWith("virtual-")
+      ? (personalization.id as string)
+      : null;
+
+  const { submissionsCount, formChangesCount, markSeen } =
+    useProjectTabNotifications({
+      projectId: project?.id,
+      personalizationId,
+    });
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    if (value === "submissions") markSeen("submissions");
+    if (value === "form" || value === "info") markSeen(value as any);
+  };
+
+  // Mark the initially open tab as seen
+  useEffect(() => {
+    if (project?.id) markSeen("info");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id]);
+
+  const NotifBadge = ({ count }: { count: number }) =>
+    count > 0 ? (
+      <Badge
+        variant="destructive"
+        className="ml-2 h-5 min-w-5 px-1.5 text-xs"
+      >
+        {count}
+      </Badge>
+    ) : null;
+
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+    <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-6">
       <TabsList className="grid grid-cols-5 mb-4">
-        <TabsTrigger value="info">Informações</TabsTrigger>
-        <TabsTrigger value="form">Formulário do Cliente</TabsTrigger>
+        <TabsTrigger value="info">
+          Informações
+          <NotifBadge count={formChangesCount} />
+        </TabsTrigger>
+        <TabsTrigger value="form">
+          Formulário do Cliente
+          <NotifBadge count={formChangesCount} />
+        </TabsTrigger>
         <TabsTrigger value="customization">Personalizações</TabsTrigger>
         <TabsTrigger value="upload">Uploads</TabsTrigger>
         <TabsTrigger value="submissions">Envios do Cliente</TabsTrigger>
