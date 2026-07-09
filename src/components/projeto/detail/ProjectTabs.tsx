@@ -148,7 +148,10 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({ project }) => {
         </TabsTrigger>
         <TabsTrigger value="customization">Personalizações</TabsTrigger>
         <TabsTrigger value="upload">Uploads</TabsTrigger>
-        <TabsTrigger value="submissions">Envios do Cliente</TabsTrigger>
+        <TabsTrigger value="submissions">
+          Envios do Cliente
+          <NotifBadge count={submissionsCount} />
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="info" className="space-y-4">
