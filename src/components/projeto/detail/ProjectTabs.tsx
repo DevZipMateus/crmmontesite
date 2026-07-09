@@ -1,6 +1,7 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { CustomizationTab } from "@/components/projeto/CustomizationTab";
 import { Project } from "@/types/project";
 import { ProjectInformation } from "./ProjectInformation";
@@ -10,6 +11,7 @@ import { ClientSubmissionsCard } from "./ClientSubmissionsCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getSignedUrl } from "@/lib/supabase/storage";
+import { useProjectTabNotifications } from "@/hooks/useProjectTabNotifications";
 
 interface ProjectTabsProps {
   project: Project | undefined;
