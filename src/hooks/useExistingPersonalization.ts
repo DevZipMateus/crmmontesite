@@ -12,6 +12,13 @@ export interface ExistingPersonalizationData {
   historia_empresa: string;
   mercado_atuacao: string;
   endereco: string;
+  cep: string;
+  logradouro: string;
+  numero: string;
+  complemento: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
   horario_funcionamento: string;
   slogan: string;
   servicos: string;
