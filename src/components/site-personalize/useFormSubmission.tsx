@@ -8,6 +8,7 @@ import { submitPartnerClient } from "./services/partnerSubmissionService";
 import { uploadFiles } from "./services/fileUploadService";
 import { savePersonalizationData, createProject } from "./services/directClientService";
 import { supabase } from "@/integrations/supabase/client";
+import { buildEnderecoCompleto } from "@/utils/enderecoUtils";
 
 export const useFormSubmission = (props: SubmissionProps) => {
   const { 
@@ -94,7 +95,14 @@ export const useFormSubmission = (props: SubmissionProps) => {
           officenome: data.nome_empresa,
           responsavelnome: data.nome_empresa,
           telefone: data.telefone,
-          endereco: data.endereco,
+          endereco: data.endereco || buildEnderecoCompleto(data as any),
+          cep: data.cep || "",
+          logradouro: data.logradouro || "",
+          numero: data.numero || "",
+          complemento: data.complemento || "",
+          bairro: data.bairro || "",
+          cidade: data.cidade || "",
+          estado: data.estado || "",
           // Campos separados
           cnpj_cpf: data.cnpj_cpf || "",
           visao_missao_valores: data.visao_missao_valores || "",
