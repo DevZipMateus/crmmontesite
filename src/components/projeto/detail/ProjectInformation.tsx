@@ -6,6 +6,8 @@ import { Building2, Globe } from "lucide-react";
 import { formatCnpjCpf } from "@/utils/documentFormatter";
 import { useEditedFieldsData } from "@/hooks/useEditedFieldsData";
 import { EditedFieldsIndicator } from "./EditedFieldsIndicator";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProjectInformationProps {
   project: Project;
@@ -13,6 +15,20 @@ interface ProjectInformationProps {
 
 export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project }) => {
   const { editData } = useEditedFieldsData(project.personalization_id);
+
+  const { data: personalization } = useQuery({
+    queryKey: ["personalization-address", project.personalization_id],
+    queryFn: async () => {
+      if (!project.personalization_id) return null;
+      const { data } = await supabase
+        .from("site_personalizacoes")
+        .select("cep,logradouro,numero,complemento,bairro,cidade,estado,endereco")
+        .eq("id", project.personalization_id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!project.personalization_id,
+  });
 
   const formattedDate = (dateStr?: string) => {
     if (!dateStr) return '--';
@@ -24,6 +40,10 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
     const d = new Date(dateStr);
     return `${d.toLocaleDateString('pt-BR')}, ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
   };
+
+  const p: any = personalization || {};
+  const hasStructuredAddress = !!(p.cep || p.logradouro || p.cidade);
+  const enderecoFallback = p.endereco || '--';
 
   return (
     <div className="space-y-4">
