@@ -138,23 +138,145 @@ export const PersonalizeBasicForm: React.FC<PersonalizeBasicFormProps> = ({
         )}
       />
 
-      {/* Endereço */}
-      <FormField
-        control={form.control}
-        name="endereco"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Endereço *</FormLabel>
-            <FormControl>
-              <Input 
-                placeholder="Rua, número, bairro, cidade - CEP"
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      {/* Endereço estruturado */}
+      <div className="space-y-4 border rounded-md p-4 bg-muted/20">
+        <h4 className="text-sm font-medium">Endereço *</h4>
+
+        <FormField
+          control={form.control}
+          name="cep"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>CEP</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="00000-000"
+                  maxLength={9}
+                  {...field}
+                  value={field.value || ""}
+                  onChange={async (e) => {
+                    const formatted = formatCep(e.target.value);
+                    field.onChange(formatted);
+                    const digits = formatted.replace(/\D/g, "");
+                    if (digits.length === 8) {
+                      const { fetchViaCep } = await import("@/utils/enderecoUtils");
+                      const data = await fetchViaCep(digits);
+                      if (data) {
+                        form.setValue("logradouro", data.logradouro || "", { shouldValidate: true });
+                        form.setValue("bairro", data.bairro || "", { shouldValidate: true });
+                        form.setValue("cidade", data.cidade || "", { shouldValidate: true });
+                        form.setValue("estado", data.estado || "", { shouldValidate: true });
+                      }
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="sm:col-span-2">
+            <FormField
+              control={form.control}
+              name="logradouro"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Logradouro</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Rua, Avenida..." {...field} value={field.value || ""} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <FormField
+            control={form.control}
+            name="numero"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Número</FormLabel>
+                <FormControl>
+                  <Input placeholder="123" {...field} value={field.value || ""} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="complemento"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Complemento</FormLabel>
+              <FormControl>
+                <Input placeholder="Sala, Andar, Bloco (opcional)" {...field} value={field.value || ""} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="bairro"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Bairro</FormLabel>
+              <FormControl>
+                <Input placeholder="Bairro" {...field} value={field.value || ""} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="sm:col-span-2">
+            <FormField
+              control={form.control}
+              name="cidade"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cidade</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Cidade" {...field} value={field.value || ""} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <FormField
+            control={form.control}
+            name="estado"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Estado</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="UF" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {UF_LIST.map((uf) => (
+                      <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+
+
 
       {/* Horário de Funcionamento */}
       <FormField
