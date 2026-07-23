@@ -3,9 +3,11 @@ import React from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import LogoUploader from "./LogoUploader";
 import { UseFormReturn } from "react-hook-form";
 import { formatCnpjCpf, getCnpjCpfPlaceholder } from "@/utils/documentFormatter";
+import { formatCep, buildEnderecoCompleto, UF_LIST } from "@/utils/enderecoUtils";
 
 export interface FormValues {
   nome_empresa: string;
@@ -20,6 +22,15 @@ export interface FormValues {
   servicosOferecidos?: string;
   possuiProdutos?: boolean;
   produtos?: string;
+  // Endereço estruturado (novos campos)
+  cep?: string;
+  logradouro?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  // Campo legado (mantido para compatibilidade — preenchido automaticamente)
   endereco?: string;
   horario_funcionamento?: string;
   redes_sociais?: string;
