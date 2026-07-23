@@ -71,10 +71,22 @@ export const ProjectInformation: React.FC<ProjectInformationProps> = ({ project 
             <InfoField label="TELEFONE" value={project.telefone || '--'} />
             <InfoField label="E-MAIL" value={project.email_complementar || '--'} />
             <InfoField label="TIPO DE CLIENTE" value={project.client_type === 'parceiro' ? 'Parceiro' : 'Cliente final'} />
-            <InfoField label="ENDERECO" value={'--'} />
+            {hasStructuredAddress ? (
+              <>
+                <InfoField label="CEP" value={p.cep || '--'} />
+                <InfoField label="LOGRADOURO" value={[p.logradouro, p.numero].filter(Boolean).join(', ') || '--'} />
+                <InfoField label="COMPLEMENTO" value={p.complemento || '--'} />
+                <InfoField label="BAIRRO" value={p.bairro || '--'} />
+                <InfoField label="CIDADE" value={p.cidade || '--'} />
+                <InfoField label="ESTADO" value={p.estado || '--'} />
+              </>
+            ) : (
+              <InfoField label="ENDERECO" value={enderecoFallback} />
+            )}
           </div>
         </CardContent>
       </Card>
+
 
       {/* Site & integracoes */}
       <Card>
