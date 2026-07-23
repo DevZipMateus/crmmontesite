@@ -223,17 +223,6 @@ const TermoEntregaForm: React.FC = () => {
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="comentarios">Espaço para comentários ou sugestões (opcional)</Label>
-                    <Textarea
-                      id="comentarios"
-                      value={comentarios}
-                      onChange={(e) => setComentarios(e.target.value)}
-                      placeholder="Conte-nos como foi sua experiência..."
-                      className="mt-1"
-                      rows={4}
-                    />
-                  </div>
                 </div>
               </section>
 
