@@ -387,7 +387,16 @@ Domínio: ${project.domain || 'Não informado'}
 CNPJ/CPF: ${formatTextField(personalizationData.cnpj_cpf || project.cnpj)}
 Telefone: ${formatTextField(personalizationData.telefone)}
 Email: ${formatTextField(personalizationData.email)}
-Endereço: ${formatTextField(personalizationData.endereco)}
+Endereço: ${formatTextField([
+  [(personalizationData as any).logradouro, (personalizationData as any).numero].filter(Boolean).join(', '),
+  (personalizationData as any).complemento,
+  (personalizationData as any).bairro,
+  [(personalizationData as any).cidade, (personalizationData as any).estado].filter(Boolean).join('/'),
+  (personalizationData as any).cep,
+].filter(Boolean).join(' - ') || personalizationData.endereco)}
+CEP: ${formatTextField((personalizationData as any).cep)}
+Cidade/UF: ${formatTextField([(personalizationData as any).cidade, (personalizationData as any).estado].filter(Boolean).join('/'))}
+Bairro: ${formatTextField((personalizationData as any).bairro)}
 Horário de funcionamento: ${formatTextField(personalizationData.horario_funcionamento)}
 Redes Sociais: ${formatTextField(personalizationData.redessociais)}
 
