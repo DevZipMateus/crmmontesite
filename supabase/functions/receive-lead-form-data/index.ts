@@ -29,6 +29,13 @@ serve(async (req) => {
       responsavelnome,
       telefone,
       endereco,
+      cep,
+      logradouro,
+      numero,
+      complemento,
+      bairro,
+      cidade,
+      estado,
       // Campos separados
       cnpj_cpf,
       visao_missao_valores,
