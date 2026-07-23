@@ -767,8 +767,12 @@ export type Database = {
       }
       site_personalizacoes: {
         Row: {
+          bairro: string | null
           botaowhatsapp: boolean | null
+          cep: string | null
+          cidade: string | null
           cnpj_cpf: string | null
+          complemento: string | null
           created_at: string | null
           depoimento_urls: string[] | null
           depoimentos: string | null
@@ -777,6 +781,7 @@ export type Database = {
           edited_fields: string[] | null
           email: string
           endereco: string
+          estado: string | null
           estilo_visual: string | null
           fonte: string | null
           historia_empresa: string | null
@@ -785,9 +790,11 @@ export type Database = {
           last_edited_at: string | null
           linkmapa: string | null
           logo_url: string | null
+          logradouro: string | null
           mercado_atuacao: string | null
           midia_urls: string[] | null
           modelo: string | null
+          numero: string | null
           officenome: string
           paletacores: string | null
           planos: string | null
@@ -804,8 +811,12 @@ export type Database = {
           visao_missao_valores: string | null
         }
         Insert: {
+          bairro?: string | null
           botaowhatsapp?: boolean | null
+          cep?: string | null
+          cidade?: string | null
           cnpj_cpf?: string | null
+          complemento?: string | null
           created_at?: string | null
           depoimento_urls?: string[] | null
           depoimentos?: string | null
@@ -814,6 +825,7 @@ export type Database = {
           edited_fields?: string[] | null
           email: string
           endereco: string
+          estado?: string | null
           estilo_visual?: string | null
           fonte?: string | null
           historia_empresa?: string | null
@@ -822,9 +834,11 @@ export type Database = {
           last_edited_at?: string | null
           linkmapa?: string | null
           logo_url?: string | null
+          logradouro?: string | null
           mercado_atuacao?: string | null
           midia_urls?: string[] | null
           modelo?: string | null
+          numero?: string | null
           officenome: string
           paletacores?: string | null
           planos?: string | null
@@ -841,8 +855,12 @@ export type Database = {
           visao_missao_valores?: string | null
         }
         Update: {
+          bairro?: string | null
           botaowhatsapp?: boolean | null
+          cep?: string | null
+          cidade?: string | null
           cnpj_cpf?: string | null
+          complemento?: string | null
           created_at?: string | null
           depoimento_urls?: string[] | null
           depoimentos?: string | null
@@ -851,6 +869,7 @@ export type Database = {
           edited_fields?: string[] | null
           email?: string
           endereco?: string
+          estado?: string | null
           estilo_visual?: string | null
           fonte?: string | null
           historia_empresa?: string | null
@@ -859,9 +878,11 @@ export type Database = {
           last_edited_at?: string | null
           linkmapa?: string | null
           logo_url?: string | null
+          logradouro?: string | null
           mercado_atuacao?: string | null
           midia_urls?: string[] | null
           modelo?: string | null
+          numero?: string | null
           officenome?: string
           paletacores?: string | null
           planos?: string | null

@@ -12,6 +12,13 @@ export interface ExistingPersonalizationData {
   historia_empresa: string;
   mercado_atuacao: string;
   endereco: string;
+  cep: string;
+  logradouro: string;
+  numero: string;
+  complemento: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
   horario_funcionamento: string;
   slogan: string;
   servicos: string;
@@ -174,6 +181,13 @@ export function useExistingPersonalization(
           historia_empresa: personalization.historia_empresa || "",
           mercado_atuacao: personalization.mercado_atuacao || "",
           endereco: personalization.endereco || "",
+          cep: (personalization as any).cep || "",
+          logradouro: (personalization as any).logradouro || "",
+          numero: (personalization as any).numero || "",
+          complemento: (personalization as any).complemento || "",
+          bairro: (personalization as any).bairro || "",
+          cidade: (personalization as any).cidade || "",
+          estado: (personalization as any).estado || "",
           horario_funcionamento: personalization.horario_funcionamento || "",
           slogan: personalization.slogan || "",
           servicos: personalization.servicos || "",

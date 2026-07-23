@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { FormValues } from "../PersonalizeBasicForm";
+import { buildEnderecoCompleto } from "@/utils/enderecoUtils";
 
 export const savePersonalizationData = async (
   formData: any,
@@ -17,7 +18,14 @@ export const savePersonalizationData = async (
       responsavelnome: formData.nome_empresa,
       telefone: formData.telefone,
       email: formData.email,
-      endereco: formData.endereco || "",
+      endereco: formData.endereco || buildEnderecoCompleto(formData),
+      cep: formData.cep || null,
+      logradouro: formData.logradouro || null,
+      numero: formData.numero || null,
+      complemento: formData.complemento || null,
+      bairro: formData.bairro || null,
+      cidade: formData.cidade || null,
+      estado: formData.estado || null,
       redessociais: formData.redes_sociais || "",
       fonte: "",
       paletacores: formData.cores_preferidas || "",

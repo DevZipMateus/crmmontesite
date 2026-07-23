@@ -28,7 +28,24 @@ export const PersonalizationData: React.FC<PersonalizationDataProps> = ({ person
                 )}
                 <p><span className="font-medium">Telefone:</span> {personalization.telefone}</p>
                 <p><span className="font-medium">Email:</span> {personalization.email}</p>
-                <p><span className="font-medium">Endereço:</span> {personalization.endereco}</p>
+                {(personalization.cep || personalization.logradouro || personalization.cidade) ? (
+                  <div className="space-y-1">
+                    <p><span className="font-medium">Endereço:</span></p>
+                    <div className="pl-3 text-sm text-muted-foreground space-y-0.5">
+                      {personalization.cep && <p>CEP: {personalization.cep}</p>}
+                      {(personalization.logradouro || personalization.numero) && (
+                        <p>{[personalization.logradouro, personalization.numero].filter(Boolean).join(", ")}</p>
+                      )}
+                      {personalization.complemento && <p>Complemento: {personalization.complemento}</p>}
+                      {personalization.bairro && <p>Bairro: {personalization.bairro}</p>}
+                      {(personalization.cidade || personalization.estado) && (
+                        <p>{[personalization.cidade, personalization.estado].filter(Boolean).join("/")}</p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <p><span className="font-medium">Endereço:</span> {personalization.endereco}</p>
+                )}
                 {personalization.horario_funcionamento && (
                   <p><span className="font-medium">Horário de Funcionamento:</span> {personalization.horario_funcionamento}</p>
                 )}
