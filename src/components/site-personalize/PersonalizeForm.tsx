@@ -223,6 +223,13 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
       possuiProdutos: false,
       produtos: "",
       endereco: "",
+      cep: "",
+      logradouro: "",
+      numero: "",
+      complemento: "",
+      bairro: "",
+      cidade: "",
+      estado: "",
       horario_funcionamento: "",
       redes_sociais: "",
       cores_preferidas: "",
@@ -377,6 +384,13 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
         possuiProdutos: !!existingData.produtos,
         produtos: existingData.produtos || "",
         endereco: existingData.endereco || "",
+        cep: (existingData as any).cep || "",
+        logradouro: (existingData as any).logradouro || "",
+        numero: (existingData as any).numero || "",
+        complemento: (existingData as any).complemento || "",
+        bairro: (existingData as any).bairro || "",
+        cidade: (existingData as any).cidade || "",
+        estado: (existingData as any).estado || "",
         horario_funcionamento: existingData.horario_funcionamento || "",
         redes_sociais: existingData.redessociais || "",
         cores_preferidas: existingData.paletacores || "",
@@ -472,7 +486,7 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
       'cnpj_cpf',
       'visao_missao_valores',
       'historia_empresa',
-      'endereco',
+      'cep', 'logradouro', 'numero', 'bairro', 'cidade', 'estado',
       'horario_funcionamento'
     ],
     optionalFields: [
@@ -516,7 +530,7 @@ export const PersonalizeForm: React.FC<PersonalizeFormProps> = ({
     const fieldToStep: Record<string, number> = {
       nome_empresa: 0, email: 0, telefone: 0, cnpj_cpf: 0,
       visao_missao_valores: 0, historia_empresa: 0,
-      endereco: 0, horario_funcionamento: 0,
+      endereco: 0, cep: 0, logradouro: 0, numero: 0, complemento: 0, bairro: 0, cidade: 0, estado: 0, horario_funcionamento: 0,
     };
     const firstField = Object.keys(errors)[0];
     const stepWithError = fieldToStep[firstField] ?? 0;
