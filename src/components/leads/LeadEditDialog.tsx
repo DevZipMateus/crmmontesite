@@ -20,6 +20,7 @@ import { MessageSquare } from "lucide-react";
 import { useUpdateLead } from "@/hooks/useLeads";
 import { Lead, SITUACOES_PADRONIZADAS } from "@/types/lead";
 import LeadSchedulingSection from "./LeadSchedulingSection";
+import { formatPhoneNumber } from "@/lib/phone";
 
 interface LeadEditDialogProps {
   lead: Lead | null;
@@ -38,6 +39,7 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
     empresa: "",
     nome_cliente: "",
     email: "",
+    telefone: "",
     cnpj: "",
     vendedor: "",
     situacao: "",
@@ -55,6 +57,7 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
         empresa: lead.empresa || "",
         nome_cliente: lead.nome_cliente || "",
         email: lead.email || "",
+        telefone: lead.telefone || "",
         cnpj: lead.cnpj || "",
         vendedor: lead.vendedor || "",
         situacao: lead.situacao || "",
@@ -127,6 +130,17 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
+                  <Label htmlFor="telefone">Número de Contato</Label>
+                  <Input
+                    id="telefone"
+                    type="tel"
+                    value={formData.telefone}
+                    onChange={(e) => handleInputChange("telefone", formatPhoneNumber(e.target.value))}
+                    placeholder="(00) 00000-0000"
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="email">E-mail</Label>
                   <Input
                     id="email"
@@ -136,7 +150,9 @@ const LeadEditDialog: React.FC<LeadEditDialogProps> = ({
                     placeholder="email@exemplo.com"
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="cnpj">CNPJ/CPF</Label>
                   <Input

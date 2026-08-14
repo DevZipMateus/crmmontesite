@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SITUACOES_PADRONIZADAS } from "@/types/lead";
 import { useCreateLead } from "@/hooks/useLeads";
+import { formatPhoneNumber, isValidPhoneNumber } from "@/lib/phone";
 
 interface LeadCreateDialogProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
     empresa: '',
     nome_cliente: '',
     email: '',
+    telefone: '',
     cnpj: '',
     vendedor: '',
     situacao: 'Em Contato',
@@ -33,12 +35,18 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
     observacoes: '',
     tipo_servico: 'Site'
   });
+  const [telefoneError, setTelefoneError] = useState('');
 
   const createLead = useCreateLead();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    if (!isValidPhoneNumber(formData.telefone)) {
+      setTelefoneError('Informe um número de contato válido, com DDD.');
+      return;
+    }
+
     const leadData = {
       ...formData,
       vendedor: formData.vendedor === 'none' ? null : formData.vendedor,
@@ -51,6 +59,7 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
           empresa: '',
           nome_cliente: '',
           email: '',
+          telefone: '',
           cnpj: '',
           vendedor: '',
           situacao: 'Em Contato',
@@ -60,6 +69,7 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
           observacoes: '',
           tipo_servico: 'Site'
         });
+        setTelefoneError('');
         onClose();
       }
     });
@@ -96,6 +106,24 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
+              <Label htmlFor="telefone">Número de Contato *</Label>
+              <Input
+                id="telefone"
+                type="tel"
+                value={formData.telefone}
+                onChange={(e) => {
+                  setFormData({ ...formData, telefone: formatPhoneNumber(e.target.value) });
+                  if (telefoneError) setTelefoneError('');
+                }}
+                placeholder="(00) 00000-0000"
+                required
+                aria-invalid={!!telefoneError}
+              />
+              {telefoneError && (
+                <p className="text-xs text-destructive mt-1">{telefoneError}</p>
+              )}
+            </div>
+            <div>
               <Label htmlFor="email">E-mail</Label>
               <Input
                 id="email"
@@ -105,6 +133,9 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
                 placeholder="email@exemplo.com"
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="cnpj">CNPJ/CPF</Label>
               <Input
@@ -114,9 +145,6 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
                 placeholder="00.000.000/0000-00"
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="vendedor">Vendedor</Label>
               <Select
@@ -136,6 +164,9 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="situacao">Situação</Label>
               <Select
@@ -154,9 +185,6 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="tipo_servico">Tipo de Serviço</Label>
               <Select
@@ -171,15 +199,6 @@ const LeadCreateDialog: React.FC<LeadCreateDialogProps> = ({
                   <SelectItem value="Site + Vitrine">Site + Vitrine</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div>
-              <Label htmlFor="link_blaster">Link Blaster</Label>
-              <Input
-                id="link_blaster"
-                value={formData.link_blaster}
-                onChange={(e) => setFormData({ ...formData, link_blaster: e.target.value })}
-                placeholder="https://..."
-              />
             </div>
           </div>
 
