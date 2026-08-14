@@ -3,6 +3,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { Project } from "@/types/project";
 
+type ProjectUpdateInput = Pick<
+  Project,
+  | 'client_name'
+  | 'template'
+  | 'status'
+  | 'responsible_name'
+  | 'domain'
+  | 'client_type'
+  | 'blaster_link'
+  | 'partner_link'
+  | 'provider_credentials'
+  | 'assigned_programmer'
+  | 'is_inadimplente'
+  | 'project_link'
+  | 'showcase_link'
+  | 'tipo_servico'
+>;
+
 // Function to update an existing project
 export async function updateProject(id: string, values: Partial<Project>) {
   try {
@@ -14,8 +32,8 @@ export async function updateProject(id: string, values: Partial<Project>) {
     console.log("Updating project ID:", id);
     console.log("Update values:", values);
     
-    // Create update object with all fields that could be updated
-    const updateData: Partial<Project> = {};
+    // Create update object with only table fields
+    const updateData: Partial<ProjectUpdateInput> = {};
     
     // Include all possible fields in the update
     if (values.client_name !== undefined) updateData.client_name = values.client_name;
@@ -30,6 +48,7 @@ export async function updateProject(id: string, values: Partial<Project>) {
     if (values.is_inadimplente !== undefined) updateData.is_inadimplente = values.is_inadimplente;
     if (values.project_link !== undefined) updateData.project_link = values.project_link;
     if (values.showcase_link !== undefined) updateData.showcase_link = values.showcase_link;
+    if (values.tipo_servico !== undefined) updateData.tipo_servico = values.tipo_servico;
     
     // Handle partner_link only if client_type is being updated
     if (values.client_type !== undefined) {
