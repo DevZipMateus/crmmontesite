@@ -31,6 +31,7 @@ const getStatusProjeto = (lead: LeadWithProject): string => lead.projects?.statu
 export const REPORT_COLUMNS: ReportColumn[] = [
   { key: "empresa", label: "Empresa", defaultSelected: true, getValue: (l) => l.empresa || "" },
   { key: "nome_cliente", label: "Cliente", defaultSelected: true, getValue: (l) => l.nome_cliente || "" },
+  { key: "telefone", label: "Número de Contato", defaultSelected: true, getValue: (l) => l.telefone || "" },
   { key: "vendedor", label: "Vendedor", defaultSelected: true, getValue: (l) => l.vendedor || "" },
   { key: "situacao", label: "Situação", defaultSelected: true, getValue: (l) => l.situacao || "" },
   { key: "tipo_servico", label: "Tipo de Serviço", defaultSelected: true, getValue: (l) => l.tipo_servico || "" },
