@@ -35,6 +35,7 @@ export interface LeadFilters {
   empresa?: string;
   vendedor?: string;
   situacao?: string;
+  tipoServico?: string;
   diasSemResposta?: number;
   faixaDias?: string;
   ordenacao?: 'asc' | 'desc' | 'dias_asc' | 'dias_desc' | 'cadastro_asc' | 'cadastro_desc';
@@ -58,6 +59,12 @@ export const SITUACOES_PADRONIZADAS = [
 ] as const;
 
 export type SituacaoLead = typeof SITUACOES_PADRONIZADAS[number];
+
+// Tipos de serviço padronizados dos leads
+export const TIPOS_SERVICO_PADRONIZADOS = [
+  'Site',
+  'Site + Vitrine',
+] as const;
 
 // Interface para resultados de vinculação automática
 export interface LeadProjectLink {

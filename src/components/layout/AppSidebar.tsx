@@ -11,6 +11,7 @@ import {
   Settings,
   Plug,
   ChevronDown,
+  FileBarChart,
 } from "lucide-react";
 import {
   Sidebar,
@@ -43,6 +44,7 @@ const workspaceItems: NavItem[] = [
   { title: "Leads", url: "/leads", icon: Users },
   { title: "Produção", url: "/producao-sites", icon: Terminal },
   { title: "Revisões", url: "/revisoes", icon: FileCheck },
+  { title: "Relatórios", url: "/relatorios", icon: FileBarChart },
 ];
 
 const operationsItems: NavItem[] = [

@@ -33,6 +33,10 @@ export const useLeads = (filters?: LeadFilters) => {
         query = query.eq('situacao', filters.situacao);
       }
 
+      if (filters?.tipoServico) {
+        query = query.eq('tipo_servico', filters.tipoServico);
+      }
+
       const { data, error } = await query;
 
       if (error) {

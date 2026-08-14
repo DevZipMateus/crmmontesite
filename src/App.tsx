@@ -22,6 +22,7 @@ import PersonalizacaoDetalhe from "@/pages/PersonalizacaoDetalhe";
 import WebhookManagement from "./pages/WebhookManagement";
 import CriarProjetos from "./pages/CriarProjetos";
 import Leads from "./pages/Leads";
+import Relatorios from "./pages/Relatorios";
 import ClientSubmissionPage from "./pages/ClientSubmissionPage";
 import TermosEntrega from "./pages/TermosEntrega";
 import TermoEntregaForm from "./pages/TermoEntregaForm";
@@ -60,6 +61,7 @@ const App = () => {
               <Route path="/home" element={<Index />} />
               <Route path="/criar-projetos" element={<CriarProjetos />} />
               <Route path="/leads" element={<Leads />} />
+              <Route path="/relatorios" element={<Relatorios />} />
               <Route path="/parceiros" element={<Navigate to="/webhooks?tab=partners" replace />} />
               <Route path="/projetos" element={<Projetos />} />
               <Route path="/novo-projeto" element={<NovoProjeto />} />
