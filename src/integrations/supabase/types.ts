@@ -179,6 +179,116 @@ export type Database = {
           },
         ]
       }
+      hosting_events: {
+        Row: {
+          created_at: string
+          detail: Json
+          domain: string
+          event_type: string
+          id: string
+          order_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          detail?: Json
+          domain: string
+          event_type: string
+          id?: string
+          order_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          detail?: Json
+          domain?: string
+          event_type?: string
+          id?: string
+          order_id?: number | null
+        }
+        Relationships: []
+      }
+      hosting_plans: {
+        Row: {
+          disk_bytes_limit: number | null
+          disk_bytes_used: number | null
+          last_synced_at: string | null
+          order_id: number
+          plan_name: string
+          platform: string
+          site_count: number
+          site_limit: number | null
+        }
+        Insert: {
+          disk_bytes_limit?: number | null
+          disk_bytes_used?: number | null
+          last_synced_at?: string | null
+          order_id: number
+          plan_name: string
+          platform: string
+          site_count?: number
+          site_limit?: number | null
+        }
+        Update: {
+          disk_bytes_limit?: number | null
+          disk_bytes_used?: number | null
+          last_synced_at?: string | null
+          order_id?: number
+          plan_name?: string
+          platform?: string
+          site_count?: number
+          site_limit?: number | null
+        }
+        Relationships: []
+      }
+      hosting_websites: {
+        Row: {
+          deleted_at: string | null
+          domain: string
+          external_uid: string | null
+          first_seen_at: string
+          id: string
+          is_placeholder: boolean
+          last_seen_at: string
+          linked_project_id: string | null
+          order_id: number
+          panel_state: string
+          platform: string
+        }
+        Insert: {
+          deleted_at?: string | null
+          domain: string
+          external_uid?: string | null
+          first_seen_at?: string
+          id?: string
+          is_placeholder?: boolean
+          last_seen_at?: string
+          linked_project_id?: string | null
+          order_id: number
+          panel_state?: string
+          platform: string
+        }
+        Update: {
+          deleted_at?: string | null
+          domain?: string
+          external_uid?: string | null
+          first_seen_at?: string
+          id?: string
+          is_placeholder?: boolean
+          last_seen_at?: string
+          linked_project_id?: string | null
+          order_id?: number
+          panel_state?: string
+          platform?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hosting_websites_linked_project_id_fkey"
+            columns: ["linked_project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_settings: {
         Row: {
           active: boolean | null

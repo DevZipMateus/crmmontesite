@@ -26,6 +26,7 @@ import Relatorios from "./pages/Relatorios";
 import ClientSubmissionPage from "./pages/ClientSubmissionPage";
 import TermosEntrega from "./pages/TermosEntrega";
 import TermoEntregaForm from "./pages/TermoEntregaForm";
+import HostingMonitor from "./pages/HostingMonitor";
 import AppLayout from "./components/layout/AppLayout";
 
 const queryClient = new QueryClient();
@@ -73,6 +74,7 @@ const App = () => {
               <Route path="/producao-sites" element={<ProducaoSites />} />
               <Route path="/webhooks" element={<WebhookManagement />} />
               <Route path="/revisoes" element={<TermosEntrega />} />
+              <Route path="/hospedagem" element={<HostingMonitor />} />
             </Route>
             
             {/* Fallback */}
