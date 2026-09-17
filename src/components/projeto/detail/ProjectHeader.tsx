@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { Badge } from "@/components/ui/badge";
+import { HostingLocationBadge } from "./HostingLocationBadge";
 
 interface ProjectHeaderProps {
   projectId: string;
@@ -21,6 +22,7 @@ interface ProjectHeaderProps {
   createdAt?: string;
   responsibleName?: string;
   leadId?: string;
+  domain?: string;
   isDialogOpen: boolean;
   setIsDialogOpen: (open: boolean) => void;
   handleProjectDeleted: () => void;
@@ -53,6 +55,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
   createdAt,
   responsibleName,
   leadId,
+  domain,
   isDialogOpen,
   setIsDialogOpen,
   handleProjectDeleted,
@@ -142,6 +145,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
               Lead vinculado
             </Badge>
           )}
+          <HostingLocationBadge projectId={projectId} domain={domain} />
         </div>
         <p className="text-sm text-muted-foreground mt-1">
           {[

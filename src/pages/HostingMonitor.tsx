@@ -33,6 +33,7 @@ import {
   Unlink,
   Eraser,
   ShieldOff,
+  Server,
 } from "lucide-react";
 import { WebsiteRowActions } from "@/components/hosting/WebsiteRowActions";
 import { getFunctionErrorMessage } from "@/lib/functionError";
@@ -124,11 +125,13 @@ export default function HostingMonitor() {
 
     return websites.filter((w) => {
       if (term && !w.domain.toLowerCase().includes(term)) return false;
-      if (platformFilter !== "all" && w.platform !== platformFilter) return false;
+
+      const effectivePlatform = w.deleted_at ? "vps" : w.platform;
+      if (platformFilter !== "all" && effectivePlatform !== platformFilter) return false;
 
       if (statusFilter !== "all") {
         const status = w.deleted_at
-          ? "deleted"
+          ? "vps"
           : w.panel_state === "offline"
           ? "offline"
           : w.is_placeholder
@@ -148,6 +151,8 @@ export default function HostingMonitor() {
       return true;
     });
   }, [websites, search, platformFilter, statusFilter, dateFrom, dateTo]);
+
+  const vpsMigratedCount = websites?.filter((w) => w.deleted_at).length ?? 0;
 
   const totalPages = Math.max(1, Math.ceil(filteredWebsites.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -220,6 +225,31 @@ export default function HostingMonitor() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="shadow-sm border-amber-500/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Server className="h-4 w-4 text-amber-600" />
+                  VPS AdminBolt
+                </span>
+                <Badge variant="outline" className="text-amber-600 border-amber-500/30 bg-amber-500/10">
+                  2.25.231.60
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-1 text-muted-foreground">
+                  <Globe className="h-3.5 w-3.5" /> Sites migrados
+                </span>
+                <span className="font-medium">{vpsMigratedCount}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Sites que saíram da Hostinger e passaram a ser hospedados na própria VPS. Contagem ainda manual — sincronização automática entra amanhã.
+              </p>
+            </CardContent>
+          </Card>
+
           {loadingPlans && <p className="text-sm text-muted-foreground">Carregando planos...</p>}
           {plans?.map((plan) => (
             <Card key={plan.order_id} className="shadow-sm">
@@ -311,6 +341,7 @@ export default function HostingMonitor() {
                         <SelectItem value="all">Todas</SelectItem>
                         <SelectItem value="h5g">Agency Growth</SelectItem>
                         <SelectItem value="cloudlinux">Cloud Professional</SelectItem>
+                        <SelectItem value="vps">VPS (AdminBolt)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -329,10 +360,10 @@ export default function HostingMonitor() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Todos</SelectItem>
-                        <SelectItem value="active">Ativo</SelectItem>
+                        <SelectItem value="active">Ativo (Hostinger)</SelectItem>
+                        <SelectItem value="vps">Migrado p/ VPS</SelectItem>
                         <SelectItem value="offline">Fora do ar</SelectItem>
                         <SelectItem value="placeholder">Placeholder</SelectItem>
-                        <SelectItem value="deleted">Removido</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -418,9 +449,16 @@ export default function HostingMonitor() {
                         <TableRow key={site.id}>
                           <TableCell className="font-medium">{site.domain}</TableCell>
                           <TableCell>
-                            <Badge variant="outline">
-                              {site.platform === "h5g" ? "Agency Growth" : "Cloud Professional"}
-                            </Badge>
+                            {site.deleted_at ? (
+                              <Badge variant="outline" className="gap-1 text-amber-600 border-amber-500/30 bg-amber-500/10">
+                                <Server className="h-3 w-3" />
+                                VPS (AdminBolt)
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-purple-600 border-purple-500/30 bg-purple-500/10">
+                                {site.platform === "h5g" ? "Agency Growth" : "Cloud Professional"}
+                              </Badge>
+                            )}
                           </TableCell>
                           <TableCell>
                             {site.projects ? (
@@ -433,7 +471,7 @@ export default function HostingMonitor() {
                           </TableCell>
                           <TableCell>
                             {site.deleted_at ? (
-                              <Badge variant="destructive">Removido</Badge>
+                              <Badge className="bg-amber-500">Migrado p/ VPS</Badge>
                             ) : site.panel_state === "offline" ? (
                               <Badge className="bg-orange-500">Fora do ar</Badge>
                             ) : site.is_placeholder ? (

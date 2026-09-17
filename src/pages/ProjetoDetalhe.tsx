@@ -119,6 +119,7 @@ export default function ProjetoDetalhe() {
             createdAt={project.created_at}
             responsibleName={project.responsible_name}
             leadId={project.lead_id}
+            domain={project.domain}
             isDialogOpen={isDialogOpen}
             setIsDialogOpen={setIsDialogOpen}
             handleProjectDeleted={handleProjectDeleted}
