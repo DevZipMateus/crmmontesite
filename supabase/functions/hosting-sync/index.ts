@@ -8,10 +8,11 @@ const corsHeaders = {
 
 const HOSTINGER_API_BASE = 'https://developers.hostinger.com/api';
 
-// Limite de sites conhecido publicamente para o plano Agency Growth.
+// Limite de sites de cada plano, conhecido manualmente (hPanel / contrato).
 // A API da Hostinger não expõe um endpoint de "quota de sites" por plano.
 const KNOWN_SITE_LIMITS: Record<string, number> = {
   agency_growth: 300,
+  cloud_professional: 300,
 };
 
 interface HostingerWebsite {
@@ -207,12 +208,13 @@ serve(async (req) => {
         websites.map((w) => ({ domain: w.domain }))
       );
 
+      const cloudPlanName = order.plan?.name ?? 'cloud_hosting';
       planSummaries.push({
         order_id: order.id,
-        plan_name: order.plan?.name ?? 'cloud_hosting',
+        plan_name: cloudPlanName,
         platform: 'cloudlinux',
         site_count: websites.length,
-        site_limit: null,
+        site_limit: KNOWN_SITE_LIMITS[cloudPlanName] ?? null,
         disk_bytes_used: null,
         disk_bytes_limit: null,
       });
