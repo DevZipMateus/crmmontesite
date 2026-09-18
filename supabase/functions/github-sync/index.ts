@@ -135,6 +135,31 @@ function extractVisibleText(html: string): string {
 // (o texto extraído fica quase vazio, só o pouco que não depende de JS).
 const MIN_RENDERED_TEXT_LENGTH = 50;
 
+// Quando o DNS do domínio ainda aponta pra outra hospedagem (ex: HostGator,
+// mesmo com o site provisionado certinho na Hostinger/VPS), quem responde é a
+// página padrão/estacionada do outro provedor, não o site publicado. Isso não
+// é um bug de sincronismo com o GitHub - é o domínio que precisa ser
+// realinhado pelo dono/cliente, então vira uma flag separada
+// (needs_client_action) em vez de um falso "outdated". Achado auditando
+// mgservicefood.com.br manualmente (2026-09-18): nameservers ainda em
+// ns786/787.hostgator.com.br.
+const HOSTING_PLACEHOLDER_SIGNATURES: { note: string; pattern: RegExp }[] = [
+  { note: 'Domínio aponta para a página temporária da HostGator ("Bem-vindo a HostGator" / "publicar seu site") - DNS desatualizado, ainda não migrado pra nossa hospedagem', pattern: /bem-vindo a hostgator|latam-files\.hostgator\.com\/system\/temporary-page/i },
+  { note: 'Domínio aponta para a página padrão da HostGator/cPanel ("Future home of something quite cool") - DNS provavelmente desatualizado', pattern: /future home of something quite cool/i },
+  { note: 'Domínio aponta para a página padrão de servidor (cPanel/Apache) - DNS provavelmente desatualizado', pattern: /this is the default (index\.html )?page for this server/i },
+  { note: 'Domínio aponta para a página padrão do Apache ("Apache2 Ubuntu Default Page") - DNS provavelmente desatualizado', pattern: /apache2 ubuntu default page/i },
+  { note: 'Domínio aponta para a página padrão do Nginx ("Welcome to nginx!") - DNS provavelmente desatualizado', pattern: /welcome to nginx!/i },
+  { note: 'Domínio sem site publicado - servidor devolveu listagem de diretório ("Index of /")', pattern: /<title>\s*index of \//i },
+  { note: 'Domínio estacionado (parked) em registrador - sem site publicado', pattern: /this domain is parked|domain has expired|buy this domain/i },
+];
+
+function detectHostingPlaceholder(html: string): string | null {
+  for (const { note, pattern } of HOSTING_PLACEHOLDER_SIGNATURES) {
+    if (pattern.test(html)) return note;
+  }
+  return null;
+}
+
 async function sha256Hex(text: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -217,6 +242,7 @@ serve(async (req) => {
     let outdated = 0;
     let noMatch = 0;
     let errors = 0;
+    let needsClientAction = 0;
 
     await mapWithConcurrency(sites ?? [], CONCURRENCY, async (site: HostingWebsiteRow) => {
       const clientName = Array.isArray(site.projects) ? site.projects[0]?.client_name : site.projects?.client_name;
@@ -267,6 +293,20 @@ serve(async (req) => {
           const repoBytes = Uint8Array.from(atob((contentRes.content ?? '').replace(/\s/g, '')), (c) => c.charCodeAt(0));
           const repoHtml = new TextDecoder('utf-8').decode(repoBytes);
 
+          // Busca o HTML ao vivo uma vez só, antes de saber se é source_only,
+          // pra poder checar página-padrão-de-provedor (DNS desatualizado) em
+          // qualquer site, mesmo os que guardam projeto-fonte no repositório.
+          const liveRes = await fetchWithTimeout(`https://${site.domain}/`, { redirect: 'follow' }, FETCH_TIMEOUT_MS);
+          if (!liveRes.ok) throw new Error(`Site respondeu HTTP ${liveRes.status}`);
+          const liveHtml = await liveRes.text();
+
+          const placeholderNote = detectHostingPlaceholder(liveHtml);
+          update.needs_client_action = !!placeholderNote;
+          update.client_action_note = placeholderNote;
+          if (placeholderNote) {
+            needsClientAction += 1;
+          }
+
           // Alguns repositórios guardam o projeto-fonte (Vite/React) em vez do
           // HTML já publicado - o index.html deles aponta pro entry point de
           // dev ("/src/main.tsx") e nunca vai bater com o site ao vivo (que é
@@ -275,9 +315,6 @@ serve(async (req) => {
           if (/\/src\/main\.tsx/.test(repoHtml)) {
             update.github_sync_status = 'source_only';
           } else {
-            const liveRes = await fetchWithTimeout(`https://${site.domain}/`, { redirect: 'follow' }, FETCH_TIMEOUT_MS);
-            if (!liveRes.ok) throw new Error(`Site respondeu HTTP ${liveRes.status}`);
-            const liveHtml = await liveRes.text();
             const liveText = extractVisibleText(liveHtml);
 
             if (liveText.length < MIN_RENDERED_TEXT_LENGTH) {
@@ -318,6 +355,7 @@ serve(async (req) => {
         outdated,
         no_match: noMatch,
         errors,
+        needs_client_action: needsClientAction,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

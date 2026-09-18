@@ -231,6 +231,11 @@ export default function HostingMonitor() {
     () => (websites ?? []).filter((w) => w.is_decommissioned),
     [websites]
   );
+  const needsClientActionSites = useMemo(
+    () => (websites ?? []).filter((w) => w.needs_client_action),
+    [websites]
+  );
+  const foraDoArCount = noHostingSites.length + needsClientActionSites.length;
 
   const totalPages = Math.max(1, Math.ceil(filteredWebsites.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -412,8 +417,8 @@ export default function HostingMonitor() {
             <TabsTrigger value="fora-do-ar" className="gap-1.5">
               <AlertTriangle className="h-3.5 w-3.5 text-red-600" />
               Fora do ar
-              {noHostingSites.length > 0 && (
-                <Badge className="bg-red-600 hover:bg-red-600 h-5 px-1.5">{noHostingSites.length}</Badge>
+              {foraDoArCount > 0 && (
+                <Badge className="bg-red-600 hover:bg-red-600 h-5 px-1.5">{foraDoArCount}</Badge>
               )}
             </TabsTrigger>
           </TabsList>
@@ -719,7 +724,60 @@ export default function HostingMonitor() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="fora-do-ar">
+          <TabsContent value="fora-do-ar" className="space-y-4">
+            <Card className="border-amber-500/30">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-1.5 text-amber-600">
+                  <AlertTriangle className="h-4 w-4" />
+                  Domínio com problema de DNS ({needsClientActionSites.length})
+                </CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  O site está provisionado corretamente na nossa hospedagem, mas o domínio ainda aponta pra outro
+                  lugar (nameservers desatualizados) — quem responde é a página padrão do outro provedor. Só o dono
+                  do domínio pode corrigir isso repontando o DNS.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-1">
+                {needsClientActionSites.length > 0 ? (
+                  needsClientActionSites.map((site) => (
+                    <div
+                      key={site.id}
+                      className="flex items-center justify-between gap-3 py-2 border-b last:border-0"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-sm font-medium truncate">{site.domain}</p>
+                          <Badge variant="outline" className="text-amber-600 border-amber-500/30 bg-amber-500/10 shrink-0">
+                            Ação do cliente
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                          {site.projects ? (
+                            <Link
+                              to={`/projeto/${site.projects.id}`}
+                              className="text-xs text-primary hover:underline"
+                            >
+                              {site.projects.client_name}
+                            </Link>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Sem projeto vinculado</span>
+                          )}
+                        </div>
+                        {site.client_action_note && (
+                          <p className="text-xs text-muted-foreground mt-0.5">{site.client_action_note}</p>
+                        )}
+                      </div>
+                      <WebsiteRowActions site={site} />
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Nenhum domínio com problema de DNS detectado no momento.
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             <Card className="border-red-500/30">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-1.5 text-red-600">

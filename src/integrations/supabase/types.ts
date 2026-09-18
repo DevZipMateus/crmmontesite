@@ -241,6 +241,7 @@ export type Database = {
       }
       hosting_websites: {
         Row: {
+          client_action_note: string | null
           deleted_at: string | null
           domain: string
           external_uid: string | null
@@ -257,11 +258,13 @@ export type Database = {
           is_placeholder: boolean
           last_seen_at: string
           linked_project_id: string | null
+          needs_client_action: boolean
           order_id: number
           panel_state: string
           platform: string
         }
         Insert: {
+          client_action_note?: string | null
           deleted_at?: string | null
           domain: string
           external_uid?: string | null
@@ -278,11 +281,13 @@ export type Database = {
           is_placeholder?: boolean
           last_seen_at?: string
           linked_project_id?: string | null
+          needs_client_action?: boolean
           order_id: number
           panel_state?: string
           platform: string
         }
         Update: {
+          client_action_note?: string | null
           deleted_at?: string | null
           domain?: string
           external_uid?: string | null
@@ -299,6 +304,7 @@ export type Database = {
           is_placeholder?: boolean
           last_seen_at?: string
           linked_project_id?: string | null
+          needs_client_action?: boolean
           order_id?: number
           panel_state?: string
           platform?: string
