@@ -93,13 +93,34 @@ async function listAllRepos(owner: string, token: string): Promise<GithubRepo[]>
   return repos;
 }
 
+// O Cloudflare troca e-mails visíveis por um placeholder ofuscado
+// (<span class="__cf_email__" data-cfemail="HEX">[email protected]</span>)
+// que só vira o e-mail de verdade via JS. Sem decodificar isso, um site sem
+// nenhuma mudança real aparece como "desatualizado" só por causa da proteção
+// anti-spam. O primeiro byte hex é a chave XOR do resto.
+function decodeCloudflareEmails(html: string): string {
+  return html.replace(
+    /<[a-z]+[^>]*class="__cf_email__"[^>]*data-cfemail="([0-9a-f]+)"[^>]*>.*?<\/[a-z]+>/gis,
+    (_match, hex: string) => {
+      try {
+        const bytes = hex.match(/../g)?.map((h: string) => parseInt(h, 16)) ?? [];
+        const key = bytes[0];
+        return bytes.slice(1).map((b) => String.fromCharCode(b ^ key)).join('');
+      } catch {
+        return '';
+      }
+    }
+  );
+}
+
 // Comparar o HTML bruto gera falso "desatualizado" toda hora: comentário
 // adicionado, atributo reordenado, aspas trocadas, CSS/JS minificado
 // diferente - nada disso é conteúdo de verdade. Extrai só o texto visível
-// (sem script/style/comentários/tags) pra comparar o que realmente importa:
-// se o que a pessoa vê na página mudou ou não.
+// (sem título/script/style/comentários/tags) pra comparar o que realmente
+// importa: se o que a pessoa vê na página mudou ou não.
 function extractVisibleText(html: string): string {
-  return html
+  return decodeCloudflareEmails(html)
+    .replace(/<title[\s\S]*?<\/title>/gi, '')
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
@@ -107,6 +128,12 @@ function extractVisibleText(html: string): string {
     .replace(/\s+/g, ' ')
     .trim();
 }
+
+// Site que roda inteiro em JS (React/Vue sem SSR) só entrega <div id="root">
+// vazio pro fetch() - sem executar o JS não tem como saber se bate ou não
+// com o backup. Sem essa checagem, todo site assim vira falso "desatualizado"
+// (o texto extraído fica quase vazio, só o pouco que não depende de JS).
+const MIN_RENDERED_TEXT_LENGTH = 50;
 
 async function sha256Hex(text: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
@@ -251,18 +278,23 @@ serve(async (req) => {
             const liveRes = await fetchWithTimeout(`https://${site.domain}/`, { redirect: 'follow' }, FETCH_TIMEOUT_MS);
             if (!liveRes.ok) throw new Error(`Site respondeu HTTP ${liveRes.status}`);
             const liveHtml = await liveRes.text();
+            const liveText = extractVisibleText(liveHtml);
 
-            const [repoHash, liveHash] = await Promise.all([
-              sha256Hex(extractVisibleText(repoHtml)),
-              sha256Hex(extractVisibleText(liveHtml)),
-            ]);
-
-            if (repoHash === liveHash) {
-              update.github_sync_status = 'synced';
-              synced += 1;
+            if (liveText.length < MIN_RENDERED_TEXT_LENGTH) {
+              update.github_sync_status = 'render_required';
             } else {
-              update.github_sync_status = 'outdated';
-              outdated += 1;
+              const [repoHash, liveHash] = await Promise.all([
+                sha256Hex(extractVisibleText(repoHtml)),
+                sha256Hex(liveText),
+              ]);
+
+              if (repoHash === liveHash) {
+                update.github_sync_status = 'synced';
+                synced += 1;
+              } else {
+                update.github_sync_status = 'outdated';
+                outdated += 1;
+              }
             }
           }
         }

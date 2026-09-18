@@ -95,6 +95,12 @@ function GithubStatusBadge({
             <Code className="h-3 w-3" /> Código-fonte
           </Badge>
         );
+      case "render_required":
+        return (
+          <Badge variant="outline" className="gap-1 text-muted-foreground">
+            <Code className="h-3 w-3" /> Requer JS p/ checar
+          </Badge>
+        );
       case "no_live_site":
         return (
           <Badge variant="outline" className="gap-1 text-muted-foreground">
