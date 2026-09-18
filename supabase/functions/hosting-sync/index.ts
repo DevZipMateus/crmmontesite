@@ -30,6 +30,20 @@ function isPlaceholderDomain(domain: string) {
   return /\.hostingersite\.com$/i.test(domain);
 }
 
+// Domínio de projeto costuma vir como URL completa colada pelo usuário
+// ("https://www.site.com.br/", "https://site.com.br/#home") - sem remover
+// protocolo/caminho/fragmento ele nunca batia com o domínio "limpo" que a
+// Hostinger retorna, deixando o vínculo automático (ver projectByDomain)
+// silenciosamente sem efeito pra boa parte dos projetos.
+function normalizeDomain(raw: string): string {
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, '')
+    .replace(/^www\./, '')
+    .replace(/[/#?].*$/, '');
+}
+
 async function hostingerFetch(path: string, token: string) {
   const res = await fetch(`${HOSTINGER_API_BASE}${path}`, {
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -111,7 +125,7 @@ serve(async (req) => {
     const projectByDomain = new Map(
       (allProjects ?? [])
         .filter((p) => !!p.domain)
-        .map((p) => [p.domain!.toLowerCase().replace(/^www\./, ''), p.id])
+        .map((p) => [normalizeDomain(p.domain!), p.id])
     );
 
     const createdEvents: { domain: string; order_id: number }[] = [];
@@ -145,7 +159,7 @@ serve(async (req) => {
       // default da tabela - e isso já quebrou o sync inteiro (violação de NOT NULL em
       // first_seen_at) sempre que um lote misturava sites novos com sites já conhecidos.
       const rowsToUpsert = websites.map((site) => {
-        const domainLower = site.domain.toLowerCase().replace(/^www\./, '');
+        const domainLower = normalizeDomain(site.domain);
         const existingRow = existingMap.get(site.domain.toLowerCase());
         const isNew = !existingRow;
         if (isNew) {
@@ -157,6 +171,13 @@ serve(async (req) => {
             detail: { platform },
           });
         }
+        // Um projeto pode ganhar o domínio bem depois do site já estar sincronizado
+        // (é o que acontece ao mover pra "pronto" e preencher o domínio agora) - por
+        // isso sites já existentes também tentam casar por domínio, não só os novos.
+        // Nunca sobrescreve um vínculo manual já definido (linked_project_id existente).
+        const linkedProjectId = existingRow
+          ? existingRow.linked_project_id ?? projectByDomain.get(domainLower) ?? null
+          : projectByDomain.get(domainLower) ?? null;
         return {
           order_id: orderId,
           external_uid: site.external_uid ?? null,
@@ -165,7 +186,7 @@ serve(async (req) => {
           is_placeholder: isPlaceholderDomain(site.domain),
           last_seen_at: now,
           deleted_at: null,
-          linked_project_id: existingRow ? existingRow.linked_project_id : projectByDomain.get(domainLower) ?? null,
+          linked_project_id: linkedProjectId,
           first_seen_at: existingRow ? existingRow.first_seen_at : now,
         };
       });
