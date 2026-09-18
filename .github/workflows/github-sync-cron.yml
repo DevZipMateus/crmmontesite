@@ -2,7 +2,11 @@ name: Sincronizar status com GitHub
 
 on:
   schedule:
+    # 2x/dia: cada rodada processa um lote de 300 sites (BATCH_SIZE em
+    # index.ts) pra não estourar o limite de recursos do worker; com 2 rodadas
+    # a base inteira (~600 sites ativos) fica em dia dentro de 1 dia.
     - cron: "0 9 * * *"
+    - cron: "0 21 * * *"
   workflow_dispatch:
 
 jobs:
@@ -17,7 +21,7 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}" \
             -H "Content-Type: application/json" \
             -d '{}' \
-            --max-time 240)
+            --max-time 350)
           body=$(echo "$response" | head -n -1)
           status=$(echo "$response" | tail -n 1)
           echo "$body"

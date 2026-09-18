@@ -14,13 +14,20 @@ const GITHUB_API_BASE = 'https://api.github.com';
 const GITHUB_OWNERS = ['Montesite'];
 
 // Quantos sites reclassificar por execução, dos que estão há mais tempo sem
-// checar (github_checked_at nulls first). ~120 sites levaram ~17s no teste
-// (concorrência 12), então esse tamanho cobre a base atual (~630 sites) numa
-// única rodada diária com folga; se crescer além disso, o cron do dia
-// seguinte continua de onde parou (ordenado por github_checked_at).
-const BATCH_SIZE = 1000;
-const CONCURRENCY = 20;
+// checar (github_checked_at nulls first) - o cron seguinte continua de onde
+// parou. Era 1000 (cobria a base toda numa rodada só) enquanto só checávamos
+// o domínio ao vivo dos ~210 sites com repositório casado. Desde que passamos
+// a checar TODO site ativo (~600, incluindo os ~420 sem repositório), o
+// volume de trabalho por invocação triplicou e a função passou a estourar
+// WORKER_RESOURCE_LIMIT (limite de CPU/recursos do worker) perto do fim de
+// uma rodada, mesmo já reduzindo concorrência e limitando o tamanho da
+// resposta lida (MAX_LIVE_BODY_BYTES). Baixado pra 300 pra cada invocação
+// terminar com folga - o cron roda 2x/dia (ver github-sync-cron.yml) pra
+// cobrir a base inteira em ~1 dia.
+const BATCH_SIZE = 300;
+const CONCURRENCY = 8;
 const FETCH_TIMEOUT_MS = 8000;
+const MAX_LIVE_BODY_BYTES = 1_500_000;
 
 interface GithubRepo {
   name: string;
@@ -160,6 +167,75 @@ function detectHostingPlaceholder(html: string): string | null {
   return null;
 }
 
+interface LiveCheckResult {
+  html: string | null;
+  needsClientAction: boolean;
+  note: string | null;
+}
+
+// Lê no máximo MAX_LIVE_BODY_BYTES do corpo da resposta - o suficiente pra
+// qualquer checagem de texto/placeholder que fazemos, sem carregar na memória
+// uma resposta anormalmente grande (vídeo/arquivo servido sem content-type
+// correto, página com payload gigante etc.) que um domínio de terceiro pode
+// devolver sem aviso nenhum.
+async function readTextCapped(res: Response, maxBytes: number): Promise<string> {
+  const reader = res.body?.getReader();
+  if (!reader) return await res.text();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) {
+        chunks.push(value);
+        total += value.byteLength;
+        if (total >= maxBytes) {
+          await reader.cancel();
+          break;
+        }
+      }
+    }
+  } finally {
+    try { reader.releaseLock(); } catch { /* ignore */ }
+  }
+  const buf = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    buf.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder('utf-8').decode(buf);
+}
+
+// Checa se o domínio está de pé, independente de ter repositório do GitHub
+// associado ou não - antes, sites sem repositório encontrado (~2/3 da base)
+// nunca tinham o próprio domínio checado, então um domínio derrubado ou com
+// DNS quebrado nesse grupo passava batido. Agora todo site ativo (exceto os
+// já marcados como sem hospedagem) tem o domínio realmente aberto e checado.
+async function checkLiveSite(domain: string): Promise<LiveCheckResult> {
+  try {
+    const res = await fetchWithTimeout(`https://${domain}/`, { redirect: 'follow' }, FETCH_TIMEOUT_MS);
+    if (!res.ok) {
+      return {
+        html: null,
+        needsClientAction: true,
+        note: `Site respondeu HTTP ${res.status} ao vivo - hospedagem ou domínio com problema`,
+      };
+    }
+    const html = await readTextCapped(res, MAX_LIVE_BODY_BYTES);
+    const placeholderNote = detectHostingPlaceholder(html);
+    return { html, needsClientAction: !!placeholderNote, note: placeholderNote };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    return {
+      html: null,
+      needsClientAction: true,
+      note: `Site não respondeu (${message}) - domínio pode estar com DNS quebrado, certificado inválido ou fora do ar`,
+    };
+  }
+}
+
 async function sha256Hex(text: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -257,10 +333,14 @@ serve(async (req) => {
 
       if (!repo) {
         noMatch += 1;
-        await supabase
-          .from('hosting_websites')
-          .update({ github_sync_status: 'no_match', github_checked_at: now })
-          .eq('id', site.id);
+        const update: Record<string, unknown> = { github_sync_status: 'no_match', github_checked_at: now };
+        if (!site.is_decommissioned) {
+          const live = await checkLiveSite(site.domain);
+          update.needs_client_action = live.needsClientAction;
+          update.client_action_note = live.note;
+          if (live.needsClientAction) needsClientAction += 1;
+        }
+        await supabase.from('hosting_websites').update(update).eq('id', site.id);
         return;
       }
 
@@ -293,29 +373,28 @@ serve(async (req) => {
           const repoBytes = Uint8Array.from(atob((contentRes.content ?? '').replace(/\s/g, '')), (c) => c.charCodeAt(0));
           const repoHtml = new TextDecoder('utf-8').decode(repoBytes);
 
-          // Busca o HTML ao vivo uma vez só, antes de saber se é source_only,
-          // pra poder checar página-padrão-de-provedor (DNS desatualizado) em
-          // qualquer site, mesmo os que guardam projeto-fonte no repositório.
-          const liveRes = await fetchWithTimeout(`https://${site.domain}/`, { redirect: 'follow' }, FETCH_TIMEOUT_MS);
-          if (!liveRes.ok) throw new Error(`Site respondeu HTTP ${liveRes.status}`);
-          const liveHtml = await liveRes.text();
-
-          const placeholderNote = detectHostingPlaceholder(liveHtml);
-          update.needs_client_action = !!placeholderNote;
-          update.client_action_note = placeholderNote;
-          if (placeholderNote) {
+          // Checa o domínio ao vivo separado do restante (que é tudo API do
+          // GitHub) - assim uma falha de rede no domínio do cliente não vira
+          // um "fetch_error" genérico misturado com falha da API do GitHub,
+          // e sim um needs_client_action com o motivo de verdade.
+          const live = await checkLiveSite(site.domain);
+          update.needs_client_action = live.needsClientAction;
+          update.client_action_note = live.note;
+          if (live.needsClientAction) {
             needsClientAction += 1;
           }
 
-          // Alguns repositórios guardam o projeto-fonte (Vite/React) em vez do
-          // HTML já publicado - o index.html deles aponta pro entry point de
-          // dev ("/src/main.tsx") e nunca vai bater com o site ao vivo (que é
-          // a versão compilada). Comparar esses dois é sempre falso "outdated",
-          // então nem tenta - só registra que é fonte, sem veredito de frescor.
-          if (/\/src\/main\.tsx/.test(repoHtml)) {
+          if (live.html === null) {
+            update.github_sync_status = 'site_unreachable';
+          } else if (/\/src\/main\.tsx/.test(repoHtml)) {
+            // Alguns repositórios guardam o projeto-fonte (Vite/React) em vez
+            // do HTML já publicado - o index.html deles aponta pro entry
+            // point de dev ("/src/main.tsx") e nunca vai bater com o site ao
+            // vivo (que é a versão compilada). Comparar os dois é sempre
+            // falso "outdated", então nem tenta - só registra que é fonte.
             update.github_sync_status = 'source_only';
           } else {
-            const liveText = extractVisibleText(liveHtml);
+            const liveText = extractVisibleText(live.html);
 
             if (liveText.length < MIN_RENDERED_TEXT_LENGTH) {
               update.github_sync_status = 'render_required';
@@ -338,7 +417,7 @@ serve(async (req) => {
       } catch (e) {
         errors += 1;
         update.github_sync_status = 'fetch_error';
-        console.error(`Falha ao comparar ${site.domain} com ${repo.owner}/${repo.name}:`, e);
+        console.error(`Falha ao comparar ${site.domain} com ${repo.owner}/${repo.name} (API do GitHub):`, e);
       }
 
       await supabase.from('hosting_websites').update(update).eq('id', site.id);

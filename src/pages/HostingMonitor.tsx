@@ -107,6 +107,12 @@ function GithubStatusBadge({
             <Github className="h-3 w-3" /> Só backup
           </Badge>
         );
+      case "site_unreachable":
+        return (
+          <Badge variant="outline" className="gap-1 text-red-600 border-red-500/30 bg-red-500/10">
+            <AlertTriangle className="h-3 w-3" /> Site fora do ar
+          </Badge>
+        );
       case "fetch_error":
         return (
           <Badge variant="outline" className="gap-1 text-red-600 border-red-500/30 bg-red-500/10">
