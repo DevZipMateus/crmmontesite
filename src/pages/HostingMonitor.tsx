@@ -36,6 +36,9 @@ import {
   Server,
   AlertTriangle,
   Github,
+  CheckCircle2,
+  XCircle,
+  Code,
 } from "lucide-react";
 import { WebsiteRowActions } from "@/components/hosting/WebsiteRowActions";
 import { getFunctionErrorMessage } from "@/lib/functionError";
@@ -60,6 +63,67 @@ function formatBytes(bytes: number | null) {
   if (bytes === null || bytes === undefined) return "—";
   const gb = bytes / 1024 ** 3;
   return `${gb.toFixed(1)} GB`;
+}
+
+function GithubStatusBadge({
+  site,
+}: {
+  site: { github_sync_status: string | null; github_repo_owner: string | null; github_repo_name: string | null };
+}) {
+  const repoUrl =
+    site.github_repo_owner && site.github_repo_name
+      ? `https://github.com/${site.github_repo_owner}/${site.github_repo_name}`
+      : null;
+
+  const badge = (() => {
+    switch (site.github_sync_status) {
+      case "synced":
+        return (
+          <Badge variant="outline" className="gap-1 text-green-600 border-green-500/30 bg-green-500/10">
+            <CheckCircle2 className="h-3 w-3" /> Atualizado
+          </Badge>
+        );
+      case "outdated":
+        return (
+          <Badge variant="outline" className="gap-1 text-orange-600 border-orange-500/30 bg-orange-500/10">
+            <XCircle className="h-3 w-3" /> Desatualizado
+          </Badge>
+        );
+      case "source_only":
+        return (
+          <Badge variant="outline" className="gap-1 text-blue-600 border-blue-500/30 bg-blue-500/10">
+            <Code className="h-3 w-3" /> Código-fonte
+          </Badge>
+        );
+      case "no_live_site":
+        return (
+          <Badge variant="outline" className="gap-1 text-muted-foreground">
+            <Github className="h-3 w-3" /> Só backup
+          </Badge>
+        );
+      case "fetch_error":
+        return (
+          <Badge variant="outline" className="gap-1 text-red-600 border-red-500/30 bg-red-500/10">
+            <XCircle className="h-3 w-3" /> Erro ao checar
+          </Badge>
+        );
+      case "no_match":
+        return (
+          <Badge variant="outline" className="gap-1 text-muted-foreground">
+            Sem repositório
+          </Badge>
+        );
+      default:
+        return <span className="text-muted-foreground text-xs">—</span>;
+    }
+  })();
+
+  if (!repoUrl) return badge;
+  return (
+    <a href={repoUrl} target="_blank" rel="noreferrer" className="hover:opacity-80">
+      {badge}
+    </a>
+  );
 }
 
 function timeAgo(date: string) {
@@ -483,6 +547,7 @@ export default function HostingMonitor() {
                         <TableHead>Plataforma</TableHead>
                         <TableHead>Projeto vinculado</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>GitHub</TableHead>
                         <TableHead>Visto por último</TableHead>
                         <TableHead className="w-10"></TableHead>
                       </TableRow>
@@ -529,6 +594,9 @@ export default function HostingMonitor() {
                             ) : (
                               <Badge className="bg-green-500">Ativo</Badge>
                             )}
+                          </TableCell>
+                          <TableCell>
+                            <GithubStatusBadge site={site} />
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground">
                             {timeAgo(site.last_seen_at)}

@@ -246,6 +246,12 @@ export type Database = {
           external_uid: string | null
           first_seen_at: string
           github_backup_url: string | null
+          github_checked_at: string | null
+          github_commit_at: string | null
+          github_commit_sha: string | null
+          github_repo_name: string | null
+          github_repo_owner: string | null
+          github_sync_status: string | null
           id: string
           is_decommissioned: boolean
           is_placeholder: boolean
@@ -261,6 +267,12 @@ export type Database = {
           external_uid?: string | null
           first_seen_at?: string
           github_backup_url?: string | null
+          github_checked_at?: string | null
+          github_commit_at?: string | null
+          github_commit_sha?: string | null
+          github_repo_name?: string | null
+          github_repo_owner?: string | null
+          github_sync_status?: string | null
           id?: string
           is_decommissioned?: boolean
           is_placeholder?: boolean
@@ -276,6 +288,12 @@ export type Database = {
           external_uid?: string | null
           first_seen_at?: string
           github_backup_url?: string | null
+          github_checked_at?: string | null
+          github_commit_at?: string | null
+          github_commit_sha?: string | null
+          github_repo_name?: string | null
+          github_repo_owner?: string | null
+          github_sync_status?: string | null
           id?: string
           is_decommissioned?: boolean
           is_placeholder?: boolean

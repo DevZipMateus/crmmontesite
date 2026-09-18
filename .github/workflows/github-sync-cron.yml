@@ -1,0 +1,32 @@
+name: Sincronizar status com GitHub
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔄 Chamar github-sync
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            "${{ secrets.VITE_SUPABASE_URL }}/functions/v1/github-sync" \
+            -H "apikey: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{}' \
+            --max-time 240)
+          body=$(echo "$response" | head -n -1)
+          status=$(echo "$response" | tail -n 1)
+          echo "$body"
+          echo "## Sincronização com GitHub" >> "$GITHUB_STEP_SUMMARY"
+          echo "**HTTP status:** $status" >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          echo "$body" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          if [ "$status" -ge 300 ]; then
+            echo "github-sync falhou (HTTP $status)"
+            exit 1
+          fi
