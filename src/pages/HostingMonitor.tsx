@@ -335,63 +335,17 @@ export default function HostingMonitor() {
           )}
         </div>
 
-        {noHostingSites.length > 0 && (
-          <Card className="shadow-sm border-red-500/30 bg-red-500/[0.03]">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-1.5 text-red-600">
-                <AlertTriangle className="h-4 w-4" />
-                Sites sem hospedagem ({noHostingSites.length})
-              </CardTitle>
-              <p className="text-xs text-muted-foreground">
-                Saíram da Hostinger e não foram migrados pra VPS — domínio fora do ar ou movido pra outro lugar,
-                só existe backup local. Vincule a um projeto pra manter o histórico.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-1">
-              {noHostingSites.map((site) => (
-                <div
-                  key={site.id}
-                  className="flex items-center justify-between gap-3 py-2 border-b last:border-0"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{site.domain}</p>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {site.projects ? (
-                        <Link
-                          to={`/projeto/${site.projects.id}`}
-                          className="text-xs text-primary hover:underline"
-                        >
-                          {site.projects.client_name}
-                        </Link>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">Sem projeto vinculado</span>
-                      )}
-                      {(site.projects?.project_link || site.github_backup_url) && (
-                        <>
-                          <span className="text-xs text-muted-foreground">·</span>
-                          <a
-                            href={site.projects?.project_link || site.github_backup_url || undefined}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-xs text-muted-foreground hover:text-primary hover:underline flex items-center gap-1"
-                          >
-                            <Github className="h-3 w-3" /> Backup
-                          </a>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <WebsiteRowActions site={site} />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
         <Tabs defaultValue="sites">
           <TabsList>
             <TabsTrigger value="sites">Sites</TabsTrigger>
             <TabsTrigger value="historico">Histórico</TabsTrigger>
+            <TabsTrigger value="fora-do-ar" className="gap-1.5">
+              <AlertTriangle className="h-3.5 w-3.5 text-red-600" />
+              Fora do ar
+              {noHostingSites.length > 0 && (
+                <Badge className="bg-red-600 hover:bg-red-600 h-5 px-1.5">{noHostingSites.length}</Badge>
+              )}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="sites">
@@ -685,6 +639,65 @@ export default function HostingMonitor() {
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
                     Nenhum evento registrado ainda.
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="fora-do-ar">
+            <Card className="border-red-500/30">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-1.5 text-red-600">
+                  <AlertTriangle className="h-4 w-4" />
+                  Sites sem hospedagem ({noHostingSites.length})
+                </CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  Saíram da Hostinger e da VPS por cancelamento do serviço ou outro motivo — domínio fora do ar,
+                  só existe backup local. Vincule a um projeto pra manter o histórico.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-1">
+                {noHostingSites.length > 0 ? (
+                  noHostingSites.map((site) => (
+                    <div
+                      key={site.id}
+                      className="flex items-center justify-between gap-3 py-2 border-b last:border-0"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{site.domain}</p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {site.projects ? (
+                            <Link
+                              to={`/projeto/${site.projects.id}`}
+                              className="text-xs text-primary hover:underline"
+                            >
+                              {site.projects.client_name}
+                            </Link>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Sem projeto vinculado</span>
+                          )}
+                          {(site.projects?.project_link || site.github_backup_url) && (
+                            <>
+                              <span className="text-xs text-muted-foreground">·</span>
+                              <a
+                                href={site.projects?.project_link || site.github_backup_url || undefined}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-xs text-muted-foreground hover:text-primary hover:underline flex items-center gap-1"
+                              >
+                                <Github className="h-3 w-3" /> Backup
+                              </a>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <WebsiteRowActions site={site} />
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Nenhum site sem hospedagem no momento.
                   </div>
                 )}
               </CardContent>
