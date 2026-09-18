@@ -130,15 +130,22 @@ serve(async (req) => {
 
       const { data: existing, error: existingError } = await supabase
         .from('hosting_websites')
-        .select('domain, deleted_at')
+        .select('domain, deleted_at, first_seen_at, linked_project_id')
         .eq('order_id', orderId);
       if (existingError) throw existingError;
 
       const existingMap = new Map((existing ?? []).map((r) => [r.domain.toLowerCase(), r]));
 
+      // Cada linha do upsert precisa ter exatamente as MESMAS colunas, com um valor
+      // explícito em todas elas. O PostgREST monta um único INSERT com a união das
+      // chaves de todos os objetos do lote; se uma linha "pula" uma coluna que outra
+      // linha do mesmo lote define, ele manda NULL nessa coluna em vez de aplicar o
+      // default da tabela - e isso já quebrou o sync inteiro (violação de NOT NULL em
+      // first_seen_at) sempre que um lote misturava sites novos com sites já conhecidos.
       const rowsToUpsert = websites.map((site) => {
         const domainLower = site.domain.toLowerCase().replace(/^www\./, '');
-        const isNew = !existingMap.has(site.domain.toLowerCase());
+        const existingRow = existingMap.get(site.domain.toLowerCase());
+        const isNew = !existingRow;
         if (isNew) {
           createdEvents.push({ domain: site.domain, order_id: orderId });
           eventsToInsert.push({
@@ -156,9 +163,8 @@ serve(async (req) => {
           is_placeholder: isPlaceholderDomain(site.domain),
           last_seen_at: now,
           deleted_at: null,
-          ...(isNew
-            ? { linked_project_id: projectByDomain.get(domainLower) ?? null, first_seen_at: now }
-            : {}),
+          linked_project_id: existingRow ? existingRow.linked_project_id : projectByDomain.get(domainLower) ?? null,
+          first_seen_at: existingRow ? existingRow.first_seen_at : now,
         };
       });
 
