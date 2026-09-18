@@ -93,8 +93,19 @@ async function listAllRepos(owner: string, token: string): Promise<GithubRepo[]>
   return repos;
 }
 
-function normalizeHtml(html: string): string {
-  return html.replace(/\s+/g, ' ').trim();
+// Comparar o HTML bruto gera falso "desatualizado" toda hora: comentário
+// adicionado, atributo reordenado, aspas trocadas, CSS/JS minificado
+// diferente - nada disso é conteúdo de verdade. Extrai só o texto visível
+// (sem script/style/comentários/tags) pra comparar o que realmente importa:
+// se o que a pessoa vê na página mudou ou não.
+function extractVisibleText(html: string): string {
+  return html
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 async function sha256Hex(text: string): Promise<string> {
@@ -242,8 +253,8 @@ serve(async (req) => {
             const liveHtml = await liveRes.text();
 
             const [repoHash, liveHash] = await Promise.all([
-              sha256Hex(normalizeHtml(repoHtml)),
-              sha256Hex(normalizeHtml(liveHtml)),
+              sha256Hex(extractVisibleText(repoHtml)),
+              sha256Hex(extractVisibleText(liveHtml)),
             ]);
 
             if (repoHash === liveHash) {
