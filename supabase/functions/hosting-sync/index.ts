@@ -18,6 +18,7 @@ const KNOWN_SITE_LIMITS: Record<string, number> = {
 interface HostingerWebsite {
   domain: string;
   order_id: number;
+  vhost_type?: string;
 }
 
 interface AgencyWebsite {
@@ -208,12 +209,17 @@ serve(async (req) => {
         websites.map((w) => ({ domain: w.domain }))
       );
 
+      // Subdomínio (ex: previa2.facaseusite.com.br) não conta como "site" separado
+      // no contador da própria Hostinger nem contra o limite do plano - só domínios
+      // principais e addon contam. Sem esse filtro o site_count ficava inflado.
+      const billableWebsites = websites.filter((w) => w.vhost_type !== 'subdomain');
+
       const cloudPlanName = order.plan?.name ?? 'cloud_hosting';
       planSummaries.push({
         order_id: order.id,
         plan_name: cloudPlanName,
         platform: 'cloudlinux',
-        site_count: websites.length,
+        site_count: billableWebsites.length,
         site_limit: KNOWN_SITE_LIMITS[cloudPlanName] ?? null,
         disk_bytes_used: null,
         disk_bytes_limit: null,
