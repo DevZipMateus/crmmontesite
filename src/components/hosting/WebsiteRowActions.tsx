@@ -17,14 +17,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getFunctionErrorMessage } from "@/lib/functionError";
-import { MoreVertical, Link2, PowerOff, Power, Trash2, Globe2, Eraser } from "lucide-react";
+import { MoreVertical, Link2, PowerOff, Power, Trash2, Globe2, Eraser, Github } from "lucide-react";
 import { DomainRenewalDialog } from "./DomainRenewalDialog";
 
 interface WebsiteRow {
@@ -34,6 +35,9 @@ interface WebsiteRow {
   panel_state: string;
   deleted_at: string | null;
   linked_project_id: string | null;
+  is_decommissioned?: boolean;
+  github_backup_url?: string | null;
+  projects?: { id: string; client_name: string; project_link?: string | null } | null;
 }
 
 export function WebsiteRowActions({ site }: { site: WebsiteRow }) {
@@ -43,11 +47,25 @@ export function WebsiteRowActions({ site }: { site: WebsiteRow }) {
   const [toggleOpen, setToggleOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [renewalOpen, setRenewalOpen] = useState(false);
+  const [githubOpen, setGithubOpen] = useState(false);
+  const [githubUrl, setGithubUrl] = useState("");
   const [search, setSearch] = useState("");
+
+  // Sem projeto vinculado, o link fica guardado no próprio site (staging).
+  // Com projeto vinculado, o site "conversa" com o campo Link do Projeto
+  // (Lovable/GitHub) do projeto — a mesma informação editável nos dois lugares.
+  const effectiveBackupUrl = site.linked_project_id
+    ? site.projects?.project_link ?? ""
+    : site.github_backup_url ?? "";
 
   const isOffline = site.panel_state === "offline";
   const isDeleted = !!site.deleted_at;
-  const canToggle = site.platform === "h5g";
+  const isDecommissioned = !!site.is_decommissioned;
+  // Sites sem hospedagem (nem Hostinger, nem VPS) já saíram da Hostinger pra
+  // sempre, mas ainda precisam poder ser vinculados a um projeto pra manter o
+  // histórico — só as ações que dependem da API da Hostinger ficam bloqueadas.
+  const canCallHostinger = !isDeleted;
+  const canToggle = canCallHostinger && site.platform === "h5g";
 
   const invalidateAll = () => {
     queryClient.invalidateQueries({ queryKey: ["hosting_websites"] });
@@ -75,6 +93,23 @@ export function WebsiteRowActions({ site }: { site: WebsiteRow }) {
         .eq("id", site.id);
       if (error) throw error;
 
+      // Se já tinha um link de backup guardado no site (antes de vincular) e o
+      // projeto ainda não tem "Link do Projeto" preenchido, aproveita e leva
+      // essa informação pro projeto agora.
+      if (projectId && site.github_backup_url) {
+        const { data: project } = await supabase
+          .from("projects")
+          .select("project_link")
+          .eq("id", projectId)
+          .maybeSingle();
+        if (project && !project.project_link) {
+          await supabase
+            .from("projects")
+            .update({ project_link: site.github_backup_url })
+            .eq("id", projectId);
+        }
+      }
+
       await supabase.from("hosting_events").insert({
         event_type: projectId ? "project_linked" : "project_unlinked",
         domain: site.domain,
@@ -82,15 +117,49 @@ export function WebsiteRowActions({ site }: { site: WebsiteRow }) {
         detail: {},
       });
     },
-    onSuccess: () => {
+    onSuccess: (_data, projectId) => {
       toast({ title: "Vínculo atualizado" });
       setLinkOpen(false);
       invalidateAll();
+      if (projectId) queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     },
     onError: (error) => {
       toast({
         title: "Erro",
         description: error instanceof Error ? error.message : "Não foi possível vincular o projeto.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const githubMutation = useMutation({
+    mutationFn: async (url: string) => {
+      if (site.linked_project_id) {
+        const { error } = await supabase
+          .from("projects")
+          .update({ project_link: url || null })
+          .eq("id", site.linked_project_id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("hosting_websites")
+          .update({ github_backup_url: url || null })
+          .eq("id", site.id);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast({ title: "Link do backup salvo" });
+      setGithubOpen(false);
+      invalidateAll();
+      if (site.linked_project_id) {
+        queryClient.invalidateQueries({ queryKey: ["project", site.linked_project_id] });
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: error instanceof Error ? error.message : "Não foi possível salvar o link.",
         variant: "destructive",
       });
     },
@@ -132,7 +201,7 @@ export function WebsiteRowActions({ site }: { site: WebsiteRow }) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" disabled={isDeleted}>
+          <Button variant="ghost" size="sm" disabled={isDeleted && !isDecommissioned}>
             <MoreVertical className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -143,41 +212,56 @@ export function WebsiteRowActions({ site }: { site: WebsiteRow }) {
           <DropdownMenuItem onSelect={() => setRenewalOpen(true)}>
             <Globe2 className="h-4 w-4 mr-2" /> Gerenciar renovação do domínio
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {canToggle ? (
-            <DropdownMenuItem onSelect={() => setToggleOpen(true)}>
-              {isOffline ? (
-                <>
-                  <Power className="h-4 w-4 mr-2" /> Reativar site
-                </>
-              ) : (
-                <>
-                  <PowerOff className="h-4 w-4 mr-2" /> Tirar do ar
-                </>
-              )}
+          {isDecommissioned && (
+            <DropdownMenuItem
+              onSelect={() => {
+                setGithubUrl(effectiveBackupUrl);
+                setGithubOpen(true);
+              }}
+            >
+              <Github className="h-4 w-4 mr-2" />
+              {effectiveBackupUrl ? "Editar link do backup" : "Adicionar link do backup"}
             </DropdownMenuItem>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div>
-                  <DropdownMenuItem disabled>
-                    <PowerOff className="h-4 w-4 mr-2" /> Tirar do ar
-                  </DropdownMenuItem>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>Disponível apenas para sites do plano Agency Growth</TooltipContent>
-            </Tooltip>
           )}
-          <DropdownMenuItem
-            disabled={actionMutation.isPending}
-            onSelect={() => actionMutation.mutate("clear_cache")}
-          >
-            <Eraser className="h-4 w-4 mr-2" /> Limpar cache
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-red-600 focus:text-red-600" onSelect={() => setDeleteOpen(true)}>
-            <Trash2 className="h-4 w-4 mr-2" /> Excluir site
-          </DropdownMenuItem>
+          {canCallHostinger && (
+            <>
+              <DropdownMenuSeparator />
+              {canToggle ? (
+                <DropdownMenuItem onSelect={() => setToggleOpen(true)}>
+                  {isOffline ? (
+                    <>
+                      <Power className="h-4 w-4 mr-2" /> Reativar site
+                    </>
+                  ) : (
+                    <>
+                      <PowerOff className="h-4 w-4 mr-2" /> Tirar do ar
+                    </>
+                  )}
+                </DropdownMenuItem>
+              ) : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <DropdownMenuItem disabled>
+                        <PowerOff className="h-4 w-4 mr-2" /> Tirar do ar
+                      </DropdownMenuItem>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>Disponível apenas para sites do plano Agency Growth</TooltipContent>
+                </Tooltip>
+              )}
+              <DropdownMenuItem
+                disabled={actionMutation.isPending}
+                onSelect={() => actionMutation.mutate("clear_cache")}
+              >
+                <Eraser className="h-4 w-4 mr-2" /> Limpar cache
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-red-600 focus:text-red-600" onSelect={() => setDeleteOpen(true)}>
+                <Trash2 className="h-4 w-4 mr-2" /> Excluir site
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -208,6 +292,34 @@ export function WebsiteRowActions({ site }: { site: WebsiteRow }) {
               </CommandGroup>
             </CommandList>
           </Command>
+        </DialogContent>
+      </Dialog>
+
+      {/* Link do backup no GitHub */}
+      <Dialog open={githubOpen} onOpenChange={setGithubOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Link do backup de {site.domain}</DialogTitle>
+          </DialogHeader>
+          {site.linked_project_id && (
+            <p className="text-xs text-muted-foreground -mt-2">
+              Esse site está vinculado a {site.projects?.client_name ?? "um projeto"} — salvar aqui atualiza o
+              campo "Link do Projeto (Lovable/GitHub)" desse projeto, e vice-versa.
+            </p>
+          )}
+          <Input
+            placeholder="https://github.com/organizacao/repositorio"
+            value={githubUrl}
+            onChange={(e) => setGithubUrl(e.target.value)}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setGithubOpen(false)} disabled={githubMutation.isPending}>
+              Cancelar
+            </Button>
+            <Button onClick={() => githubMutation.mutate(githubUrl.trim())} disabled={githubMutation.isPending}>
+              {githubMutation.isPending ? "Salvando..." : "Salvar"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

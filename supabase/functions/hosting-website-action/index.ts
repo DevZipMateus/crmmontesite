@@ -121,7 +121,9 @@ serve(async (req) => {
           method: 'DELETE',
         });
       }
-      await supabase.from('hosting_websites').update({ deleted_at: now }).eq('id', website_id);
+      // Exclusão manual pelo painel nunca é uma migração pra VPS — o site não
+      // tem mais hospedagem em lugar nenhum a partir daqui.
+      await supabase.from('hosting_websites').update({ deleted_at: now, is_decommissioned: true }).eq('id', website_id);
       await supabase.from('hosting_events').insert({
         event_type: 'site_deleted_manual',
         domain: site.domain,

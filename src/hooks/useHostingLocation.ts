@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type HostingLocation = "loading" | "vps" | "hostinger" | "unknown";
+export type HostingLocation = "loading" | "vps" | "hostinger" | "no_hosting" | "unknown";
 
 function normalizeDomain(domain: string): string {
   return domain
@@ -29,7 +29,7 @@ export function useHostingLocation(projectId?: string | null, domain?: string | 
       if (projectId) {
         const { data: byProject, error: byProjectError } = await supabase
           .from("hosting_websites")
-          .select("deleted_at, domain")
+          .select("deleted_at, domain, is_decommissioned")
           .eq("linked_project_id", projectId)
           .maybeSingle();
         if (byProjectError) throw byProjectError;
@@ -39,7 +39,7 @@ export function useHostingLocation(projectId?: string | null, domain?: string | 
       if (cleanDomain) {
         const { data: byDomain, error: byDomainError } = await supabase
           .from("hosting_websites")
-          .select("deleted_at, domain")
+          .select("deleted_at, domain, is_decommissioned")
           .ilike("domain", cleanDomain)
           .maybeSingle();
         if (byDomainError) throw byDomainError;
@@ -56,5 +56,10 @@ export function useHostingLocation(projectId?: string | null, domain?: string | 
   if (isLoading) return { status: "loading" as HostingLocation };
   if (!data) return { status: "unknown" as HostingLocation };
 
-  return { status: (data.deleted_at ? "vps" : "hostinger") as HostingLocation };
+  const status: HostingLocation = data.is_decommissioned
+    ? "no_hosting"
+    : data.deleted_at
+    ? "vps"
+    : "hostinger";
+  return { status };
 }

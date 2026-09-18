@@ -34,6 +34,8 @@ import {
   Eraser,
   ShieldOff,
   Server,
+  AlertTriangle,
+  Github,
 } from "lucide-react";
 import { WebsiteRowActions } from "@/components/hosting/WebsiteRowActions";
 import { getFunctionErrorMessage } from "@/lib/functionError";
@@ -99,7 +101,7 @@ export default function HostingMonitor() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("hosting_websites")
-        .select("*, projects:linked_project_id (id, client_name)")
+        .select("*, projects:linked_project_id (id, client_name, project_link)")
         .order("last_seen_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -126,11 +128,13 @@ export default function HostingMonitor() {
     return websites.filter((w) => {
       if (term && !w.domain.toLowerCase().includes(term)) return false;
 
-      const effectivePlatform = w.deleted_at ? "vps" : w.platform;
+      const effectivePlatform = w.is_decommissioned ? "no_hosting" : w.deleted_at ? "vps" : w.platform;
       if (platformFilter !== "all" && effectivePlatform !== platformFilter) return false;
 
       if (statusFilter !== "all") {
-        const status = w.deleted_at
+        const status = w.is_decommissioned
+          ? "no_hosting"
+          : w.deleted_at
           ? "vps"
           : w.panel_state === "offline"
           ? "offline"
@@ -152,7 +156,11 @@ export default function HostingMonitor() {
     });
   }, [websites, search, platformFilter, statusFilter, dateFrom, dateTo]);
 
-  const vpsMigratedCount = websites?.filter((w) => w.deleted_at).length ?? 0;
+  const vpsMigratedCount = websites?.filter((w) => w.deleted_at && !w.is_decommissioned).length ?? 0;
+  const noHostingSites = useMemo(
+    () => (websites ?? []).filter((w) => w.is_decommissioned),
+    [websites]
+  );
 
   const totalPages = Math.max(1, Math.ceil(filteredWebsites.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -250,6 +258,32 @@ export default function HostingMonitor() {
             </CardContent>
           </Card>
 
+          <Card className="shadow-sm border-red-500/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <AlertTriangle className="h-4 w-4 text-red-600" />
+                  Sem hospedagem
+                </span>
+                <Badge variant="outline" className="gap-1 text-red-600 border-red-500/30 bg-red-500/10">
+                  <Github className="h-3 w-3" />
+                  Backup no GitHub
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-1 text-muted-foreground">
+                  <Globe className="h-3.5 w-3.5" /> Sites sem hospedagem
+                </span>
+                <span className="font-medium">{noHostingSites.length}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Saíram da Hostinger e não foram pra VPS — domínio fora do ar, só existe backup do código no GitHub.
+              </p>
+            </CardContent>
+          </Card>
+
           {loadingPlans && <p className="text-sm text-muted-foreground">Carregando planos...</p>}
           {plans?.map((plan) => (
             <Card key={plan.order_id} className="shadow-sm">
@@ -301,6 +335,59 @@ export default function HostingMonitor() {
           )}
         </div>
 
+        {noHostingSites.length > 0 && (
+          <Card className="shadow-sm border-red-500/30 bg-red-500/[0.03]">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-1.5 text-red-600">
+                <AlertTriangle className="h-4 w-4" />
+                Sites sem hospedagem ({noHostingSites.length})
+              </CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Saíram da Hostinger e não foram migrados pra VPS — domínio fora do ar ou movido pra outro lugar,
+                só existe backup local. Vincule a um projeto pra manter o histórico.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-1">
+              {noHostingSites.map((site) => (
+                <div
+                  key={site.id}
+                  className="flex items-center justify-between gap-3 py-2 border-b last:border-0"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{site.domain}</p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {site.projects ? (
+                        <Link
+                          to={`/projeto/${site.projects.id}`}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          {site.projects.client_name}
+                        </Link>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Sem projeto vinculado</span>
+                      )}
+                      {(site.projects?.project_link || site.github_backup_url) && (
+                        <>
+                          <span className="text-xs text-muted-foreground">·</span>
+                          <a
+                            href={site.projects?.project_link || site.github_backup_url || undefined}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs text-muted-foreground hover:text-primary hover:underline flex items-center gap-1"
+                          >
+                            <Github className="h-3 w-3" /> Backup
+                          </a>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <WebsiteRowActions site={site} />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
         <Tabs defaultValue="sites">
           <TabsList>
             <TabsTrigger value="sites">Sites</TabsTrigger>
@@ -342,6 +429,7 @@ export default function HostingMonitor() {
                         <SelectItem value="h5g">Agency Growth</SelectItem>
                         <SelectItem value="cloudlinux">Cloud Professional</SelectItem>
                         <SelectItem value="vps">VPS (AdminBolt)</SelectItem>
+                        <SelectItem value="no_hosting">Sem hospedagem</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -362,6 +450,7 @@ export default function HostingMonitor() {
                         <SelectItem value="all">Todos</SelectItem>
                         <SelectItem value="active">Ativo (Hostinger)</SelectItem>
                         <SelectItem value="vps">Migrado p/ VPS</SelectItem>
+                        <SelectItem value="no_hosting">Sem hospedagem</SelectItem>
                         <SelectItem value="offline">Fora do ar</SelectItem>
                         <SelectItem value="placeholder">Placeholder</SelectItem>
                       </SelectContent>
@@ -449,7 +538,12 @@ export default function HostingMonitor() {
                         <TableRow key={site.id}>
                           <TableCell className="font-medium">{site.domain}</TableCell>
                           <TableCell>
-                            {site.deleted_at ? (
+                            {site.is_decommissioned ? (
+                              <Badge variant="outline" className="gap-1 text-red-600 border-red-500/30 bg-red-500/10">
+                                <AlertTriangle className="h-3 w-3" />
+                                Sem hospedagem
+                              </Badge>
+                            ) : site.deleted_at ? (
                               <Badge variant="outline" className="gap-1 text-amber-600 border-amber-500/30 bg-amber-500/10">
                                 <Server className="h-3 w-3" />
                                 VPS (AdminBolt)
@@ -470,7 +564,9 @@ export default function HostingMonitor() {
                             )}
                           </TableCell>
                           <TableCell>
-                            {site.deleted_at ? (
+                            {site.is_decommissioned ? (
+                              <Badge className="bg-red-600">Sem hospedagem</Badge>
+                            ) : site.deleted_at ? (
                               <Badge className="bg-amber-500">Migrado p/ VPS</Badge>
                             ) : site.panel_state === "offline" ? (
                               <Badge className="bg-orange-500">Fora do ar</Badge>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Server, Cloud } from "lucide-react";
+import { Server, Cloud, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useHostingLocation } from "@/hooks/useHostingLocation";
 
@@ -26,6 +26,15 @@ export const HostingLocationBadge: React.FC<HostingLocationBadgeProps> = ({ proj
       <Badge variant="outline" className="text-xs gap-1 text-amber-600 border-amber-500/30 bg-amber-500/10">
         <Server className="h-3 w-3" />
         Hospedado na VPS (AdminBolt)
+      </Badge>
+    );
+  }
+
+  if (status === "no_hosting") {
+    return (
+      <Badge variant="outline" className="text-xs gap-1 text-red-600 border-red-500/30 bg-red-500/10">
+        <AlertTriangle className="h-3 w-3" />
+        Sem hospedagem
       </Badge>
     );
   }
